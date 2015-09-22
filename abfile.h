@@ -29,3 +29,4 @@
 #DEFINE CSIDL_INTERNET_CACHE			32 && Temp. Internet Files
 #DEFINE CSIDL_COOKIES					33 && Cookies
 #DEFINE CSIDL_HISTORY					34 && History
+
