@@ -42,13 +42,16 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-# all subdirectories
+# all subdirectories except graphics
 **/
+!graphics/
+graphics/**
 
 # useless and/or third party files
 /*.bak
 /*.tbk
 /abModule*.*
 /*.dll
+/*.fll
 /awCopy.vc?
 
