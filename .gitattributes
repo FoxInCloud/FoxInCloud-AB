@@ -16,4 +16,6 @@
 *.rtf	 diff=astextplain
 *.RTF	 diff=astextplain
 *.prg  diff=astextplain
-*.h  diff=astextplain
+*.PRG  diff=astextplain
+*.h    diff=astextplain
+*.H    diff=astextplain
