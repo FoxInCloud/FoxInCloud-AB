@@ -200,7 +200,7 @@ tnResult = FilesProc(;
 	, Textmerge([Stuffc(m.tcFileSrce, 1, Lenc(<<cL(m.tcFolderSrce)>>), <<cL(m.tcFolderDest)>>)]); && Nouvelle adresse (can contain wildcard characters) && @ 2ème paramètre à passer à la procédure (le premier est l'adresse du fichier)
 	, @m.lcResult; && [''] @ Détails de l'erreur éventuelle && @ 3ème paramètre à passer à la procédure
 	, ; && [''] @ Message d'erreur éventuel && @ 4eme paramètre à passer à la procédure
-	, Vartype(m.tlKeepExisting) == 'L' and m.tlKeepExisting; && [.F.] Ne pas remplacer si existe déjà - .NULL. ou autre, ignorer
+	, lTrue(m.tlKeepExisting); && [.F.] Ne pas remplacer si existe déjà - .NULL. ou autre, ignorer
 	)
 
 return Empty(m.lcResult) or cResultAdd(@m.tcResult, m.lcResult)
@@ -240,7 +240,7 @@ IF m.llResult
 			llResult = NOT Lower(m.tcFileSrce) == Lower(m.lcFileDest)
 			IF m.llResult
 
-				llResult = Vartype(m.tlKeepExisting) == 'L' AND m.tlKeepExisting AND lFile(m.lcFileDest)
+				llResult = lTrue(m.tlKeepExisting) AND lFile(m.lcFileDest)
 				IF m.llResult
 
 					STORE Textmerge(ICase(;
@@ -309,7 +309,7 @@ IF m.llResult
 	IF m.llResult
 
 		TRY
-			IF lFiles(m.tcFileDest) OR Vartype(m.tlCopyForce) == 'L' AND m.tlCopyForce
+			IF lFiles(m.tcFileDest) OR lTrue(m.tlCopyForce)
 
 			 	DELETE FILE (m.tcFileDest) && évite que le fichier copié hérite
 			 	COPY FILE (m.tcFileSrce) TO (m.tcFileDest)
@@ -398,7 +398,7 @@ LOCAL llResult, laFile[1], lnFile, llFiles
 if ga_Type_IsChar(m.tcFileAddr, .T.) && Vartype(m.tcFileAddr) == 'C'
 
 	lnFile = ADir(laFile, m.tcFileAddr, 'HS') && , 1 inutile
-	llFiles = Vartype(m.tnSize) == 'L' AND m.tnSize
+	llFiles = lTrue(m.tnSize)
 	llResult = Iif(m.llFiles, m.lnFile > 0, m.lnFile = 1)
 	IF m.llResult AND NOT m.llFiles and Pcount() > 1
 
@@ -786,7 +786,7 @@ LPARAMETERS ;
 	tlMemo && [.F.] Tenir compte du fichier memo associé éventuel
 
 tcFile = FullPath(m.tcFile)
-tlMemo = Iif(Vartype(m.tlMemo) == 'L' AND m.tlMemo, FileMemo(m.tcFile), Space(0))
+tlMemo = Iif(lTrue(m.tlMemo), FileMemo(m.tcFile), Space(0))
 
 local ltResult
 
@@ -908,12 +908,12 @@ llResult = Vartype(m.tcFile) == 'C' AND File(m.tcFile)
 ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([<<Program()>> - Invalid File Address Specification: <<m.tcFile>>]))
 IF m.llResult
 
-	IF Vartype(m.tlMemo) == 'L' AND m.tlMemo
+	IF lTrue(m.tlMemo)
 		lcMemo = FileMemo(m.tcFile)
 		tlMemo = NOT Empty(m.lcMemo) && @ feedback
 	endif
 
-	if Vartype(m.tlCDX) == 'L' and m.tlCDX
+	if lTrue(m.tlCDX)
 		lcCDX = ForceExt(m.tcFile, 'cdx')
 		tlCDX = File(m.lcCDX) && @ feedback
 	endif
@@ -1000,7 +1000,7 @@ LPARAMETERS ;
 	tlMemo,; && [.F.] Inclure le memo associé éventuel
 	tnPadr && [none] Longueur à padder
 tcFile = Evl(m.tcFile, '')
-tlMemo = Vartype(m.tlMemo) == 'L' AND m.tlMemo
+tlMemo = lTrue(m.tlMemo)
 
 LOCAL tnFile, lcFile, llFile, lnFile, llResult, lcResult
 
@@ -1125,7 +1125,7 @@ LPARAMETERS ;
 	tcResult,; && [''] @ Détail de l'erreur éventuelle
 	tnResult; && [0] @ Nombre de fichiers copiés
 
-tlRecycle = Vartype(m.tlRecycle) == 'L' AND m.tlRecycle
+tlRecycle = lTrue(m.tlRecycle)
 
 LOCAL llResult as Boolean;
 , lcResult as String
@@ -1144,7 +1144,7 @@ tnResult = FilesProc(;
 llResult = Empty(m.lcResult) or cResultAdd(@m.tcResult, m.lcResult)
 
 * Supprimer les répertoires vides résiduels
-IF m.llResult AND Vartype(m.tlDirsEmptyDel) == 'L' AND m.tlDirsEmptyDel
+IF m.llResult AND lTrue(m.tlDirsEmptyDel)
 
 	LOCAL laFolders[1], lcFolder, laSubFolders[1], lcSubFolder
 	ALines(laFolders, m.tcFolders, 1, ',', ';')
@@ -1192,7 +1192,7 @@ LOCAL lcRecycle;
 
 TRY
 
-	lcRecycle = Iif(Vartype(m.tlRecycle) == 'L' AND m.tlRecycle, 'RECYCLE', '')
+	lcRecycle = Iif(lTrue(m.tlRecycle), 'RECYCLE', '')
 
 	IF InList(Lower(JustExt(m.tcFile)), 'fxp', 'prg') AND Upper(ForceExt(m.tcFile, 'fxp')) $ Set("Procedure")
 		RELEASE PROCEDURE (m.tcFile)
@@ -1201,7 +1201,7 @@ TRY
 	DELETE FILE (m.tcFile) &lcRecycle
 
 	lcPath = JustPath(m.tcFile)
-	IF Vartype(m.tlDirsEmptyDel) == 'L' AND m.tlDirsEmptyDel AND lDirEmpty(m.lcPath)
+	IF lTrue(m.tlDirsEmptyDel) AND lDirEmpty(m.lcPath)
 		RD (m.lcPath)
 	ENDIF
 
@@ -1247,7 +1247,7 @@ LPARAMETERS ;
 	&& on pourrait passer jusqu'à 19 paramètres à la procédure ...
 
 tcFileSkels = Iif(Vartype(m.tcFileSkels) == 'C', Alltrim(m.tcFileSkels), [*.*])
-tlSubFolders = Vartype(m.tlSubFolders) == 'L' AND m.tlSubFolders
+tlSubFolders = lTrue(m.tlSubFolders)
 tcSubFoldersExcl = Iif(m.tlSubFolders AND Vartype(m.tcSubFoldersExcl)=='C', Upper(m.tcSubFoldersExcl), Space(0))
 
 LOCAL llResult, lnResult && Nombre de fichiers traités
@@ -1497,7 +1497,7 @@ IF m.llResult
 			DIMENSION laFolders[m.lnResult, Alen(laFolders, 2)]
 
 			* Si demandé, supprimer les colonnes superflues
-			IF Vartype(m.tlAddrOnly) == 'L' AND m.tlAddrOnly
+			IF lTrue(m.tlAddrOnly)
 				aColsDel(@m.laFolders, 2)
 				dimension laFolders[Alen(m.laFolders)]
 			ENDIF
@@ -1562,7 +1562,7 @@ IF lFileAddrSkeleton(m.tcSkeleton)
 	lcResult = cListOfArray(@m.laFiles, m.tcSep, 1)
 	
 	* Si dossiers contenus
-	IF Vartype(m.tlRecurse) == 'L' AND m.tlRecurse;
+	IF lTrue(m.tlRecurse);
 	 AND aClear(@m.laFiles);
 	 AND aSubFolders(@m.laFiles, JustPath(m.tcSkeleton), '', .T., .T.) > 0
 
@@ -1693,7 +1693,7 @@ IF Vartype(m.tcFile) == 'C' AND (File(m.tcFile) OR lDir(m.tcFile))
 	ENDFOR
 	
 	IF m.llResult
-		IF NOT (Vartype(m.tlFullPath) == 'L' AND m.tlFullPath) AND NOT '~' $ m.tcFile
+		IF NOT (lTrue(m.tlFullPath)) AND NOT '~' $ m.tcFile
 			lcResult = Rightc(m.lcResult, Len(m.tcFile)) && au cas où l'adresse indiquée était partielle
 		ENDIF
 		IF m.llBS
@@ -1727,7 +1727,7 @@ RETURN .T.;
 	AND Vartype(m.tcPath) == 'C';
 	AND NOT Empty(m.tcPath);
 	AND m.tcPath == Chrtran(m.tcPath; && aucun caractère interdit
-			, Iif(Vartype(m.tlSkeleton) == 'L' and m.tlSkeleton;
+			, Iif(lTrue(m.tlSkeleton);
 				, Chrtran(CAR_INT_DS_ADR_FICH, '?*', '');
 				, CAR_INT_DS_ADR_FICH;
 				) + CRLF + TABUL;
@@ -1741,7 +1741,7 @@ LPARAMETERS ;
 	tlDrive,; && [.F.] Le lecteur doit exister
 	tlSkeleton && [.F.] L'adresse peut être un masque de fichiers
 	
-tlDrive = Vartype(m.tlDrive) == 'L' AND m.tlDrive
+tlDrive = lTrue(m.tlDrive)
 
 RETURN .T.;
 	AND lPath(m.tcPath, m.tlSkeleton);

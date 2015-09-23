@@ -581,13 +581,13 @@ IF NOT laEmpty(@m.taWords)
 				),;
 			1;
 		)
-	tlLitterals = Vartype(m.tlLitterals) == 'L' AND m.tlLitterals
+	tlLitterals = lTrue(m.tlLitterals)
 	tlKeepEmpty = Iif(Pcount()>= 5 AND Vartype(m.tlKeepEmpty) == 'L', m.tlKeepEmpty, m.tlLitterals)
 	tlKeepNull = Iif(Pcount()>= 6 AND Vartype(m.tlKeepNull) == 'L', m.tlKeepNull, m.tlLitterals)
-	tlDistinct = Vartype(m.tlDistinct) == 'L' AND m.tlDistinct
-	tlLines = m.lnCols > 0 AND Vartype(m.tlLines) == 'L' AND m.tlLines AND Vartype(m.tnCol) == 'N' AND m.tnCol <= 0
+	tlDistinct = lTrue(m.tlDistinct)
+	tlLines = m.lnCols > 0 AND lTrue(m.tlLines) AND Vartype(m.tnCol) == 'N' AND m.tnCol <= 0
 	tnColFilter = Iif(Vartype(m.tnColFilter) == 'N' ANd Between(m.tnColFilter, 1, m.lnCols), m.tnColFilter, 0)
-	tlRtrimNot = Vartype(m.tlRtrimNot) == 'L' and m.tlRtrimNot
+	tlRtrimNot = lTrue(m.tlRtrimNot)
 	llRtrim = !m.tlRtrimNot
 
 	* Si le délimiteur peut entrer en conflit avec le séparateur décimal, changer celui-ci
@@ -727,7 +727,7 @@ result = Iif(Lenc(m.result) = m.length;
 
 return Iif(Lenc(m.result) = m.length;
 	, m.result;
-	, Iif(Vartype(m.tlLitteral) == 'L' and m.tlLitteral, '', m.tcLitteral);
+	, Iif(lTrue(m.tlLitteral), '', m.tcLitteral);
 	)
 
 * -----------------------------------------------------------------
@@ -831,8 +831,8 @@ if ALines(m.aa, m.tcData) > 0
 
 		lnData = Lenc(m.s)
 
-		s = Iif(Vartype(m.tlRTrim) == 'L' AND m.tlRTrim, Rtrim(m.s), m.s)
-		s = Iif(Vartype(m.tlXML) == 'L' AND m.tlXML, cEscaped_XML(m.s), m.s)
+		s = Iif(lTrue(m.tlRTrim), Rtrim(m.s), m.s)
+		s = Iif(lTrue(m.tlXML), cEscaped_XML(m.s), m.s)
 
 		IF Vartype(m.tnTronc) == 'N'
 			s = Iif(m.lnData > m.lnTronc, cTronc(m.s, m.lnTronc), m.s)
@@ -1147,7 +1147,7 @@ CASE m.lcVarType == 'C'
 	&& /!\ 2/8/07	conserver les sauts de ligne		lcResult = cPrintable(m.lcResult)
 
 	* Encadrer la chaîne de délimiteur, échapper si nécessaire
-*		return ["] + Strtran(Strtran(Iif(Vartype(m.tlTrim) == 'L' AND m.tlTrim, Trim(m.tuData), m.tuData), '\', '\\'), ["], [\"]) + ["]
+*		return ["] + Strtran(Strtran(Iif(lTrue(m.tlTrim), Trim(m.tuData), m.tuData), '\', '\\'), ["], [\"]) + ["]
 	return ICase(;
 		lTrue(m.tlQuotesNo),;
 		[];
@@ -1319,7 +1319,7 @@ FUNCTION uEmpty && Valeur vide selon les différents Type()
 LPARAMETERS ;
 	tuType,; && Type de valeur, ou valeur si m.tlValue
 	tlValue && [.F.] tuType contient une valeur
-tlValue = Vartype(m.tlValue) == 'L' AND m.tlValue
+tlValue = lTrue(m.tlValue)
 
 #IF .F. && Types supportés
 A	Array (only returned when the optional 1 parameter is included) 
@@ -1935,7 +1935,7 @@ llResult = Vartype(m.lcResult) == 'C'
 ASSERT m.llResult MESSAGE cAssertMsg(Textmerge("Paramètre invalide: <<m.tcChain>>"))
 IF m.llResult and !Empty(m.lcResult)
 
-	tlReplace = Vartype(m.tlReplace) == 'L' AND m.tlReplace OR IsNull(m.tuRef)
+	tlReplace = lTrue(m.tlReplace) OR IsNull(m.tuRef)
 	lcRefType = Vartype(m.tuRef)
 
 	#define cRefAppend_OPENS '([{<'
@@ -1950,7 +1950,7 @@ IF m.llResult and !Empty(m.lcResult)
 			* ===================================================
 			return Iif(.F.;
 				 or m.lcRefType == 'X';
-				 or m.lcRefType == 'N' AND Vartype(m.tlNoZero) == 'L' AND m.tlNoZero AND Empty(m.tuRef);
+				 or m.lcRefType == 'N' AND lTrue(m.tlNoZero) AND Empty(m.tuRef);
 				 or m.lcRefType == 'C' AND Empty(m.tuRef);
 				 , Trim(Iif(m.lnRat > 0;
 				   , Left(m.lcResult, m.lnRat-1);
@@ -2016,8 +2016,8 @@ IF m.llResult
 
 		tcSep = Iif(Vartype(m.tcSep) == 'C' , Iif(Empty(m.tcSep), m.tcSep, Alltrim(m.tcSep)), ',')
 *			tcSep = Iif(Lenc(m.tcSep) == 1, m.tcSep, ',')
-		tlCase = Vartype(m.tlCase) == 'L' AND m.tlCase
-		tlExactCur = Vartype(m.tlExactCur) == 'L' AND m.tlExactCur
+		tlCase = lTrue(m.tlCase)
+		tlExactCur = lTrue(m.tlExactCur)
 
 		ALines(laElts, m.tcList, 1, m.tcSep)
 		llResult = Ascan(laElts, Alltrim(m.tcWord), 1, -1, 1, Iif(m.tlCase, 0, 1) + Iif(m.tlExactCur, 0, 2+4)) > 0
@@ -2042,9 +2042,9 @@ ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([la liste <<cLitteral(m.tcList)>>
 IF m.llResult
 	lcResult = m.tcList
 
-	tlRemove = Vartype(m.tlRemove) == 'L' AND m.tlRemove
+	tlRemove = lTrue(m.tlRemove)
 	tcSep = Iif(Vartype(m.tcSep) == 'C' AND Lenc(m.tcSep) == 1, m.tcSep, ',')
-	tlCase = Vartype(m.tlCase) == 'L' AND m.tlCase
+	tlCase = lTrue(m.tlCase)
 
 	* Si des éléments sont spécifiés
 	LOCAL ARRAY laElts[1]
@@ -2111,7 +2111,7 @@ LPARAMETERS ;
 	tlAnyWord,; && [.F.] Traiter le mot même s'il comporte des caractère de séparation
 	tnAtc,; && @ [1] position de début de recherche, en retour, position trouvée, 0 si pas trouvé
 	tlOr && [.F.] Trouver au moins un des mots
-tlOr = Vartype(m.tlOr) == 'L' AND m.tlOr
+tlOr = lTrue(m.tlOr)
  
 LOCAL laWord[1], lcWord, llWord, llResult
 
@@ -2153,12 +2153,12 @@ LOCAL llResult
 llResult = Vartype(m.tcChain) == 'C';
  AND Vartype(m.tcWord) == 'C';
  AND NOT (Empty(m.tcChain) OR Empty(m.tcWord));
- AND (Vartype(m.tlAnyWord) == 'L' AND m.tlAnyWord;
+ AND (lTrue(m.tlAnyWord);
  		 OR Chrtran(m.tcWord, VFPOPSEPCARS, Space(0)) == m.tcWord)
 ASSERT m.llResult MESSAGE cAssertMsg(Textmerge("<<Program()>> received invalid parameters"))
 IF m.llResult
 
-	tlCaseIgnore = Vartype(m.tlCaseIgnore) == 'L' AND m.tlCaseIgnore
+	tlCaseIgnore = lTrue(m.tlCaseIgnore)
 	tnAtc = Iif(Vartype(m.tnAtc) == 'N' AND m.tnAtc > 0, m.tnAtc, 1)
 
 	* Si le mot est présent dans la chaîne à partir de la position de départ
@@ -2440,7 +2440,7 @@ LOCAL loException AS Exception, llResult
 
 TRY
 
-	this.lDebug = Vartype(m.tlDebug) == 'L' AND m.tlDebug
+	this.lDebug = lTrue(m.tlDebug)
 	
 	* Si l'objet RegExp peut être créé
 	this.oRegExp = CreateObject("VBscript.RegExp")
@@ -2601,7 +2601,7 @@ PROCEDURE Execute && Tabule les occurrences dans this.matches[]
 LPARAMETERS ;
 	tcIn,; && Chaîne où chercher
 	tlDebug && [.F.] Débuguer
-tlDebug = Vartype(m.tlDebug) == 'L' AND m.tlDebug
+tlDebug = lTrue(m.tlDebug)
 
 LOCAL lnResult
 
@@ -2660,7 +2660,7 @@ PROTECTED PROCEDURE Execute_Pattern && Exécute un pattern unique
 LPARAMETERS ;
 	tcIn,; && Chaîne où chercher
 	tlDebug && [.F.] Débuguer
-tlDebug = Vartype(m.tlDebug) == 'L' AND m.tlDebug OR m.this.lDebug
+tlDebug = lTrue(m.tlDebug) OR m.this.lDebug
 
 .nSeconds = Seconds()
 .nMatches = 0 && Nombre de Résultats
@@ -3087,7 +3087,7 @@ LOCAL liResult, lcFormat, lcResult
 
 lcResult = ''
 IF Vartype(m.tc) == 'C' AND Len(m.tc) > 0
-	lcFormat = Iif(Vartype(m.tlHexa) == 'L' AND m.tlHexa;
+	lcFormat = Iif(lTrue(m.tlHexa);
 		, '@0'; && hexadécimal
 		, '@L 999'; && 3 chiffres décimaux
 		)

@@ -23,8 +23,9 @@ return abUnitTests()
 * ===================================================================
 FUNCTION aChars && {fr} Tabule les caractères d'une chaîne {en} splits characters of a string into an array
 LPARAMETERS ;
-	taResult,; && @ {fr} Résultat {en} Result
-	tcString && {fr} Chaîne à splitter {en} String to be splitted
+	taResult; && @ {fr} Résultat {en} Result
+, tcString && {fr} Chaîne à splitter {en} String to be splitted
+
 EXTERNAL ARRAY taResult && pour le gestionnaire de projet
 
 LOCAL lnResult; && nombre de lignes du Résultat
@@ -59,9 +60,10 @@ LPARAMETERS ;
 	taSrce,; && @ {fr} Source des lignes ajoutées à taDest {en} array to append to taDest
 	tlUnique,; && [.F.] {fr} ne pas ajouter les lignes existantes {en} don't append lines that already exists in the target
 	tlPrepend && [.F.] {fr} ajouter en début de tableau {en} append at the beginning of the array
+
 EXTERNAL ARRAY taDest, taSrce && {fr} pour le gestionnaire de projet {en} for the project manager
-tlUnique = Vartype(m.tlUnique) == 'L' AND m.tlUnique
-tlPrepend = Vartype(m.tlPrepend) == 'L' AND m.tlPrepend
+tlUnique = lTrue(m.tlUnique)
+tlPrepend = lTrue(m.tlPrepend)
 
 LOCAL llResult, lnResult; && {fr} nombre de lignes du Résultat {en} number of lines of the array taDest
 , lnRowsSrce, liRowSrce;
@@ -77,9 +79,6 @@ ASSERT m.llResult MESSAGE cAssertMsg(ICase(;
 	cLangUser() = 'fr',	'Les deux paramètres taDest et taSrce doivent être des tableaux',; && copy-paste this line to add another language support
 						'The type of parameters taDest and taSrce must be array'; && Default: English
 	))
-
-
-
 IF m.llResult
 
 	* {fr} Si le second tableau a des lignes {en} If second array belongs line(s)
@@ -260,9 +259,9 @@ IF m.llResult
 	lnResult = Alen(taDest)
 	lnSrce = Alen(taSrce)
 	liCompare = 0;
-		+ Iif(Vartype(m.tlCase) == 'L' AND m.tlCase, 0, 1);
-		+ Iif(Vartype(m.tlExactOff) == 'L' AND m.tlExactOff, 0, 2) + 4 && override SET EXACT setting
-	tlExclude = Vartype(m.tlExclude) == 'L' and m.tlExclude
+		+ Iif(lTrue(m.tlCase), 0, 1);
+		+ Iif(lTrue(m.tlExactOff), 0, 2) + 4 && override SET EXACT setting
+	tlExclude = lTrue(m.tlExclude)
 
 	FOR liDest = m.lnResult TO 1 STEP -1
 
@@ -829,7 +828,7 @@ LPARAMETERS ;
 	ta2,; && @ {fr} tableau 2 {en} array 2
 	tlCase,; && {fr} [.F.] Si élements de type caractère, ignorer la casse, les diacritiques et les espaces de fin {en} If type 'C', case insensitive and ending spaces are ignored
 	taDelta && @ {fr} tableau différentiel {en} array of differences
-tlCase = Vartype(m.tlCase) == 'L' AND m.tlCase
+tlCase = lTrue(m.tlCase)
 EXTERNAL ARRAY ta1, ta2, taDelta
 
 LOCAL llParms, lnElt1, lnElt2, lnCol1, lnCol2, liElt, luElt1, luElt2, llElt;
@@ -1247,7 +1246,7 @@ IF m.llResult
 	IF m.llResult
 		
 		lnResult = Alen(taResult)
-		IF Vartype(m.tlUnique) == 'L' AND m.tlUnique
+		IF lTrue(m.tlUnique)
 		
 			IF Vartype(m.tuElt) == 'O' && {fr} Ascan() ne marche pas pour les objets {en} Ascan() don't work with object
 				FOR EACH lu IN taResult
@@ -1264,7 +1263,7 @@ IF m.llResult
 			
 			lnResult = Iif(laEmpty(@m.taResult), 0, m.lnResult) + 1
 			DIMENSION taResult[m.lnResult]
-			IF Vartype(m.tlPush) == 'L' AND m.tlPush
+			IF lTrue(m.tlPush)
 				Ains(taResult, 1)
 				taResult[1] = m.tuElt
 			ELSE
@@ -1327,7 +1326,7 @@ ASSERT m.llResult MESSAGE cAssertMsg(Textmerge(ICase(;
 IF .T.;
  AND m.llResult;
  AND (.F.;
- 		OR NOT (Vartype(m.tlUnique) == 'L' AND m.tlUnique);
+ 		OR NOT (lTrue(m.tlUnique));
  		OR Ascan(m.taResult, m.tuElt, 1, -1, 1, 5) = 0;
  		)
 

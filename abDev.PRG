@@ -89,10 +89,10 @@ llResult = this.init_Logs(m.luTxtLog, m.luDBFlog)
 ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([Échec de la création des fichiers de compte-rendu]))
 
 * Déterminer si une ligne de totaux / moyennes doit être produite en fin de log
-this.alFooter = m.lnParms < 3 OR Vartype(m.tlFooter) == 'L' AND m.tlFooter
+this.alFooter = m.lnParms < 3 OR lTrue(m.tlFooter)
 
 * Déterminer si les sorties doivent être envoyées à l'écran
-this.alConsole = (m.lnParms < 4 OR Vartype(m.tlConsole) == 'L' AND m.tlConsole);
+this.alConsole = (m.lnParms < 4 OR lTrue(m.tlConsole));
 	AND InList(_VFP.StartMode, 0, 1, 4);
 	AND Vartype(_screen) == 'O' ;
 	AND _screen.Visible
@@ -413,8 +413,8 @@ IF m.llResult
 
 	* Donner leur valeur par défaut aux paramètres optionnels
 	luContent = Iif(Pcount() >= 2, m.tuContent, Space(0))
- 	llExpand = Vartype(m.tlExpand) == 'L' AND m.tlExpand
-	llNoDisplay = Vartype(m.tlNoDisplay) == 'L' AND m.tlNoDisplay
+ 	llExpand = lTrue(m.tlExpand)
+	llNoDisplay = lTrue(m.tlNoDisplay)
 	lcFormat = Iif(Pcount() >= 5 AND Vartype(m.tcFormat) == 'C', m.tcFormat, Space(0))
 	lcFormat = Evl(m.lcFormat, this.aaLog[L_cFORMAT, m.lnCol])
 	
@@ -461,7 +461,7 @@ LPARAMETERS ;
 	tnColWidth,; && Largeur de la colonne en foxels
 	tlExpand,; && [.F.] Si le contenu est plus large que la colonne, déborder sur les colonnes de droite
 	tcFormat && [''] Format de présentation
-tlExpand = Vartype(m.tlExpand) == 'L' AND m.tlExpand
+tlExpand = lTrue(m.tlExpand)
 tcFormat = Evl(m.tcFormat, '')
 
  	LOCAL lcType, lcResult
@@ -570,7 +570,7 @@ RETURN m.lnResult
 * -------------------------------------------------
 PROCEDURE LineDisplay && Affiche le contenu de l'en-tête ou de la ligne courante
 LPARAMETERS tlHeader && [.F.] Afficher l'en-tête du tableau
-tlHeader = Vartype(m.tlHeader) == 'L' AND m.tlHeader
+tlHeader = lTrue(m.tlHeader)
 
 LOCAL lcLineOut, lnDisplayWidth;
 , lnCol, lnColsWidth, lnColWidth;
@@ -626,7 +626,7 @@ IF m.this.alConsole
 *!*			?? Space(0) AT 0 && bug de TEXT TO m.lcResult TEXTMERGE NOSHOW
 	?? Space(1) AT 0 && bug de TEXT TO m.lcResult TEXTMERGE NOSHOW
 
-	IF Vartype(m.tlHeader) == 'L' AND m.tlHeader
+	IF lTrue(m.tlHeader)
 		?
 	ENDIF
 	?? m.this.acLine AT 0
@@ -643,7 +643,7 @@ LOCAL lcLine, llResult
 * Update line count
 IF this.anCols > 0
 	this.anLine = this.anLine + 1
-	this.anDataLines = this.anDataLines + Iif(Vartype(m.tlDataLine) == 'L' AND m.tlDataLine, 1, 0)
+	this.anDataLines = this.anDataLines + Iif(lTrue(m.tlDataLine), 1, 0)
 ENDIF
 
 * Flush and clear current line
@@ -651,7 +651,7 @@ llResult = this.LineFlush()
 llResult = this.LineClear() AND m.llResult
 
 * Move to ENDFOR line, with separation line if required
-IF Vartype(m.tlSepLine) == 'L' AND m.tlSepLine
+IF lTrue(m.tlSepLine)
 	lcLine = this.cSepLine()
 	StrToFile(CRLF + m.lcLine, this.acTxtLogAddr, .T.)
 ELSE
@@ -735,7 +735,7 @@ ENDIF
 
 * Append Warning to Log if requested
 IF m.llWarnNew;
- AND not (Vartype(m.tlAppendNot) == 'L' AND m.tlAppendNot)
+ AND not (lTrue(m.tlAppendNot))
 
 	lcWarning = CRLF + m.lcWarning
 	this.acWarnings = m.this.acWarnings + m.lcWarning
@@ -979,7 +979,7 @@ LPARAMETERS ;
 
 tcInfo = Iif(Vartype(m.tcInfo) = 'C' AND NOT Empty(m.tcInfo), Upper(Left(Ltrim(m.tcInfo), 1)), 'N')
 tcInfo = Iif(m.tcInfo $ 'NAPSOLF', m.tcInfo, 'N')
-tlCase = Vartype(m.tlCase) == 'L' AND m.tlCase
+tlCase = lTrue(m.tlCase)
 
 LOCAL llProc, lcAddr, lcProc, laMembers[1], lnMembers, llMethod;
 , llResult, lcResult
@@ -1138,7 +1138,7 @@ LPARAMETERS ;
 	tlCurrent,; && [.F.] Inclure le nom du module courant
 	tcInfo && [Name] 'Name', 'Address', 'Path', 'Object' ou 'Lignée'
 
-tlCurrent = Vartype(m.tlCurrent) == 'L' AND m.tlCurrent
+tlCurrent = lTrue(m.tlCurrent)
 
 LOCAL lnLevelHere, lnLevel, lcResult
 lcResult = Space(0)
@@ -1172,7 +1172,7 @@ IF Vartype(m.tcModule) == 'C' AND NOT Empty(m.tcModule)
 
 	* Si ce module est appelé par un module appelé
 	liLevelHere = Program(-1) && current program level
-	liLevelBase = 2 + Iif(Vartype(m.tlModules) == 'L' AND m.tlModules, 1, 0)
+	liLevelBase = 2 + Iif(lTrue(m.tlModules), 1, 0)
 	IF m.liLevelHere > m.liLevelBase
 
 		tcModule = Upper(Alltrim(m.tcModule))
@@ -1205,7 +1205,7 @@ FUNCTION lCallingModules && Plusieurs modules appellent le module appelant cette
 LPARAMETERS ;
 	tcModules,; && Modules
 	tlOR && [.F.] Au moins un module appelle le module
-tlOR = Vartype(m.tlOR) == 'L' AND m.tlOR
+tlOR = lTrue(m.tlOR)
 
 LOCAL laModules[1], lcModule, llResult
 llResult = Vartype(m.tcModules) == 'C' AND ALines(laModules, Upper(m.tcModules), 1+4, ',', ';') > 0
@@ -2233,7 +2233,7 @@ IF m.success
 		* If setting is OK
 		success = .T.;
 			and (.F.;
-				OR Vartype(m.tlSupported) == 'L' AND m.tlSupported;
+				OR lTrue(m.tlSupported);
 				OR Vartype(m.tvValueNew) == 'C' AND InList(Upper(Alltrim(m.tvValueNew)), 'ON', 'OFF');
 				OR this.lSupported(m.tcSetting, m.this.cParm2); && supported
 				);
@@ -2254,7 +2254,7 @@ IF m.success
 				* If setting must be changed
 				IF .F.;
 				 OR m.llToggle;
-				 OR Vartype(m.tlChangeAlways) == 'L' AND m.tlChangeAlways;
+				 OR lTrue(m.tlChangeAlways);
 				 OR !luEqual(m.lvValueCur, m.tvValueNew,, .T.)
 					
 					this.lOnOff = m.lcTypeCur == 'C' AND (m.lvValueCur == 'ON' or m.lvValueCur == 'OFF')
@@ -2831,7 +2831,7 @@ IF m.success
 	tcSetting = Iif(ga_Type_IsChar(m.tcSetting, .T.), Upper(m.tcSetting), '')
 
 	tlSupported = Iif(Pcount() >= 5;
-		, Vartype(m.tlSupported) == 'L' and m.tlSupported;
+		, lTrue(m.tlSupported);
 		, m.this.lSupported;
 		)
 
@@ -3947,8 +3947,8 @@ LPARAMETERS ;
 	tu2,; && Valeur 2, par référence si Array
 	tlStrict,; && [.F.] comparaison de chaînes stricte
 	tlCaseIgnore && [.F.] ignorer la casse
-tlStrict = Vartype(m.tlStrict) == 'L' AND m.tlStrict
-tlCaseIgnore = Vartype(m.tlCaseIgnore) == 'L' AND m.tlCaseIgnore
+tlStrict = lTrue(m.tlStrict)
+tlCaseIgnore = lTrue(m.tlCaseIgnore)
 
 LOCAL lcType1, lcType2
 
@@ -4086,7 +4086,7 @@ LPARAMETERS ;
 tiType = Int(Evl(Nvl(m.tiType, 0), 1)) && OK par défaut
 tcLang = cLangUser(m.tcLang)
 
-RETURN Iif(Vartype(m.tlHotKey) == 'L' AND m.tlHotKey, '\<', '');
+RETURN Iif(lTrue(m.tlHotKey), '\<', '');
 	+	ICase(;
 			m.tiType = 1, 'OK',;
 			m.tiType = 2, ICase(;
@@ -4174,7 +4174,7 @@ loUnitTest.assert(256, m.lnDefault)
 * =================================================
 FUNCTION nScreenDockOffset && Nombre de colonnes où commence la partie gauche du _Screen du fait des fenêtres dockées à gauche
 LPARAMETERS tlRows && [.F.] décalage ; .T.: vertical (rows), .F.: horizontal (cols)
-tlRows = Vartype(m.tlRows) == 'L' AND m.tlRows
+tlRows = lTrue(m.tlRows)
 
 LOCAL laDock[1], lnDocks, lnDock, lnResult
 
@@ -4529,7 +4529,7 @@ RETURN m.lcResult
 PROCEDURE CoverageSet && Démarre / arrête l'enregistrement des temps d'exécution pendant le test
 LPARAMETERS tlCoverage && [.F.] démarrer / arrêter l'enregistrement pendant le test
 
-this.lCoverage = Vartype(m.tlCoverage) == 'L' AND m.tlCoverage
+this.lCoverage = lTrue(m.tlCoverage)
 
 * -----------------------------------
 PROCEDURE CoverageClear && Efface le fichier de coverage
@@ -5361,7 +5361,7 @@ LPARAMETERS ;
 	tcCharEOL && [''] Caractère de fin de ligne
 tcCode = Iif(Vartype(m.tcCode) == 'C', m.tcCode, '')
 tcIndent = Iif(Vartype(m.tcIndent) == 'C' AND Lenc(m.tcIndent) > 0, m.tcIndent, Chr(9)) && Evl() ne marche pas sur space() et tab
-tlEmptyDel = Vartype(m.tlEmptyDel) == 'L' AND m.tlEmptyDel
+tlEmptyDel = lTrue(m.tlEmptyDel)
 tcCharEOL = Evl(m.tcCharEOL, Space(0))
 
 RETURN '';
@@ -5402,7 +5402,7 @@ LPARAMETERS ;
 	tcCom,; && [* ] caractère de commentaire
 	tlEmptyDel && [.F.] Supprimer les lignes vides
 tcCom = Evl(m.tcCom, '* ')
-tlEmptyDel = Vartype(m.tlEmptyDel) == 'L' AND m.tlEmptyDel
+tlEmptyDel = lTrue(m.tlEmptyDel)
 
 RETURN Iif(Empty(m.tcCode);
 	, '';
@@ -5467,8 +5467,8 @@ LPARAMETERS ;
 	tlCheck,; && [.F.] Vérifier si Set("Procedure") antérieur est dans Set("Procedure") courant
 	tlAdditive && [.F.] Ajouter tcSetPro_ à Set("Procedure") courant
 
-tlCheck = Vartype(m.tlCheck) == 'L' AND m.tlCheck
-tlAdditive = Vartype(m.tlAdditive) == 'L' and m.tlAdditive
+tlCheck = lTrue(m.tlCheck)
+tlAdditive = lTrue(m.tlAdditive)
 
 LOCAL llResult as Boolean;
 , laSetProc[1];
@@ -5536,7 +5536,7 @@ lparameters ;
   tcSetAnte as String; && previous Set("Classlib") or Set("Procedure")
 , tlClassLib as Boolean && [.F.] tcSetAnte is Set("Classlib")
 
-tlClassLib = Vartype(m.tlClassLib) == 'L' and m.tlClassLib
+tlClassLib = lTrue(m.tlClassLib)
 
 local success as Boolean;
 , laFileAnte[1];
@@ -5754,7 +5754,7 @@ LOCAL llResult && le fichier a été ajouté ou ôté selon la demande
 IF Vartype(m.tcPrg) == 'C' AND File(m.tcPrg) AND InList(Upper(JustExt(m.tcPrg)), 'PRG', 'FXP')
 
 	tcPrg = FullPath(ForceExt(m.tcPrg, 'FXP'))
-	tlRemove = Vartype(m.tlRemove) == 'L' AND m.tlRemove
+	tlRemove = lTrue(m.tlRemove)
 
 	IF '"' + m.tcPrg + '"' $ Set("Procedure")
 		IF m.tlRemove
@@ -5793,7 +5793,7 @@ IF .T.;
 
 		lcAlias = Upper(JustStem(m.lcVCX))
 		llSet = ' ALIAS ' + m.lcAlias + ',' $ Set("Classlib") + ','
-		IF Vartype(m.tlRemove) == 'L' AND m.tlRemove
+		IF lTrue(m.tlRemove)
 			IF m.llSet
 				RELEASE CLASSLIB (m.lcVCX)
 				llResult = .T.
@@ -6068,7 +6068,7 @@ endfunc
 * =============================================
 function lTrue && a value is .T.
 lparameters value
-return Vartype(m.value) == 'L' and m.value
+return lTrue(m.value)
 endfunc
 * =============================================
 function lFalse && a value is .F.

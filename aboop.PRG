@@ -489,7 +489,7 @@ IF m.llResult
 	ASSERT m.llResult MESSAGE cAssertMsg(Textmerge("Object <<cLitteral(m.toObject)>> should be in a containing object such as form, container, etc."))
 	IF m.llResult
 
-		tlTabIndex = Vartype(m.tlTabIndex) == 'L' AND m.tlTabIndex
+		tlTabIndex = lTrue(m.tlTabIndex)
 		
 		* Pour chaque objet frère
 		FOR m.lnSibling = 1 TO nObjectsCont(m.loParent)
@@ -824,8 +824,8 @@ LPARAMETERS ;
 
 EXTERNAL ARRAY taObjects
 tnConts = Iif(Vartype(m.tnConts) == 'N' AND m.tnConts > 0, m.tnConts, 0)
-tlTabIndex = Vartype(m.tlTabIndex) == 'L' AND m.tlTabIndex
-tlEnabled = Vartype(m.tlEnabled) == 'L' AND m.tlEnabled
+tlTabIndex = lTrue(m.tlTabIndex)
+tlEnabled = lTrue(m.tlEnabled)
 
 LOCAL llClass, lnObject, loObject, llResult, lnResult && Nombre d'objets trouvés
 
@@ -841,7 +841,7 @@ IF m.llResult
 	ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([le premier paramètre (<<cLitteral(@m.taObjects)>>) doit être un tableau]))
 	IF m.llResult
 
-		IF Vartype(m.plRecurse) == 'U' AND NOT (Vartype(m.tlAdd) == 'L' AND m.tlAdd)
+		IF Vartype(m.plRecurse) == 'U' AND NOT (lTrue(m.tlAdd))
 			aClear(@m.taObjects)
 			PRIVATE plRecurse
 			plRecurse = .T.
@@ -1033,7 +1033,7 @@ LPARAMETERS ;
 	toObject,; && Objet
 	tlDown && [.F.] de l'ancêtre au père
 EXTERNAL ARRAY taParents
-tlDown = Vartype(m.tlDown) == 'L' AND m.tlDown
+tlDown = lTrue(m.tlDown)
 
 LOCAL loParent as Control, llResult, lnResult
 
@@ -2428,7 +2428,7 @@ LPARAMETER ;
 , tnFontSize; && [active output window]
 , tcFontStyle && [normal]
 
-tlVertical = Iif(Vartype(m.tlVertical) == 'L' and m.tlVertical, 1, 6)
+tlVertical = Iif(lTrue(m.tlVertical), 1, 6)
  
 RETURN Evl(m.tnFoxels, 0) * Iif(Pcount() > 1;
 	, Fontmetric(;
@@ -2449,7 +2449,7 @@ LPARAMETER ;
 , tnFontSize; && [active output window]
 , tcFontStyle && [normal]
 
-tlVertical = Iif(Vartype(m.tlVertical) == 'L' and m.tlVertical, 1, 6)
+tlVertical = Iif(lTrue(m.tlVertical), 1, 6)
 
 RETURN Evl(m.tnPixels, 0) / Iif(Pcount() > 1;
 	, Fontmetric(;
@@ -2632,7 +2632,7 @@ nMember = AMembers(;
 	, Evl(m.cFlags, '');
 	)
 if m.nMember > 0
-	cTypes = Iif(Vartype(m.lEventsNo) == 'L' and m.lEventsNo, 'M', 'EM')
+	cTypes = Iif(lTrue(m.lEventsNo), 'M', 'EM')
 	for iMember = m.nMember to 1 step -1
 		if Upper(Left(m.aMethod[m.iMember, 2], 1)) $ m.cTypes
 			result = m.result + 1

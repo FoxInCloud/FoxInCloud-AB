@@ -231,7 +231,7 @@ IF m.llResult
 		IF m.llResult
 			tuSelect = m.this.cAlias
 			this.lOpened = m.llOpened
-			this.lKeepOpened = Vartype(m.tlKeepOpened) == 'L' AND m.tlKeepOpened
+			this.lKeepOpened = lTrue(m.tlKeepOpened)
 		ENDIF
 	ENDIF
 
@@ -388,7 +388,7 @@ otherwise && Sinon (adresse de table sur le disque ou dans une base de données)
 	ENDIF
 ENDCASE
 
-IF Used(m.lcResult) AND Vartype(m.tlExclusive) == 'L' AND m.tlExclusive
+IF Used(m.lcResult) AND lTrue(m.tlExclusive)
 	lcResult = ExclusiveForce(m.lcResult)
 ENDIF
 
@@ -415,7 +415,7 @@ case InList(CursorGetProp("Buffering", m.tcAlias), 2, 3) && Row buffering
 otherwise
 
 	loRecno = abRecno(m.tcAlias)
-	loFilter = Iif(Vartype(m.tlAll) == 'L' and m.tlAll, abFilter(m.tcAlias), .null.)
+	loFilter = Iif(lTrue(m.tlAll), abFilter(m.tcAlias), .null.)
 	loOrder = abOrder(, m.tcAlias)
 	liRecno = 0
 	do while .T.
@@ -881,7 +881,7 @@ IF Used(m.tcAlias)
 	IF m.llResult
 
 		tcMode = Upper(Left(Ltrim(Evl(m.tcMode, '')), 1))
-		tlAgain = Iif(Vartype(m.tlAgain) == 'L' AND m.tlAgain AND NOT m.tcMode == 'E', 'AGAIN', '')
+		tlAgain = Iif(lTrue(m.tlAgain) AND NOT m.tcMode == 'E', 'AGAIN', '')
 		tcMode = ICase(m.tcMode == 'E', 'EXCLUSIVE', m.tcMode == 'S', 'SHARED', m.tcMode == 'R', 'READONLY', '')
 		
 		lnSelect = Select(0)
@@ -1459,7 +1459,7 @@ IF m.llResult
 		llResult = laFields1[m.lnField1, AFIELDS_TYPE] == laFields2[m.lnField2, AFIELDS_TYPE];
 			AND (NOT m.tlContains AND laFields1[m.lnField1, AFIELDS_WIDTH] == laFields2[m.lnField2, AFIELDS_WIDTH] OR laFields1[m.lnField1, AFIELDS_WIDTH] <= laFields2[m.lnField2, AFIELDS_WIDTH]);
 			AND (NOT m.tlContains AND laFields1[m.lnField1, AFIELDS_PRECISION] == laFields2[m.lnField2, AFIELDS_PRECISION] OR laFields1[m.lnField1, AFIELDS_PRECISION] <= laFields2[m.lnField2, AFIELDS_PRECISION]);
-			AND (Vartype(m.tlNullIgnore) == 'L' AND m.tlNullIgnore OR laFields1[m.lnField1, AFIELDS_NULL] == laFields2[m.lnField2, AFIELDS_NULL])
+			AND (lTrue(m.tlNullIgnore) OR laFields1[m.lnField1, AFIELDS_NULL] == laFields2[m.lnField2, AFIELDS_NULL])
 	ENDIF
 ENDIF
 
@@ -1525,7 +1525,7 @@ IF m.llResult
 			IF m.lnCols = 1
 				DIMENSION taArray[m.lnRows]
 			ENDIF
-			tl2D = Vartype(m.tl2D) == 'L' AND m.tl2D AND m.lnCols > 1
+			tl2D = lTrue(m.tl2D) AND m.lnCols > 1
 		
 			* Créer le curseur ou la table
 			LOCAL loSelect, lcFields, lcAlias, lcType, lnLen, lnDec
@@ -2029,9 +2029,9 @@ LPARAMETERS ;
 	tnTag,; && @ [0] N° du tag d'index trouvé
 	tlTagPrim && [.F.] Index primaire seulement
 tcTagExp = ''
-tlTagCand = Vartype(m.tlTagCand) == 'L' AND m.tlTagCand
+tlTagCand = lTrue(m.tlTagCand)
 tnTag = 0
-tlTagPrim = Vartype(m.tlTagPrim) == 'L' AND m.tlTagPrim
+tlTagPrim = lTrue(m.tlTagPrim)
 
  	LOCAL llTagPrim, lcAlias, llAlias;
  	, lnTag, liTag, lcTag;
@@ -2447,7 +2447,7 @@ LPARAMETERS ;
 	tiDS && [session de données courante] identifiant de la session de données
 
 EXTERNAL ARRAY taView
-tlUpdateable = Iif(Pcount() < 2 OR IsNull(m.tlUpdateable), .NULL.,  Vartype(m.tlUpdateable) == 'L' AND m.tlUpdateable)
+tlUpdateable = Iif(Pcount() < 2 OR IsNull(m.tlUpdateable), .NULL.,  lTrue(m.tlUpdateable))
 
 LOCAL lnAlias, llResult, lnResult
 lnResult = 0
@@ -2500,7 +2500,7 @@ LPARAMETERS ;
 	tiDS && [session de données courante] identifiant de la session de données
 
 tcAlias = Iif(Vartype(m.tcAlias) == 'C' AND NOT Empty(m.tcAlias), m.tcAlias, Alias())
-tlReadWrite = Iif(Pcount() < 2 OR IsNull(m.tlReadWrite), .NULL.,  Vartype(m.tlReadWrite) == 'L' AND m.tlReadWrite)
+tlReadWrite = Iif(Pcount() < 2 OR IsNull(m.tlReadWrite), .NULL.,  lTrue(m.tlReadWrite))
 
 LOCAL llResult;
 , liDS, llDS;
@@ -2578,7 +2578,7 @@ LPARAMETERS ;
 	tiDS && [session de données courante] identifiant de la session de données
 tlReadWrite = Iif(Pcount() = 0 OR IsNull(m.tlReadWrite);
 	, .NULL.;
-	, Vartype(m.tlReadWrite) == 'L' AND m.tlReadWrite;
+	, lTrue(m.tlReadWrite);
 	)
 
 RETURN Iif(aCursors(@m.taCursor, m.tlReadWrite, m.tiDS, .T.) > 0;
@@ -2596,7 +2596,7 @@ LPARAMETERS ;
 EXTERNAL ARRAY taCursor
 tlReadWrite = Iif(Pcount() < 2 OR IsNull(m.tlReadWrite);
 	, .NULL.;
-	, Vartype(m.tlReadWrite) == 'L' AND m.tlReadWrite;
+	, lTrue(m.tlReadWrite);
 	)
 
 LOCAL liAlias, llResult, lnResult
@@ -2630,7 +2630,7 @@ IF m.llResult
 			aClear(@m.taCursor)
 		ELSE
 			DIMENSION taCursor[m.lnResult]
-			= Vartype(m.tlSort) == 'L' AND m.tlSort AND Asort(taCursor) > 0
+			= lTrue(m.tlSort) AND Asort(taCursor) > 0
 		ENDIF
 	ENDIF
 ENDIF
@@ -3003,11 +3003,11 @@ IF m.llResult
 	IF m.llResult
 	
 		lcResult = cFieldExp(;
-				  Iif(Vartype(m.tlNameIgnore) == 'L' AND m.tlNameIgnore, '', laField[m.lnField, AFIELDS_NAME]);
+				  Iif(lTrue(m.tlNameIgnore), '', laField[m.lnField, AFIELDS_NAME]);
 				, laField[m.lnField, AFIELDS_TYPE];
 				, laField[m.lnField, AFIELDS_WIDTH];
 				, laField[m.lnField, AFIELDS_PRECISION];
-				, Iif(Vartype(m.tlNullIgnore) == 'L' AND m.tlNullIgnore, .NULL., laField[m.lnField, AFIELDS_NULL]);
+				, Iif(lTrue(m.tlNullIgnore), .NULL., laField[m.lnField, AFIELDS_NULL]);
 				)
 	ENDIF
 ENDIF
@@ -3125,7 +3125,7 @@ IF m.llResult
 	IF m.llResult
 		
 		tcSep = Iif(Vartype(m.tcSep) == 'C' and Len(m.tcSep) > 0, m.tcSep, ',')
-		tlNullIgnore = (Vartype(m.tlNullIgnore) == 'L' and m.tlNullIgnore) OR m.lnCol = 4
+		tlNullIgnore = (lTrue(m.tlNullIgnore)) OR m.lnCol = 4
 	
 		* Pour chaque champ
 		FOR liField = 1 TO Alen(taFields, 1)
@@ -3150,7 +3150,7 @@ ENDIF
 
 * Si OK, ajouter les parenthèses le cas échéant
 RETURN Iif(m.llResult;
-	, Iif(Vartype(m.tlParenth) == 'L' AND m.tlParenth, '(' + m.lcResult + ')', m.lcResult);
+	, Iif(lTrue(m.tlParenth), '(' + m.lcResult + ')', m.lcResult);
 	, '')
 
 * ========================================
@@ -3244,8 +3244,8 @@ IF m.llResult
 
 	* Donner leur valeur par défaut aux paramètres
 	tcSkeleton = Evl(m.tcSkeleton, '')
-	tlExcept = Vartype(m.tlExcept) == 'L' AND m.tlExcept
-	tlColsKeep = Vartype(m.tlColsKeep) == 'L' AND m.tlColsKeep
+	tlExcept = lTrue(m.tlExcept)
+	tlColsKeep = lTrue(m.tlColsKeep)
 	
 	* Sélectionner l'alias
 	lnSelect = Select(0)
@@ -4789,8 +4789,8 @@ LPARAMETERS ;
 
 EXTERNAL ARRAY taRelation
 tcAlias = Iif(Vartype(m.tcAlias) == 'C', Upper(m.tcAlias), Alias())
-tlCascade = Vartype(m.tlCascade) == 'L' and m.tlCascade
-tlExtended = m.tlCascade or Vartype(m.tlExtended) == 'L' and m.tlExtended
+tlCascade = lTrue(m.tlCascade)
+tlExtended = m.tlCascade or lTrue(m.tlExtended)
 
 LOCAL lnResult as Integer; && Nombre de relations trouvées
 , llResult;
@@ -5130,8 +5130,8 @@ IF m.llResult
 		ELSE
 			tuDest = Evl(m.tuDest, Sys(2015))
 			lcDest = 'CURSOR ' + m.tuDest ;
-					+ Iif(Vartype(m.tlReadWrite) == 'L' AND m.tlReadWrite, ' READWRITE', '');
-					+ Iif(Vartype(m.tlNoFilter) == 'L' AND m.tlNoFilter, ' NOFILTER', '')
+					+ Iif(lTrue(m.tlReadWrite), ' READWRITE', '');
+					+ Iif(lTrue(m.tlNoFilter), ' NOFILTER', '')
 		ENDIF
 	ENDIF
 	lcSelect = m.lcSelect + ' INTO ' + m.lcDest
@@ -5259,7 +5259,7 @@ LPARAMETERS tlThermoNo && [.F.] ne pas afficher la barre d'avancement
 this.cTalk = Set("TALK")
 this.cNotify = Set("NOTIFY")
 
-this.lThermo = !(Vartype(m.tlThermoNo) == 'L' AND m.tlThermoNo);
+this.lThermo = !(lTrue(m.tlThermoNo));
 	AND InList(_vfp.Startmode, 0, 4)
 
 #IF .F. && _vfp.Startmode
@@ -6558,7 +6558,7 @@ if m.success
 	else
 		success = lTag(m.cOrder)
 		if m.success
-			lDesc  = Iif(!Empty(m.cOrder) and Vartype(m.lDesc) == 'L' and m.lDesc, 'DESCENDING', '')
+			lDesc  = Iif(!Empty(m.cOrder) and lTrue(m.lDesc), 'DESCENDING', '')
 			set order to &cOrder in (m.cAlias) &lDesc
 		endif
 	endif
@@ -7084,7 +7084,7 @@ IF aSQLSelectClauses(@m.laClauses, m.tcSQLSelect) > 0
 	IF m.lnClause > 0
 
 		lcResult = laClauses[m.lnClause, 1] + laClauses[m.lnClause, 2]
-		IF Vartype(m.tlDelete) == 'L' AND m.tlDelete
+		IF lTrue(m.tlDelete)
 
 			tcSQLSelect = Strtran(m.tcSQLSelect, m.lcResult, '')
 		ENDIF
@@ -7599,14 +7599,14 @@ DEFINE CLASS abDataSyncVFP AS Custom && Synchronise deux tables ou deux bases de
 	  tlSuccess; && [.F.] en cas de succès, seulement le résultat
 	, tlPipe && [.F.] séparer les éléments par '|'
 	
-	tlPipe = Iif(Vartype(m.tlPipe) == 'L' and m.tlPipe, ' | ', CRLF)
+	tlPipe = Iif(lTrue(m.tlPipe), ' | ', CRLF)
 
 	this.oResultFinal
 
 	LOCAL lcResult, liResultItem, luResultItem
 
 	lcResult = ''
-	FOR liResultItem = 1 TO Iif(Vartype(m.tlSuccess) == 'L' and m.tlSuccess and m.this.oResult.lResult;
+	FOR liResultItem = 1 TO Iif(lTrue(m.tlSuccess) and m.this.oResult.lResult;
 	 , 2;
 	 , Alen(this.aResultItems, 1);
 	 )
@@ -7882,7 +7882,7 @@ DEFINE CLASS abDataSyncVFP AS Custom && Synchronise deux tables ou deux bases de
 
 			* Si le champs de la Table source sont tous dans la Table destination et réciproquement
 			this.lResult = .F.;
-			 OR Vartype(m.tuFieldsIgnore) == 'L' AND m.tuFieldsIgnore ;
+			 OR lTrue(m.tuFieldsIgnore) ;
 			 OR this.lFieldsMatch(m.lcAliasDest, m.lcAliasSrce, uDefault(m.tuFieldsIgnore, 'WARNING'))
 			IF m.this.lResult
 
@@ -7981,8 +7981,8 @@ DEFINE CLASS abDataSyncVFP AS Custom && Synchronise deux tables ou deux bases de
 		tlReplace,; && [.F.] Remplacer toute la table destination
 		tlCKmatch,; && [.F.] Matcher les enregistrements sur la première clé candidate de la table destination
 		tnRecs && [all] Nombre d'enregistrements à synchroniser
-	tlReplace = Vartype(m.tlReplace) == 'L' AND m.tlReplace
-	tlCKmatch = Vartype(m.tlCKmatch) == 'L' AND m.tlCKmatch
+	tlReplace = lTrue(m.tlReplace)
+	tlCKmatch = lTrue(m.tlCKmatch)
 	tnRecs = Iif(Vartype(m.tnRecs) == 'N' AND m.tnRecs > 0, Int(m.tnRecs), 0)
 
 	* Si la table destination a une clé unique (primaire ou candidate)
@@ -8336,7 +8336,7 @@ lSyncField = Evl(m.lSyncField, 'lSYNC') && FoxInCloud standard
 * {en} Set record's last modification date-time
 * {fr} Régler la date et heure de dernière modification
 IF .T.;
- AND !(Vartype(m.pltModKeep) == 'L' AND m.pltModKeep); && pltModKeep : {en} Inhibit record's last modification date-time modification [see abDataSyncVFP.tablesync_()] {fr} Inhiber la mise à jour automatique de la date de modification [cf. abDataSyncVFP.tablesync_()]
+ AND !(lTrue(m.pltModKeep)); && pltModKeep : {en} Inhibit record's last modification date-time modification [see abDataSyncVFP.tablesync_()] {fr} Inhiber la mise à jour automatique de la date de modification [cf. abDataSyncVFP.tablesync_()]
  AND ! Empty(Field(m.tModField)) && {en} Field exists in table {fr} Le champ existe dans la table
 	replace (m.tModField) with Datetime() && {en} In a table rule, Alias() == alias of the table owning the rule	{fr} dans une règle de table, Alias() == alias de la table dont la règle est exécutée
 endif
@@ -8344,7 +8344,7 @@ endif
 * {en} Set record was not modified through synchronization
 * {fr} Indiquer que l'enregistrement n'a pas été modifié par synchronisation
 IF .T.;
- AND !(Vartype(m.plSync) == 'L' AND m.plSync); && plSync : {en} Records are being synchronized [see abDataSyncVFP.tablesync_()] {fr} synchronisation en cours  [cf. abDataSyncVFP.tablesync_()]
+ AND !(lTrue(m.plSync)); && plSync : {en} Records are being synchronized [see abDataSyncVFP.tablesync_()] {fr} synchronisation en cours  [cf. abDataSyncVFP.tablesync_()]
  AND ! Empty(Field(m.lSyncField)) && {en} Field exists in table {fr} Le champ existe dans la table
 	replace (m.lSyncField) with .F. && {en} In a table rule, Alias() == alias of the table owning the rule	{fr} dans une règle de table, Alias() == alias de la table dont la règle est exécutée
 endif
