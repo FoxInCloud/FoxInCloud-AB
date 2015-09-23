@@ -53,4 +53,4 @@ graphics/**/
 /abModule*.*
 /*.dll
 /*.fll
-/awCopy.vc*
+/awCopy.*
