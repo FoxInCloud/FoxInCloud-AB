@@ -45,7 +45,7 @@ Temporary Items
 # all subdirectories except graphics
 **/
 !graphics/
-graphics/**
+graphics/**/
 
 # useless and/or third party files
 /*.bak
@@ -53,5 +53,4 @@ graphics/**
 /abModule*.*
 /*.dll
 /*.fll
-/awCopy.vc?
-
+/awCopy.vc*
