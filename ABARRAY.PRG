@@ -1717,7 +1717,7 @@ ELSE
 ENDIF
 
 * ===================================================================
-FUNCTION aStrExtract && {fr} Occurences entre délimiteurs /!\ non imbriquées {en} Strings found between delimiters /!\ not imbricated
+FUNCTION aStrExtract && {fr} Occurences entre délimiteurs /!\ non imbriquées {en} Strings found between delimiters /!\ not nested
 LPARAMETERS ;
 	taResult,;
 	tcString,;
@@ -1835,3 +1835,4 @@ otherwise
 endcase
 
 return m.success
+endfunc

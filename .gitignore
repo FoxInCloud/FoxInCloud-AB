@@ -1,3 +1,10 @@
+# =========================
+# Operating System Files
+# =========================
+
+# Windows
+# =========================
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
@@ -14,14 +21,10 @@ $RECYCLE.BIN/
 *.msm
 *.msp
 
-# Windows shortcuts
+# shortcuts
 *.lnk
 
-# =========================
-# Operating System Files
-# =========================
-
-# OSX
+# Mac OSX
 # =========================
 
 .DS_Store
@@ -42,15 +45,23 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+# ===============================
+# Abaque FoxInCloud reserved Files
+# ===============================
+
 # all subdirectories except graphics
 **/
 !graphics/
 graphics/**/
 
-# useless and/or third party files
+# to be later released
+/abModule*.*
+
+# useless and/or third party
 /*.bak
 /*.tbk
-/abModule*.*
 /*.dll
 /*.fll
-/awCopy.*
+
+# FoxInCloud-related
+/aw*.*
