@@ -23,4 +23,4 @@ Areas you may want to contribute:
 - improve and/or extend code base
 - localize documentation comments
 
-For detailed information, see CONTRIBUTING.md
+For detailed information, see CONTRIBUTING.md @ https://github.com/FoxInCloud/FoxInCloud-AB/blob/master/CONTRIBUTING.md
