@@ -3,13 +3,13 @@
 * (c) Abaque SARL, 66 rue Michel Ange - 75016 Paris - France
 * contact@FoxInCloud.com - http://www.FoxInCloud.com/ - +33 9 53 41 90 90
 * -----------------------------------------------------
-* Ce logiciel est distribué sous licence MIT, tel quel, sans aucune garantie
+* Ce logiciel est distribué sous GNU General Public License, tel quel, sans aucune garantie
 * Il peut être utilisé et/ou redistribué sans restriction
 * Toute modification doit être reversée à la communauté
 * La présente mention doit être intégralement reproduite
 && dans toute copie même partielle
 * -----------------------------------------------------
-* This software is distributed under the terms of a MIT-style license, AS IS, without any warranty 
+* This software is distributed under the terms of GNU General Public License, AS IS, without any warranty 
 && under the terms of an MIT-style license
 * It may be used and/or distributed without restriction
 * Any substantial improvement must be given for free to the community
