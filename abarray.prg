@@ -9,7 +9,7 @@
 * La présente mention doit être intégralement reproduite
 && dans toute copie même partielle
 * -----------------------------------------------------
-* This software is distributed under the terms of GNU General Public License, AS IS, without any warranty 
+* This software is distributed under the terms of GNU General Public License, AS IS, without any warranty
 * It may be used and/or distributed without restriction
 * Any substantial improvement must be given for free to the community
 * This permission notice shall be entirely included in all copies
@@ -18,7 +18,7 @@
 
 #INCLUDE AB.H
 AB()
-return abUnitTests()
+RETURN abUnitTests()
 
 * ===================================================================
 FUNCTION aChars && {fr} Tabule les caractères d'une chaîne {en} splits characters of a string into an array
@@ -119,7 +119,7 @@ IF m.llResult
 
 			CASE m.llColsDest && {fr} tableau destination à 2 dimensions, tableau source à 1 dimension {en} target array has 2 dimensions, source array has only one
 				taDest[m.liRowDest, 1] = taSrce[m.liRowSrce]
-				
+
 			OTHERWISE && {fr} les 2 tableaux ont 1 dimension {en} each array has one dimension
 				taDest[m.liRowDest] = taSrce[m.liRowSrce]
 
@@ -200,7 +200,7 @@ IF m.llResult
 			Adel(m.taDest, m.liResult)
 		ENDIF
 	ENDFOR
-	
+
 	IF m.lnResult = 0
 		aClear(@m.taDest)
 	ELSE
@@ -234,7 +234,7 @@ LPARAMETERS ;
 	tlExactOff,; && [.F.] {fr} Comparer avec exact off {en} compare with exact off
 	tlCase,; && [.F.] {fr} Comparer en respectant la casse {en} case-sensitive comparison
 	tlExclude && [.F.] {fr} Garder les éléments destination absents de la source {en} Keep destination elements that can't be found in source
-	
+
 EXTERNAL ARRAY taDest, taSrce
 
 LOCAL lnResult as Integer; && dimension du tableau résultat
@@ -274,7 +274,7 @@ IF m.llResult
 			Adel(m.taDest, m.liDest)
 		ENDIF
 	ENDFOR
-	
+
 	IF m.lnResult = 0
 		aClear(@m.taDest)
 	ELSE
@@ -442,7 +442,7 @@ RETURN loUnitTest.Result()
 	FUNCTION aRowMove_test_a1 && tableau de test à 1 dimension
 	LPARAMETERS laResult && @ tableau
 	EXTERNAL ARRAY laResult
-	
+
 	DIMENSION laResult[6]
 	laResult[1] = '1'
 	laResult[2] = '2'
@@ -524,7 +524,7 @@ laTest[2,4] = "D"
 * --------------------------------------
 PROCEDURE aColDel_Test_aa(laTest)
 
-local lcTest
+LOCAL lcTest
 TEXT TO lcTest NOSHOW PRETEXT 1+2
 	11	.T.
 	21	.F.	"toto"
@@ -532,7 +532,7 @@ TEXT TO lcTest NOSHOW PRETEXT 1+2
 	41	.NULL.	"tutu"	{^2014-01-11}
 endtext
 
-return aLinesCols(@m.laTest, m.lcTest, TABUL, 'ILCD')
+RETURN aLinesCols(@m.laTest, m.lcTest, TABUL, 'ILCD')
 
 * --------------------------------------
 PROCEDURE aColDel_Test
@@ -733,7 +733,7 @@ IF m.llResult
 	* Voir si le typage est demandé
 	lnType = aVarType(@m.laType, @m.tuTypes)
 
-	* Remplir le tableau de travail 
+	* Remplir le tableau de travail
 	FOR m.liCol = 1 TO m.lnResult
 
 		llColBeg = m.liCol <= m.tnColBef
@@ -755,7 +755,7 @@ IF m.llResult
 				)
 		ENDFOR
 	ENDFOR
-	
+
 	* Copier le tableau de travail dans le résultat
 	DIMENSION taResult[m.lnRow, m.lnResult]
 	Acopy(laTemp, taResult) && contrairement à ce que dit la doc, ne dimensionne pas correctement taResult
@@ -849,7 +849,7 @@ IF m.llParms
 	lnElt1 = Alen(ta1)
 	lnElt2 = Alen(ta2)
 	IF m.lnElt1 = m.lnElt2 OR m.llDelta
-	
+
 		* Pour chaque élément
 		lnDelta = 0
 		lnCol1 = Alen(m.ta1, 2)
@@ -931,7 +931,7 @@ ASSERT m.llResult MESSAGE cAssertMsg(Textmerge(ICase(;
 						[<<Proper(Program())>>() - Invalid parameters]; && Default: English
 	)))
 IF m.llResult
-	
+
 	* Si le second tableau est à 2 dims et les deux tableaux ont le même nombre de colonnes
 	lnCol = Alen(ta2, 2)
 	llResult = m.lnCol > 0 AND Alen(ta1) = m.lnCol
@@ -940,15 +940,15 @@ IF m.llResult
 						[<<Proper(Program())>>() - each array must have the same number of columns]; && Default: English
 	)))
 	IF m.llResult
-	
+
 		* Pour chaque ligne du second tableau
 		dimension laRow[m.lnCol]
 		FOR liRow = 1 TO Alen(ta2, 1)
-		
+
 			* Extraire la ligne dans un tableau temporaire
 			Acopy(ta2, laRow, Aelement(ta2, m.liRow, 1), m.lnCol)
 			dimension laRow[m.lnCol] && Acopy() dimensionne laRow comme ta2
-			
+
 			* Si la ligne est identique au tableau 1, terminé
 			llResult = laEqual(@m.laRow, @m.ta1, m.tlCase)
 			IF m.llResult
@@ -984,7 +984,7 @@ IF m.llResult
 	* Si plus d'une ligne
 	lnResult = Alen(taResult, 1)
 	IF m.lnResult > 1
-	
+
 		* Pour chaque ligne en partant de la fin
 		lnCol = Alen(taResult, 2)
 		dimension laRow[Evl(m.lnCol, 1)]
@@ -995,7 +995,7 @@ IF m.llResult
 				, Acopy(taResult, laRow, Aelement(taResult, m.liRow, 1), m.lnCol);
 				, Acopy(taResult, laRow, Aelement(taResult, m.liRow), 1);
 				)
-			
+
 			* Pour chaque ligne jusqu'à celle précédant celle examinée
 			FOR liRow_ = 1 TO m.liRow - 1
 				IF m.lnCol > 0
@@ -1013,14 +1013,14 @@ IF m.llResult
 					EXIT
 				ENDIF
 			ENDFOR
-			
+
 			* Si la ligne existe, supprimer
 			IF m.llDup
 				Adel(taResult, m.liRow)
 				lnResult = m.lnResult - 1
 			ENDIF
 		ENDFOR
-		
+
 		* Retailler le tableau
 		IF m.lnCol > 0
 			DIMENSION taResult[m.lnResult, m.lnCol]
@@ -1056,7 +1056,7 @@ loUnitTest.Test(2, @m.laTest)
 RETURN m.loUnitTest.Result()
 
 * ===================================================================
-FUNCTION aLookup && {fr} Valeur d'une colonne d'un tableau selon une clé cherchée dans une autre colonne {en} Value found in an array column based on a key sought in another column 
+FUNCTION aLookup && {fr} Valeur d'une colonne d'un tableau selon une clé cherchée dans une autre colonne {en} Value found in an array column based on a key sought in another column
 LPARAMETERS ;
 	taSrce,; && @ {fr} Tableau source {en} Array source
 	tuVal,; && {fr} Valeur à trouver {en} Value to find
@@ -1115,13 +1115,13 @@ ASSERT m.llResult MESSAGE cAssertMsg(Textmerge(ICase(;
 						"<<Proper(Program())>>() - At least one parameter is not conform"; && Default: English
 	)))
 IF m.llResult
-	
+
 	* Si la valeur existe
 	liResult = Ascan(taSrce, m.tuVal, 1, -1, m.tnCol, m.tnFlags)
 	IF m.liResult > 0
 
 		aClear(@m.taDest)
-	
+
 		DO WHILE liResult > 0
 			aRowCopyIns(@m.taDest, @m.taSrce,, m.liResult)
 			lnResult = m.lnResult + 1
@@ -1188,7 +1188,7 @@ ASSERT m.llResult MESSAGE cAssertMsg(Textmerge(ICase(;
 						[the firsts two parameters must be arrays]; && Default: English
 	)))
 IF m.llResult
-	
+
 	llResult = laEmpty(@m.taDest)
 	IF m.llResult
 		lnCol = Alen(taSrce,2)
@@ -1196,21 +1196,21 @@ IF m.llResult
 		lnCol = Alen(taDest,2)
 		llResult = m.lnCol = Alen(taSrce,2)
 		ASSERT m.llResult MESSAGE cAssertMsg(Textmerge(ICase(;
-	cLangUser() = 'fr',	[les deux tableaux doivent avoir le même nombre de colonnes],; 
+	cLangUser() = 'fr',	[les deux tableaux doivent avoir le même nombre de colonnes],;
 						[the arrays must have the same number of columns]; && Default: English
 	)))
 		lnResult = Iif(m.llResult, Alen(taDest, 1), 0)
 	ENDIF
 	IF m.llResult
-	
+
 		tiDest = Iif(Vartype(m.tiDest) == 'N' AND Between(m.tiDest, 0, m.lnResult), m.tiDest, m.lnResult) + 1 && {fr} spec aIns() : AVANT {en} aIns() : BEFORE
 		tiSrce = Iif(Vartype(m.tiSrce) == 'N' AND Between(m.tiSrce, 1, Alen(taSrce, 1)), m.tiSrce, 1)
-		
+
 		* Insérer la nouvelle ligne
 		lnResult = m.lnResult + 1
 		DIMENSION taDest[m.lnResult, m.lnCol]
 		Ains(taDest, m.tiDest)
-		
+
 		* Copier les données dans la nouvelle ligne
 		FOR liCol = 1 TO m.lnCol
 			taDest[m.tiDest, m.liCol] = taSrce[m.tiSrce, m.liCol]
@@ -1234,7 +1234,7 @@ LOCAL llResult, lu, lnResult && {fr} nombre de lignes du Résultat {en} number of
 lnResult = 0
 llResult = Type('taResult', 1) == 'A'
 ASSERT m.llResult MESSAGE cAssertMsg(Textmerge(ICase(;
-	cLangUser() = 'fr',	[tableau attendu en premier paramètre : <<cLitteral(m.taResult)>> !],; 
+	cLangUser() = 'fr',	[tableau attendu en premier paramètre : <<cLitteral(m.taResult)>> !],;
 						[array expected as the first parameter : <<cLitteral(m.taResult)>> !]; && Default: English
 	)))
 IF m.llResult
@@ -1245,10 +1245,10 @@ IF m.llResult
 						[array with one dimension only expected : <<cLitteral(m.taResult)>> !]; && Default: English
 	)))
 	IF m.llResult
-		
+
 		lnResult = Alen(taResult)
 		IF Vartype(m.tlUnique) == 'L' AND m.tlUnique
-		
+
 			IF Vartype(m.tuElt) == 'O' && {fr} Ascan() ne marche pas pour les objets {en} Ascan() don't work with object
 				FOR EACH lu IN taResult
 					llResult = NOT (Vartype(m.lu) == 'O' AND m.lu = m.tuElt)
@@ -1261,7 +1261,7 @@ IF m.llResult
 			ENDIF
 		ENDIF
 		IF m.llResult
-			
+
 			lnResult = Iif(laEmpty(@m.taResult), 0, m.lnResult) + 1
 			DIMENSION taResult[m.lnResult]
 			IF Vartype(m.tlPush) == 'L' AND m.tlPush
@@ -1401,9 +1401,9 @@ IF m.llResult AND NOT laEmpty(@m.taIn)
 	* Si au moins une valeur à chercher est non nulle (clé)
 	lnCol = Alen(m.taFor)
 	liColKey = Cast(m.liColKey as Integer)
-	if Between(m.liColKey, 1, m.lnCol) and !IsNull(m.taFor[m.liColKey])
+	IF Between(m.liColKey, 1, m.lnCol) and !IsNull(m.taFor[m.liColKey])
 		luKey = m.taFor[m.liColKey]
-	else
+	ELSE
 		llResult = .F.
 		FOR liColKey = m.lnCol TO 1 STEP -1
 			luKey = m.taFor[m.liColKey]
@@ -1412,7 +1412,7 @@ IF m.llResult AND NOT laEmpty(@m.taIn)
 				EXIT
 			ENDIF
 		ENDFOR
-	endif
+	ENDIF
 	IF m.llResult
 
 		tlCaseNo = lTrue(m.tlCaseNo)
@@ -1425,11 +1425,11 @@ IF m.llResult AND NOT laEmpty(@m.taIn)
 		liRow = 0
 		llResult = .F.
 		DO WHILE .T.
-				
+
 			* Si la clé existe dans le tableau
 			liRow = Ascan(m.taIn, m.luKey, m.liRow + 1, -1, m.liColKey, m.lnFlags)
-			if m.liRow > 0
- 			
+			IF m.liRow > 0
+
 				* Si les autres valeurs sont dans la ligne
 				llResult = .T.
 				for liCol = 1 TO m.lnCol
@@ -1442,19 +1442,19 @@ IF m.llResult AND NOT laEmpty(@m.taIn)
 						)
 						llResult = .F.
 						exit
-					endif
+					ENDIF
 				endfor
-				if m.llResult
+				IF m.llResult
 					liResult = m.liRow
 					exit
-				endif
-			else
+				ENDIF
+			ELSE
 				exit
-			endif
+			ENDIF
 		enddo
 		set exact &lcExact
-	endif
-endif
+	ENDIF
+ENDIF
 
 RETURN m.liResult
 endfunc
@@ -1496,12 +1496,12 @@ ASSERT m.llResult MESSAGE cAssertMsg(Textmerge(ICase(;
 						[at least one parameter not conform]; && Default: English
 	)))
 IF m.llResult
-	
+
 	lnResult = ALines(taResult, m.tc, 1, ',', ';')
 	FOR liResult = 1 TO m.lnResult
 		taResult[m.liResult] = Evaluate(taResult[m.liResult])
 	ENDFOR
-	
+
 	tiCols = Iif(Vartype(m.tiCols) == 'N' AND Int(tiCols) = m.tiCols, m.tiCols, 0)
 	IF tiCols > 0
 		lnResult = Ceiling(Alen(taResult) / m.tiCols)
@@ -1534,7 +1534,7 @@ ASSERT m.llResult MESSAGE cAssertMsg(Textmerge(ICase(;
 IF m.llResult
 
 	lnResult = Alen(taRow, 1)
-	
+
 	* Tabuler les séparateurs de colonnes
 	llSep = 1 = aChars(;
 		  @m.laSep;
@@ -1542,7 +1542,7 @@ IF m.llResult
 			, m.tcSeps;
 			, [,;|] + TABUL;
 		))
-	
+
 	* Calculer le nombre de colonnes et le séparateur s'il est ambigu
 	lnCol = 0
 	lcSep = Iif(m.llSep, m.tcSeps, Space(0))
@@ -1570,7 +1570,7 @@ IF m.llResult
 	ENDFOR
 	DIMENSION taRow[m.lnResult, m.lnCol]
 	Acopy(laRow, taRow)
-	
+
 	* Le cas échéant, typer les données
 	IF m.llType
 
@@ -1638,7 +1638,7 @@ IF m.llResult
 
 	* Tabuler les lignes
 	ALines(taResult, m.tcTxt)
-	
+
 	RETURN aColsDelim(@m.taResult, m.tcSep, @m.tuTypes)
 ELSE
 	RETURN 0
@@ -1741,22 +1741,22 @@ ENDIF
 RETURN m.lnResult
 
 * ===================================================================
-function aToBase64 as Boolean
-lparameters ;
+FUNCTION aToBase64 as Boolean
+LPARAMETERS ;
 	result as String; && @ out
 , aa && @ out
 
-external array aa
+EXTERNAL ARRAY aa
 
-local success as Boolean;
+LOCAL success as Boolean;
 , memFile as String;
 , oResult as Exception
 
 success = Type('m.aa', 1) == 'A'
-if m.success
+IF m.success
 
 	memFile = Addbs(Sys(2023)) + 'temp' + Cast(_VFP.processID as M) + '.mem'
-	
+
 	try
 
 		save to (m.memFile) all like aa
@@ -1780,22 +1780,22 @@ if m.success
 
 	endtry
 
-else
+ELSE
 	cResultAdd(@m.result, [])
-endif
+ENDIF
 
-return m.success
+RETURN m.success
 
 * ===================================================================
-function aOfBase64 as Boolean
-lparameters ;
+FUNCTION aOfBase64 as Boolean
+LPARAMETERS ;
 	result as String; && @ out
 , aa; && @ out
 , base64 as String
 
-external array aa
+EXTERNAL ARRAY aa
 
-local success as Boolean;
+LOCAL success as Boolean;
 , memFile as String;
 , oResult as Exception
 
@@ -1812,17 +1812,17 @@ case !ga_Type_IsChar(m.base64, .T.)
 otherwise
 
 	memFile = Addbs(Sys(2023)) + 'temp' + Cast(_VFP.processID as M) + '.mem'
-	
+
 	try
 
 		success = StrToFile(Strconv(m.base64, 14), m.memFile) > 0
-		if m.success
+		IF m.success
 			restore from (m.memFile) additive
 			success = FileDel(m.memFile,,, @m.result) && FileDelete() abandonné à cause d'un conflit avec FileDelete.exe de web connect
-		else
+		ELSE
 			cResultAdd(@m.result, [])
-		endif
-		
+		ENDIF
+
 	catch to oResult
 
 		oResult = cException(m.oResult)
@@ -1834,5 +1834,5 @@ otherwise
 
 endcase
 
-return m.success
+RETURN m.success
 endfunc
