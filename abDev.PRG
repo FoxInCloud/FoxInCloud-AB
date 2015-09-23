@@ -7294,7 +7294,7 @@ lparameters ;
 , version as String; && version à analyser
 , loose as Boolean; && [.F.]
 
-if Pcount() <= 2 or Vartype(m.version) # 'C'
+if Vartype(m.version) # 'C'
 	loose = m.version
 	version = m.result
 endif
