@@ -56,6 +56,7 @@ graphics/**/
 
 # to be later released
 /abModule*.*
+/abFolders*.*
 
 # useless and/or third party
 /*.bak
