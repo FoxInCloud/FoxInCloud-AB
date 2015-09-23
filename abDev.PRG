@@ -6027,7 +6027,13 @@ endfunc
 
 * =============================================
 function nEvl(uValue, notEmpty, typeForce) && substitute value instead of not empty value
-return ICase(!Empty(m.uValue), m.notEmpty, lTrue(m.typeForce), uEmpty(Vartype(m.notEmpty)), m.uValue)
+return ICase(;
+	!Empty(m.uValue),;
+		m.notEmpty,;
+	lTrue(m.typeForce),;
+		uEmpty(Vartype(m.notEmpty)),;
+		m.uValue;
+	)
 endfunc
 
 * =============================================
@@ -6068,7 +6074,7 @@ endfunc
 * =============================================
 function lTrue && a value is .T.
 lparameters value
-return lTrue(m.value)
+return Vartype(m.value) == 'L' and m.value
 endfunc
 * =============================================
 function lFalse && a value is .F.
