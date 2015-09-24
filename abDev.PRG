@@ -1047,7 +1047,7 @@ loUnitTest.Test(upper(DOS_AB) + 'ABDEV.FXP', m.lcSys16, 'Address')
 
 loClassTest = createobject('cusModuleInfo_Test', m.loUnitTest)
 
-return loUnitTest.Result()
+return loUnitTest.result()
 
 * --------------------------------------
 define class cusModuleInfo_Test as custom && Teste cModuleInfo() au sein d'une classe
@@ -1316,7 +1316,7 @@ loUnitTest = newobject('abUnitTest', 'abDev.prg')
 loUnitTest.Test(.f.)
 loUnitTest.Test(.f., 'abUnitTest')
 
-return m.loUnitTest.Result()
+return m.loUnitTest.result()
 
 * ========================================
 function uDefault && Valeur par défaut d'un paramètre /!\ .T. non supporté
@@ -1357,7 +1357,7 @@ local loAsserts as abSet of abDev.prg
 loAsserts = abSet('Asserts', 'OFF')
 loUnitTest.Test(.null., 0, .t.)
 
-return loUnitTest.Result()
+return loUnitTest.result()
 
 * ==================================
 define class abMachineInfo as GA_LIGHTWEIGHT_CLASS of abGA.prg && Informations sur la machine : processeur, mémoire, etc.
@@ -1778,7 +1778,7 @@ loUnitTest.Test('_2CARTABLE_POIRE', '2cartable.poiré')
 loUnitTest.Test('_2CARTABLE_POIRE', '2cartable.:poiré')
 loUnitTest.Test(leftc('_2CARTABLE_POIRE', 9), '2cartable.:poiré', 9)
 
-return loUnitTest.Result()
+return loUnitTest.result()
 
 *========================================
 function lVFPname	&& Nom valide pour VFP
@@ -1965,7 +1965,7 @@ loUnitTest.Test('Test réussi', m.lcLine)
 lcLine = '* Procedure test ' + replicate('&', 2) + '   test réussi'
 loUnitTest.Test('Procedure test ' + replicate('&', 2) + ' test réussi', m.lcLine)
 
-return loUnitTest.Result()
+return loUnitTest.result()
 
 * ====================
 function cCodeLineClean && Ligne de code sans caractères parasites
@@ -2092,7 +2092,7 @@ ENDTEXT
 
 loUnitTest.Test(m.lcExpected, m.lcCode)
 
-return loUnitTest.Result()
+return loUnitTest.result()
 
 * ====================
 function aInLineCommentsStripped && Lignes de code sans commentaires de ligne
@@ -2532,7 +2532,7 @@ loUnitTest.Test(.t., 'Datasession', 2)
 
 loUnitTest.Test(.f., 'Skip', 'TO cALIAS')
 
-return loUnitTest.Result()
+return loUnitTest.result()
 
 * ------------------------------------
 procedure abSet_Tests && Tests the abSet Class
@@ -2791,7 +2791,7 @@ lInit = .t. && all settings were successful && See in this.Set() why default is 
 
 *---------------------------------------------------------------------------
 procedure init
-lparameters Result && @ {en} error if any {fr} erreur éventuelle
+lparameters result && @ {en} error if any {fr} erreur éventuelle
 
 #if .f. && Sample implementation
 with m.this as abSets of abDev.prg
@@ -2891,7 +2891,7 @@ loResult = newobject('abSetsMaintain', 'abDev.prg')
 loUnitTest.Test(.null.) && 1 ms
 *loUnitTest.coverageSet(.F.)
 
-return m.loUnitTest.Result()
+return m.loUnitTest.result()
 
 * ===========================================
 define class abSetsMaintain as GA_LIGHTWEIGHT_CLASS of abGA.prg && Sauve les sets critiques et les restore s'ils ont changé
@@ -3167,7 +3167,7 @@ loUnitTest = newobject('abUnitTest', 'abDev.prg')
 
 loUnitTest.Test('myFunc(toto,m.lcTest)', ' myFunc(toto)', 'm.lcTest')
 
-return loUnitTest.Result()
+return loUnitTest.result()
 
 * ========================================
 function cException && Message d'exception standard
@@ -3219,7 +3219,7 @@ finally
 	loUnitTest.Test(m.lcResult, m.loException)
 endtry
 
-return loUnitTest.Result()
+return loUnitTest.result()
 
 * ---------------------------------------------------
 procedure FilesCompile && Compile des fichiers d'après un squelette
@@ -3415,7 +3415,7 @@ loUnitTest = newobject('abUnitTest', 'abDev.prg')
 loUnitTest.Test(.t.)
 loUnitTest.Test(.t., 2, 'bidon', .f., date())
 
-return loUnitTest.Result()
+return loUnitTest.result()
 
 * ========================================
 function cPWRand && Mot de passe aléatoire sûr selon indications Windows
@@ -3931,7 +3931,7 @@ loUnitTest.Test({}, '23/09/194', 'D') && date invalide && ajouté le 15/05/09
 
 loUnitTest.Test({/}, 'boto', 'D') && 2015-06-16 - contributor Gilles Lajot-Sarthou
 
-return loUnitTest.Result()
+return loUnitTest.result()
 
 define class uValue_Test as abUnitTest of abDev.prg
 		procedure init
@@ -4039,7 +4039,7 @@ loUnitTest.Test(.f., 'toto', 'tot')
 loUnitTest.Test(.f., 'TOTO ', 'toto', .t., .t.)
 loUnitTest.Test(.t., 'TOTO ', 'toto', , .t.)
 
-return loUnitTest.Result()
+return loUnitTest.result()
 
 * =================================================
 function cSetPath(tlSort) && Set("Path") bien présenté
@@ -4227,7 +4227,7 @@ lparameters ;
   tcString; && Chaîne à localiser
 , tcLangUser; && [cLangUser()] Langue de l'utilisateur
 
-local Result as string;
+local result as string;
 , liLangUser as integer;
 , liEN as integer;
 
@@ -4236,7 +4236,7 @@ tcLangUser = iif(ga_Type_IsChar(m.tcLangUser, .t.) and lenc(m.tcLangUser) = 2, m
 liLangUser = at_c('{' + m.tcLangUser + '}', m.tcString)
 liEN = at_c('{en}', m.tcString)
 
-Result = icase(;
+result = icase(;
 	M.liLangUser > 0,;
 		substrc(m.tcString, m.liLangUser + 4),;
 	M.liEN > 0,;
@@ -4245,8 +4245,8 @@ Result = icase(;
 	)
 
 return alltrim(iif(m.liEN + m.liLangUser > 0;
-	, leftc(m.Result, evl(at_c('{', m.Result), lenc(m.Result)+1)-1);
-	, m.Result;
+	, leftc(m.result, evl(at_c('{', m.result), lenc(m.result)+1)-1);
+	, m.result;
 	), CR, LF, ' ', chr(9))
 endfunc
 
@@ -4259,7 +4259,7 @@ loUnitTest = newobject('abUnitTest', 'abDev.prg')
 loUnitTest.Test([formulaire où s'est produit l'événement], [ {en} requested form {fr} formulaire où s'est produit l'événement], 'fr')
 loUnitTest.Test([requested form], [ {en} requested form {fr} formulaire où s'est produit l'événement], 'en')
 
-return m.loUnitTest.Result()
+return m.loUnitTest.result()
 
 
 * -----------------------------------
@@ -4815,7 +4815,7 @@ if m.lnColsParms > m.lnCols
 endif
 
 * -----------------------------------
-procedure Result
+procedure result
 
 if not this.lResultOut
 	this.ResultOut()
@@ -5676,7 +5676,7 @@ return '';
 
 * =============================================
 function lUserAnAdmin as Variant && Current User is an administrator
-lparameters Result as string && @
+lparameters result as string && @
 
 local success as Variant
 
@@ -5697,7 +5697,7 @@ catch
 	success = .null. && IsUserAnAdmin() not supported, we don't know
 endtry
 
-Result = iif(isnull(m.success);
+result = iif(isnull(m.success);
 	, textmerge('';
 		+ [<<Proper(Program())>>() ];
 		+ icase(;
@@ -6087,21 +6087,60 @@ endfunc
 #endif
 
 * =============================
-function cSemVer_MMP as String && {en} SemVer without prereleases
+function cSemVer as String && {en} SemVer of a version string
+lparameters ;
+  result as string; && @ résultat (cumulatif)
+, version as string; && version à analyser
+, loose as Boolean; && [.F.]
+
+local oSemVer as abSemVer of abDev.prg
+
+oSemVer = abSemVer(;
+	 @m.result;
+	, m.version;
+	, m.loose;
+	)
+
+return Iif(labSemVer(m.oSemVer);
+	, m.oSemVer.version;
+	, .null.;
+	)
+endfunc
+
+* =============================
+function cSemVerMMP as String && {en} SemVer major.minor.patch (without prereleases)
+lparameters ;
+  result as string; && @ résultat (cumulatif)
+, version as string; && version à analyser
+, loose as Boolean; && [.F.]
+
+local oSemVer as abSemVer of abDev.prg
+
+oSemVer = abSemVer(;
+	 @m.result;
+	, m.version;
+	, m.loose;
+	)
+
+return Iif(labSemVer(m.oSemVer);
+	, m.oSemVer.versionMMP;
+	, .null.;
+	)
+endfunc
 
 * =============================
 function abSemVer as abSemVer of abDev.prg && {en} abSemVer object from a version string
 lparameters ;
-  Result as string; && @ résultat (cumulatif)
+  result as string; && @ résultat (cumulatif)
 , version as string; && version à analyser
-, LOOSE as Boolean; && [.F.]
+, loose as Boolean; && [.F.]
 
 if vartype(m.version) # 'C'
-	LOOSE = m.version
-	version = m.Result
+	loose = m.version
+	version = m.result
 endif
 
-return createobject('abSemVer', @m.Result, m.version, m.LOOSE)
+return createobject('abSemVer', @m.result, m.version, m.loose)
 endfunc
 
 * -----------------
@@ -6124,7 +6163,7 @@ tildeTrimReplace = '$1~'
 caretTrimReplace = '$1^'
 comparatorTrimReplace = '$1$2$3'
 
-LOOSE = .null.
+loose = .null.
 raw = .null.
 version = .null.
 
@@ -6148,17 +6187,17 @@ versionMMP = .null. && version without prerelease(s)
 * -----------------
 procedure init
 lparameters ;
-  Result as string; && @ résultat (cumulatif)
+  result as string; && @ résultat (cumulatif)
 , version as string; && version à analyser
-, LOOSE as Boolean; && [.F.]
+, loose as Boolean; && [.F.]
 
 local success as Boolean;
 , cResult as string;
 
-success = this.Init_(@m.cResult, m.version, m.LOOSE)
+success = this.Init_(@m.cResult, m.version, m.loose)
 
 assert m.success message cAssertMsg(m.cResult)
-= m.success or cResultAdd(@m.Result, m.cResult)
+= m.success or cResultAdd(@m.result, m.cResult)
 
 return m.success
 endproc
@@ -6166,11 +6205,11 @@ endproc
 * -----------------
 hidden procedure Init_
 lparameters ;
-  Result as string; && @ résultat (cumulatif)
+  result as string; && @ résultat (cumulatif)
 , version as string; && [this.raw] version à analyser
-, LOOSE as Boolean; && [.F.]
+, loose as Boolean; && [.F.]
 
-LOOSE = lTrue(m.LOOSE)
+loose = lTrue(m.loose)
 
 local success as Boolean;
 , oRegExp as abRegExp of abTxt.prg;
@@ -6182,26 +6221,26 @@ local success as Boolean;
 , oRegExpNum as abRegExp of abTxt.prg;
 
 do case
-case !this.Init_RegExp(@m.Result)
+case !this.Init_RegExp(@m.result)
 	return m.success
 case this.lSemVer(m.version)
- LOOSE   = m.version.LOOSE
+ loose   = m.version.loose
  version = m.version.version
 case !ga_Type_IsChar(m.version, .t.)
-	return cResultAdd(@m.Result, [Invalid version: ] + cL(m.version))
+	return cResultAdd(@m.result, [Invalid version: ] + cL(m.version))
 endcase
 
 store alltrim(m.version) to this.raw, version
-this.LOOSE = m.LOOSE
+this.loose = m.loose
 
 if lenc(m.version) > this.MAX_LENGTH
-  return cResultAdd(@m.Result, textmerge([version <<cL(m.version)>> is longer than <<this.MAX_LENGTH>> characters]))
+  return cResultAdd(@m.result, textmerge([version <<cL(m.version)>> is longer than <<this.MAX_LENGTH>> characters]))
 endif
 
-oRegExp = iif(m.LOOSE, this.oRegExpr.LOOSE, this.oRegExpr.full)
+oRegExp = iif(m.loose, this.oRegExpr.loose, this.oRegExpr.full)
 
 if empty(m.oRegExp.execute(m.version))
-  return cResultAdd(@m.Result, textmerge([Invalid version: <<m.version>>]))
+  return cResultAdd(@m.result, textmerge([Invalid version: <<m.version>>]))
 endif
 
 oSubMatch = m.oRegExp.matches[3]
@@ -6213,11 +6252,11 @@ this.patch = cast(m.oSubMatch.item(3) as i)
 
 do case
 case !between(m.this.major, 0, this.MAX_SAFE_INTEGER)
-  return cResultAdd(@m.Result, textmerge([Invalid major version: <<m.this.major>>]))
+  return cResultAdd(@m.result, textmerge([Invalid major version: <<m.this.major>>]))
 case !between(m.this.minor, 0, this.MAX_SAFE_INTEGER)
-  return cResultAdd(@m.Result, textmerge([Invalid minor version: <<m.this.minor>>]))
+  return cResultAdd(@m.result, textmerge([Invalid minor version: <<m.this.minor>>]))
 case !between(m.this.patch, 0, this.MAX_SAFE_INTEGER)
-  return cResultAdd(@m.Result, textmerge([Invalid patch version: <<m.this.patch>>]))
+  return cResultAdd(@m.result, textmerge([Invalid patch version: <<m.this.patch>>]))
 endcase
 
 this.lMajor = empty(m.this.minor) && major release
@@ -6275,7 +6314,7 @@ endproc
 
 * -----------------
 hidden procedure Init_RegExp && Initializes Regular Expressions are used for tokenizing, validating and parsing abSemVer version strings
-lparameters Result as string; && @ résultat (cumulatif)
+lparameters result as string; && @ résultat (cumulatif)
 
 this.oPattern = createobject('Empty')
 this.oRegExpr = createobject('Empty')
@@ -6350,7 +6389,7 @@ LOOSEPLAIN = '[v=\s]*';
 	+ this.oPattern.PRERELEASELOOSE + '?';
 	+ this.oPattern.build + '?'
 
-addproperty(this.oPattern, 'LOOSE', '^' + LOOSEPLAIN + '$')
+addproperty(this.oPattern, 'loose', '^' + LOOSEPLAIN + '$')
 
 addproperty(this.oPattern, 'GTLT', '((?:<|>)?=?)')
 
@@ -6446,7 +6485,7 @@ protected function oSemVer && objet de la classe abSemVer
 lparameters other as Variant && autre version
 return iif(this.lSemVer(m.other);
 	, m.other;
-	, abSemVer(m.other, m.this.LOOSE);
+	, abSemVer(m.other, m.this.loose);
 	)
 endfunc
 
