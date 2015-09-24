@@ -6276,7 +6276,6 @@ this.lPreRelease = !empty(m.cPreReleases)
 if m.this.lPreRelease
 	oRegExpNum = abRegExp('^[0-9]+$')
 	nPreRelease = getwordcount(m.cPreReleases, '.')
-	if m.loose and m.nPreRelease = 1 and IsDigit(Rightc(m.cPreReleases, 1)) && 2015-09-25 thn back compat.: allow for missing dot between prerelease type and prerelease number
 		iPreRelease = Lenc(m.cPreReleases)
 		do while m.iPreRelease >= 0
 			if !IsDigit(Substr(m.cPreReleases, m.iPreRelease))
@@ -6294,8 +6293,7 @@ if m.this.lPreRelease
 	for iPreRelease = 1 to m.nPreRelease
 		cPreRelease = getwordnum(m.cPreReleases, m.iPreRelease, '.')
 		this.prerelease[m.iPreRelease] = iif(m.oRegExpNum.Test(m.cPreRelease);
-			, cast(m.cPreRelease as i);
-			, lower(m.cPreRelease);
+			, cast(m.cPreRelease as I);
 			)
 	endfor
 endif
@@ -6370,7 +6368,7 @@ addproperty(this.oPattern, 'PRERELEASEIDENTIFIERLOOSE', '(?:' + this.oPattern.NU
 && Hyphen, followed by one or more dot-separated pre-release version identifiers.
 
 addproperty(this.oPattern, 'PRERELEASE', '(?:-(' + this.oPattern.PRERELEASEIDENTIFIER + '(?:\.' + this.oPattern.PRERELEASEIDENTIFIER + ')*))')
-addproperty(this.oPattern, 'PRERELEASELOOSE', '(?:[-\.]?(' + this.oPattern.PRERELEASEIDENTIFIERLOOSE + '(?:\.' + this.oPattern.PRERELEASEIDENTIFIERLOOSE + ')*))') && 2015-09-25 thn InstallShield support: prerelease is separated by '.' from main version
+addproperty(this.oPattern, 'PRERELEASELOOSE', '(?:[-\.]?(' + this.oPattern.PRERELEASEIDENTIFIERLOOSE + '(?:\.' + this.oPattern.PRERELEASEIDENTIFIERLOOSE + ')*))') && 2015-09-25 thn InstallShield support: prerelease is a number separated by '.' from main version
 
 && ## Build Metadata Identifier
 && Any combination of digits, letters, or hyphens.
@@ -6835,8 +6833,12 @@ oAsserts  = abSet('ASSERTS', 'ON')
 success = .t.
 nTest = 0
 
-&& InstallShield support:
+&& InstallShield support: prerelease is a number separated by '.' from main version
 success = cSemVer('2.20.0.1', .T.) == '2.20.0-beta.1' and m.success
+nTest = m.nTest + 1
+
+&& back compta.: allow for missing dot between prerelease type and number
+success = cSemVer('2.20beta1', .T.) == '2.20.0-beta.1' and m.success
 nTest = m.nTest + 1
 
 && major: 1.0.0-5 bumps to 1.0.0
@@ -6879,7 +6881,7 @@ nTest = m.nTest + 1
 success = abSemVer_test_inc('1.2.2-beta.0', '1.2.2-beta.1', 'prerelease') and m.success
 nTest = m.nTest + 1
 
-#if .F. && execute in command window
+#if .F. && select > right click > 'execute selection' > paste below
 AB()
 nTest = 0
 _cliptext = nEvl(varSet(@m.nTest, 0), '') + textmerge([&]+[& <<Datetime()>> - abSemVer_test(): <<abSemVer_test(@m.nTest)>> - <<m.nTest>> tests] + chr(13))
@@ -6887,6 +6889,7 @@ _cliptext = nEvl(varSet(@m.nTest, 0), '') + textmerge([&]+[& <<Datetime()>> - ab
 
 && 18/09/15 10:44:13 - abSemVer_test(): .T. - 10 tests
 && 24/09/15 15:53:59 - abSemVer_test(): .T. - 11 tests
+&& 24/09/15 15:57:42 - abSemVer_test(): .T. - 12 tests
 
 return m.success
 endfunc
