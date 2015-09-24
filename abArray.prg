@@ -23,7 +23,7 @@ return abUnitTests()
 * ===================================================================
 function aChars && {fr} Tabule les caractères d'une chaîne {en} splits characters of a string into an array
 lparameters ;
-	taResult; && @ {fr} Résultat {en} Result
+  taResult; && @ {fr} Résultat {en} Result
 , tcString && {fr} Chaîne à splitter {en} String to be splitted
 
 external array taResult && pour le gestionnaire de projet

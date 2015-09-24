@@ -15,7 +15,13 @@
 *.PDF	 diff=astextplain
 *.rtf	 diff=astextplain
 *.RTF	 diff=astextplain
+
 *.prg  diff=astextplain
 *.PRG  diff=astextplain
 *.h    diff=astextplain
 *.H    diff=astextplain
+
+*.prg  encoding=Western
+*.PRG  encoding=Western
+*.h    encoding=Western
+*.H    encoding=Western
