@@ -3,7 +3,7 @@
 # =========================
 
 # Windows
-# =========================
+# -------
 
 # Windows image file caches
 Thumbs.db
@@ -25,7 +25,7 @@ $RECYCLE.BIN/
 *.lnk
 
 # Mac OSX
-# =========================
+# -------
 
 .DS_Store
 .AppleDouble
@@ -50,26 +50,25 @@ Temporary Items
 # ===============================
 *.fxp
 *.err
+*.bak
+*.tbk
 
-
-# ===============================
-# Abaque FoxInCloud reserved Files
-# ===============================
+# =================
+# Abaque FoxInCloud
+# =================
 
 # all subdirectories except graphics
 **/
 !graphics/
 graphics/**/
 
-# to be later released
+# to be released later
 /abModule*.*
 /abFolders*.*
 
 # useless and/or third party
-/*.bak
-/*.tbk
 /*.dll
 /*.fll
 
-# FoxInCloud-related
+# FoxInCloud-specific
 /aw*.*
