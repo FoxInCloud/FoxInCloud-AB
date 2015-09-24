@@ -9,7 +9,7 @@
 * La présente mention doit être intégralement reproduite
 && dans toute copie même partielle
 * -----------------------------------------------------
-* This software is distributed under the terms of GNU General Public License, AS IS, without any warranty 
+* This software is distributed under the terms of GNU General Public License, AS IS, without any warranty
 * It may be used and/or distributed without restriction
 * Any substantial improvement must be given for free to the community
 * This permission notice shall be entirely included in all copies
@@ -21,57 +21,57 @@ AB()
 return abUnitTests()
 
 * --------------------------------------------------
-PROCEDURE XLWBtablesBeautify && Améliore l'aspect des feuilles d'un classeur Excel contenant une table
-LPARAMETERS ;
+procedure XLWBtablesBeautify && Améliore l'aspect des feuilles d'un classeur Excel contenant une table
+lparameters ;
 	tcXLWB && Adresse d'un classeur Excel
 
-LOCAL llResult, lnResult && Nombre de feuilles du classeur ont été traitées
+local llResult, lnResult && Nombre de feuilles du classeur ont été traitées
 
 lnResult = 0
-llResult = Vartype(m.tcXLWB) == 'C' AND File(m.tcXLWB)
-ASSERT m.llResult MESSAGE "Aucun fichier à l'adresse" + Space(1) + cLitteral(m.tcXLWB)
-IF m.llResult
-	
-	* Ouvrir Excel en automation si pas encore fait
-	LOCAL loXL as Excel.Application
-	loXL = Vartype(m.poXL) == 'O' AND loXL(m.poXL)
-	IF NOT m.loXL
-		PRIVATE poXL as Excel.Application
-		poXL = oXL()
-	ENDIF
-	llResult = loXL(m.poXL)
-	ASSERT m.llResult MESSAGE "Impossible d'ouvrir Excel en automation"
-	IF m.llResult
+llResult = vartype(m.tcXLWB) == 'C' and file(m.tcXLWB)
+assert m.llResult message "Aucun fichier à l'adresse" + space(1) + cLitteral(m.tcXLWB)
+if m.llResult
 
-		* Si le classeur contient au moins une feuille de calcul
-		LOCAL laXLWSs[1], lnXLWSs
+* Ouvrir Excel en automation si pas encore fait
+	local loXL as Excel.application
+	loXL = vartype(m.poXL) == 'O' and loXL(m.poXL)
+	if not m.loXL
+		private poXL as Excel.application
+		poXL = oXL()
+	endif
+	llResult = loXL(m.poXL)
+	assert m.llResult message "Impossible d'ouvrir Excel en automation"
+	if m.llResult
+
+* Si le classeur contient au moins une feuille de calcul
+		local laXLWSs[1], lnXLWSs
 		lnXLWSs = acXLWSs(@laXLWSs, m.tcXLWB)
 		llResult = m.lnXLWSs > 0
-		ASSERT m.llResult MESSAGE "Aucune feuille trouvée dans le classeur" + Space(1) + cLitteral(m.tcXLWB)
-		IF m.llResult
+		assert m.llResult message "Aucune feuille trouvée dans le classeur" + space(1) + cLitteral(m.tcXLWB)
+		if m.llResult
 
-			* Pour chaque feuille du classeur
-			LOCAL lcXLWS
-			FOR EACH m.lcXLWS IN m.laXLWSs
-				
-				* Enrichir l'aspect
+* Pour chaque feuille du classeur
+			local lcXLWS
+			for each m.lcXLWS in m.laXLWSs
+
+* Enrichir l'aspect
 				llResult = XLWStableBeautify(oXLWS(m.tcXLWB + '|' + m.lcXLWS))
-				lnResult = m.lnResult + Iif(m.llResult, 1, 0)
-			ENDFOR
-		ENDIF
+				lnResult = m.lnResult + iif(m.llResult, 1, 0)
+			endfor
+		endif
 
-		IF NOT m.loXL
-			poXL.Quit
-			RELEASE m.poXL
-		ENDIF
-	ENDIF
-ENDIF
+		if not m.loXL
+			poXL.quit
+			release m.poXL
+		endif
+	endif
+endif
 
-RETURN m.lnResult
+return m.lnResult
 
 * --------------------------------------------------
-PROCEDURE XLWStableBeautify && Améliore l'aspect d'une feuille Excel contenant une table
-LPARAMETERS ;
+procedure XLWStableBeautify && Améliore l'aspect d'une feuille Excel contenant une table
+lparameters ;
 	tuXLWS,; && Référence à une feuille ou @ adresse d'un classeur Excel
 	tcXLWSName,; && [nom du classeur] Nom de la feuille si on veut la renommer
 	tcTypes && [ignoré] Types des colonnes
@@ -91,69 +91,69 @@ local llResult as Boolean; && La feuille a été traitée
 
 * Si la feuille excel peut être ouverte
 loXLWS = oXLWS(@m.tuXLWS, @llOpened)
-llResult = Vartype(m.loXLWS)=='O' AND NOT IsNull(m.loXLWS)
-IF m.llResult
+llResult = vartype(m.loXLWS)=='O' and not isnull(m.loXLWS)
+if m.llResult
 
-	WITH m.loXLWS AS Excel.WorkSheet
+	with m.loXLWS as Excel.WorkSheet
 
-		* Nommer la feuille élégament
-		lcXLWSName = Iif(Vartype(m.tcXLWSName) == 'C' AND NOT Empty(m.tcXLWSName), m.tcXLWSName, .Name)
-		lcXLWSName = Chrtran(m.lcXLWSName, ["'/\:|_], Space(1))
+* Nommer la feuille élégament
+		lcXLWSName = iif(vartype(m.tcXLWSName) == 'C' and not empty(m.tcXLWSName), m.tcXLWSName, .name)
+		lcXLWSName = chrtran(m.lcXLWSName, ["'/\:|_], space(1))
 		lcXLWSName = cRepCharDel(m.lcXLWSName)
-		lcXLWSName = Alltrim(m.lcXLWSName)
-		IF NOT Empty(m.lcXLWSName)
-			.Name = Iif(Len(m.lcXLWSName) < 5, Upper(m.lcXLWSName), cTronc(Proper(m.lcXLWSName), 31)) && 31 est la limite Excel 97
-		ENDIF
+		lcXLWSName = alltrim(m.lcXLWSName)
+		if not empty(m.lcXLWSName)
+			.name = iif(len(m.lcXLWSName) < 5, upper(m.lcXLWSName), cTronc(proper(m.lcXLWSName), 31)) && 31 est la limite Excel 97
+		endif
 
-		* Si lignes et colonnes
-		lnRow = .UsedRange.Rows.Count
-		lnCol = .UsedRange.Columns.Count
-		IF m.lnRow > 1 AND m.lnCol > 0
+* Si lignes et colonnes
+		lnRow = .UsedRange.rows.count
+		lnCol = .UsedRange.columns.count
+		if m.lnRow > 1 and m.lnCol > 0
 
-			* Empty 0-cells
-			.UsedRange.Replace(0, Space(0), 1)
+* Empty 0-cells
+			.UsedRange.replace(0, space(0), 1)
 
-			llTypes = .F.;
-				or Type('tcTypes', 1) == 'A' and !laEmpty(@m.tcTypes) and Acopy(m.tcTypes, m.laTypes) > 0;
-				or Vartype(m.tcTypes) == 'C' and ALines(m.laTypes, Upper(m.tcTypes), 5, ',', ';') > 0 and !laEmpty(@m.laTypes)
+			llTypes = .f.;
+				or type('tcTypes', 1) == 'A' and !laEmpty(@m.tcTypes) and acopy(m.tcTypes, m.laTypes) > 0;
+				or vartype(m.tcTypes) == 'C' and alines(m.laTypes, upper(m.tcTypes), 5, ',', ';') > 0 and !laEmpty(@m.laTypes)
 
-			* Pour chaque colonne
-			.AutoFilterMode = .F.
-			FOR m.liCol = 1 TO m.lnCol
+* Pour chaque colonne
+			.AutoFilterMode = .f.
+			for m.liCol = 1 to m.lnCol
 
-				* Régler la cellule de la première ligne
-				WITH .Cells(1, m.liCol) AS Excel.Range
-					IF m.liCol = 1 AND m.lnRow > 60
+* Régler la cellule de la première ligne
+				with .Cells(1, m.liCol) as Excel.range
+					if m.liCol = 1 and m.lnRow > 60
 						.AutoFilter
-					ENDIF
-					luValue = .Value
-					IF Vartype(m.luValue) == 'C' AND NOT IsNull(m.luValue)
-						.Font.Name = 'Calibri'
-						.Font.Bold = .T.
-						.Value = Upper(cRepCharDel(Chrtran(m.luValue, '_', ' ')))
-						.Interior.Color = Rgb(0,255,64) && Green
-					ENDIF
-				ENDWITH
-				
-				WITH .Columns(m.liCol) AS Excel.Range
+					endif
+					luValue = .value
+					if vartype(m.luValue) == 'C' and not isnull(m.luValue)
+						.font.name = 'Calibri'
+						.font.Bold = .t.
+						.value = upper(cRepCharDel(chrtran(m.luValue, '_', ' ')))
+						.Interior.color = rgb(0,255,64) && Green
+					endif
+				endwith
 
-					* Si colonne date ou datetime, ajuster le format
-					if m.llTypes and Upper(m.laTypes[m.liCol]) $ 'DT'
-						.NumberFormat = cDTformat_AW_XL(Upper(m.laTypes[m.liCol]) == 'T') && modify command abDate
+				with .columns(m.liCol) as Excel.range
+
+* Si colonne date ou datetime, ajuster le format
+					if m.llTypes and upper(m.laTypes[m.liCol]) $ 'DT'
+						.NumberFormat = cDTformat_AW_XL(upper(m.laTypes[m.liCol]) == 'T') && modify command abDate
 					endif
 
-					* Ajuster la largeur de colonne en automatique
-					IF NOT .WrapText
-						.AutoFit
-						.ColumnWidth = Min(.ColumnWidth, 30) && maximum 30
-					ENDIF
+* Ajuster la largeur de colonne en automatique
+					if not .WrapText
+						.autofit
+						.columnwidth = min(.columnwidth, 30) && maximum 30
+					endif
 				endwith
-			ENDFOR
-		ENDIF
+			endfor
+		endif
 
-		* Set up page for printing
+* Set up page for printing
 		lnMargin = .parent.parent.CentimetersToPoints(1) && 1 cm
-		WITH .PageSetup
+		with .PageSetup
 			.RightMargin = m.lnMargin
 			.HeaderMargin = m.lnMargin
 			.FooterMargin = m.lnMargin
@@ -164,499 +164,499 @@ IF m.llResult
 			.BottomMargin = m.lnMargin
 
 			.PrintTitleRows = '$1:$1' && Repeat 1st row on each page
-			
-			&& cf. "Formatting codes for headers and footers" in XL8.h
+
+&& cf. "Formatting codes for headers and footers" in XL8.h
 			.LeftHeader = '&10&F' && name of the document
 			.CenterHeader = '&12&A' && nom de la feuille en xx points
 			.RightHeader = 'Printed on &J' && date
-			
-			.LeftFooter = 'Generated by Abaque on ' + Transform(Date())
+
+			.LeftFooter = 'Generated by Abaque on ' + transform(date())
 			.CenterFooter = 'Page &P/&N' && &N = nombre total de pages et non le nom du classeur comme documenté
 			.RightFooter = '&W' && nom du classeur ??
 
-			.PrintGridLines = .T.
-		ENDWITH
-	ENDWITH
+			.PrintGridLines = .t.
+		endwith
+	endwith
 
-	* Traiter le classeur
-	WITH m.loXLWS.parent AS Excel.Workbook && parent = WB
+* Traiter le classeur
+	with m.loXLWS.parent as Excel.Workbook && parent = WB
 
-		* Changer la police normale
-		WITH .Styles('Normal').Font
-			.Name = 'Calibri'
-			.Size = 10
-		ENDWITH
+* Changer la police normale
+		with .Styles('Normal').font
+			.name = 'Calibri'
+			.size = 10
+		endwith
 
-		* Ajuster la présentation à l'écran
-		WITH .Windows(1) AS Excel.Window
+* Ajuster la présentation à l'écran
+		with .windows(1) as Excel.window
 
-			* Freeze panes on first row
+* Freeze panes on first row
 			.SplitRow = 1
-			.FreezePanes = .T.
+			.FreezePanes = .t.
 
-			* Dimensionner la fenêtre à un minimum
-			LOCAL lnWindowState
-			lnWindowState = .WindowState
-			.WindowState = xlNormal
-			.Width = Max(.Width , .7 * 72 * 20) && pouces logiques > points > twips
-			.Height = Max(.Height,  .4 * 72 * 20)
-			.WindowState = m.lnWindowState
-		ENDWITH
+* Dimensionner la fenêtre à un minimum
+			local lnWindowState
+			lnWindowState = .windowstate
+			.windowstate = xlNormal
+			.width = max(.width , .7 * 72 * 20) && pouces logiques > points > twips
+			.height = max(.height,  .4 * 72 * 20)
+			.windowstate = m.lnWindowState
+		endwith
 
-		* Sauvegarder en version courante
-		.SaveAs(Iif(Vartype(m.tuXLWS) == 'C', m.tuXLWS, .FullName), xlWorkbookNormal)
+* Sauvegarder en version courante
+		.saveas(iif(vartype(m.tuXLWS) == 'C', m.tuXLWS, .fullname), xlWorkbookNormal)
 
-		* Refermer s'il était fermé à l'entrée
-		IF m.llOpened
-			.Close
-		ENDIF
-	ENDWITH
-ENDIF
+* Refermer s'il était fermé à l'entrée
+		if m.llOpened
+			.close
+		endif
+	endwith
+endif
 
-RETURN m.llResult
+return m.llResult
 
 * -----------------------------------------------------------------
-PROCEDURE XLWStableBeautify_Test && teste XLWStableBeautify(), nouvelle version
+procedure XLWStableBeautify_Test && teste XLWStableBeautify(), nouvelle version
 
-LOCAL loTest as sesXLWSTableBeautify_Test
-loTest = CreateObject('sesXLWSTableBeautify_Test')
+local loTest as sesXLWSTableBeautify_Test
+loTest = createobject('sesXLWSTableBeautify_Test')
 
-LOCAL lcTableTest, lcXLWBTest
+local lcTableTest, lcXLWBTest
 lcTableTest = "XLWStableBeautify_Test"
 lcXLWBTest = loTest.DataOpen(m.lcTableTest)
 
 loTest.DataShow()
-loTest.CoverageSet(.T.)
-loTest.Test(.T., m.lcXLWBTest)
+loTest.CoverageSet(.t.)
+loTest.Test(.t., m.lcXLWBTest)
 
-RETURN loTest.Result()
+return loTest.Result()
 
 * ------------------------------
-DEFINE CLASS sesXLWSTableBeautify_Test as abUnitTest OF abDev.prg
+define class sesXLWSTableBeautify_Test as abUnitTest of abDev.prg
 
-PROCEDURE DataOpen
-	LPARAMETERS tcTable
-	LOCAL lcResult
+procedure DataOpen
+	lparameters tcTable
+	local lcResult
 
-	* Créer une table de test dans le dossier temporaire
-	LOCAL lcAddr
-	lcAddr = Addbs(Sys(2023)) + ForceExt(m.tcTable, EXT_DBF)
-	CREATE TABLE (m.lcAddr) FREE ;
-				(PK I, cX1 C(20) NULL, nX2 N(5))
-	INSERT INTO (m.tcTable) VALUES (1, 'Premier', 100)
-	INSERT INTO (m.tcTable) VALUES (2, 'Second', 200)
-	INSERT INTO (m.tcTable) VALUES (3, 'Troisième', 300)
-	INSERT INTO (m.tcTable) VALUES (4, NULL, 400)
+* Créer une table de test dans le dossier temporaire
+	local lcAddr
+	lcAddr = addbs(sys(2023)) + forceext(m.tcTable, EXT_DBF)
+	create table (m.lcAddr) free ;
+				(PK I, cX1 C(20) null, nX2 n(5))
+	insert into (m.tcTable) values (1, 'Premier', 100)
+	insert into (m.tcTable) values (2, 'Second', 200)
+	insert into (m.tcTable) values (3, 'Troisième', 300)
+	insert into (m.tcTable) values (4, null, 400)
 
-	* Copier dans un classeur Excel
-	lcResult = ForceExt(m.lcAddr, EXT_XLS)
-	COPY TO (m.lcResult) TYPE XL5
+* Copier dans un classeur Excel
+	lcResult = forceext(m.lcAddr, EXT_XLS)
+	copy to (m.lcResult) type xl5
 
-	RETURN m.lcResult
+	return m.lcResult
 
-PROCEDURE DataShow
+procedure DataShow
 
-	IF Set("Asserts") == 'ON'
-		LOCAL lcWindow
-		lcWindow = Wontop()
-		BROWSE TITLE Alias()
-		ACTIVATE WINDOW (m.lcWindow)
-	ENDIF
+	if set("Asserts") == 'ON'
+		local lcWindow
+		lcWindow = wontop()
+		browse title alias()
+		activate window (m.lcWindow)
+	endif
 
-ENDDEFINE && CLASS sesXLWSTableBeautify_Test
+enddefine && CLASS sesXLWSTableBeautify_Test
 
 * ---------------------
-PROCEDURE XLWSMultiLineCellExpand && Augmente la hauteur des cellules contenant plusieurs lignes
-LPARAMETERS ;
+procedure XLWSMultiLineCellExpand && Augmente la hauteur des cellules contenant plusieurs lignes
+lparameters ;
 	tuXLWS,; && Référence à une feuille ou adresse d'un classeur Excel
 	tuCol,; && n° ou nom de la colonne
 	tnColor && [sans changement] Couleur à appliquer aux cellules contenant plusieurs lignes
-LOCAL llResult
+local llResult
 
 * Si on peut accéder à la feuille Excel
-LOCAL loXLWS AS Excel.WorkSheet, llOpened
+local loXLWS as Excel.WorkSheet, llOpened
 loXLWS = oXLWS(@m.tuXLWS, @llOpened)
-llResult = Vartype(m.loXLWS) == 'O'
-ASSERT m.llResult MESSAGE Program() + ": impossible d'accéder à la feuille Excel sépcifiée " + cLitteral(m.tuXLWS)
-IF m.llResult
+llResult = vartype(m.loXLWS) == 'O'
+assert m.llResult message program() + ": impossible d'accéder à la feuille Excel sépcifiée " + cLitteral(m.tuXLWS)
+if m.llResult
 
-	WITH m.loXLWS AS Excel.WorkSheet
+	with m.loXLWS as Excel.WorkSheet
 
-		* Compter les lignes et les colonnes de la feuille
-		LOCAL lnRows, lnCols
-		lnRows = .usedRange.rows.count
-		lnCols = .usedRange.columns.count
-		
-		* Si au moins une ligne
+* Compter les lignes et les colonnes de la feuille
+		local lnRows, lnCols
+		lnRows = .UsedRange.rows.count
+		lnCols = .UsedRange.columns.count
+
+* Si au moins une ligne
 		llResult = m.lnRows > 1
-		IF m.llResult
+		if m.llResult
 
-			* Si la colonne spécifiée existe
-			LOCAL lnCol
+* Si la colonne spécifiée existe
+			local lnCol
 			lnCol = nXLWSCol(m.loXLWS, m.tuCol)
 			llResult = m.lnCol > 0
-			ASSERT m.llResult MESSAGE Program() + " - spécification de colonne invalide" + cLitteral(m.tuCol)
-			IF m.llResult
+			assert m.llResult message program() + " - spécification de colonne invalide" + cLitteral(m.tuCol)
+			if m.llResult
 
-				* Voir s'il faut appliquer une couleur aux cellules concernées
-				LOCAL llColor
-				llColor = Vartype(m.tnColor) == 'N' AND m.tnColor > 0 AND m.tnColor < Rgb(255,255,255)
+* Voir s'il faut appliquer une couleur aux cellules concernées
+				local llColor
+				llColor = vartype(m.tnColor) == 'N' and m.tnColor > 0 and m.tnColor < rgb(255,255,255)
 
-				* Pour chaque ligne de données
-				LOCAL lnRow, luValue, llAlign
-				FOR m.lnRow = 2 TO m.lnRows && la première ligne doit contenir les noms des champs
-					
-					* Si la cellule contient un saut de ligne, traiter
-					WITH .cells(m.lnRow, m.lnCol)
+* Pour chaque ligne de données
+				local lnRow, luValue, llAlign
+				for m.lnRow = 2 to m.lnRows && la première ligne doit contenir les noms des champs
+
+* Si la cellule contient un saut de ligne, traiter
+					with .Cells(m.lnRow, m.lnCol)
 						luValue = .value
-						IF Vartype(m.luValue) == 'C' ;
-						 AND LF $ m.luValue
+						if vartype(m.luValue) == 'C' ;
+						 and LF $ m.luValue
 							.value = m.luValue && Simulates 'F2 + enter'
-							.WrapText = .T. && Retour à la ligne automatique
-							.EntireRow.AutoFit && Hauteur de ligne automatique
-							IF m.llColor
-								.interior.color = m.tnColor
-							ENDIF
-							llAlign = .T.
-						ENDIF
-					ENDWITH
-				ENDFOR
-			ENDIF
+							.WrapText = .t. && Retour à la ligne automatique
+							.EntireRow.autofit && Hauteur de ligne automatique
+							if m.llColor
+								.Interior.color = m.tnColor
+							endif
+							llAlign = .t.
+						endif
+					endwith
+				endfor
+			endif
 
-			* Si au moins une cellule détectée, aligner tout en haut
-			IF m.llAlign
-				.usedRange.VerticalAlignment = xlVAlignTop
-			ENDIF
-			
-			* Sauvegarder le classeur
-			.parent.SaveAs(.parent.FullName, xlWorkbookNormal)
-		ENDIF
-	ENDWITH
-ENDIF
+* Si au moins une cellule détectée, aligner tout en haut
+			if m.llAlign
+				.UsedRange.VerticalAlignment = xlVAlignTop
+			endif
+
+* Sauvegarder le classeur
+			.parent.saveas(.parent.fullname, xlWorkbookNormal)
+		endif
+	endwith
+endif
 
 * Si le classeur a été ouvert, refermer
-IF m.llOpened
+if m.llOpened
 	loXLWS.parent.close()
-ENDIF
+endif
 
-RETURN m.llResult
+return m.llResult
 
 * --------------------------------------------------
-PROCEDURE XLWStableBlankLinesDel && Supprime les lignes vides d'un tableau Excel
-LPARAMETERS ;
+procedure XLWStableBlankLinesDel && Supprime les lignes vides d'un tableau Excel
+lparameters ;
 	tuXLWS,; && Référence à une feuille ou adresse d'un classeur Excel
 	tcXLWSName && [nom du classeur] Nom de la feuille si on veut la renommer
-LOCAL llResult && La feuille a été traitée
+local llResult && La feuille a été traitée
 
 * Si la feuille excel peut être ouverte
-LOCAL llOpened, loXLWS as Excel.WorkSheet
+local llOpened, loXLWS as Excel.WorkSheet
 loXLWS = oXLWS(@m.tuXLWS, @llOpened)
-llResult = Vartype(m.loXLWS)=='O' AND NOT IsNull(m.loXLWS)
-IF m.llResult
+llResult = vartype(m.loXLWS)=='O' and not isnull(m.loXLWS)
+if m.llResult
 
-	WITH m.loXLWS as Excel.WorkSheet
+	with m.loXLWS as Excel.WorkSheet
 
-		* S'il y a des lignes et des colonnes
-		LOCAL lnRows, lnCols
-		lnRows = .usedRange.rows.count
-		lnCols = .usedRange.columns.count
-		llResult = m.lnRows > 1 AND m.lnCols > 0
-		IF m.llResult
+* S'il y a des lignes et des colonnes
+		local lnRows, lnCols
+		lnRows = .UsedRange.rows.count
+		lnCols = .UsedRange.columns.count
+		llResult = m.lnRows > 1 and m.lnCols > 0
+		if m.llResult
 
-			* Pour chaque Ligne
-			LOCAL lnRow, lnCol, llRowEmpty, luValue
-			FOR m.lnRow = m.lnRows TO 2 STEP -1
-			
-				* Si chaque cellule est vide
-				llRowEmpty = .F.
-				FOR m.lnCol = 1 TO m.lnCols
-					luValue = .cells(m.lnRow, m.lnCol).Value
-					llRowEmpty = Empty(m.luValue) OR IsNull(m.luValue)
-					IF NOT m.llRowEmpty
-						EXIT
-					ENDIF
-				ENDFOR
-				
-				* Si la ligne est vide, supprimer
-				IF m.llRowEmpty
-					.cells(m.lnRow,1).EntireRow.Delete()
-				ENDIF
-			ENDFOR
+* Pour chaque Ligne
+			local lnRow, lnCol, llRowEmpty, luValue
+			for m.lnRow = m.lnRows to 2 step -1
 
-			* Sauvegarder le classeur en version courante
-			.parent.SaveAs(Iif(Vartype(m.tuXLWS) == 'C', m.tuXLWS, .FullName), xlWorkbookNormal)
-		ENDIF
+* Si chaque cellule est vide
+				llRowEmpty = .f.
+				for m.lnCol = 1 to m.lnCols
+					luValue = .Cells(m.lnRow, m.lnCol).value
+					llRowEmpty = empty(m.luValue) or isnull(m.luValue)
+					if not m.llRowEmpty
+						exit
+					endif
+				endfor
 
-		* Refermer le classeur s'il était fermé à l'entrée
-		IF m.llOpened
-			.parent.Close
-		ENDIF
-	ENDWITH
-ENDIF
+* Si la ligne est vide, supprimer
+				if m.llRowEmpty
+					.Cells(m.lnRow,1).EntireRow.delete()
+				endif
+			endfor
 
-RETURN m.llResult
+* Sauvegarder le classeur en version courante
+			.parent.saveas(iif(vartype(m.tuXLWS) == 'C', m.tuXLWS, .fullname), xlWorkbookNormal)
+		endif
+
+* Refermer le classeur s'il était fermé à l'entrée
+		if m.llOpened
+			.parent.close
+		endif
+	endwith
+endif
+
+return m.llResult
 
 * ---------------------
-PROCEDURE XLWSColFormatNumber && Applique un format de présentation à une colonne d'une feuille Excel
-LPARAMETERS ;
+procedure XLWSColFormatNumber && Applique un format de présentation à une colonne d'une feuille Excel
+lparameters ;
 	tuXLWS,; && Référence à une feuille ou adresse d'un classeur Excel
 	tuCol,; && n° ou nom de la colonne
 	tcNumberFormat && [sans changement] Code format Excel à appliquer
 
-LOCAL loXLWSCol AS Excel.Range, llOpened, llResult
+local loXLWSCol as Excel.range, llOpened, llResult
 
 * Si on peut accéder à la colonne de la feuille Excel
 loXLWSCol = oXLWSCol(m.tuXLWS, m.tuCol, @llOpened)
-llResult = not IsNull(m.loXLWSCol)
-IF m.llResult
+llResult = not isnull(m.loXLWSCol)
+if m.llResult
 
-	LOCAL loWB as Excel.Workbook, lcFormat
-	loWB = m.loXLWSCol.Parent.Parent
-	
-	* Si un format est spécifié
-	lcFormat = uDefault(m.tcNumberFormat, Space(0))
-	llResult = not Empty(m.lcFormat)
-	ASSERT m.llResult MESSAGE Program() + " - Spécification de format invalide " + cLitteral(m.tcNumberFormat)
-	IF m.llResult
-		
-		* Appliquer le format à la colonne
+	local loWB as Excel.Workbook, lcFormat
+	loWB = m.loXLWSCol.parent.parent
+
+* Si un format est spécifié
+	lcFormat = uDefault(m.tcNumberFormat, space(0))
+	llResult = not empty(m.lcFormat)
+	assert m.llResult message program() + " - Spécification de format invalide " + cLitteral(m.tcNumberFormat)
+	if m.llResult
+
+* Appliquer le format à la colonne
 		loXLWSCol.NumberFormat = m.lcFormat
 
-		* Sauvegarder le classeur en version courante
-		loWB.SaveAs(Iif(Vartype(m.tuXLWS) == 'C', m.tuXLWS, .FullName), xlWorkbookNormal)
-	ENDIF
+* Sauvegarder le classeur en version courante
+		loWB.saveas(iif(vartype(m.tuXLWS) == 'C', m.tuXLWS, .fullname), xlWorkbookNormal)
+	endif
 
-	* Refermer le classeur si on l'a ouvert à l'entrée
-	IF m.llOpened
+* Refermer le classeur si on l'a ouvert à l'entrée
+	if m.llOpened
 		loWB.close
-	ENDIF
-ENDIF
+	endif
+endif
 
-RETURN m.llResult
+return m.llResult
 
 * ---------------------
-PROCEDURE XLWSColFormatHAlign && Applique un format d'alignement horizontal à une colonne d'une feuille Excel
-LPARAMETERS ;
+procedure XLWSColFormatHAlign && Applique un format d'alignement horizontal à une colonne d'une feuille Excel
+lparameters ;
 	tuXLWS,; && Référence à une feuille ou adresse d'un classeur Excel
 	tuCol,; && n° ou nom de la colonne
 	tnHAlign && [xlHAlignGeneral] format d'alignement horizontal à appliquer (selon constantes Excel)
 
-LOCAL loXLWSCol AS Excel.Range, llOpened, llResult
+local loXLWSCol as Excel.range, llOpened, llResult
 
 * Si on peut accéder à la colonne de la feuille Excel
 loXLWSCol = oXLWSCol(m.tuXLWS, m.tuCol, @llOpened)
-llResult = NOT IsNull(m.loXLWSCol)
-IF m.llResult
+llResult = not isnull(m.loXLWSCol)
+if m.llResult
 
-	LOCAL loWB as Excel.Workbook
-	loWB = m.loXLWSCol.Parent.Parent
-	
-	* Si un format est spécifié
-	LOCAL lnHAlign
+	local loWB as Excel.Workbook
+	loWB = m.loXLWSCol.parent.parent
+
+* Si un format est spécifié
+	local lnHAlign
 	lnHAlign = uDefault(m.tnHAlign, xlHAlignGeneral)
-	llResult = InList(m.lnHAlign, xlHAlignCenter,xlHAlignCenterAcrossSelection,xlHAlignDistributed,xlHAlignFill,xlHAlignGeneral,xlHAlignJustify,xlHAlignLeft,xlHAlignRight)
-	ASSERT m.llResult MESSAGE Program() + " - Spécification de format invalide : " + cLitteral(m.tnHAlign)
-	IF m.llResult
-		
-		* Appliquer le format à la colonne
+	llResult = inlist(m.lnHAlign, xlHAlignCenter,xlHAlignCenterAcrossSelection,xlHAlignDistributed,xlHAlignFill,xlHAlignGeneral,xlHAlignJustify,xlHAlignLeft,xlHAlignRight)
+	assert m.llResult message program() + " - Spécification de format invalide : " + cLitteral(m.tnHAlign)
+	if m.llResult
+
+* Appliquer le format à la colonne
 		loXLWSCol.HorizontalAlignment = m.lnHAlign
 
-		* Sauvegarder le classeur en version courante
-		loWB.SaveAs(Iif(Vartype(m.tuXLWS) == 'C', m.tuXLWS, .FullName), xlWorkbookNormal)
-	ENDIF
+* Sauvegarder le classeur en version courante
+		loWB.saveas(iif(vartype(m.tuXLWS) == 'C', m.tuXLWS, .fullname), xlWorkbookNormal)
+	endif
 
-	* Refermer le classeur si on l'a ouvert à l'entrée
-	IF m.llOpened
+* Refermer le classeur si on l'a ouvert à l'entrée
+	if m.llOpened
 		loWB.close
-	ENDIF
-ENDIF
+	endif
+endif
 
-RETURN m.llResult
+return m.llResult
 
 * ---------------------
-PROCEDURE oXLWSCol && Colonne d'une feuille Excel
-LPARAMETERS ;
+procedure oXLWSCol && Colonne d'une feuille Excel
+lparameters ;
 	tuXLWS,; && Référence à une feuille ou adresse d'un classeur Excel
 	tuCol,; && n° ou nom de la colonne
 	tlOpened && @ Le classeur excel a été ouvert
 
-LOCAL llResult, loResult as excel.Range && Référence à l'objet colonne
-loResult = .NULL.
+local llResult, loResult as Excel.range && Référence à l'objet colonne
+loResult = .null.
 
 * Si on peut accéder à la feuille Excel
-LOCAL loXLWS AS Excel.WorkSheet
+local loXLWS as Excel.WorkSheet
 loXLWS = oXLWS(@m.tuXLWS, @tlOpened)
-llResult = Vartype(m.loXLWS) == 'O'
-ASSERT m.llResult MESSAGE Program() + ": impossible d'accéder à la feuille Excel " + cLitteral(m.tuXLWS)
-IF m.llResult
-	WITH m.loXLWS AS Excel.WorkSheet
+llResult = vartype(m.loXLWS) == 'O'
+assert m.llResult message program() + ": impossible d'accéder à la feuille Excel " + cLitteral(m.tuXLWS)
+if m.llResult
+	with m.loXLWS as Excel.WorkSheet
 
-		* Si au moins une ligne dans la feuille
-		LOCAL lnRows
-		lnRows = .usedRange.rows.count
+* Si au moins une ligne dans la feuille
+		local lnRows
+		lnRows = .UsedRange.rows.count
 		llResult = m.lnRows > 1
-		ASSERT m.llResult MESSAGE Program() + " - Moins d'une ligne dans la feuille " + cLitteral(m.tuXLWS)
-		IF m.llResult
+		assert m.llResult message program() + " - Moins d'une ligne dans la feuille " + cLitteral(m.tuXLWS)
+		if m.llResult
 
-			* Si la colonne spécifiée existe
-			LOCAL lnCol
+* Si la colonne spécifiée existe
+			local lnCol
 			lnCol = nXLWSCol(m.loXLWS, m.tuCol)
 			llResult = m.lnCol > 0
-			ASSERT m.llResult MESSAGE Program() + " - spécification de colonne invalide : " + cLitteral(m.tuCol)
-			IF m.llResult
-			
-				loResult = m.loXLWS.Cells(1, m.lnCol).EntireColumn
-			ENDIF
-		ENDIF
-	ENDWITH
-ENDIF
+			assert m.llResult message program() + " - spécification de colonne invalide : " + cLitteral(m.tuCol)
+			if m.llResult
 
-RETURN m.loResult
+				loResult = m.loXLWS.Cells(1, m.lnCol).EntireColumn
+			endif
+		endif
+	endwith
+endif
+
+return m.loResult
 
 * ---------------------
-PROCEDURE XLWSRowsInteriorColor && Applique une couleur de fond à des rangées d'une feuille Excel selon un critère de filtre sur une colonne
-LPARAMETERS ;
+procedure XLWSRowsInteriorColor && Applique une couleur de fond à des rangées d'une feuille Excel selon un critère de filtre sur une colonne
+lparameters ;
 	tuXLWS,; && Référence à une feuille ou adresse d'un classeur Excel
 	tuCol,; && n° ou nom de la colonne
 	tcCrit,; && Critère à appliquer : UDF de type logique à UN SEUL PARAMÈTRE ou opérateur relationnel (=<>$!)
 	tlOpLeft,; && [.F.] l'opération relationnelle est appliquée à gauche de la valeur
-	tnColor && [-1] Couleur rgb(),  -1 pour xlColorIndexNone, -2 pour xlColorIndexAutomatic 
-LOCAL llResult
+	tnColor && [-1] Couleur rgb(),  -1 pour xlColorIndexNone, -2 pour xlColorIndexAutomatic
+local llResult
 
 * Si on peut sélectionner les rangées de la feuille Excel
-LOCAL loXLWSRows AS Excel.Range, llOpened
+local loXLWSRows as Excel.range, llOpened
 loXLWSRows = oXLWSRowsFilter(m.tuXLWS, m.tuCol, m.tcCrit, m.tlOpLeft, @llOpened)
-llResult = NOT IsNull(m.loXLWSRows)
-IF m.llResult
-		LOCAL loWB as Excel.Workbook
-		loWB = m.loXLWSRows.Parent.Parent
-		
-		* Donner sa valeur par défaut à la couleur spécifiée
-		LOCAL lnColor
+llResult = not isnull(m.loXLWSRows)
+if m.llResult
+		local loWB as Excel.Workbook
+		loWB = m.loXLWSRows.parent.parent
+
+* Donner sa valeur par défaut à la couleur spécifiée
+		local lnColor
 		lnColor = uDefault(m.tnColor, -1)
-		lnColor = Iif(m.lnColor < -2 OR m.lnColor > Rgb(255,255,255), -1, m.lnColor)
-			
-		* Appliquer la couleur demandée
-		WITH m.loXLWSRows.Interior
-			IF m.lnColor < 0
-				.ColorIndex = Iif(m.lnColor = -1, xlColorIndexNone, xlColorIndexAutomatic)
-			ELSE
-				.Color = m.lnColor
-			ENDIF
-		ENDWITH
+		lnColor = iif(m.lnColor < -2 or m.lnColor > rgb(255,255,255), -1, m.lnColor)
 
-		* Sauvegarder le classeur en version courante
-		loWB.SaveAs(Iif(Vartype(m.tuXLWS) == 'C', m.tuXLWS, .FullName), xlWorkbookNormal)
+* Appliquer la couleur demandée
+		with m.loXLWSRows.Interior
+			if m.lnColor < 0
+				.ColorIndex = iif(m.lnColor = -1, xlColorIndexNone, xlColorIndexAutomatic)
+			else
+				.color = m.lnColor
+			endif
+		endwith
 
-		* Refermer le classeur si on l'a ouvert à l'entrée
-		IF m.llOpened
+* Sauvegarder le classeur en version courante
+		loWB.saveas(iif(vartype(m.tuXLWS) == 'C', m.tuXLWS, .fullname), xlWorkbookNormal)
+
+* Refermer le classeur si on l'a ouvert à l'entrée
+		if m.llOpened
 			loWB.close()
-		ENDIF
-ENDIF
+		endif
+endif
 
-RETURN m.llResult
+return m.llResult
 
 * ---------------------
-FUNCTION oXLWSRowsFilter && Rangées d'une feuille Excel selon un critère de filtre sur une colonne
-LPARAMETERS ;
+function oXLWSRowsFilter && Rangées d'une feuille Excel selon un critère de filtre sur une colonne
+lparameters ;
 	tuXLWS,; && Référence à une feuille ou adresse d'un classeur Excel
 	tuCol,; && n° ou nom de la colonne où se trouve le critère
 	tcCrit,; && [aucun, toutes les lignes sont renvoyées] Critère de filtre des lignes : UDF de type logique à UN SEUL PARAMÈTRE ou opération relationnelle (=<>$!)
 	tlOpLeft,; && [.F.] l'opération relationnelle est appliquée à gauche de la valeur
 	tlOpened && @ Le classeur excel a été ouvert
-LOCAL loResult as excel.Range && Référence à l'objet Range contenant les lignes
-loResult = .NULL.
+local loResult as Excel.range && Référence à l'objet Range contenant les lignes
+loResult = .null.
 
-LOCAL llResult
+local llResult
 
 * Si on peut accéder à la feuille Excel
-LOCAL loXLWS AS Excel.WorkSheet
+local loXLWS as Excel.WorkSheet
 loXLWS = oXLWS(@m.tuXLWS, @tlOpened)
-llResult = Vartype(m.loXLWS) == 'O'
-ASSERT m.llResult MESSAGE Program() + ": impossible d'accéder à la feuille Excel " + cLitteral(m.tuXLWS)
-IF m.llResult
-	WITH m.loXLWS AS Excel.WorkSheet
+llResult = vartype(m.loXLWS) == 'O'
+assert m.llResult message program() + ": impossible d'accéder à la feuille Excel " + cLitteral(m.tuXLWS)
+if m.llResult
+	with m.loXLWS as Excel.WorkSheet
 
-		* Si au moins une ligne dans la feuille
-		LOCAL lnRows
-		lnRows = .usedRange.rows.count
+* Si au moins une ligne dans la feuille
+		local lnRows
+		lnRows = .UsedRange.rows.count
 		llResult = m.lnRows > 1
-		ASSERT m.llResult MESSAGE Program() + " - moins de deux lignes dans la feuille " + cLitteral(m.tuXLWS)
-		IF m.llResult
+		assert m.llResult message program() + " - moins de deux lignes dans la feuille " + cLitteral(m.tuXLWS)
+		if m.llResult
 
-			* Si la colonne spécifiée existe
-			LOCAL lnCol
+* Si la colonne spécifiée existe
+			local lnCol
 			lnCol = nXLWSCol(m.loXLWS, m.tuCol)
 			llResult = m.lnCol > 0
-			ASSERT m.llResult MESSAGE Program() + " - spécification de colonne invalide : " + cLitteral(m.tuCol)
-			IF m.llResult
-			
-				* Si le critère est précisé
-				LOCAL lcCrit
-				lcCrit = Alltrim(uDefault(m.tcCrit, Space(0)))
-				llResult = NOT Empty(m.lcCrit)
-				IF m.llResult
-				
-					LOCAL llOpLeft
-					llOpLeft = uDefault(m.tlOpLeft, .F.)
-					
-					* Si le critère est valide
-					LOCAL luVal, lcType, lcTest, llOp, loErr
-					luVal = .Cells(2, m.lnCol).Value
-					lcType = Vartype(m.luVal)
+			assert m.llResult message program() + " - spécification de colonne invalide : " + cLitteral(m.tuCol)
+			if m.llResult
+
+* Si le critère est précisé
+				local lcCrit
+				lcCrit = alltrim(uDefault(m.tcCrit, space(0)))
+				llResult = not empty(m.lcCrit)
+				if m.llResult
+
+					local llOpLeft
+					llOpLeft = uDefault(m.tlOpLeft, .f.)
+
+* Si le critère est valide
+					local luVal, lcType, lcTest, llOp, loErr
+					luVal = .Cells(2, m.lnCol).value
+					lcType = vartype(m.luVal)
 					lcTest = cLitteral(m.luVal)
-					#DEFINE VFPLOGOP '=<>$!'
-					llOp = Iif(m.llOpLeft, Right(m.lcCrit, 1) $ VFPLOGOP, Left(m.lcCrit, 1) $ VFPLOGOP)
-					TRY
-						LOCAL lcEval
+					#define VFPLOGOP '=<>$!'
+					llOp = iif(m.llOpLeft, right(m.lcCrit, 1) $ VFPLOGOP, left(m.lcCrit, 1) $ VFPLOGOP)
+					try
+						local lcEval
 						lcEval = cCritEval(m.lcCrit, m.lcTest, m.llOp, m.llOpLeft)
-						luResult = Evaluate(m.lcEval)
-						llResult = Vartype(m.luResult) == 'L'
-					CATCH TO m.loErr
-					ENDTRY
-					ASSERT m.llResult MESSAGE Program() + " - critère de filtrage incorrect : " + cLitteral(m.tcCrit)
-					IF m.llResult
-					
-						* Pour chaque ligne à partir de la seconde (la première contient les noms des champs)
-						LOCAL lnRow, luVal, loXl as excel.Application
-						loXl = .Parent.Parent
-						FOR m.lnRow = 2 TO m.lnRows
-							WITH .Cells(m.lnRow, m.lnCol) as excel.Range
-								luVal = .Value
+						luResult = evaluate(m.lcEval)
+						llResult = vartype(m.luResult) == 'L'
+					catch to m.loErr
+					endtry
+					assert m.llResult message program() + " - critère de filtrage incorrect : " + cLitteral(m.tcCrit)
+					if m.llResult
 
-								* Si la valeur est du type attendu
-								IF Vartype(m.luVal) == m.lcType
-								
-									* Si le critère est respecté
+* Pour chaque ligne à partir de la seconde (la première contient les noms des champs)
+						local lnRow, luVal, loXL as Excel.application
+						loXL = .parent.parent
+						for m.lnRow = 2 to m.lnRows
+							with .Cells(m.lnRow, m.lnCol) as Excel.range
+								luVal = .value
+
+* Si la valeur est du type attendu
+								if vartype(m.luVal) == m.lcType
+
+* Si le critère est respecté
 									lcTest = cLitteral(m.luVal)
-									IF Evaluate(cCritEval(m.lcCrit, m.lcTest, m.llOp, m.llOpLeft))
-									
-										* Ajouter la ligne au Range
-										loResult = Iif(IsNull(m.loResult), .EntireRow, m.loXl.Union(m.loResult, .EntireRow))
-									ENDIF
-								ENDIF
-							ENDWITH
-						ENDFOR
-					ENDIF
-				ELSE
-					loResult = .Cells
-				ENDIF
-			ENDIF
-		ENDIF
-	ENDWITH
-ENDIF
+									if evaluate(cCritEval(m.lcCrit, m.lcTest, m.llOp, m.llOpLeft))
 
-RETURN m.loResult
+* Ajouter la ligne au Range
+										loResult = iif(isnull(m.loResult), .EntireRow, m.loXL.union(m.loResult, .EntireRow))
+									endif
+								endif
+							endwith
+						endfor
+					endif
+				else
+					loResult = .Cells
+				endif
+			endif
+		endif
+	endwith
+endif
+
+return m.loResult
 
 * ---------------------
-FUNCTION cCritEval && Critère de filtre à évaluer
-LPARAMETERS ;
+function cCritEval && Critère de filtre à évaluer
+lparameters ;
 	tcCrit,; && Critère de filtre
 	tcVal,; && Valeur sous forme de constante caractère
 	tlOp,; && Le critère est une opération relationnelle (UDF si .F.)
 	tlOpLeft && l'opération relationnelle est appliquée à gauche de la valeur
 
-RETURN ICase(;
+return icase(;
 	!m.tlOp,;
 		m.tcCrit + '(' + m.tcVal + ')',;
 	m.tlOpLeft,;
@@ -664,472 +664,472 @@ RETURN ICase(;
 		m.tcVal + m.tcCrit;
 	)
 * ---------------------
-FUNCTION nXLWSCol && N° d'une colonne d'après son nom inscrit dans la première ligne
-LPARAMETERS ;
+function nXLWSCol && N° d'une colonne d'après son nom inscrit dans la première ligne
+lparameters ;
 	toXLWS as Excel.WorkSheet,; && Référence présumée à une feuille Excel
 	tuCol && Nom ou n° de de la colonne
-LOCAL lnResult
+local lnResult
 lnResult = 0
 
-LOCAL lcType
-lcType = Vartype(m.tuCol)
-IF loXLWS(m.toXLWS) ;
- AND m.lcType $ 'CN' ;
- AND NOT Empty(m.tuCol)
-		
-	* Compter les lignes et les colonnes de la feuille
-	LOCAL lnRows, lnCols
-	lnRows = m.toXLWS.usedRange.rows.count
-	lnCols = m.toXLWS.usedRange.columns.count
-	
-	* Si au moins une ligne et une colonne
-	IF m.lnRows > 0 AND m.lnCols > 0
-	
-		* Si un n° de colonne a été spécifié et qu'il est dans la plage de colonnes, OK
-		IF m.lcType == 'N'
-			IF m.tuCol <= m.lnCols
+local lcType
+lcType = vartype(m.tuCol)
+if loXLWS(m.toXLWS) ;
+ and m.lcType $ 'CN' ;
+ and not empty(m.tuCol)
+
+* Compter les lignes et les colonnes de la feuille
+	local lnRows, lnCols
+	lnRows = m.toXLWS.UsedRange.rows.count
+	lnCols = m.toXLWS.UsedRange.columns.count
+
+* Si au moins une ligne et une colonne
+	if m.lnRows > 0 and m.lnCols > 0
+
+* Si un n° de colonne a été spécifié et qu'il est dans la plage de colonnes, OK
+		if m.lcType == 'N'
+			if m.tuCol <= m.lnCols
 				lnResult = m.tuCol
-			ENDIF
+			endif
 
-		* Sinon (nom de colonne spécifié)
-		ELSE
+* Sinon (nom de colonne spécifié)
+		else
 
-			* Pour chaque cellule de la première ligne
-			LOCAL lcCol, lnCol, luValue
-			lcCol = Upper(Alltrim(m.tuCol))
-			FOR m.lnCol = 1 TO m.lnCols
-				
-				* Si la valeur contient le nom de colonne cherché, trouvé !
-				luValue = m.toXLWS.cells(1, m.lnCol).value
-				IF Vartype(m.luValue) == 'C' ;
-				 AND Upper(Alltrim(m.luValue)) == m.lcCol
+* Pour chaque cellule de la première ligne
+			local lcCol, lnCol, luValue
+			lcCol = upper(alltrim(m.tuCol))
+			for m.lnCol = 1 to m.lnCols
+
+* Si la valeur contient le nom de colonne cherché, trouvé !
+				luValue = m.toXLWS.Cells(1, m.lnCol).value
+				if vartype(m.luValue) == 'C' ;
+				 and upper(alltrim(m.luValue)) == m.lcCol
 				 	lnResult = m.lnCol
-					EXIT
-				ENDIF
-			ENDFOR
-		ENDIF
-	ENDIF
-ENDIF
+					exit
+				endif
+			endfor
+		endif
+	endif
+endif
 
-RETURN m.lnResult
+return m.lnResult
 
 * -------------------------------------------------------------
-FUNCTION oXL && Référence à un objet Excel.Application
+function oXL && Référence à un objet Excel.Application
 
-LOCAL lcWindow, loResult AS Excel.Application
-loResult = .NULL.
+local lcWindow, loResult as Excel.application
+loResult = .null.
 
 * Si Excel est déjà instancié dans la variable standard (publique ou privée)
-IF Vartype(m.poXL) == 'O' ; && standard Abaque pour éviter d'instancier excel plusieurs fois
-AND Type('m.poXL.ActiveWorkbook') == 'O' && vrai même si aucun classeur n'est ouvert
+if vartype(m.poXL) == 'O' ; && standard Abaque pour éviter d'instancier excel plusieurs fois
+and type('m.poXL.ActiveWorkbook') == 'O' && vrai même si aucun classeur n'est ouvert
 
 	loResult = m.poXL
 
 * Sinon (aucune référence disponible)
-ELSE
+else
 
-	lcWindow = WOUTPUT()
-	TRY
-		loResult = GetObject(Space(0), 'Excel.Application') && le premier paramètre est requis
-		loResult = Iif(Vartype(m.loResult) == 'O', m.loResult, CreateObject('Excel.Application'))
-	CATCH
-	ENDTRY
-	IF Vartype(m.loResult) == 'O'
-		loResult.DisplayAlerts = .F.
+	lcWindow = woutput()
+	try
+		loResult = getobject(space(0), 'Excel.Application') && le premier paramètre est requis
+		loResult = iif(vartype(m.loResult) == 'O', m.loResult, createobject('Excel.Application'))
+	catch
+	endtry
+	if vartype(m.loResult) == 'O'
+		loResult.DisplayAlerts = .f.
 
-		* Rétablir la fenêtre active avant l'instanciation
-		IF Empty(m.lcWindow) OR NOT Wvisible(m.lcWindow)
-			ACTIVATE SCREEN
-		ELSE
-			ACTIVATE WINDOW (m.lcWindow)
-		ENDIF
-	ENDIF
-ENDIF
+* Rétablir la fenêtre active avant l'instanciation
+		if empty(m.lcWindow) or not wvisible(m.lcWindow)
+			activate screen
+		else
+			activate window (m.lcWindow)
+		endif
+	endif
+endif
 
-RETURN m.loResult
+return m.loResult
 
 * -------------------------------------------------------------
-FUNCTION oXLWB && Référence à un objet Excel.WorkBook
-LPARAMETERS ;
+function oXLWB && Référence à un objet Excel.WorkBook
+lparameters ;
 	tuXLWB,; && Référence ou adresse d'un classeur Excel
 	tlOpened,; && @ le classeur a été ouvert
 	tlCreated && @ le classeur a été créé
-STORE .F. TO tlOpened, tlCreated
+store .f. to tlOpened, tlCreated
 
-LOCAL loResult AS Excel.Workbook
-loResult = .NULL.
+local loResult as Excel.Workbook
+loResult = .null.
 
-DO CASE
+do case
 
 * Si une référence à un classeur Excel a été passée
-CASE loXLWB(m.tuXLWB)
+case loXLWB(m.tuXLWB)
 
-	* Renvoyer tout simplement
+* Renvoyer tout simplement
 	loResult = m.tuXLWB
 
 * Si l'adresse d'un classeur Excel a été passée
-CASE Vartype(m.tuXLWB)=='C' ;
- AND Upper(JustExt(m.tuXLWB)) == EXT_XLS
+case vartype(m.tuXLWB)=='C' ;
+ and upper(justext(m.tuXLWB)) == EXT_XLS
 
-	* Démarrer Excel
-	LOCAL loXL as Excel.Application
+* Démarrer Excel
+	local loXL as Excel.application
 	loXL = oXL()
-	
-	* Si le classeur existe
-	IF lFile(m.tuXLWB)
 
-		* Ouvrir le classeur
-		loResult = m.loXL.Workbooks.Open(FullPath(m.tuXLWB), 0) && 0: Ne met à jour aucune référence
-		tlOpened = .T.
+* Si le classeur existe
+	if lFile(m.tuXLWB)
 
-	* Sinon (le classeur n'existe pas)
-	ELSE
+* Ouvrir le classeur
+		loResult = m.loXL.Workbooks.open(fullpath(m.tuXLWB), 0) && 0: Ne met à jour aucune référence
+		tlOpened = .t.
 
-		* Si l'adresse du classeur est valide
-		LOCAL llResult
-		llResult = lDir(JustPath(m.tuXLWB))
-		ASSERT m.llResult MESSAGE Program() + " - Invalid Excel Workbook specification : " + cLitteral(m.tuXLWB)
-		IF m.llResult
-			
-			loResult = m.loXL.Workbooks.Add()
-			tlCreated = .T.
-		ENDIF
-	ENDIF
-ENDCASE
+* Sinon (le classeur n'existe pas)
+	else
 
-RETURN m.loResult
+* Si l'adresse du classeur est valide
+		local llResult
+		llResult = lDir(justpath(m.tuXLWB))
+		assert m.llResult message program() + " - Invalid Excel Workbook specification : " + cLitteral(m.tuXLWB)
+		if m.llResult
+
+			loResult = m.loXL.Workbooks.add()
+			tlCreated = .t.
+		endif
+	endif
+endcase
+
+return m.loResult
 
 * ---------------------
-FUNCTION oXLWS && Référence à un objet Excel.Worksheet
-LPARAMETERS ;
+function oXLWS && Référence à un objet Excel.Worksheet
+lparameters ;
 	tuXLWS,; && Référence à une Feuille Excel OU @ adresse d'un classeur [(|!,) Nom Feuille]
 	tlOpened && @ le classeur a été ouvert
-tlOpened = .F.
+tlOpened = .f.
 
-LOCAL loResult as Excel.Worksheet;
+local loResult as Excel.WorkSheet;
 , loXLWB as Excel.Workbook;
 , liSep;
 , lcXLWB;
 , lcXLWS;
 
-loResult = .NULL.
+loResult = .null.
 
 * Si une référence à une feuille Excel a été passée
 do case
 case loXLWS(m.tuXLWS)
 
-	* Renvoyer tout simplement
+* Renvoyer tout simplement
 	loResult = m.tuXLWS
 
-case Vartype(m.tuXLWS) == 'C'
+case vartype(m.tuXLWS) == 'C'
 
-	* Lire l'adresse du classeur [et le nom de la feuille]
-	liSep = Evl(Evl(At_c('|', m.tuXLWS), At_c(',', m.tuXLWS)), At_c('!', m.tuXLWS))
-	
+* Lire l'adresse du classeur [et le nom de la feuille]
+	liSep = evl(evl(at_c('|', m.tuXLWS), at_c(',', m.tuXLWS)), at_c('!', m.tuXLWS))
+
 	if m.liSep > 0
-		lcXLWB = Leftc(m.tuXLWS, m.liSep - 1)
-		lcXLWS = Substrc(m.tuXLWS, m.liSep + 1)
+		lcXLWB = leftc(m.tuXLWS, m.liSep - 1)
+		lcXLWS = substrc(m.tuXLWS, m.liSep + 1)
 	else
-		store cFileCased(m.tuXLWS, .T.) to lcXLWB, m.tuXLWS
+		store cFileCased(m.tuXLWS, .t.) to lcXLWB, m.tuXLWS
 		lcXLWS = ''
 	endif
 
-	* Si le classeur peut être ouvert
+* Si le classeur peut être ouvert
 	loXLWB = oXLWB(m.lcXLWB)
-	IF Vartype(m.loXLWB) == 'O'
-		tlOpened = .T.
+	if vartype(m.loXLWB) == 'O'
+		tlOpened = .t.
 
-		* Renvoyer une référence à la feuille spécifiée, à défaut la première feuille du classeur
-		loResult = Iif(lXLWS(m.lcXLWS, m.loXLWB);
+* Renvoyer une référence à la feuille spécifiée, à défaut la première feuille du classeur
+		loResult = iif(lXLWS(m.lcXLWS, m.loXLWB);
 			, m.loXLWB.Sheets(m.lcXLWS);
 			, m.loXLWB.ActiveSheet;
 			)
-	ENDIF
+	endif
 endcase
 
-RETURN m.loResult
+return m.loResult
 
 * ---------------------
-FUNCTION acXLWSs && Noms des feuilles de calcul contenues dans un classeur Excel
-LPARAMETERS ;
+function acXLWSs && Noms des feuilles de calcul contenues dans un classeur Excel
+lparameters ;
 	taXLWS,; && @ Noms des feuilles de calcul contenues dans le classeur Excel
 	tcXLWBAddr && Adresse du classeur Excel à explorer
 
-EXTERNAL ARRAY taXLWS
+external array taXLWS
 
-LOCAL llXLWBAddr, lnResult && Nombre de feuilles de calcul contenues dans le classeur Excel
+local llXLWBAddr, lnResult && Nombre de feuilles de calcul contenues dans le classeur Excel
 lnResult = 0
-	
+
 * Initialiser le tableau des feuilles
 aClear(@m.taXLWS)
 
 * Si le classeur XL indiqué peut être localisé
-llXLWBAddr = File(m.tcXLWBAddr)
-ASSERT m.llXLWBAddr MESSAGE "Impossible de trouver un classeur XL à l'adresse" + Alltrim(m.tcXLWBAdd)
-IF m.llXLWBAddr
-	
-	* Ouvrir le classeur XL en automation
-	LOCAL loXL as Excel.Application,;
+llXLWBAddr = file(m.tcXLWBAddr)
+assert m.llXLWBAddr message "Impossible de trouver un classeur XL à l'adresse" + alltrim(m.tcXLWBAdd)
+if m.llXLWBAddr
+
+* Ouvrir le classeur XL en automation
+	local loXL as Excel.application,;
 		loXLWB as Excel.Workbook
 	loXL = oXL()
-	loXLWB = loXL.Workbooks.Open(FullPath(m.tcXLWBAddr), 0, .T.)
+	loXLWB = loXL.Workbooks.open(fullpath(m.tcXLWBAddr), 0, .t.)
 
-	* Lire les noms des feuilles de calcul contenues dans le classeur
-	LOCAL loXLWS as EXCEL.Worksheet
-	FOR EACH m.loXLWS IN m.loXLWB.Worksheets
+* Lire les noms des feuilles de calcul contenues dans le classeur
+	local loXLWS as Excel.WorkSheet
+	for each m.loXLWS in m.loXLWB.Worksheets
 		lnResult = m.lnResult + 1
-		DIMENSION m.taXLWS[m.lnResult]
-		taXLWS[m.lnResult] = m.loXLWS.Name
-	ENDFOR
+		dimension m.taXLWS[m.lnResult]
+		taXLWS[m.lnResult] = m.loXLWS.name
+	endfor
 
-	* Fermer le classeur et XL
-	loXLWB.Close()
-	loXL = .NULL.
-ENDIF
+* Fermer le classeur et XL
+	loXLWB.close()
+	loXL = .null.
+endif
 
-RETURN m.lnResult
-
-* ---------------------
-FUNCTION loXL && C'est une référence à un objet application Excel
-LPARAMETERS toXL && Référence présumée à un objet application Excel
-
-RETURN ;
-	Vartype(m.toXL) == 'O';
- AND Type('m.toXL.Name') == 'C';
- AND 'excel' $ Lower(m.toXL.Name) ;
- AND Type('m.toXL.WorkBooks') == 'O'
+return m.lnResult
 
 * ---------------------
-FUNCTION loXLWB && C'est une référence à un objet classeur Excel
+function loXL && C'est une référence à un objet application Excel
+lparameters toXL && Référence présumée à un objet application Excel
+
+return ;
+	vartype(m.toXL) == 'O';
+ and type('m.toXL.Name') == 'C';
+ and 'excel' $ lower(m.toXL.name) ;
+ and type('m.toXL.WorkBooks') == 'O'
+
+* ---------------------
+function loXLWB && C'est une référence à un objet classeur Excel
 lparameters toXLWB && Référence présumée à une classeur Excel
 
-RETURN ;
-	Vartype(m.toXLWB) == 'O';
- AND Type('m.toXLWB.Application') == 'O';
- AND loXL(m.toXLWB.Application) ;
- AND Type('m.toXLWB.WorkSheets') == 'O'
+return ;
+	vartype(m.toXLWB) == 'O';
+ and type('m.toXLWB.Application') == 'O';
+ and loXL(m.toXLWB.application) ;
+ and type('m.toXLWB.WorkSheets') == 'O'
 
 * ---------------------
-FUNCTION loXLWS && C'est une référence à un objet feuille de calcul Excel
-LPARAMETERS toXLWS && Référence présumée à une feuille Excel
+function loXLWS && C'est une référence à un objet feuille de calcul Excel
+lparameters toXLWS && Référence présumée à une feuille Excel
 
-RETURN ;
-	Vartype(m.toXLWS) == 'O';
- AND Type('m.toXLWS.parent') == 'O';
- AND loXLWB(m.toXLWS.parent)
+return ;
+	vartype(m.toXLWS) == 'O';
+ and type('m.toXLWS.parent') == 'O';
+ and loXLWB(m.toXLWS.parent)
 
 * ---------------------
-PROCEDURE loXLWS_Test && Teste loXLWS(), nouvelle version
+procedure loXLWS_Test && Teste loXLWS(), nouvelle version
 
-LOCAL loTest as abUnitTest OF abDev.prg
-loTest = NewObject('abUnitTest', 'abDev.prg')
+local loTest as abUnitTest of abDev.prg
+loTest = newobject('abUnitTest', 'abDev.prg')
 
-LOCAL loXL as Excel.Application, loXLWB as excel.Workbook
+local loXL as Excel.application, loXLWB as Excel.Workbook
 loXL = oXL()
-loXLWB = m.loXL.Workbooks.Add()
+loXLWB = m.loXL.Workbooks.add()
 
-loTest.Test(.T., m.loXLWB.ActiveSheet)
+loTest.Test(.t., m.loXLWB.ActiveSheet)
 
-loXLWB.Close()
-loXL.Quit()
+loXLWB.close()
+loXL.quit()
 
-RETURN loTest.Result()
+return loTest.Result()
 
 * ---------------------
-FUNCTION lXLWS && La feuille XL existe dans le classeur spécifié
-LPARAMETERS ;
+function lXLWS && La feuille XL existe dans le classeur spécifié
+lparameters ;
 	tcSheet,; && Nom de la feuille cherchée
 	tuXLWB && Référence ou adresse d'un classeur Excel
-LOCAL llResult
-	
+local llResult
+
 * Si une feuille valide a été indiquée
-llResult = Vartype(m.tcSheet) == 'C' AND NOT Empty(m.tcSheet)
-IF m.llResult
+llResult = vartype(m.tcSheet) == 'C' and not empty(m.tcSheet)
+if m.llResult
 
-	* Si le classeur spécifié peut être ouvert
-	LOCAL loXLWB as Excel.WorkBook
+* Si le classeur spécifié peut être ouvert
+	local loXLWB as Excel.Workbook
 	loXLWB = oXLWB(m.tuXLWB)
-	llResult = NOT IsNull(m.loXLWB)
-	IF m.llResult
-	
-		* Pour chaque feuille contenue
-		LOCAL lcSheet, loSheet as Excel.Worksheet
-		lcSheet = Lower(Alltrim(m.tcSheet))
-		llResult = .F.
-		FOR EACH m.loSheet IN m.loXLWB.Worksheets
-		
-			* Si la feuille porte le nom spécifié, terminé
-			llResult = Lower(m.loSheet.Name) == m.lcSheet
-			IF m.llResult
-				EXIT
-			ENDIF
-		ENDFOR
-	ENDIF
-ENDIF
+	llResult = not isnull(m.loXLWB)
+	if m.llResult
 
-RETURN m.llResult
+* Pour chaque feuille contenue
+		local lcSheet, loSheet as Excel.WorkSheet
+		lcSheet = lower(alltrim(m.tcSheet))
+		llResult = .f.
+		for each m.loSheet in m.loXLWB.Worksheets
+
+* Si la feuille porte le nom spécifié, terminé
+			llResult = lower(m.loSheet.name) == m.lcSheet
+			if m.llResult
+				exit
+			endif
+		endfor
+	endif
+endif
+
+return m.llResult
 
 * -------------------------------------------------------------
-PROCEDURE XLWBfromWSs && Regroupe des feuilles Excel dans un classeur
-LPARAMETERS ;
+procedure XLWBfromWSs && Regroupe des feuilles Excel dans un classeur
+lparameters ;
 	taWBWSSrce,; && @ Adresses des classeurs | noms des feuilles [Feuille # 1] à regrouper
 	tcWBDestAddr,; && Adresse du classeur Excel destination
 	tlWBSrceDel,; && [.F.] Supprimer les classeurs source après copie des feuilles dans le classeur destination
 	tlBeautify && [.F.] Embellir les feuilles
-EXTERNAL ARRAY taWBWSSrce
+external array taWBWSSrce
 tlWBSrceDel = lTrue(m.tlWBSrceDel)
 tlBeautify = lTrue(m.tlBeautify)
 
-LOCAL llResult && Toutes les feuilles ont bien été copiées dans le classeur destination
+local llResult && Toutes les feuilles ont bien été copiées dans le classeur destination
 
 * Si des classeurs source sont indiqués
-IF Type('taWBWSSrce', 1) == 'A'
+if type('taWBWSSrce', 1) == 'A'
 
-	LOCAL lnWBSrces
-	lnWBSrces = Alen(m.taWBWSSrce, 1)
-	IF m.lnWBSrces > 0 ;
-	 AND lFileAddress(m.tcWBDestAddr)
+	local lnWBSrces
+	lnWBSrces = alen(m.taWBWSSrce, 1)
+	if m.lnWBSrces > 0 ;
+	 and lFileAddress(m.tcWBDestAddr)
 
-		* Vérifier si des feuilles ont aussi été indiquées
-		LOCAL llWSSrce
-		llWSSrce = Alen(m.taWBWSSrce, 2) > 1
+* Vérifier si des feuilles ont aussi été indiquées
+		local llWSSrce
+		llWSSrce = alen(m.taWBWSSrce, 2) > 1
 
-		* Créer un tableau de résultats
-		LOCAL ARRAY laResult[m.lnWBSrces]
+* Créer un tableau de résultats
+		local array laResult[m.lnWBSrces]
 
-		* Lancer Excel en automation
-		LOCAL loXL as Excel.Application
+* Lancer Excel en automation
+		local loXL as Excel.application
 		loXL = oXL()
 
-		* Pour chaque classeur source,
-		LOCAL ;
+* Pour chaque classeur source,
+		local ;
 			lnWBSrce, lcWBSrce, loWBSrce as Excel.Workbook,;
-			lcWSSrce, loWSSrce as Excel.Worksheet,;
+			lcWSSrce, loWSSrce as Excel.WorkSheet,;
 			llWBDest
-		FOR m.lnWBSrce = 1 TO m.lnWBSrces
+		for m.lnWBSrce = 1 to m.lnWBSrces
 
-			* Si le classeur source existe
-			lcWBSrce = Iif(m.llWSSrce, m.taWBWSSrce[m.lnWBSrce, 1], m.taWBWSSrce[m.lnWBSrce])
-			IF Vartype(m.lcWBSrce) == 'C' AND File(m.lcWBSrce)
+* Si le classeur source existe
+			lcWBSrce = iif(m.llWSSrce, m.taWBWSSrce[m.lnWBSrce, 1], m.taWBWSSrce[m.lnWBSrce])
+			if vartype(m.lcWBSrce) == 'C' and file(m.lcWBSrce)
 
-				* Ouvrir le classeur source
-				loWBSrce = m.loXL.WorkBooks.Open(FullPath(m.lcWBSrce))
-				
-				* Si une feuille source a été indiquée
-				lcWSSrce = Iif(m.llWSSrce, m.taWBWSSrce[m.lnWBSrce, 2], Space(0))
-				laResult[m.lnWBSrce] = .T.
-				IF Vartype(m.lcWSSrce) == 'C' ;
-				 AND NOT Empty(m.lcWSSrce)
-					
-					* Si la feuille existe dans le classeur
-					IF lXLWS(m.lcWSSrce, m.loWBSrce)
+* Ouvrir le classeur source
+				loWBSrce = m.loXL.Workbooks.open(fullpath(m.lcWBSrce))
 
-						* Ouvrir la feuille source indiquée,
+* Si une feuille source a été indiquée
+				lcWSSrce = iif(m.llWSSrce, m.taWBWSSrce[m.lnWBSrce, 2], space(0))
+				laResult[m.lnWBSrce] = .t.
+				if vartype(m.lcWSSrce) == 'C' ;
+				 and not empty(m.lcWSSrce)
+
+* Si la feuille existe dans le classeur
+					if lXLWS(m.lcWSSrce, m.loWBSrce)
+
+* Ouvrir la feuille source indiquée,
 						loWSSrce = m.loWBSrce.Worksheets(m.lcWSSrce)
-						
-					* Sinon, erreur
-					ELSE
-						laResult[m.lnWBSrce] = .F.
-					ENDIF
 
-				* Sinon, (aucune feuille source indiquée), ouvrir la première feuille
-				ELSE
+* Sinon, erreur
+					else
+						laResult[m.lnWBSrce] = .f.
+					endif
+
+* Sinon, (aucune feuille source indiquée), ouvrir la première feuille
+				else
 					loWSSrce = m.loWBSrce.Worksheets(1)
-					lcWSSrce = m.loWSSrce.Name
-				ENDIF
+					lcWSSrce = m.loWSSrce.name
+				endif
 
-				* Si la feuille a été ouverte,
-				IF laResult[m.lnWBSrce]
+* Si la feuille a été ouverte,
+				if laResult[m.lnWBSrce]
 
-					* Si le classeur destination n'est pas créé, le créer
-					IF NOT m.llWBDest
-						LOCAL ;
+* Si le classeur destination n'est pas créé, le créer
+					if not m.llWBDest
+						local ;
 							loWBDest as Excel.Workbook,;
 							lnWBDestDefaultSheets,;
-							loWSDest as Excel.Worksheet
-						loWBDest = m.loXL.workBooks.add() && new WB
-						lnWBDestDefaultSheets = m.loWBDest.Sheets.Count && default sheets
+							loWSDest as Excel.WorkSheet
+						loWBDest = m.loXL.Workbooks.add() && new WB
+						lnWBDestDefaultSheets = m.loWBDest.Sheets.count && default sheets
 						loWSDest = m.loWBDest.Sheets(m.lnWBDestDefaultSheets) && Last sheet
-						llWBDest = .T.
-					ENDIF
-						
-					IF m.tlBeautify
+						llWBDest = .t.
+					endif
+
+					if m.tlBeautify
 						XLWStableBeautify(m.loWSSrce)
-					ENDIF
+					endif
 
-					* Copier la feuille dans le classeur destination après les feuilles existantes
-					loWSSrce.Copy(NULL, m.loWSDest)
-					loWSDest = m.loWBDest.Sheets(m.loWBDest.Sheets.Count) && last sheet
+* Copier la feuille dans le classeur destination après les feuilles existantes
+					loWSSrce.copy(null, m.loWSDest)
+					loWSDest = m.loWBDest.Sheets(m.loWBDest.Sheets.count) && last sheet
 
-					* Supprimer les styles automatiques nommés selon la nouvelle feuille
-					lcWBSrce = Upper(JustStem(m.lcWBSrce))
-					lcWSSrce = Upper(Alltrim(m.lcWSSrce))
-					LOCAL lcStyle, loStyle as Excel.Style
-					FOR EACH m.loStyle IN m.loWBDest.Styles
-						lcStyle = Upper(Alltrim(m.loStyle.Name))
-						IF Right(m.lcStyle, 1 + Len(m.lcWBSrce)) == '_' + m.lcWBSrce ;
-						 OR Right(m.lcStyle, 1 + Len(m.lcWSSrce)) == '_' + m.lcWSSrce
-							loStyle.Delete()
-						ENDIF
-					ENDFOR
+* Supprimer les styles automatiques nommés selon la nouvelle feuille
+					lcWBSrce = upper(juststem(m.lcWBSrce))
+					lcWSSrce = upper(alltrim(m.lcWSSrce))
+					local lcStyle, loStyle as Excel.style
+					for each m.loStyle in m.loWBDest.Styles
+						lcStyle = upper(alltrim(m.loStyle.name))
+						if right(m.lcStyle, 1 + len(m.lcWBSrce)) == '_' + m.lcWBSrce ;
+						 or right(m.lcStyle, 1 + len(m.lcWSSrce)) == '_' + m.lcWSSrce
+							loStyle.delete()
+						endif
+					endfor
 
-					* Fermer le classeur source
-					loWSSrce = .NULL.
-					loWBSrce.Close
+* Fermer le classeur source
+					loWSSrce = .null.
+					loWBSrce.close
 
-					* Si la suppression des classeurs sources a été demandée, supprimer
-					IF m.tlWBSrceDel
-						DELETE FILE (m.lcWBSrce)
-					ENDIF
-				ENDIF
-			ENDIF
-		ENDFOR
+* Si la suppression des classeurs sources a été demandée, supprimer
+					if m.tlWBSrceDel
+						delete file (m.lcWBSrce)
+					endif
+				endif
+			endif
+		endfor
 
-		* Si le classeur destination a bien été créé
-		IF m.llWBDest
-			WITH m.loWBDest
+* Si le classeur destination a bien été créé
+		if m.llWBDest
+			with m.loWBDest
 
-				* Supprimer les feuilles initiales vides
-				IF m.lnWBDestDefaultSheets > 0
-					LOCAL lnSheet
-					FOR m.lnSheet = m.lnWBDestDefaultSheets TO 1 STEP -1
-						.Sheets(m.lnSheet).Delete()
-					ENDFOR
-				ENDIF
+* Supprimer les feuilles initiales vides
+				if m.lnWBDestDefaultSheets > 0
+					local lnSheet
+					for m.lnSheet = m.lnWBDestDefaultSheets to 1 step -1
+						.Sheets(m.lnSheet).delete()
+					endfor
+				endif
 
-				* Sélectionner la première feuille et dimensionner la fenêtre
-				.Sheets(1).Select()
-				.Windows(1).Width = 900
-				.Windows(1).Height = 700
-				
-				* Enregistrer et fermer le nouveau classeur
-				.SaveAs(m.tcWBDestAddr, xlWorkbookNormal)
-				.Close
-			ENDWITH
-			
-			* Calculer le résultat
-			llResult = Ascan(m.laResult, .F.) = 0
-		ENDIF
-	ENDIF
-ENDIF
+* Sélectionner la première feuille et dimensionner la fenêtre
+				.Sheets(1).select()
+				.windows(1).width = 900
+				.windows(1).height = 700
 
-RETURN m.llResult
+* Enregistrer et fermer le nouveau classeur
+				.saveas(m.tcWBDestAddr, xlWorkbookNormal)
+				.close
+			endwith
+
+* Calculer le résultat
+			llResult = ascan(m.laResult, .f.) = 0
+		endif
+	endif
+endif
+
+return m.llResult
 
 * -------------------------------------------------------------
-PROCEDURE XLWBfromWSs_Test && teste XLWBfromWSs, ancienne version
+procedure XLWBfromWSs_Test && teste XLWBfromWSs, ancienne version
 
 ?
-? Sys(16)
+? sys(16)
 
-PRIVATE poXL as excel.Application
+private poXL as Excel.application
 poXL = oXL()
 
-LOCAL lcDos, lcAdr
+local lcDos, lcAdr
 lcDos = "C:\aDossier\3639 VS Emb PL\Client\Envoi\"
 lcAdr = m.lcDos + "XLWBfromWSs_Test.xls"
-DELETE FILE (m.lcAdr)
+delete file (m.lcAdr)
 
-LOCAL ARRAY laWBs[2, 2]
+local array laWBs[2, 2]
 laWBs[1,1] = m.lcDos + "KEM_Warn.xls"
 laWBs[1,2] = "KEM_Warn"
 laWBs[2,1] = m.lcDos + "EEM_Warn.xls"
@@ -1140,244 +1140,244 @@ laWBs[2,2] = "EEM_Warn"
 poXL.quit()
 
 * -------------------------------------------------------------
-PROCEDURE XLWBfromWSs_Test && teste XLWBfromWSs, nouvelle version
+procedure XLWBfromWSs_Test && teste XLWBfromWSs, nouvelle version
 
-LOCAL loTest as abUnitTest OF abDev.prg
-loTest = NewObject('abUnitTest', 'abDev.prg')
+local loTest as abUnitTest of abDev.prg
+loTest = newobject('abUnitTest', 'abDev.prg')
 
-LOCAL lcDos
+local lcDos
 lcDos = "C:\aDossier\3639 VS Emb PL\Client\Envoi\"
-IF Directory(m.lcDos)
+if directory(m.lcDos)
 
-	LOCAL ARRAY laWBs[2, 2]
+	local array laWBs[2, 2]
 	laWBs[1,1] = m.lcDos + "KEM_Warn.xls"
 	laWBs[1,2] = "KEM_Warn"
 	laWBs[2,1] = m.lcDos + "EEM_Warn.xls"
 	laWBs[2,2] = "EEM_Warn"
-	IF File(m.laWBs[1,1]) AND File(m.laWBs[2,1])
+	if file(m.laWBs[1,1]) and file(m.laWBs[2,1])
 
-		LOCAL lcAdr
+		local lcAdr
 		lcAdr = m.lcDos + "XLWBfromWSs_Test.xls"
-		DELETE FILE (m.lcAdr)
+		delete file (m.lcAdr)
 
-		PRIVATE poXL as Excel.Application
+		private poXL as Excel.application
 		poXL = oXL()
 
-		loTest.Test( .T., @laWBs, m.lcAdr)
+		loTest.Test( .t., @laWBs, m.lcAdr)
 
 		poXL.quit()
-	ENDIF
-ENDIF
+	endif
+endif
 
-RETURN loTest.Result()
+return loTest.Result()
 *========================================
-PROCEDURE XLWSofTableMemo && feuille Excel d'après une table FoxPro avec les champs MEMO (impossible avec COPY TO)
-LPARAMETERS ;
+procedure XLWSofTableMemo && feuille Excel d'après une table FoxPro avec les champs MEMO (impossible avec COPY TO)
+lparameters ;
 	tuTable,;	&& [Alias()] Alias, zone ou adresse de la table source
 	tcXLWBAddr && [forceExt(tuTable, 'XLS'] Adresse du classeur XL cible
-LOCAL llResult
-llResult = .T.
+local llResult
+llResult = .t.
 
 * Si la table existe
-LOCAL lcAlias, llDBFOpened
+local lcAlias, llDBFOpened
 lcAlias = cAlias(m.tuTable, @llDBFOpened)
-llResult = Used(m.lcAlias)
-ASSERT m.llResult MESSAGE Program() + " - Invalid table specification : " + cLitteral(m.tuTable)
-IF m.llResult
+llResult = used(m.lcAlias)
+assert m.llResult message program() + " - Invalid table specification : " + cLitteral(m.tuTable)
+if m.llResult
 
-	* Si le classeur peut être ouvert ou créé
-	LOCAL lcTableAddr, lcXLWBAddr, loXLWB as Excel.Workbook, llXLSOpened, llCreated
+* Si le classeur peut être ouvert ou créé
+	local lcTableAddr, lcXLWBAddr, loXLWB as Excel.Workbook, llXLSOpened, llCreated
 	lcTableAddr = cTableAddress(m.lcAlias)
-	lcXLWBAddr = uDefault(m.tcXLWBAddr, ForceExt(m.lcTableAddr, EXT_XLS))
+	lcXLWBAddr = uDefault(m.tcXLWBAddr, forceext(m.lcTableAddr, EXT_XLS))
 	loXLWB = oXLWB(m.lcXLWBAddr, @llXLSOpened, @llCreated)
 	llResult = loXLWB(m.loXLWB)
-	IF m.llResult
-		WITH m.loXLWB as Excel.Workbook
-		
-			* Si la feuille existe,
-			LOCAL lcXLWS, loXLWS as Excel.Worksheet
-			lcXLWS = JustStem(m.lcTableAddr)
-			IF lXLWS(m.lcXLWS, m.loXLWB)
-				
-				* Sélectionner
+	if m.llResult
+		with m.loXLWB as Excel.Workbook
+
+* Si la feuille existe,
+			local lcXLWS, loXLWS as Excel.WorkSheet
+			lcXLWS = juststem(m.lcTableAddr)
+			if lXLWS(m.lcXLWS, m.loXLWB)
+
+* Sélectionner
 				loXLWS = .Worksheets(m.lcXLWS)
 
-				* Razer les données et les styles
-				WITH m.loXLWS.UsedRange as Excel.Range
-					.Value = .NULL.
-					.Style = m.loXLWB.Styles.Item('normal')
-				ENDWITH
+* Razer les données et les styles
+				with m.loXLWS.UsedRange as Excel.range
+					.value = .null.
+					.style = m.loXLWB.Styles.item('normal')
+				endwith
 
-			* Sinon, ajouter une feuille au classeur
-			ELSE
-				loXLWS = .Worksheets.Add()
-				loXLWS.Name = m.lcXLWS
-			ENDIF
+* Sinon, ajouter une feuille au classeur
+			else
+				loXLWS = .Worksheets.add()
+				loXLWS.name = m.lcXLWS
+			endif
 
-			WITH m.loXLWS as Excel.Worksheet
-				
-				* Copier les noms des champs dans la première ligne
-				LOCAL lnRow, lnCol, lnCols
+			with m.loXLWS as Excel.WorkSheet
+
+* Copier les noms des champs dans la première ligne
+				local lnRow, lnCol, lnCols
 				lnRow = 1
-				lnCols = Fcount(m.lcAlias)
-				FOR m.lnCol = 1 TO m.lnCols
-					.Cells(m.lnRow, m.lnCol).Value = Field(m.lnCol, m.lcAlias)
-				ENDFOR
+				lnCols = fcount(m.lcAlias)
+				for m.lnCol = 1 to m.lnCols
+					.Cells(m.lnRow, m.lnCol).value = field(m.lnCol, m.lcAlias)
+				endfor
 
-				* Copier les données de la table dans les lignes suivantes
-				LOCAL lnSelect, luValue
-				lnSelect = Select(0)
-				SELECT (m.lcAlias)
-				SCAN
+* Copier les données de la table dans les lignes suivantes
+				local lnSelect, luValue
+				lnSelect = select(0)
+				select (m.lcAlias)
+				scan
 					lnRow = m.lnRow + 1
-					FOR m.lnCol = 1 TO m.lnCols
-						luValue = Evaluate(Field(m.lnCol, m.lcAlias))
-						luValue = Iif(Vartype(m.luValue) == 'C', Rtrim(m.luValue), m.luValue)
-						.Cells(m.lnRow, m.lnCol).Value = m.luValue
-					ENDFOR
-				ENDSCAN
-				SELECT (m.lnSelect)
-			ENDWITH
-			
-		* Sauver le classeur et fermer Excel
-			IF m.llCreated
-				.SaveAs(m.lcXLWBAddr, xlWorkbookNormal)
-			ELSE
-				.Save()
-			ENDIF
-			IF m.llXLSOpened
-				.Parent.Quit()
-			ENDIF
-		ENDWITH
-	ENDIF
-	IF m.llDBFOpened
-		USE IN (m.lcAlias)
-	ENDIF
-ENDIF
+					for m.lnCol = 1 to m.lnCols
+						luValue = evaluate(field(m.lnCol, m.lcAlias))
+						luValue = iif(vartype(m.luValue) == 'C', rtrim(m.luValue), m.luValue)
+						.Cells(m.lnRow, m.lnCol).value = m.luValue
+					endfor
+				endscan
+				select (m.lnSelect)
+			endwith
 
-RETURN m.llResult
+* Sauver le classeur et fermer Excel
+			if m.llCreated
+				.saveas(m.lcXLWBAddr, xlWorkbookNormal)
+			else
+				.save()
+			endif
+			if m.llXLSOpened
+				.parent.quit()
+			endif
+		endwith
+	endif
+	if m.llDBFOpened
+		use in (m.lcAlias)
+	endif
+endif
+
+return m.llResult
 
 *========================================
-PROCEDURE TableMemoOfXLWS && Table FoxPro avec les champs MEMO d'après une feuille Excel (impossible avec Import ou append from)
-LPARAMETERS ;
+procedure TableMemoOfXLWS && Table FoxPro avec les champs MEMO d'après une feuille Excel (impossible avec Import ou append from)
+lparameters ;
 	tuTable,;	&& [Alias()] Alias, zone ou adresse de la table destination
 	tcXLWBAddr,; && [forceExt(tuTable, 'XLS'] Adresse du classeur XL source
 	tcXLWS,; && [première] Feuille contenant les données à importer
 	tlFieldsCheck && [.F.] Vérifier que les champs de la feuille sont tous dans la table
-LOCAL llResult
-llResult = .T.
+local llResult
+llResult = .t.
 
 * Si la table existe
-LOCAL lcAlias, llOpened
+local lcAlias, llOpened
 lcAlias = cAlias(m.tuTable, @llOpened)
-llResult = Used(m.lcAlias)
-ASSERT m.llResult MESSAGE cAssertMsg(Textmerge("<<Program()>> - Invalid table specification : <<cLitteral(m.tuTable)>>"))
-IF m.llResult
+llResult = used(m.lcAlias)
+assert m.llResult message cAssertMsg(textmerge("<<Program()>> - Invalid table specification : <<cLitteral(m.tuTable)>>"))
+if m.llResult
 
-	* Si le classeur existe et peut être ouvert en automation
-	LOCAL lcTableAddr, lcXLWBAddr, loXLWB as Excel.Workbook, llOpened, llCreated
+* Si le classeur existe et peut être ouvert en automation
+	local lcTableAddr, lcXLWBAddr, loXLWB as Excel.Workbook, llOpened, llCreated
 	lcTableAddr = cTableAddress(m.lcAlias)
-	lcXLWBAddr = uDefault(m.tcXLWBAddr, ForceExt(m.lcTableAddr, EXT_XLS))
+	lcXLWBAddr = uDefault(m.tcXLWBAddr, forceext(m.lcTableAddr, EXT_XLS))
 	loXLWB = oXLWB(m.lcXLWBAddr, @llOpened, @llCreated)
-	llResult = loXLWB(m.loXLWB) AND NOT m.llCreated
-	IF m.llResult
-		WITH m.loXLWB as Excel.Workbook
-		
-			* Sélectionner la feuille indiquée, la première par défaut
-			LOCAL lcXLWS, loXLWS as Excel.Worksheet
-			lcXLWS = uDefault(m.tcXLWS, Space(0))
-			loXLWS = .Worksheets(Iif(lXLWS(m.lcXLWS, m.loXLWB), m.lcXLWS, 1))
-			WITH m.loXLWS as Excel.Worksheet
-				lcXLWS = .Name
-				LOCAL lnCols, lnRow, lnCol
-				lnCols = .UsedRange.Columns.Count
-				
-				* Si tous les champs dont les noms sont dans la première ligne figurent dans la table
-				LOCAL llFieldsCheck, lcField
-				llFieldsCheck = uDefault(m.tlFieldsCheck, .F.)
-				LOCAL ARRAY laFields[m.lnCols]
+	llResult = loXLWB(m.loXLWB) and not m.llCreated
+	if m.llResult
+		with m.loXLWB as Excel.Workbook
+
+* Sélectionner la feuille indiquée, la première par défaut
+			local lcXLWS, loXLWS as Excel.WorkSheet
+			lcXLWS = uDefault(m.tcXLWS, space(0))
+			loXLWS = .Worksheets(iif(lXLWS(m.lcXLWS, m.loXLWB), m.lcXLWS, 1))
+			with m.loXLWS as Excel.WorkSheet
+				lcXLWS = .name
+				local lnCols, lnRow, lnCol
+				lnCols = .UsedRange.columns.count
+
+* Si tous les champs dont les noms sont dans la première ligne figurent dans la table
+				local llFieldsCheck, lcField
+				llFieldsCheck = uDefault(m.tlFieldsCheck, .f.)
+				local array laFields[m.lnCols]
 				lnRow = 1
-				FOR m.lnCol = 1 TO m.lnCols
-					lcField = .Cells(m.lnRow, m.lnCol).Value
-					IF lField(m.lcField, m.lcAlias)
+				for m.lnCol = 1 to m.lnCols
+					lcField = .Cells(m.lnRow, m.lnCol).value
+					if lField(m.lcField, m.lcAlias)
 						laFields[m.lnCol] = m.lcField
-					ELSE
-						llResult = NOT m.llFieldsCheck
-						IF m.llResult
-							laFields[m.lnCol] = Space(0)
-						ELSE
-							EXIT
-						ENDIF
-					ENDIF
-				ENDFOR
-				ASSERT m.llResult MESSAGE Program() + " - Some Field(s) of Worksheet " + cLitteral(m.lcXLWS) + " miss in table" + cLitteral(m.tuTable)
-				IF m.llResult
+					else
+						llResult = not m.llFieldsCheck
+						if m.llResult
+							laFields[m.lnCol] = space(0)
+						else
+							exit
+						endif
+					endif
+				endfor
+				assert m.llResult message program() + " - Some Field(s) of Worksheet " + cLitteral(m.lcXLWS) + " miss in table" + cLitteral(m.tuTable)
+				if m.llResult
 
-					* Si la table peut être ouverte en exclusif
+* Si la table peut être ouverte en exclusif
 					lcAlias = ExclusiveForce(m.lcAlias)
-					llResult = Used(m.lcAlias)
-					ASSERT m.llResult MESSAGE Program() + " - Table cannot be opened exclusively :" + cLitteral(m.tuTable)
-					IF m.llResult
-						LOCAL lnSelect
-						lnSelect = Select(0)
-						SELECT (m.lcAlias)
-						
-						* Vider la table
-						ZAP
-						
-						* Rouvrir en shared
-						USE
+					llResult = used(m.lcAlias)
+					assert m.llResult message program() + " - Table cannot be opened exclusively :" + cLitteral(m.tuTable)
+					if m.llResult
+						local lnSelect
+						lnSelect = select(0)
+						select (m.lcAlias)
+
+* Vider la table
+						zap
+
+* Rouvrir en shared
+						use
 						lcAlias = cAlias(m.tuTable)
-						SELECT (m.lcAlias)
-						
-						* Créer une variable mémoire par champ destination
-						LOCAL lcFields, luValue
+						select (m.lcAlias)
+
+* Créer une variable mémoire par champ destination
+						local lcFields, luValue
 						lcFields = cListOfArray(@laFields)
-						lcFields = Strtran(m.lcFields, ',' + ',', ',') && élimine les champs vides
-						LOCAL &lcFields
+						lcFields = strtran(m.lcFields, ',' + ',', ',') && élimine les champs vides
+						local &lcFields
 
-						* Pour chaque ligne de données de la feuille Excel
-						FOR m.lnRow = 2 TO .UsedRange.Rows.Count
-							
-							* Ajouter un nouvel enregistrement vierge
-							APPEND BLANK
-							SCATTER MEMVAR MEMO
-						
-							* Pour chaque colonne comportant un champ présent dans la table
-							FOR m.lnCol = 1 TO m.lnCols
+* Pour chaque ligne de données de la feuille Excel
+						for m.lnRow = 2 to .UsedRange.rows.count
+
+* Ajouter un nouvel enregistrement vierge
+							append blank
+							scatter memvar memo
+
+* Pour chaque colonne comportant un champ présent dans la table
+							for m.lnCol = 1 to m.lnCols
 								lcField = m.laFields[m.lnCol]
-								IF NOT Empty(m.lcField)
+								if not empty(m.lcField)
 
-									* Si le contenu de la cellule est non nul, copier en mémoire
-									luValue = .Cells(m.lnRow, m.lnCol).Value
-									IF NOT IsNull(m.luValue)
-										STORE m.luValue TO (m.lcField)
-									ENDIF
-								ENDIF
-							ENDFOR
-						
-							* Copier la mémoire dans la table
-							GATHER MEMVAR MEMO
-						ENDFOR
-						SELECT (m.lnSelect)
-					ENDIF
-				ENDIF
-			ENDWITH
+* Si le contenu de la cellule est non nul, copier en mémoire
+									luValue = .Cells(m.lnRow, m.lnCol).value
+									if not isnull(m.luValue)
+										store m.luValue to (m.lcField)
+									endif
+								endif
+							endfor
 
-			* Refermer Excel
-			.Parent.Quit()
-		ENDWITH
-	ENDIF
-	IF m.llOpened
-		USE IN (m.lcAlias)
-	ENDIF
-ENDIF
+* Copier la mémoire dans la table
+							gather memvar memo
+						endfor
+						select (m.lnSelect)
+					endif
+				endif
+			endwith
 
-RETURN m.llResult
+* Refermer Excel
+			.parent.quit()
+		endwith
+	endif
+	if m.llOpened
+		use in (m.lcAlias)
+	endif
+endif
+
+return m.llResult
 
 *========================================
-PROCEDURE XL8table && Importe une feuille d'un Classeur Excel 97 dans une table
-LPARAMETERS ;
+procedure XL8table && Importe une feuille d'un Classeur Excel 97 dans une table
+lparameters ;
 	tcXLWBAddr,; && Adresse du MASQUE de classeur Excel contenant la feuille à importer
 	tcSheet,; && [feuille n°1] Nom de la feuille à importer
 	tlNonVerifDernVers,; && [.F.] @ Ne pas prendre le dernier n° de version du classeur Excel ; @ la table a été rafraîchie
@@ -1386,11 +1386,11 @@ LPARAMETERS ;
 	tcFieldsAdd,; && [aucun] Champs à ajouter à la table ou au curseur résultat (définition type ALTER TABLE)
 	tlAutomation && [.F.] Toujours importer par automation Excel
 
-tcSheet = Upper(uDefault(m.tcSheet, Space(0)))
+tcSheet = upper(uDefault(m.tcSheet, space(0)))
 tlNonVerifDernVers = lTrue(m.tlNonVerifDernVers)
 tlImportForce = lTrue(m.tlImportForce)
 tlCursor = lTrue(m.tlCursor)
-tcFieldsAdd = Evl(m.tcFieldsAdd, Space(0))
+tcFieldsAdd = evl(m.tcFieldsAdd, space(0))
 tlAutomation = lTrue(m.tlAutomation)
 
 && La première ligne de la feuille doit contenir les noms des champs
@@ -1398,7 +1398,7 @@ tlAutomation = lTrue(m.tlAutomation)
 && Les colonnes masquées ou sans nom ne sont pas importées
 && Les colonnes servant à une concaténation sont tronquées
 
-LOCAL llResult, lcResult && Adresse de la table créée OU nom du curseur OU message d'erreur
+local llResult, lcResult && Adresse de la table créée OU nom du curseur OU message d'erreur
 
 *================================================================
 * Date      Par   Action
@@ -1414,152 +1414,152 @@ LOCAL llResult, lcResult && Adresse de la table créée OU nom du curseur OU messa
 * 26/11/02	TN		Optimisation et restructuration
 *================================================================
 
-lcResult = Space(0)
-llResult = Vartype(m.tcXLWBAddr) == 'C'
-IF m.llResult
+lcResult = space(0)
+llResult = vartype(m.tcXLWBAddr) == 'C'
+if m.llResult
 
-	* Si un classeur existe selon le masque spécifié
-	LOCAL lcXLWBAddr, lcXLWBPath, lcDBFStem, lcDBFAddr, lcAliasUsed, llAliasUsed, llExclusive
-	lcXLWBAddr = Iif(m.tlNonVerifDernVers, FullPath(m.tcXLWBAddr), cFileFreshest(m.tcXLWBAddr))
-	llResult = File(m.lcXLWBAddr)
-	IF m.llResult
+* Si un classeur existe selon le masque spécifié
+	local lcXLWBAddr, lcXLWBPath, lcDBFStem, lcDBFAddr, lcAliasUsed, llAliasUsed, llExclusive
+	lcXLWBAddr = iif(m.tlNonVerifDernVers, fullpath(m.tcXLWBAddr), cFileFreshest(m.tcXLWBAddr))
+	llResult = file(m.lcXLWBAddr)
+	if m.llResult
 
-		* Déterminer l'adresse de la table destination
-		lcXLWBPath = Addbs(JustPath(m.lcXLWBAddr))
-		lcDBFStem = Iif(Empty(m.tcSheet), JustStem(m.tcXLWBAddr), m.tcSheet)
-		lcDBFAddr = ForcePath(m.lcDBFStem + '.' + EXT_DBF, m.lcXLWBPath)
+* Déterminer l'adresse de la table destination
+		lcXLWBPath = addbs(justpath(m.lcXLWBAddr))
+		lcDBFStem = iif(empty(m.tcSheet), juststem(m.tcXLWBAddr), m.tcSheet)
+		lcDBFAddr = forcepath(m.lcDBFStem + '.' + EXT_DBF, m.lcXLWBPath)
 
-		* Si la table est ouverte, la fermer
-		lcAliasUsed = Iif(File(m.lcDBFAddr), cAliasUsed(m.lcDBFAddr, @llExclusive), '')
-		llAliasUsed = Used(m.lcAliasUsed)
-		IF m.llAliasUsed
-			USE IN (m.lcAliasUsed)
-		ENDIF
+* Si la table est ouverte, la fermer
+		lcAliasUsed = iif(file(m.lcDBFAddr), cAliasUsed(m.lcDBFAddr, @llExclusive), '')
+		llAliasUsed = used(m.lcAliasUsed)
+		if m.llAliasUsed
+			use in (m.lcAliasUsed)
+		endif
 
-		* Si import systématique ou classeur plus récent que la table
-		tlNonVerifDernVers = .F. && indique en retour si la feuille a été importée
-		IF m.tlImportForce OR Nvl(lFileFresher(m.lcDBFAddr, m.lcXLWBAddr), .T.)
+* Si import systématique ou classeur plus récent que la table
+		tlNonVerifDernVers = .f. && indique en retour si la feuille a été importée
+		if m.tlImportForce or nvl(lFileFresher(m.lcDBFAddr, m.lcXLWBAddr), .t.)
 
-			* Si le classeur n'est pas couramment ouvert (IMPORT FROM échoue si le classeur est ouvert en read-write)
-			LOCAL lnHandle
-			lnHandle = Fopen(m.lcXLWBAddr, 2) && 2 : read-write, buffered
+* Si le classeur n'est pas couramment ouvert (IMPORT FROM échoue si le classeur est ouvert en read-write)
+			local lnHandle
+			lnHandle = fopen(m.lcXLWBAddr, 2) && 2 : read-write, buffered
 			llResult = m.lnHandle > 0 ;
-			 OR Set('ASSERT') == 'ON';
-			 	 AND 6 = MessageBox(;
+			 or set('ASSERT') == 'ON';
+			 	 and 6 = messagebox(;
 								"L'importation de données depuis le classeur " + m.lcXLWBAddr + " est impossible car il est ouvert par Excel" + CRLF + ;
 								"Pour continuer l'importation, veuillez fermer le classeur et cliquer sur 'oui'" + CRLF + ;
 								"Pour abandonner l'importation, cliquez sur 'non'" + CRLF + ;
 								"Continuer ?";
 							, 4+16)
-			Fclose(m.lnHandle)
-			IF m.llResult
+			fclose(m.lnHandle)
+			if m.llResult
 
-				* Tabuler les champs additionnels éventuels
-				LOCAL laFieldAdd[1]
-				IF NOT Empty(m.tcFieldsAdd)
+* Tabuler les champs additionnels éventuels
+				local laFieldAdd[1]
+				if not empty(m.tcFieldsAdd)
 					aFieldsDef(@laFieldAdd, m.tcFieldsAdd)
-				ENDIF
-				
-				* Si la feuille peut être importée
-				LOCAL loDefault, loSelect, lcSheet, loException as Exception, llSheetError, llFormatError
+				endif
+
+* Si la feuille peut être importée
+				local loDefault, loSelect, lcSheet, loException as exception, llSheetError, llFormatError
 				loDefault = abSet('Default', m.lcXLWBPath) && IMPORT crée la table dans le dossier par défaut
 				loSelect = abSelect(0)
-				lcSheet = Iif(Empty(m.tcSheet), Space(0), Textmerge([SHEET <<m.tcSheet>>]))
+				lcSheet = iif(empty(m.tcSheet), space(0), textmerge([SHEET <<m.tcSheet>>]))
 				llResult = m.tlAutomation
-				IF NOT m.llResult
-					TRY 
-						IMPORT FROM (m.lcXLWBAddr) TYPE XL8 &lcSheet
-						llResult = .T.
-					CATCH TO loException
-						llSheetError = m.loException.ErrorNo = 1775 && You are trying to specify a worksheet name that does not match a name in the specified .XLS file.
-						llFormatError = m.loException.ErrorNo = 1661 && The Microsoft Excel file you have attempted to import is either not version 8.0 or has been corrupted.
-					ENDTRY
-				ENDIF
-				RELEASE loDefault
+				if not m.llResult
+					try
+						import from (m.lcXLWBAddr) type xl8 &lcSheet
+						llResult = .t.
+					catch to loException
+						llSheetError = m.loException.errorno = 1775 && You are trying to specify a worksheet name that does not match a name in the specified .XLS file.
+						llFormatError = m.loException.errorno = 1661 && The Microsoft Excel file you have attempted to import is either not version 8.0 or has been corrupted.
+					endtry
+				endif
+				release loDefault
 
-				DO CASE
-				CASE m.tlAutomation OR m.llFormatError
+				do case
+				case m.tlAutomation or m.llFormatError
 
-					* Traiter le classeur en automation
+* Traiter le classeur en automation
 					lcResult = XL8table_Auto(m.lcXLWBAddr, m.tcSheet, m.lcDBFAddr,, m.tlCursor, @laFieldAdd)
-					llResult = Iif(m.tlCursor, Used(m.lcResult), File(m.lcResult))
+					llResult = iif(m.tlCursor, used(m.lcResult), file(m.lcResult))
 
-				CASE m.llResult && IMPORT FROM successful
+				case m.llResult && IMPORT FROM successful
 
-					LOCAL lcAlias
-					lcAlias = Alias()
+					local lcAlias
+					lcAlias = alias()
 
-					* Alléger la table
+* Alléger la table
 					FreeTableSlim(m.lcAlias, 20) && 20% de marge
 
-					* Renommer les champs par le contenu de la premiere ligne du tableau
+* Renommer les champs par le contenu de la premiere ligne du tableau
 					lcAlias = XL8table_ModiStru(m.lcAlias, m.tlCursor, @laFieldAdd)
-					llResult = Used(m.lcAlias)
-					IF m.llResult
-					
-						IF m.tlCursor
-						
+					llResult = used(m.lcAlias)
+					if m.llResult
+
+						if m.tlCursor
+
 							lcResult = m.lcAlias
-						ELSE
+						else
 
-							* Renommer la table selon le nom de la feuille ou du classeur spécifiés
-							LOCAL lcDBFImportAddr, lcFPTImportAddr, lcFPTAddr
+* Renommer la table selon le nom de la feuille ou du classeur spécifiés
+							local lcDBFImportAddr, lcFPTImportAddr, lcFPTAddr
 							lcDBFImportAddr = cTableAddress(m.lcAlias)
-							USE IN (m.lcAlias)
-							IF Fullpath(m.lcDBFImportAddr) # Fullpath(m.lcDBFAddr)
+							use in (m.lcAlias)
+							if fullpath(m.lcDBFImportAddr) # fullpath(m.lcDBFAddr)
 
-								DELETE FILE (m.lcDBFAddr)
-								RENAME (m.lcDBFImportAddr) TO (m.lcDBFAddr)
+								delete file (m.lcDBFAddr)
+								rename (m.lcDBFImportAddr) to (m.lcDBFAddr)
 
-								lcFPTImportAddr = ForceExt(m.lcDBFImportAddr, 'fpt')
-								IF File(m.lcFPTImportAddr)
-									lcFPTAddr = ForceExt(m.lcDBFAddr, 'fpt')
-									DELETE FILE (m.lcFPTAddr)
-									RENAME (m.lcFPTImportAddr) TO (m.lcFPTAddr)
-								ENDIF
-							ENDIF
+								lcFPTImportAddr = forceext(m.lcDBFImportAddr, 'fpt')
+								if file(m.lcFPTImportAddr)
+									lcFPTAddr = forceext(m.lcDBFAddr, 'fpt')
+									delete file (m.lcFPTAddr)
+									rename (m.lcFPTImportAddr) to (m.lcFPTAddr)
+								endif
+							endif
 
 							lcResult = m.lcDBFAddr
-						ENDIF
-					ELSE
+						endif
+					else
 						lcResult = "XL8table() : Impossible de nommer les champs selon le contenu de la première ligne de la feuille " + m.tcSheet + " du classeur " + m.lcXLWBAddr
-					ENDIF
+					endif
 
-				CASE m.llSheetError
+				case m.llSheetError
 					lcResult = "XL8table() : Importation impossible car la feuille " + m.tcSheet + " n'existe pas dans le classeur " + m.lcXLWBAddr
 
-				OTHERWISE
+				otherwise
 					lcResult = cException(m.loException)
-				ENDCASE
-			ELSE
+				endcase
+			else
 				lcResult = "XL8table() : Importation impossible car le classeur " + m.lcXLWBAddr + " était ouvert."
-			ENDIF
+			endif
 
 			tlNonVerifDernVers = m.llResult && indique en retour si la feuille a été importée
-		ELSE
+		else
 			lcResult = m.lcDBFAddr
-		ENDIF
+		endif
 
-		* Si la table était ouverte, la rouvrir
-		IF m.llAliasUsed
-			LOCAL lcExclusive
-			lcExclusive = Iif(m.llExclusive, 'Exclusive', 'Shared')
-			USE (m.lcDBFAddr) IN 0 &lcExclusive
-		ENDIF
-	ELSE
-		lcResult = Textmerge("XL8table() : Importation impossible car aucun classeur n'existe selon le masque spécifié : '<<Alltrim(tcXLWBAddr)>>'")
-	ENDIF
-ELSE
+* Si la table était ouverte, la rouvrir
+		if m.llAliasUsed
+			local lcExclusive
+			lcExclusive = iif(m.llExclusive, 'Exclusive', 'Shared')
+			use (m.lcDBFAddr) in 0 &lcExclusive
+		endif
+	else
+		lcResult = textmerge("XL8table() : Importation impossible car aucun classeur n'existe selon le masque spécifié : '<<Alltrim(tcXLWBAddr)>>'")
+	endif
+else
 	lcResult = "XL8table() : Veuillez spécifier un masque de classeur XL en première paramètre"
-ENDIF
+endif
 
-ASSERT m.llResult MESSAGE m.lcResult
+assert m.llResult message m.lcResult
 
-RETURN m.lcResult
+return m.lcResult
 
 *========================================
-PROCEDURE XL8table_Auto && Importe une feuille excel en automation
-LPARAMETERS ;
+procedure XL8table_Auto && Importe une feuille excel en automation
+lparameters ;
 	tcXLWBAddr,; && Adresse du MASQUE de classeur Excel contenant la feuille à importer
 	tcSheet,; && [feuille n°1] Nom de la feuille à importer
 	tcTable,; && Table à créer
@@ -1569,174 +1569,174 @@ LPARAMETERS ;
 
 tlNULL = lTrue(m.tlNULL)
 tlCursor = lTrue(m.tlCursor)
-EXTERNAL ARRAY taFieldAdd
+external array taFieldAdd
 
-LOCAL lcResult as String;
-, loXL as Excel.Application;
+local lcResult as string;
+, loXL as Excel.application;
 , loWB as Excel.Workbook;
-, loWS as Excel.Worksheet;
+, loWS as Excel.WorkSheet;
 , loWF as Excel.WorksheetFunction;
-, loRange as Excel.Range;
+, loRange as Excel.range;
 
 * Ouvrir la feuille Excel en automation
 loXL = oXL()
-loWB = loXL.Workbooks.Open(m.tcXLWBAddr, .F., .T.)
-loWS = loWB.Worksheets(Iif(Vartype(m.tcSheet) == 'C' AND NOT Empty(m.tcSheet), m.tcSheet, 1))
+loWB = loXL.Workbooks.open(m.tcXLWBAddr, .f., .t.)
+loWS = loWB.Worksheets(iif(vartype(m.tcSheet) == 'C' and not empty(m.tcSheet), m.tcSheet, 1))
 loWF = m.loXL.WorksheetFunction
-lcResult = Space(0)
+lcResult = space(0)
 if !m.loXL.Calculation = -4105  && xlCalculationAutomatic
-	m.loWS.Calculate
+	m.loWS.calculate
 endif
-WITH m.loWS.UsedRange as Excel.Range
-	
-	* Pour chaque colonne
-	LOCAL lnCols, lnCol, lcCol, lnField, lcField, lnSuffix, lnRow, laCols[.Columns.Count, 6], luValue, lcType, lnLen
-	lnCols = Min(.Columns.Count, 254)
-	lnField = Iif(m.tlCursor, 128, 10)
-	FOR lnCol = 1 TO m.lnCols
+with m.loWS.UsedRange as Excel.range
+
+* Pour chaque colonne
+	local lnCols, lnCol, lcCol, lnField, lcField, lnSuffix, lnRow, laCols[.Columns.Count, 6], luValue, lcType, lnLen
+	lnCols = min(.columns.count, 254)
+	lnField = iif(m.tlCursor, 128, 10)
+	for lnCol = 1 to m.lnCols
 
 		lcType = 'U'
-		STORE 0 TO laCols[m.lnCol, 3], laCols[m.lnCol, 4]
-		FOR lnRow = 1 TO .Rows.Count
-			IF m.lnRow = 1
+		store 0 to laCols[m.lnCol, 3], laCols[m.lnCol, 4]
+		for lnRow = 1 to .rows.count
+			if m.lnRow = 1
 
-				* Première ligne : lire le nom du champ
-				lcCol = cVFPName(.Cells(1, m.lnCol).Value, m.lnField)
-				lcCol = Evl(m.lcCol, [Col] + Transform(m.lnCol))
+* Première ligne : lire le nom du champ
+				lcCol = cVFPName(.Cells(1, m.lnCol).value, m.lnField)
+				lcCol = evl(m.lcCol, [Col] + transform(m.lnCol))
 
-				* Dédoublonner le cas échéant
+* Dédoublonner le cas échéant
 				lcField = m.lcCol
 				lnSuffix = 0
-				DO WHILE Ascan(laCols, m.lcField, 1, -1, 1, 1+2+4) > 0
+				do while ascan(laCols, m.lcField, 1, -1, 1, 1+2+4) > 0
 					lnSuffix = m.lnSuffix + 1
-					lcField = Left(m.lcCol, m.lnField-2) + '_' + Transform(m.lnSuffix)
-				ENDDO
+					lcField = left(m.lcCol, m.lnField-2) + '_' + transform(m.lnSuffix)
+				enddo
 				laCols[m.lnCol, 1] = m.lcField
-			ELSE
+			else
 
-				* Autres lignes: déterminer le type du champ d'après le contenu
+* Autres lignes: déterminer le type du champ d'après le contenu
 				loRange = .Cells(m.lnRow, m.lnCol)
-				luValue = Iif(m.loRange.HasFormula() and m.loWF.IsError(m.loRange); && plantage si la cellule contient une erreur de formule http://stackoverflow.com/questions/2424718/how-to-know-if-a-cell-has-an-error-in-the-formula-in-c-sharp
+				luValue = iif(m.loRange.HasFormula() and m.loWF.IsError(m.loRange); && plantage si la cellule contient une erreur de formule http://stackoverflow.com/questions/2424718/how-to-know-if-a-cell-has-an-error-in-the-formula-in-c-sharp
 					, .null.;
-					, m.loRange.Value;
+					, m.loRange.value;
 					)
-				IF IsNull(m.luValue)
-					IF m.tlNULL
-						laCols[m.lnCol, 5] = .T.
-					ENDIF
-					LOOP
+				if isnull(m.luValue)
+					if m.tlNULL
+						laCols[m.lnCol, 5] = .t.
+					endif
+					loop
 
-				ELSE
+				else
 
-					lcType = Iif(m.lcType $ 'CMDT';
+					lcType = iif(m.lcType $ 'CMDT';
 						, m.lcType;
-						, Vartype(m.luValue);
+						, vartype(m.luValue);
 						)
-					
-					DO CASE
-					CASE m.lcType == 'C'
-						luValue = Transform(m.luValue)
-						lnLen = Evl(Len(Trim(m.luValue)), 1)
-						IF m.lnLen > 254 OR CRLF $ m.luValue
+
+					do case
+					case m.lcType == 'C'
+						luValue = transform(m.luValue)
+						lnLen = evl(len(trim(m.luValue)), 1)
+						if m.lnLen > 254 or CRLF $ m.luValue
 							lcType = 'M'
-							LOOP
-						ELSE
-							laCols[m.lnCol, 3] = Max(laCols[m.lnCol, 3] , m.lnLen)
-						ENDIF
-					CASE m.lcType == 'N'
-						laCols[m.lnCol, 3] = Max(laCols[m.lnCol, 3] , Len(Transform(m.luValue))) && à modifier pour point décimal
-					ENDCASE
-				ENDIF
-			ENDIF
-		ENDFOR
-		lcType = Iif(m.lcType == 'U', 'M', m.lcType)
+							loop
+						else
+							laCols[m.lnCol, 3] = max(laCols[m.lnCol, 3] , m.lnLen)
+						endif
+					case m.lcType == 'N'
+						laCols[m.lnCol, 3] = max(laCols[m.lnCol, 3] , len(transform(m.luValue))) && à modifier pour point décimal
+					endcase
+				endif
+			endif
+		endfor
+		lcType = iif(m.lcType == 'U', 'M', m.lcType)
 		laCols[m.lnCol, 2] = m.lcType
-		laCols[m.lnCol, 3] = ICase(m.lcType $ 'DT', 8, m.lcType $ 'BIM', 4, m.lcType == 'L', 1, laCols[m.lnCol, 3])
-	ENDFOR
-	
-	* Créer la table ou le curseur
-	LOCAL laFields[1], lnFields
+		laCols[m.lnCol, 3] = icase(m.lcType $ 'DT', 8, m.lcType $ 'BIM', 4, m.lcType == 'L', 1, laCols[m.lnCol, 3])
+	endfor
+
+* Créer la table ou le curseur
+	local laFields[1], lnFields
 	lnFields = 0
-	FOR lnCol = 1 TO m.lnCols
-		IF NOT Empty(laCols[m.lnCol, 1])
+	for lnCol = 1 to m.lnCols
+		if not empty(laCols[m.lnCol, 1])
 			lnFields = m.lnFields + 1
-			DIMENSION laFields[m.lnFields, 5]
+			dimension laFields[m.lnFields, 5]
 			laFields[m.lnFields, 1] = laCols[m.lnCol, 1]
 			laFields[m.lnFields, 2] = laCols[m.lnCol, 2]
 			laFields[m.lnFields, 3] = laCols[m.lnCol, 3]
 			laFields[m.lnFields, 4] = laCols[m.lnCol, 4]
 			laFields[m.lnFields, 5] = laCols[m.lnCol, 5]
 			laCols[m.lnCol, 6] = m.lnFields && pour correspondance lors du remplissage
-		ENDIF
-	ENDFOR
-	
-	IF NOT laEmpty(@taFieldAdd)
+		endif
+	endfor
+
+	if not laEmpty(@taFieldAdd)
 		aColsDel(@taFieldAdd, 6)
 		aAppend(@laFields, @taFieldAdd)
-	ENDIF
+	endif
 
-	lcResult = Iif(m.tlCursor, JustStem(m.tcTable), m.tcTable)
-	IF m.tlCursor
-		CREATE CURSOR (m.lcResult) FROM ARRAY laFields
-	ELSE
-		CREATE TABLE (m.lcResult) FREE FROM ARRAY laFields
-	ENDIF
-	
-	* Importer les données
-	LOCAL loTalk, luValue
+	lcResult = iif(m.tlCursor, juststem(m.tcTable), m.tcTable)
+	if m.tlCursor
+		create cursor (m.lcResult) from array laFields
+	else
+		create table (m.lcResult) free from array laFields
+	endif
+
+* Importer les données
+	local loTalk, luValue
 	loTalk = abSet('TALK', 'OFF')
-	FOR lnRow = 2 TO .Rows.Count
-		APPEND BLANK
-		FOR lnCol = 1 TO .Columns.Count
-			IF NOT Empty(laCols[m.lnCol, 1])
+	for lnRow = 2 to .rows.count
+		append blank
+		for lnCol = 1 to .columns.count
+			if not empty(laCols[m.lnCol, 1])
 				luValue = .Cells(m.lnRow, m.lnCol)
-				luValue = Iif(m.luValue.HasFormula() and m.loWF.IsError(m.luValue);
+				luValue = iif(m.luValue.HasFormula() and m.loWF.IsError(m.luValue);
 					, .null.;
-					, m.luValue.Value;
+					, m.luValue.value;
 					)
-				luValue = Iif(laCols[m.lnCol, 2] $ 'CM';
-					, Transform(Nvl(m.luValue, ''));
+				luValue = iif(laCols[m.lnCol, 2] $ 'CM';
+					, transform(nvl(m.luValue, ''));
 					, uValue(m.luValue, laCols[m.lnCol, 2]);
 					)
-				IF NOT m.tlNULL AND IsNull(m.luValue)
+				if not m.tlNULL and isnull(m.luValue)
 					lcType = laFields[m.lnCol, 2]
-					lcType = Iif(m.lcType $ 'M', 'C', m.lcType)
+					lcType = iif(m.lcType $ 'M', 'C', m.lcType)
 					luValue = uEmpty(m.lcType)
-				ENDIF
-				REPLACE (Field(laCols[m.lnCol, 6])) WITH m.luValue
-			ENDIF
-		ENDFOR
-	ENDFOR
-ENDWITH
+				endif
+				replace (field(laCols[m.lnCol, 6])) with m.luValue
+			endif
+		endfor
+	endfor
+endwith
 
-loWB.Close
-loXL.Quit
+loWB.close
+loXL.quit
 
-FreeTableSlim(Alias(), 20) && 20% de marge
+FreeTableSlim(alias(), 20) && 20% de marge
 
-IF NOT m.tlCursor
-	USE
-ENDIF
+if not m.tlCursor
+	use
+endif
 
-RETURN m.lcResult
+return m.lcResult
 
 *========================================
-PROCEDURE XL8table_ModiStru	&& Renomme les champs selon la première ligne de la feuille XL
-LPARAMETERS ;
+procedure XL8table_ModiStru	&& Renomme les champs selon la première ligne de la feuille XL
+lparameters ;
 	tcAlias,;	&& Alias de la table importée d'Excel
 	tlCursor,; && [.F.] produire un curseur
 	taFieldAdd && @ Champs additionnels éventuels
 tlCursor = lTrue(m.tlCursor)
-EXTERNAL ARRAY taFieldAdd
+external array taFieldAdd
 
-LOCAL llResult, lcResult && Alias du résultat
+local llResult, lcResult && Alias du résultat
 
 * Si la table peut être ouverte en exclusif
 lcResult = ExclusiveForce(m.tcAlias)
-llResult = Used(m.lcResult)
-IF m.llResult
+llResult = used(m.lcResult)
+if m.llResult
 
-	LOCAL loSelect,;
+	local loSelect,;
 		lnFields,;
 		laFields[1],;
 		lnField,;	&&	ne pas utiliser 'i' qui est un nom de colonne XL
@@ -1749,103 +1749,103 @@ IF m.llResult
 		lcDelete,;
 		lcAddr
 
-	* Lire la structure de la table
+* Lire la structure de la table
 	loSelect = abSelect(m.lcResult)
-	lnFields = AFields(laFields)
+	lnFields = afields(laFields)
 
-	* Lire les nouveaux noms des champs dans la première ligne et supprimer celle-ci
-	GO 1
-	SCATTER TO laFieldsNew MEMO
-	DELETE
-	PACK
+* Lire les nouveaux noms des champs dans la première ligne et supprimer celle-ci
+	go 1
+	scatter to laFieldsNew memo
+	delete
+	pack
 
-	* Pour chaque champ de la table
-	STORE Space(0) TO lcAlter, lcDelete
-	FOR m.lnField = m.lnFields TO 1 STEP -1
+* Pour chaque champ de la table
+	store space(0) to lcAlter, lcDelete
+	for m.lnField = m.lnFields to 1 step -1
 		lcField = laFields[m.lnField, 1]
 
-		* Si le nouveau nom est vide
+* Si le nouveau nom est vide
 		lcFieldNew = laFieldsNew[m.lnField]
-		lcFieldNew = Iif(Vartype(m.lcFieldNew) == 'C', Upper(Alltrim(m.lcFieldNew)), Space(0)) && toujours vrai en principe
-		IF Empty(m.lcFieldNew)
+		lcFieldNew = iif(vartype(m.lcFieldNew) == 'C', upper(alltrim(m.lcFieldNew)), space(0)) && toujours vrai en principe
+		if empty(m.lcFieldNew)
 
-			* Supprimer le champ
-			lcDelete = Textmerge([<<m.lcDelete>> DROP COLUMN <<m.lcField>>])
-			IF m.tlCursor
-				Adel(laFields, m.lnField)
-			ENDIF
+* Supprimer le champ
+			lcDelete = textmerge([<<m.lcDelete>> DROP COLUMN <<m.lcField>>])
+			if m.tlCursor
+				adel(laFields, m.lnField)
+			endif
 			lnFields = m.lnFields - 1
 
-		* Sinon (nouveau nom de champ non vide)
-		ELSE
+* Sinon (nouveau nom de champ non vide)
+		else
 
-			* Normaliser le nom du champ
-			lcFieldNew = cVFPName(m.lcFieldNew, Iif(m.tlCursor, 128, 10))
+* Normaliser le nom du champ
+			lcFieldNew = cVFPName(m.lcFieldNew, iif(m.tlCursor, 128, 10))
 
-			* Si le nom du champ existe déjà, lui donner un suffixe numérique
+* Si le nom du champ existe déjà, lui donner un suffixe numérique
 			lnSuffix = 0
-			DO WHILE Ascan(laFields, m.lcFieldNew, 1, -1, 1, 2+4) > 0
+			do while ascan(laFields, m.lcFieldNew, 1, -1, 1, 2+4) > 0
 				lnSuffix = m.lnSuffix + 1
-				lcSuffix = Transform(m.lnSuffix)
-				lcFieldNew = Substr(m.lcFieldNew, 1, 10-Len(m.lcSuffix)) + m.lcSuffix
-			ENDDO
+				lcSuffix = transform(m.lnSuffix)
+				lcFieldNew = substr(m.lcFieldNew, 1, 10-len(m.lcSuffix)) + m.lcSuffix
+			enddo
 
-			* Renommer le champ
-			IF m.tlCursor
+* Renommer le champ
+			if m.tlCursor
 				laFields[m.lnField, 1] = m.lcFieldNew
-			ELSE
-				lcAlter = Textmerge([<<m.lcAlter>> RENAME COLUMN <<m.lcField>> TO <<m.lcFieldNew>>])
-			ENDIF
-		ENDIF
-	ENDFOR
-	
-	* Si des champs additionnels sont demandés
-	IF NOT laEmpty(@taFieldAdd)
-		IF m.tlCursor
+			else
+				lcAlter = textmerge([<<m.lcAlter>> RENAME COLUMN <<m.lcField>> TO <<m.lcFieldNew>>])
+			endif
+		endif
+	endfor
+
+* Si des champs additionnels sont demandés
+	if not laEmpty(@taFieldAdd)
+		if m.tlCursor
 			aAppend(@laFields, @taFieldAdd)
-		ELSE
-			FOR lnField = 1 TO Alen(taFieldAdd, 1)
+		else
+			for lnField = 1 to alen(taFieldAdd, 1)
 				lcField = cFieldExp(taFieldAdd[m.lnField, 1], taFieldAdd[m.lnField, 2], taFieldAdd[m.lnField, 3], taFieldAdd[m.lnField, 4], taFieldAdd[m.lnField, 5])
-				lcAlter = Textmerge([<<m.lcAlter>> ADD COLUMN <<m.lcField>>])
-			NEXT
-		ENDIF
-	ENDIF
+				lcAlter = textmerge([<<m.lcAlter>> ADD COLUMN <<m.lcField>>])
+			next
+		endif
+	endif
 
-	* Si un curseur a été demandé
+* Si un curseur a été demandé
 	lcAddr = cTableAddress(m.lcResult)
-	IF m.tlCursor
+	if m.tlCursor
 
-		LOCAL lcCursor, laData[1]
-		
-		* Créer le curseur
-		lcCursor = Sys(2015)
-		CREATE CURSOR (m.lcCursor) FROM ARRAY laFields
+		local lcCursor, laData[1]
 
-		* Supprimer les champs inutiles de la table
-		ALTER TABLE (m.lcResult) &lcDelete
-		
-		* Remplir avec les données de la table
-		SELECT (m.lcResult)
-		SCAN
-			SCATTER TO laData
-			INSERT INTO (m.lcCursor) FROM ARRAY laData
-		ENDSCAN
-		USE
-		
-		* Supprimer la table qui ne sert plus à rien
-		DELETE FILE (m.lcAddr)
+* Créer le curseur
+		lcCursor = sys(2015)
+		create cursor (m.lcCursor) from array laFields
+
+* Supprimer les champs inutiles de la table
+		alter table (m.lcResult) &lcDelete
+
+* Remplir avec les données de la table
+		select (m.lcResult)
+		scan
+			scatter to laData
+			insert into (m.lcCursor) from array laData
+		endscan
+		use
+
+* Supprimer la table qui ne sert plus à rien
+		delete file (m.lcAddr)
 
 		lcResult = m.lcCursor
-	
-	* Sinon (table)
-	ELSE
-		ALTER TABLE (m.lcResult) &lcDelete &lcAlter
-	ENDIF
 
-	DELETE FILE (ForceExt(m.lcAddr, 'BAK')) && Supprime le fichier de sauvegarde
-ENDIF
+* Sinon (table)
+	else
+		alter table (m.lcResult) &lcDelete &lcAlter
+	endif
 
-RETURN m.lcResult
+	delete file (forceext(m.lcAddr, 'BAK')) && Supprime le fichier de sauvegarde
+endif
+
+return m.lcResult
 
 *-					* Si le champ est numérique, le passer en caractères et supprimer les espaces en tête
 *-					IF laFields[m.lnField, 2] == 'N'
@@ -1855,335 +1855,335 @@ RETURN m.lcResult
 *-					ENDIF
 
 *========================================
-PROCEDURE XL8Tables	&& Importe les feuilles d'un Classeur Excel 97 dans des tables (cf. XL8table())
-LPARAMETERS ;
+procedure XL8Tables	&& Importe les feuilles d'un Classeur Excel 97 dans des tables (cf. XL8table())
+lparameters ;
 	taXL8Table,; && @ Tables crées ou rafraîchies ; Col 1 : Adresse, Col 2 : Rafraîchie (.T./.F.)
 	tcXLWBAddr,; && Adresse du MASQUE de classeur Excel contenant les feuille à importer
 	tlNonVerifDernVers,;	&& [.F.] Ne pas prendre la dernière version du classeur Excel
 	tlImportForce && [.F.] Importer même si le classeur est plus ancien que la table
-EXTERNAL ARRAY taXL8Table
+external array taXL8Table
 tlNonVerifDernVers = lTrue(m.tlNonVerifDernVers)
 tlImportForce = lTrue(m.tlImportForce)
 
 aClear(@m.taXL8Table)
 
-LOCAL lcXLWBAddr, llResult, lnResult && Nombre de tables crées ou rafraîchies
+local lcXLWBAddr, llResult, lnResult && Nombre de tables crées ou rafraîchies
 lnResult = 0
 
 * Si un classeur existe selon le masque spécifié
-lcXLWBAddr = Iif(m.tlNonVerifDernVers, m.tcXLWBAddr, cFileFreshest(m.tcXLWBAddr))
-llResult = File(m.lcXLWBAddr)
-ASSERT m.llResult MESSAGE cAssertMsg(Textmerge("Impossible de trouver un classeur XL suivant le masque : <<cLitteral(m.tcXLWBAddr)>>"))
-IF m.llResult
-	
-	* Ouvrir Excel en automation si pas encore fait
-	LOCAL loXL
-	loXL = Vartype(m.poXL) == 'O' AND loXL(m.poXL)
-	IF NOT m.loXL
-		PRIVATE poXL as Excel.Application
-		poXL = oXL()
-	ENDIF
-	llResult = loXL(m.poXL)
-	ASSERT m.llResult MESSAGE "Impossible d'ouvrir Excel en automation"
-	IF m.llResult
+lcXLWBAddr = iif(m.tlNonVerifDernVers, m.tcXLWBAddr, cFileFreshest(m.tcXLWBAddr))
+llResult = file(m.lcXLWBAddr)
+assert m.llResult message cAssertMsg(textmerge("Impossible de trouver un classeur XL suivant le masque : <<cLitteral(m.tcXLWBAddr)>>"))
+if m.llResult
 
-		* Si le classeur contient au moins une feuille de calcul
-		LOCAL lnXLWSs, laXLWSs[1]
+* Ouvrir Excel en automation si pas encore fait
+	local loXL
+	loXL = vartype(m.poXL) == 'O' and loXL(m.poXL)
+	if not m.loXL
+		private poXL as Excel.application
+		poXL = oXL()
+	endif
+	llResult = loXL(m.poXL)
+	assert m.llResult message "Impossible d'ouvrir Excel en automation"
+	if m.llResult
+
+* Si le classeur contient au moins une feuille de calcul
+		local lnXLWSs, laXLWSs[1]
 		lnXLWSs = acXLWSs(@laXLWSs, m.lcXLWBAddr)
 		llResult = m.lnXLWSs > 0
-		ASSERT m.llResult MESSAGE "Aucune feuille trouvée dans le classeur" + Space(1) + m.lcXLWBAddr
-		IF m.llResult
+		assert m.llResult message "Aucune feuille trouvée dans le classeur" + space(1) + m.lcXLWBAddr
+		if m.llResult
 
-			* Pour chaque feuille de calcul
-			LOCAL lcXLWS, llUpdate, lcDBFAdr
-			FOR EACH m.lcXLWS IN laXLWSs
-				
-				* Si la feuille peut être importée dans une table
-				llUpdate = .F.
+* Pour chaque feuille de calcul
+			local lcXLWS, llUpdate, lcDBFAdr
+			for each m.lcXLWS in laXLWSs
+
+* Si la feuille peut être importée dans une table
+				llUpdate = .f.
 				lcDBFAdr = XL8table(m.lcXLWBAddr, m.lcXLWS, @llUpdate, m.tlImportForce)
-				IF File(m.lcDBFAdr)
+				if file(m.lcDBFAdr)
 
-					* Mémoriser l'adresse de la table
+* Mémoriser l'adresse de la table
 					lnResult = m.lnResult + 1
-					DIMENSION taXL8Table[m.lnResult, 2]
+					dimension taXL8Table[m.lnResult, 2]
 					taXL8Table[m.lnResult, 1] = m.lcDBFAdr
 					taXL8Table[m.lnResult, 2] = m.llUpdate
-				ENDIF
-			ENDFOR
-		ENDIF
+				endif
+			endfor
+		endif
 
-		IF NOT m.loXL
+		if not m.loXL
 			poXL.quit
-			RELEASE m.poXL
-		ENDIF
-	ENDIF
-ENDIF
+			release m.poXL
+		endif
+	endif
+endif
 
-RETURN m.lnResult
+return m.lnResult
 
 * =====================================
-DEFINE CLASS abWord as Relation
+define class abWord as relation
 * =====================================
 
 && Read/write
-cDefaultFolder = Sys(5) + Addbs(Curdir()) && Dossier par défaut
+cDefaultFolder = sys(5) + addbs(curdir()) && Dossier par défaut
 
 && Read only
 iVersion = 0
 
 && Hidden
-HIDDEN ARRAY aFileConverters[1]
-HIDDEN oWord
-oWord = .NULL. && AS Word.Application
+hidden array aFileConverters[1]
+hidden oWord
+oWord = .null. && AS Word.Application
 
 * -------------------------------------
-PROTECTED PROCEDURE Init && Instancie Word.Application
-LOCAL loExcept, llResult
-TRY
-	this.oWord = CreateObject('Word.Application')
-	WITH m.this.oWord as Word.Application
+protected procedure init && Instancie Word.Application
+local loExcept, llResult
+try
+	this.oWord = createobject('Word.Application')
+	with m.this.oWord as word.application
 		.DisplayAlerts = 0 && wdAlertsNone
 		this.Init_aFileConverters
-	ENDWITH
-	llResult = .T.
-CATCH TO loExcept
-ENDTRY
+	endwith
+	llResult = .t.
+catch to loExcept
+endtry
 
-RETURN m.llResult && si .F., l'objet n'est pas créé
-
-* -------------------------------------
-HIDDEN PROCEDURE iVersion_Access
-RETURN Int(Val(this.oWord.Version)) && 8: Word 97, etc.
+return m.llResult && si .F., l'objet n'est pas créé
 
 * -------------------------------------
-HIDDEN PROCEDURE Init_aFileConverters && Tabule les convertisseurs de fichiers
-IF .FileConverters.Count > 0
+hidden procedure iVersion_Access
+return int(val(this.oWord.version)) && 8: Word 97, etc.
 
-	LOCAL lnConv, loConv as Word.FileConverter
-	DIMENSION this.aFileConverters[.FileConverters.Count, 5]
-	FOR lnConv = 1 TO .FileConverters.Count
+* -------------------------------------
+hidden procedure Init_aFileConverters && Tabule les convertisseurs de fichiers
+if .FileConverters.count > 0
+
+	local lnConv, loConv as word.FileConverter
+	dimension this.aFileConverters[.FileConverters.Count, 5]
+	for lnConv = 1 to .FileConverters.count
 
 		loConv = .FileConverters(m.lnConv)
-		WITH loConv as Word.FileConverter
+		with loConv as word.FileConverter
 
 			this.aFileConverters[m.lnConv, 1] = .ClassName
 			this.aFileConverters[m.lnConv, 2] = .FormatName
 			this.aFileConverters[m.lnConv, 3] = .Extensions
-			this.aFileConverters[m.lnConv, 4] = Iif(.CanOpen, .OpenFormat, wdOpenFormatAuto)
-			this.aFileConverters[m.lnConv, 5] = Iif(.CanSave, .SaveFormat, wdFormatDocument)
-		ENDWITH
-	NEXT
-ENDIF
+			this.aFileConverters[m.lnConv, 4] = iif(.CanOpen, .OpenFormat, wdOpenFormatAuto)
+			this.aFileConverters[m.lnConv, 5] = iif(.CanSave, .SaveFormat, wdFormatDocument)
+		endwith
+	next
+endif
 
 * -------------------------------------
-PROCEDURE FileConvertersDisplay && Affiche les convertisseurs de fichiers
-LOCAL lnConv
-FOR lnConv = 1 TO Alen(m.this.aFileConverters, 1)
+procedure FileConvertersDisplay && Affiche les convertisseurs de fichiers
+local lnConv
+for lnConv = 1 to alen(m.this.aFileConverters, 1)
 	? this.aFileConverters[m.lnConv, 1];
-		+ Chr(9) + this.aFileConverters[m.lnConv, 2];
-		+ Chr(9) + this.aFileConverters[m.lnConv, 3];
-		+ Chr(9) + Transform(this.aFileConverters[m.lnConv, 4]);
-		+ Chr(9) + Transform(this.aFileConverters[m.lnConv, 5])
-NEXT
+		+ chr(9) + this.aFileConverters[m.lnConv, 2];
+		+ chr(9) + this.aFileConverters[m.lnConv, 3];
+		+ chr(9) + transform(this.aFileConverters[m.lnConv, 4]);
+		+ chr(9) + transform(this.aFileConverters[m.lnConv, 5])
+next
 
 * -------------------------------------
-PROTECTED PROCEDURE wdFormat && Code format d'ouverture / sauvegarde
-LPARAMETERS ;
+protected procedure wdFormat && Code format d'ouverture / sauvegarde
+lparameters ;
 	tcClass,; && Classe de conversion de document (cf. this.oDoc)
 	tlSave && [.F.] .T.: format de sauvegarde ; .F. : format d'ouverture
 tlSave = lTrue(m.tlSave)
 
-LOCAL lnConv, lnResult && Code format
+local lnConv, lnResult && Code format
 
-lnResult = Iif(m.tlSave, wdFormatDocument, wdOpenFormatAuto) && Code par défaut
-IF Vartype(m.tcClass) == 'C' AND NOT Empty(m.tcClass)
+lnResult = iif(m.tlSave, wdFormatDocument, wdOpenFormatAuto) && Code par défaut
+if vartype(m.tcClass) == 'C' and not empty(m.tcClass)
 
-	lnConv = Ascan(m.this.aFileConverters, m.tcClass, 1, -1, 1, 15)
-	IF m.lnConv > 0
+	lnConv = ascan(m.this.aFileConverters, m.tcClass, 1, -1, 1, 15)
+	if m.lnConv > 0
 
 		lnResult = this.aFileConverters[m.lnConv, Iif(m.tlSave, 5, 4)]
-	ENDIF
-ENDIF
+	endif
+endif
 
-RETURN m.lnResult
-
-* -------------------------------------
-HIDDEN PROCEDURE cFullPath && Chemin complet d'un fichier
-LPARAMETERS tcFile
-RETURN ICase(;
-	File(m.tcFile), FullPath(m.tcFile),;
-	Directory(JustPath(m.tcFile)), Addbs(FullPath(JustPath(m.tcFile))) + JustFname(m.tcFile),;
-	this.cDefaultFolder + JustFname(m.tcFile))
+return m.lnResult
 
 * -------------------------------------
-FUNCTION oDoc && Ouvre un document et fournit sa référence
-LPARAMETERS ;
+hidden procedure cFullPath && Chemin complet d'un fichier
+lparameters tcFile
+return icase(;
+	file(m.tcFile), fullpath(m.tcFile),;
+	directory(justpath(m.tcFile)), addbs(fullpath(justpath(m.tcFile))) + justfname(m.tcFile),;
+	this.cDefaultFolder + justfname(m.tcFile))
+
+* -------------------------------------
+function oDoc && Ouvre un document et fournit sa référence
+lparameters ;
 	tcFileSrce,; && Document source
 	tcClassSrce,; && Classe de conversion si l'extension est ambiguë
 	tcPassWord && [''] mot de passe à l'ouverture
-tcPassWord = Iif(Vartype(m.tcPassWord) == 'C', m.tcPassWord, Space(0))
-	
-LOCAL llResult, lnFormat, loExcept as Exception, loResult AS Word.Document
-loResult = .NULL.
-llResult = Vartype(m.tcFileSrce) == 'C' AND File(m.tcFileSrce)
-ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([<<Program()>> - Le fichier <<m.tcFileSrce>> est introuvable]))
-IF m.llResult
+tcPassWord = iif(vartype(m.tcPassWord) == 'C', m.tcPassWord, space(0))
 
-	tcFileSrce = FullPath(m.tcFileSrce)
+local llResult, lnFormat, loExcept as exception, loResult as word.document
+loResult = .null.
+llResult = vartype(m.tcFileSrce) == 'C' and file(m.tcFileSrce)
+assert m.llResult message cAssertMsg(textmerge([<<Program()>> - Le fichier <<m.tcFileSrce>> est introuvable]))
+if m.llResult
+
+	tcFileSrce = fullpath(m.tcFileSrce)
 	lnFormat = this.wdFormat(m.tcClassSrce)
-	WITH this.oWord.Documents as Word.Documents
+	with this.oWord.Documents as word.Documents
 
-		TRY && Abaque > ThN : à cause d'un pb d'installation Word 97, la première ouverture envoie un message d'erreur 'base de registre ...'
-			loResult = .Open(m.tcFileSrce, .F., .F., .F., m.tcPassWord, '', .F., m.tcPassWord, '', m.lnFormat)
-		CATCH TO loExcept
-		ENDTRY
-		loResult = Nvl(m.loResult, .Open(m.tcFileSrce, .F., .F., .F., m.tcPassWord, '', .F., m.tcPassWord, '', m.lnFormat))
-		
-		* Masquer le document
-		IF Vartype(m.loResult) == 'O'
-			loResult.Application.Visible = .F.
-		ENDIF
-	ENDWITH
-ENDIF
+		try && Abaque > ThN : à cause d'un pb d'installation Word 97, la première ouverture envoie un message d'erreur 'base de registre ...'
+			loResult = .open(m.tcFileSrce, .f., .f., .f., m.tcPassWord, '', .f., m.tcPassWord, '', m.lnFormat)
+		catch to loExcept
+		endtry
+		loResult = nvl(m.loResult, .open(m.tcFileSrce, .f., .f., .f., m.tcPassWord, '', .f., m.tcPassWord, '', m.lnFormat))
 
-RETURN m.loResult
+* Masquer le document
+		if vartype(m.loResult) == 'O'
+			loResult.application.visible = .f.
+		endif
+	endwith
+endif
 
-* -------------------------------------
-HIDDEN FUNCTION oDocDefault && Document par défaut
-LPARAMETERS toDoc AS Word.Document, tnDoc && @ n° de document
-
-LOCAL llResult
-
-toDoc = ICase(.F., .NULL.;
-	, Vartype(m.toDoc) == 'O', m.toDoc;
-	, Type('this.oWord.Documents(1)') == 'O', this.oWord.Documents(1);
-	, .NULL.)
-llResult = Vartype(m.toDoc) == 'O'
-ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([<<Program()>> - Aucun document n'est ouvert dans Word ...]))
-IF m.llResult
-
-	* Trouver le n° du document
-	FOR tnDoc = 1 TO this.oWord.Documents.Count
-		IF this.oWord.Documents(m.tnDoc).FullName == m.toDoc.FullName && this.oWord.Documents(m.tnDoc) = m.toDoc ne marche pas en automation
-			EXIT
-		ENDIF
-	NEXT
-ENDIF
-
-RETURN m.toDoc
+return m.loResult
 
 * -------------------------------------
-PROCEDURE oDocConvert && Sauvegarde un document dans un autre format (si supporté)
-LPARAMETERS ;
+hidden function oDocDefault && Document par défaut
+lparameters toDoc as word.document, tnDoc && @ n° de document
+
+local llResult
+
+toDoc = icase(.f., .null.;
+	, vartype(m.toDoc) == 'O', m.toDoc;
+	, type('this.oWord.Documents(1)') == 'O', this.oWord.Documents(1);
+	, .null.)
+llResult = vartype(m.toDoc) == 'O'
+assert m.llResult message cAssertMsg(textmerge([<<Program()>> - Aucun document n'est ouvert dans Word ...]))
+if m.llResult
+
+* Trouver le n° du document
+	for tnDoc = 1 to this.oWord.Documents.count
+		if this.oWord.Documents(m.tnDoc).fullname == m.toDoc.fullname && this.oWord.Documents(m.tnDoc) = m.toDoc ne marche pas en automation
+			exit
+		endif
+	next
+endif
+
+return m.toDoc
+
+* -------------------------------------
+procedure oDocConvert && Sauvegarde un document dans un autre format (si supporté)
+lparameters ;
 	tcFileDest,; && @ Adresse du fichier destination
 	tcClassDest,; && Classe de conversion si l'extension est ambiguë
 	tcPassWord,; && [''] mot de passe
 	toDoc && [Documents(1)] Référence au document source
-tcPassWord = Iif(Vartype(m.tcPassWord) == 'C', m.tcPassWord, Space(0))
-LOCAL loException, lnFormat, llResult
+tcPassWord = iif(vartype(m.tcPassWord) == 'C', m.tcPassWord, space(0))
+local loException, lnFormat, llResult
 
 toDoc = this.oDocDefault(m.toDoc)
-llResult = Vartype(m.toDoc) == 'O'
-IF m.llResult
+llResult = vartype(m.toDoc) == 'O'
+if m.llResult
 
 	tcFileDest = this.cFullPath(m.tcFileDest)
-	lnFormat = this.wdFormat(m.tcClassDest, .T.)
+	lnFormat = this.wdFormat(m.tcClassDest, .t.)
 
-	DELETE FILE (m.tcFileDest)
-	TRY
-		toDoc.SaveAs(m.tcFileDest, m.lnFormat, .F., m.tcPassWord)
-	CATCH TO loException
-	ENDTRY
+	delete file (m.tcFileDest)
+	try
+		toDoc.saveas(m.tcFileDest, m.lnFormat, .f., m.tcPassWord)
+	catch to loException
+	endtry
 	llResult = lFile(m.tcFileDest)
-	IF NOT m.llResult && Abaque ThN : Word 97 me fait des misères
+	if not m.llResult && Abaque ThN : Word 97 me fait des misères
 
-		toDoc.SaveAs(m.tcFileDest, m.lnFormat, .F., m.tcPassWord)
+		toDoc.saveas(m.tcFileDest, m.lnFormat, .f., m.tcPassWord)
 		llResult = lFile(m.tcFileDest)
-	ENDIF
-ENDIF
+	endif
+endif
 
-RETURN m.llResult
+return m.llResult
 
 * -------------------------------------
-PROCEDURE Convert && Ouvre un document et le convertit dans un autre format (si supporté)
-LPARAMETERS ;
+procedure Convert && Ouvre un document et le convertit dans un autre format (si supporté)
+lparameters ;
 	tcFileSrce,; && Document source
 	tcClassSrce,; && Classe de conversion si l'extension est ambiguë
 	tcFileDest,; && @ Adresse du fichier destination
 	tcClassDest,; && Classe de conversion si l'extension est ambiguë
 	tcPassWord && [''] mot de passe
-LOCAL loDoc
+local loDoc
 loDoc = this.oDoc(m.tcFileSrce, m.tcClassSrce, m.tcPassWord)
 
-RETURN Vartype(m.loDoc) == 'O';
- AND this.oDocConvert(m.tcFileDest, m.tcClassDest, m.tcPassWord, m.loDoc);
- AND Nvl(loDoc.Close(.F.), .T.) && .F.: no save
+return vartype(m.loDoc) == 'O';
+ and this.oDocConvert(m.tcFileDest, m.tcClassDest, m.tcPassWord, m.loDoc);
+ and nvl(loDoc.close(.f.), .t.) && .F.: no save
 
 * -------------------------------------
-PROCEDURE UserEdit && Donne la main à l'utilisateur pour éditer un document
-LPARAMETERS toDoc as Word.Document && [Documents(1)] Référence au document source
-LOCAL lnDoc, llResult
+procedure UserEdit && Donne la main à l'utilisateur pour éditer un document
+lparameters toDoc as word.document && [Documents(1)] Référence au document source
+local lnDoc, llResult
 
 toDoc = this.oDocDefault(m.toDoc, @lnDoc)
-llResult = Vartype(m.toDoc) == 'O'
-IF m.llResult
+llResult = vartype(m.toDoc) == 'O'
+if m.llResult
 
 *		this.PreventClose && sinon ça génère des erreurs && en fait ça marche presque à tous les coups sur Word 97
-	toDoc.Activate
-	WITH m.this.oWord as Word.Application
+	toDoc.activate
+	with m.this.oWord as word.application
 
-		.ActiveWindow.View.Type = 1  && wdNormalView
-		.Top = Max(.Top, 0)
-		.Visible = .T.
-		.Activate
+		.ActiveWindow.view.type = 1  && wdNormalView
+		.top = max(.top, 0)
+		.visible = .t.
+		.activate
 
-		* Afficher un message [Enregistrez et fermez le document pour revenir à la console] && pas trouvé comment faire :-(
-		
-		* Attendre que l'utilisateur ait fini ses modifications
-		DO WHILE Type(Textmerge('.Documents(<<m.lnDoc>>)')) == 'O'
-			Inkey(.5)
-		ENDDO
-	ENDWITH
+* Afficher un message [Enregistrez et fermez le document pour revenir à la console] && pas trouvé comment faire :-(
 
-	IF Type('this.oWord.Application') == 'O' && L'utilisateur peut avoir fermé Word par la X
-		this.oWord.Visible = .F.
-	ENDIF
-ENDIF
+* Attendre que l'utilisateur ait fini ses modifications
+		do while type(textmerge('.Documents(<<m.lnDoc>>)')) == 'O'
+			inkey(.5)
+		enddo
+	endwith
 
-RETURN m.llResult
+	if type('this.oWord.Application') == 'O' && L'utilisateur peut avoir fermé Word par la X
+		this.oWord.visible = .f.
+	endif
+endif
+
+return m.llResult
 
 * -------------------------------------
-PROCEDURE PreventClose && Empêche de fermer Word && Mike Gagnon sur AtoutFox
+procedure PreventClose && Empêche de fermer Word && Mike Gagnon sur AtoutFox
 
-DECLARE Integer FindWindow In user32 String lpClassName, String lpWindowName
-DECLARE Integer GetSystemMenu In user32 Integer hWnd, Integer bRevert
-DECLARE Integer RemoveMenu In user32 Integer hMenu, Integer nPosition, Integer wFlags
+declare integer FindWindow in user32 string lpClassName, string lpWindowName
+declare integer GetSystemMenu in user32 integer hwnd, integer bRevert
+declare integer RemoveMenu in user32 integer hMenu, integer nPosition, integer wFlags
 
-LOCAL lhWin, lhMenu, lnMenu
+local lhWin, lhMenu, lnMenu
 lhWin = FindWindow("OPUSApp", 0) &&"OPUSApp" est le nom de la Classe Word
 lhMenu = GetSystemMenu(lhWin, 0)
-FOR lnMenu = 6 TO 0 STEP -1
+for lnMenu = 6 to 0 step -1
  RemoveMenu(lhMenu, m.lnMenu, 1024) && MF_BYPOSITION
-NEXT
+next
 
-this.oWord.Top = Max(this.oWord.Top, 0) && on ne peut plus bouger la fenêtre
+this.oWord.top = max(this.oWord.top, 0) && on ne peut plus bouger la fenêtre
 
 * this.oWord.CommandBars('File').Controls('Quit').Enabled = .F. && ne marche pas
 
 * -------------------------------------
-PROCEDURE Destroy
+procedure destroy
 
-LOCAL loExcept as Exception
-TRY && Type('this.oWord.Documents') == 'O' alors que l'utilisateur a fermé Word ...
-	IF Type('this.oWord.Documents') == 'O'
-		IF this.oWord.Documents.Count > 0
-			this.oWord.Documents.Close(.F.) && ferme tous les documents
-		ENDIF
-		this.oWord.Quit
-	ENDIF
-CATCH TO loExcept
-ENDTRY
+local loExcept as exception
+try && Type('this.oWord.Documents') == 'O' alors que l'utilisateur a fermé Word ...
+	if type('this.oWord.Documents') == 'O'
+		if this.oWord.Documents.count > 0
+			this.oWord.Documents.close(.f.) && ferme tous les documents
+		endif
+		this.oWord.quit
+	endif
+catch to loExcept
+endtry
 
 * =====================================
-ENDDEFINE && CLASS abWord
+enddefine && CLASS abWord
 * =====================================

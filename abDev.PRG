@@ -9,7 +9,7 @@
 * La présente mention doit être intégralement reproduite
 && dans toute copie même partielle
 * -----------------------------------------------------
-* This software is distributed under the terms of GNU General Public License, AS IS, without any warranty 
+* This software is distributed under the terms of GNU General Public License, AS IS, without any warranty
 * It may be used and/or distributed without restriction
 * Any substantial improvement must be given for free to the community
 * This permission notice shall be entirely included in all copies
@@ -21,261 +21,261 @@ AB()
 return abUnitTests()
 
 * =================================================
-DEFINE CLASS cusBatchLog AS Custom && Trace un processus répétitif dans un tableau à l'écran
+define class cusBatchLog as custom && Trace un processus répétitif dans un tableau à l'écran
 * =================================================
 
 * Valeurs initiales
-alConsole = .F.
-alFooter = .F.
-acScreenFont = .NULL.
-anScreenFontSize = .NULL.
+alConsole = .f.
+alFooter = .f.
+acScreenFont = .null.
+anScreenFontSize = .null.
 
 * -------------------------------
- && Contenu des lignes du tableau de compte rendu
-#DEFINE  L_cHEADER		1 && Texte de l'en-tête de la colonne
-#DEFINE  L_uVALUE	 		2 && Ligne courante : contenu original de la cellule
-#DEFINE  L_cTYPE	 		3 && Ligne courante : type du contenu original
-#DEFINE  L_cDISPLAY		4 && Ligne courante : contenu affiché (en caractères bien sûr)
-#DEFINE  L_lBORDER		5 && La colonne est délimitée par des barres verticales
-#DEFINE  L_nWIDTH			6 && Largeur utilisable pour affichage dans la colonne (foxels)
-#DEFINE  L_cID				7 && Identifiant de la colonne
-#DEFINE  L_nSUM				8 && Cumul de la donnée si elle est numérique
-#DEFINE  L_lSUM				9 && Sommer / moyenner la donnée en fin d'état si elle est numérique
-#DEFINE  L_cFORMAT		10 && Format pour Transform()
-#DEFINE  L_COUNT 			L_cFORMAT
+&& Contenu des lignes du tableau de compte rendu
+#define  L_cHEADER		1 && Texte de l'en-tête de la colonne
+#define  L_uVALUE	 		2 && Ligne courante : contenu original de la cellule
+#define  L_cTYPE	 		3 && Ligne courante : type du contenu original
+#define  L_cDISPLAY		4 && Ligne courante : contenu affiché (en caractères bien sûr)
+#define  L_lBORDER		5 && La colonne est délimitée par des barres verticales
+#define  L_nWIDTH			6 && Largeur utilisable pour affichage dans la colonne (foxels)
+#define  L_cID				7 && Identifiant de la colonne
+#define  L_nSUM				8 && Cumul de la donnée si elle est numérique
+#define  L_lSUM				9 && Sommer / moyenner la donnée en fin d'état si elle est numérique
+#define  L_cFORMAT		10 && Format pour Transform()
+#define  L_COUNT 			L_cFORMAT
 * -------------------------------
-DIMENSION aaLog[;
+dimension aaLog[;
 				L_COUNT; && une ligne par caractéristique
 			, 1] && une colonne par colonne de log
 
 anCols = 0
 
-acLine = Space(0) && Contenu de la ligne courante
+acLine = space(0) && Contenu de la ligne courante
 anLine = 0 && N° de la ligne courante
 anDataLines = 0 && Nombre de lignes contenant des données
 
-acWarnings = Space(0) && Avertissements déjà émis
+acWarnings = space(0) && Avertissements déjà émis
 
 * Adresses des fichiers
-acTxtLogAddr = Space(0)
-acWarnTxtLogAddr = Space(0)
-acDBFlogAddr = Space(0)
-acDBFlogAlias = Space(0)
+acTxtLogAddr = space(0)
+acWarnTxtLogAddr = space(0)
+acDBFlogAddr = space(0)
+acDBFlogAlias = space(0)
 
-alParentPjFiles = .F. && Parent object has a reference to project files collection
-alDocumentView = .F.
-alDataSession = .F.
-alProjectManager = .F.
+alParentPjFiles = .f. && Parent object has a reference to project files collection
+alDocumentView = .f.
+alDataSession = .f.
+alProjectManager = .f.
 
 * -------------------------------------------------
-PROCEDURE Init && Ouvre les fichiers de compte-rendu et vide la fenêtre VFP
-LPARAMETERS ;
+procedure init && Ouvre les fichiers de compte-rendu et vide la fenêtre VFP
+lparameters ;
 	tuTxtLog,; && [.T.] Nom, dossier ou adresse du fichier de compte-rendu texte, .T. : automatique
 	tuDBFlog,; && [.T.] Nom, dossier ou adresse du fichier de la table de compte-rendu, .T. : automatique
 	tlFooter,; && [.T.] Produire une ligne de totaux / moyennes en fin de CR
 	tlConsole && [.T.] Afficher le compte rendu à l'écran (s'il est visible)
 
-LOCAL lnParms, luTxtLog, luDBFlog, llResult
+local lnParms, luTxtLog, luDBFlog, llResult
 
-lnParms = Pcount()
+lnParms = pcount()
 
 * Determine if Parent object has a reference to a project files collection
-this.alParentPjFiles = Type('this.parent.aoPjFiles') == 'O' AND NOT IsNull(this.parent.aoPjFiles)
+this.alParentPjFiles = type('this.parent.aoPjFiles') == 'O' and not isnull(this.parent.aoPjFiles)
 
 * Init/Open log files
-luTxtLog = Iif(m.lnParms>=1 AND Vartype(m.tuTxtLog) $ 'CL', m.tuTxtLog, .T.)
-luDBFlog = Iif(m.lnParms>=2 AND Vartype(m.tuDBFlog) $ 'CL', m.tuDBFlog, .T.)
+luTxtLog = iif(m.lnParms>=1 and vartype(m.tuTxtLog) $ 'CL', m.tuTxtLog, .t.)
+luDBFlog = iif(m.lnParms>=2 and vartype(m.tuDBFlog) $ 'CL', m.tuDBFlog, .t.)
 llResult = this.init_Logs(m.luTxtLog, m.luDBFlog)
-ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([Échec de la création des fichiers de compte-rendu]))
+assert m.llResult message cAssertMsg(textmerge([Échec de la création des fichiers de compte-rendu]))
 
 * Déterminer si une ligne de totaux / moyennes doit être produite en fin de log
-this.alFooter = m.lnParms < 3 OR lTrue(m.tlFooter)
+this.alFooter = m.lnParms < 3 or lTrue(m.tlFooter)
 
 * Déterminer si les sorties doivent être envoyées à l'écran
-this.alConsole = (m.lnParms < 4 OR lTrue(m.tlConsole));
-	AND InList(_VFP.StartMode, 0, 1, 4);
-	AND Vartype(_screen) == 'O' ;
-	AND _screen.Visible
-IF m.this.alConsole
+this.alConsole = (m.lnParms < 4 or lTrue(m.tlConsole));
+	and inlist(_vfp.startmode, 0, 1, 4);
+	and vartype(_screen) == 'O' ;
+	and _screen.visible
+if m.this.alConsole
 
-	this.acScreenFont = _screen.FontName
-	this.anScreenFontSize = _screen.FontSize
-	_screen.FontName = "Courier New"
-	_screen.FontSize = 10
-	HIDE WINDOW ALL
-	ACTIVATE SCREEN
-	CLEAR
-ENDIF	
+	this.acScreenFont = _screen.fontname
+	this.anScreenFontSize = _screen.fontsize
+	_screen.fontname = "Courier New"
+	_screen.fontsize = 10
+	hide window all
+	activate screen
+	clear
+endif
 
-RETURN m.llResult
+return m.llResult
 
 * -------------------------------------------------
-PROCEDURE Init_Logs && Ouvre les fichiers de compte-rendu
-LPARAMETERS ;
+procedure init_Logs && Ouvre les fichiers de compte-rendu
+lparameters ;
 	tuTxtLog, ; && [.T.] Nom ou adresse du fichier de compte-rendu texte, .T. pour automatique
 	tuDBFlog && [.T.] Nom ou adresse du fichier de la table de compte-rendu, .T. pour automatique
 
-LOCAL lcLogAddr, lcResult, llResultTXT, llResultDBF
+local lcLogAddr, lcResult, llResultTXT, llResultDBF
 
 * Si une adresse de log peut être bâtie
 lcLogAddr = this.cLogPathStem(m.tuTxtLog)
-llResultTXT = !Empty(m.lcLogAddr)
-IF m.llResultTXT
+llResultTXT = !empty(m.lcLogAddr)
+if m.llResultTXT
 
-	* Ouvrir ou créer les fichiers de log
-	this.acTxtLogAddr = Lower(ForceExt(m.lcLogAddr, EXT_LOG))
-	this.acWarnTxtLogAddr = Lower(ForceExt(m.lcLogAddr , EXT_LOG_WARN))
+* Ouvrir ou créer les fichiers de log
+	this.acTxtLogAddr = lower(forceext(m.lcLogAddr, EXT_LOG))
+	this.acWarnTxtLogAddr = lower(forceext(m.lcLogAddr , EXT_LOG_WARN))
 	this.LogCheck(m.this.acTxtLogAddr)
 	this.LogCheck(m.this.acWarnTxtLogAddr)
 
-	lcResult = 'Starting log on '+ Transform(Datetime())
-	lcResult = CRLF2 + m.lcResult + CRLF + Replicate('=', Len(m.lcResult))
-	llResultTXT = StrToFile(m.lcResult, this.acTxtLogAddr, .T.) > 0
-	llResultTXT = StrToFile(m.lcResult, this.acWarnTxtLogAddr, .T.) > 0 AND m.llResultTXT
-ENDIF
+	lcResult = 'Starting log on '+ transform(datetime())
+	lcResult = CRLF2 + m.lcResult + CRLF + replicate('=', len(m.lcResult))
+	llResultTXT = strtofile(m.lcResult, this.acTxtLogAddr, .t.) > 0
+	llResultTXT = strtofile(m.lcResult, this.acWarnTxtLogAddr, .t.) > 0 and m.llResultTXT
+endif
 
 * Open/Init table log
 lcLogAddr = this.cLogPathStem(m.tuDBFlog)
-llResultDBF = !Empty(m.lcLogAddr)
-IF m.llResultDBF
-	this.acDBFlogAlias = cVFPname(JustStem(m.lcLogAddr))
-	this.acDBFlogAddr = ForceExt(m.lcLogAddr, 'dbf')
-	USE IN Select(this.acDBFlogAlias)
+llResultDBF = !empty(m.lcLogAddr)
+if m.llResultDBF
+	this.acDBFlogAlias = cVFPname(juststem(m.lcLogAddr))
+	this.acDBFlogAddr = forceext(m.lcLogAddr, 'dbf')
+	use in select(this.acDBFlogAlias)
 	this.LogCheck(this.acDBFlogAddr)
-	llResultDBF = File(this.acDBFlogAddr)
-	IF m.llResultDBF
-		USE (this.acDBFlogAddr) IN 0 SHARED ALIAS (this.acDBFlogAlias)
-	ENDIF
-ENDIF
+	llResultDBF = file(this.acDBFlogAddr)
+	if m.llResultDBF
+		use (this.acDBFlogAddr) in 0 shared alias (this.acDBFlogAlias)
+	endif
+endif
 
-RETURN m.llResultTXT OR m.llResultDBF
+return m.llResultTXT or m.llResultDBF
 
 * -------------------------------------------------
-PROCEDURE Destroy && Ferme les fichiers de log et rétablit la fenêtre VFP
+procedure destroy && Ferme les fichiers de log et rétablit la fenêtre VFP
 
 * Faire le pied du tableau
 this.FooterCreate()
 
 * Close log table
-USE IN Select(this.acDBFlogAlias)
+use in select(this.acDBFlogAlias)
 
 * Show windows hidden AT init()
-SHOW WINDOW ALL
-SHOW WINDOW ALL && parfois il reste des fenêtres invisibles
+show window all
+show window all && parfois il reste des fenêtres invisibles
 
 * Restore screen font
-_screen.FontName = this.acScreenFont
-_screen.FontSize = this.anScreenFontSize
+_screen.fontname = this.acScreenFont
+_screen.fontsize = this.anScreenFontSize
 
-IF m.this.alConsole
+if m.this.alConsole
 
-	* Si l'utilisateur souhaite voir les avertissements
-	IF NOT Empty(m.this.acWarnings) ;
-	 AND 6 = MessageBox(;
-				ICase(;
+* Si l'utilisateur souhaite voir les avertissements
+	if not empty(m.this.acWarnings) ;
+	 and 6 = messagebox(;
+				icase(;
 					cLangUser() = 'fr',	"Voulez-vous voir les avertissements ?",; && copy-paste this line to add another language support
 															"Some warning occurred, do you want them displayed?";
 				);
 			, 4+32;
-			, ICase(;
+			, icase(;
 					cLangUser() = 'fr',	"Fin de traitement",; && copy-paste this line to add another language support
 															"End of processing";
 				);
 			, 5000;
 			)
-	 
-	 	* Copier les avertissements dans un fichier texte temporaire
-	 	LOCAL lcFile, loSafety
-	 	lcFile = ForcePath(m.this.acWarnTxtLogAddr, Sys(2023))
-	 	loSafety = abSet('SAFETY', 'OFF')
-	 	StrToFile(m.this.acWarnings, m.lcFile)
-	 	RELEASE loSafety
 
-	 	* Afficher dans une fenêtre d'édition
-	 	MODIFY FILE (m.lcFile) NOWAIT
-	 	ACTIVATE WINDOW (JustFname(m.lcFile))
-	ENDIF
-ENDIF
+* Copier les avertissements dans un fichier texte temporaire
+	 	local lcFile, loSafety
+	 	lcFile = forcepath(m.this.acWarnTxtLogAddr, sys(2023))
+	 	loSafety = abSet('SAFETY', 'OFF')
+	 	strtofile(m.this.acWarnings, m.lcFile)
+	 	release loSafety
+
+* Afficher dans une fenêtre d'édition
+	 	modify file (m.lcFile) nowait
+	 	activate window (justfname(m.lcFile))
+	endif
+endif
 
 * -------------------------------------------------
-PROCEDURE LogCheck && Vérifie qu'un fichier de compte-rendu est accessible en écriture
-LPARAMETERS tcLogAddr && Adresse du fichier de compte-rendu
+procedure LogCheck && Vérifie qu'un fichier de compte-rendu est accessible en écriture
+lparameters tcLogAddr && Adresse du fichier de compte-rendu
 
-IF File(m.tcLogAddr)
+if file(m.tcLogAddr)
 
-	* Ajouter le fichier au projet
-	IF this.alParentPjFiles
+* Ajouter le fichier au projet
+	if this.alParentPjFiles
 		ProjectFileAdd(m.tcLogAddr, this.parent.aoPjFiles)
-	ENDIF
+	endif
 
-	LOCAL lnHandle, lcWindow
+	local lnHandle, lcWindow
 	lnHandle = 0
-	lcWindow = JustFname(m.tcLogAddr)
-	DO WHILE .T.
-		lnHandle = Fopen(m.tcLogAddr, 1) && 1 : write buffered
-		IF m.lnHandle = -1
+	lcWindow = justfname(m.tcLogAddr)
+	do while .t.
+		lnHandle = fopen(m.tcLogAddr, 1) && 1 : write buffered
+		if m.lnHandle = -1
 
-			IF Wexist(m.lcWindow)
-				RELEASE WINDOWS (m.lcWindow)
-				EXIT
+			if wexist(m.lcWindow)
+				release windows (m.lcWindow)
+				exit
 
-			ELSE
-				IF 2 = MessageBox('';
+			else
+				if 2 = messagebox('';
 							+ "Le fichier de log " + m.tcLogAddr + " est actuellement ouvert." + CRLF;
 							+ "Veuillez le refermer et cliquer sur Réessayer." + CRLF;
 							+ "Cliquez sur 'Annuler' pour continuer sans écrire dans le log";
 						, 5+16)
-					EXIT
-				ENDIF
-			ENDIF
-		ELSE
-			EXIT
-		ENDIF
-	ENDDO
+					exit
+				endif
+			endif
+		else
+			exit
+		endif
+	enddo
 
-	Fclose(m.lnHandle)
-ENDIF
+	fclose(m.lnHandle)
+endif
 
 * -------------------------------------------------
-PROCEDURE cLogPathStem && Adresse d'un fichier de compte-rendu sans l'extension
-LPARAMETERS tuLog && [.T.] Nom ou adresse du fichier de compte-rendu texte, .T. pour automatique
+procedure cLogPathStem && Adresse d'un fichier de compte-rendu sans l'extension
+lparameters tuLog && [.T.] Nom ou adresse du fichier de compte-rendu texte, .T. pour automatique
 
-LOCAL lcSys16, lcResult
+local lcSys16, lcResult
 
-lcResult = Space(0)
-lcSys16 = Sys(16,0)
-IF NOT Empty(m.lcSys16)
+lcResult = space(0)
+lcSys16 = sys(16,0)
+if not empty(m.lcSys16)
 
-	LOCAL lcLogPathAuto, lcLogStemAuto, lcLogPath, lcLogStem
+	local lcLogPathAuto, lcLogStemAuto, lcLogPath, lcLogStem
 
-	lcLogPathAuto = Addbs(cModuleInfo(m.lcSys16, 'Path'))
+	lcLogPathAuto = addbs(cModuleInfo(m.lcSys16, 'Path'))
 	lcLogStemAuto = cModuleInfo(m.lcSys16, 'Name')
-	STORE Space(0) TO m.lcLogPath, m.lcLogStem
+	store space(0) to m.lcLogPath, m.lcLogStem
 
-	DO CASE
+	do case
 
-	CASE Vartype(m.tuLog) = 'C' AND ! Empty(m.tuLog)
+	case vartype(m.tuLog) = 'C' and ! empty(m.tuLog)
 
-		lcLogPath = Addbs(JustPath(m.tuLog))
-		lcLogPath = Iif(Directory(m.lcLogPath), m.lcLogPath, m.lcLogPathAuto)
+		lcLogPath = addbs(justpath(m.tuLog))
+		lcLogPath = iif(directory(m.lcLogPath), m.lcLogPath, m.lcLogPathAuto)
 
-		lcLogStem = JustStem(m.tuLog)
+		lcLogStem = juststem(m.tuLog)
 		lcLogStem = cFileName(m.lcLogStem)
-		lcLogStem = Iif(lFileName(m.lcLogStem), m.lcLogStem, m.lcLogStemAuto)
+		lcLogStem = iif(lFileName(m.lcLogStem), m.lcLogStem, m.lcLogStemAuto)
 
-	CASE Vartype(m.tuLog) = 'L' AND m.tuLog
+	case vartype(m.tuLog) = 'L' and m.tuLog
 		lcLogPath = lcLogPathAuto
 		lcLogStem = lcLogStemAuto
 
-	ENDCASE
-	lcResult = Addbs(m.lcLogPath) + m.lcLogStem
-ENDIF
+	endcase
+	lcResult = addbs(m.lcLogPath) + m.lcLogStem
+endif
 
-RETURN m.lcResult
+return m.lcResult
 
 * -------------------------------------------------
-PROCEDURE ColAdd && Ajoute une colonne à la fin de la table de compte-rendu
-LPARAMETERS ;
+procedure ColAdd && Ajoute une colonne à la fin de la table de compte-rendu
+lparameters ;
 	tcHeader,; && [''] Contenu de l'en-tête de la colonne
 	tnColWidth,; && [Header width || 10] Largeur de la colonne en foxels
 	tlNoLeftBar,;	 && [.F.] Ne pas délimiter les colonnes par une barre verticale
@@ -283,977 +283,977 @@ LPARAMETERS ;
 	tlSum,; && [.F.] Si la donnée est numérique, en fin d'état : .T.: Sommer, .F.: Moyenner, .NULL.: ne rien faire
 	tcFormat && [''] Format pour Transform()
 
-LOCAL lnResult && Numéro de la colonne ajoutée
+local lnResult && Numéro de la colonne ajoutée
 lnResult = 0
 
-IF m.this.anLine = 0 && possible only if no line was displayed yet
+if m.this.anLine = 0 && possible only if no line was displayed yet
 
  	lnResult = this.aColAdd()
 
- 	LOCAL lcHeader, lnColWidth
- 	lcHeader = uDefault(m.tcHeader, Space(0))
- 	lnColWidth = uDefault(m.tnColWidth, Max(10, Len(m.lcHeader)))
+ 	local lcHeader, lnColWidth
+ 	lcHeader = uDefault(m.tcHeader, space(0))
+ 	lnColWidth = uDefault(m.tnColWidth, max(10, len(m.lcHeader)))
 
 	this.aaLog[L_cHEADER, m.lnResult] = m.lcHeader
-	this.aaLog[L_uVALUE, m.lnResult] = .NULL.
+	this.aaLog[L_uVALUE, m.lnResult] = .null.
 	this.aaLog[L_cTYPE, m.lnResult] = ''
 	this.aaLog[L_nWIDTH, m.lnResult] = m.lnColWidth
-	this.aaLog[L_cDISPLAY, m.lnResult] = Space(m.lnColWidth)
-	this.aaLog[L_lBORDER, m.lnResult] = NOT uDefault(m.tlNoLeftBar, .F.)
+	this.aaLog[L_cDISPLAY, m.lnResult] = space(m.lnColWidth)
+	this.aaLog[L_lBORDER, m.lnResult] = not uDefault(m.tlNoLeftBar, .f.)
 	this.aaLog[L_cID, m.lnResult] = uDefault(m.tcID, m.lcHeader)
 	this.aaLog[L_nSUM, m.lnResult] = 0
-	this.aaLog[L_lSUM, m.lnResult] = Iif(Vartype(m.tlSum) $ 'LX', m.tlSum, .F.)
-	this.aaLog[L_cFORMAT, m.lnResult] = Evl(m.tcFormat, '')
-	
-	* Si affichage à l'écran (console)
-	IF m.this.alConsole
+	this.aaLog[L_lSUM, m.lnResult] = iif(vartype(m.tlSum) $ 'LX', m.tlSum, .f.)
+	this.aaLog[L_cFORMAT, m.lnResult] = evl(m.tcFormat, '')
 
-		* Calculer la largeur totale du tableau en caractères
-		LOCAL lnCol, lnTableWidth
+* Si affichage à l'écran (console)
+	if m.this.alConsole
+
+* Calculer la largeur totale du tableau en caractères
+		local lnCol, lnTableWidth
 		lnTableWidth = 0
-		FOR m.lnCol = 1 TO m.lnResult
-			lnTableWidth = m.lnTableWidth + this.aaLog[L_nWIDTH, m.lnCol] + Iif(this.aaLog[L_lBORDER, m.lnCol], 1, 0)
-		ENDFOR
+		for m.lnCol = 1 to m.lnResult
+			lnTableWidth = m.lnTableWidth + this.aaLog[L_nWIDTH, m.lnCol] + iif(this.aaLog[L_lBORDER, m.lnCol], 1, 0)
+		endfor
 		lnTableWidth = m.lnTableWidth + 1 && right border
 
-		* Tant que le tableau est plus large que l'écran, réduire la police de l'écran
-		DO WHILE m.lnTableWidth * Fontmetric(6, _screen.FontName, _screen.FontSize) > _screen.ViewPortWidth ;
-				AND _screen.FontSize > 5
-			_screen.FontSize = _screen.FontSize - 1
-		ENDDO
-	ENDIF
-ENDIF
+* Tant que le tableau est plus large que l'écran, réduire la police de l'écran
+		do while m.lnTableWidth * fontmetric(6, _screen.fontname, _screen.fontsize) > _screen.viewportwidth ;
+				and _screen.fontsize > 5
+			_screen.fontsize = _screen.fontsize - 1
+		enddo
+	endif
+endif
 
 this.anCols = m.lnResult
 
-RETURN m.lnResult
+return m.lnResult
 
 * -------------------------------------------------
-PROCEDURE aColAdd && Ajoute une colonne au tableau de compte-rendu
-LOCAL lnResult && Numéro de la colonne ajoutée
- 	lnResult = Alen(this.aaLog, 2)
+procedure aColAdd && Ajoute une colonne au tableau de compte-rendu
+local lnResult && Numéro de la colonne ajoutée
+ 	lnResult = alen(this.aaLog, 2)
 
-IF NOT Vartype(this.aaLog[1]) = 'L' && La première colonne n'est plus disponible
+if not vartype(this.aaLog[1]) = 'L' && La première colonne n'est plus disponible
 
- 	LOCAL ARRAY laCopy[L_COUNT, m.lnResult]
+ 	local array laCopy[L_COUNT, m.lnResult]
 
- 	Acopy(this.aaLog, m.laCopy)
+ 	acopy(this.aaLog, m.laCopy)
  		aColsIns(@m.laCopy)
 
  	lnResult = m.lnResult + 1
- 		DIMENSION this.aaLog[L_COUNT, m.lnResult]
- 	Acopy(m.laCopy, this.aaLog)
- 	ENDIF
+ 		dimension this.aaLog[L_COUNT, m.lnResult]
+ 	acopy(m.laCopy, this.aaLog)
+ 	endif
 
- 	RETURN m.lnResult
+ 	return m.lnResult
 
 * -------------------------------------------------
-PROCEDURE nCol && Numéro de colonne d'après son identifiant
-LPARAMETERS ;
+procedure nCol && Numéro de colonne d'après son identifiant
+lparameters ;
 	tcColID && Identifiant de la colonne
-LOCAL lnResult && Numéro de la colonne
+local lnResult && Numéro de la colonne
 lnResult = 0
 
-LOCAL llResult
-llResult = Vartype(m.tcColID) == 'C' and not Empty(m.tcColID)
-IF m.llResult
+local llResult
+llResult = vartype(m.tcColID) == 'C' and not empty(m.tcColID)
+if m.llResult
 
-	lnResult = Ascan(this.aaLog, m.tcColID, 1, -1, -1, 1+2+4)
-	lnResult = Asubscript(this.aaLog, m.lnResult, 2)
-ENDIF
+	lnResult = ascan(this.aaLog, m.tcColID, 1, -1, -1, 1+2+4)
+	lnResult = asubscript(this.aaLog, m.lnResult, 2)
+endif
 
- 	RETURN m.lnResult
+ 	return m.lnResult
 
 * -------------------------------------------------
-PROCEDURE nColWidthTotal && Largeur totale d'un colonne du compte-rendu (avec gouttières)
-LPARAMETERS tnCol && Numéro de colonne
+procedure nColWidthTotal && Largeur totale d'un colonne du compte-rendu (avec gouttières)
+lparameters tnCol && Numéro de colonne
 
-LOCAL lnColWidth, lnResult
+local lnColWidth, lnResult
 
 lnResult = 0
 
-IF Vartype(m.tnCol) = 'N' ;
- AND Between(m.tnCol, 1, Alen(this.aaLog, 2))
+if vartype(m.tnCol) = 'N' ;
+ and between(m.tnCol, 1, alen(this.aaLog, 2))
 
 	lnColWidth = this.aaLog [L_nWIDTH, m.tnCol]
-	lnResult = Iif(Vartype(m.lnColWidth) == 'N' AND m.lnColWidth > 0;
+	lnResult = iif(vartype(m.lnColWidth) == 'N' and m.lnColWidth > 0;
 			 , 1 + m.lnColWidth; && gouttière avant
 			 , 0;
 			 )
-ENDIF
+endif
 
-RETURN m.lnResult
+return m.lnResult
 
 * -------------------------------------------------
-PROCEDURE CellFill && Remplit une cellule du compte-rendu
-LPARAMETERS ;
+procedure CellFill && Remplit une cellule du compte-rendu
+lparameters ;
 	tuCol,; && Numéro ou ID de la colonne
 	tuContent,; && [''] Contenu à placer dans la colonne
 	tlExpand,; && [.F.] Si le contenu est plus large que la colonne, déborder sur les colonnes de droite
 	tlNoDisplay,; && [.F.] Différer l'affichage de la ligne (pour gagner du temps lorsque plusieurs modifications successives de la ligne)
 	tcFormat && [''] Format d'affichage
 
-LOCAL lnCols, lcType, lnCol, llResult
+local lnCols, lcType, lnCol, llResult
 
 * Si la définition de colonne est valide
-lnCols = Alen(this.aaLog, 2)
-lcType = Vartype(m.tuCol)
-DO CASE
-	CASE m.lcType == 'N'
+lnCols = alen(this.aaLog, 2)
+lcType = vartype(m.tuCol)
+do case
+	case m.lcType == 'N'
 		lnCol = m.tuCol
 		llResult = m.tuCol <= m.lnCols
-	CASE m.lcType == 'C'
+	case m.lcType == 'C'
 		lnCol = this.nCol(m.tuCol)
 		llResult = m.lnCol > 0
-ENDCASE
-ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([Spécification de colonne invalide <<cLitteral(m.tuCol)>>]))
-IF m.llResult
+endcase
+assert m.llResult message cAssertMsg(textmerge([Spécification de colonne invalide <<cLitteral(m.tuCol)>>]))
+if m.llResult
 
-	LOCAL luContent, llExpand, llNoDisplay, lcFormat, lcContent, lnColWidth
+	local luContent, llExpand, llNoDisplay, lcFormat, lcContent, lnColWidth
 
-	* Donner leur valeur par défaut aux paramètres optionnels
-	luContent = Iif(Pcount() >= 2, m.tuContent, Space(0))
+* Donner leur valeur par défaut aux paramètres optionnels
+	luContent = iif(pcount() >= 2, m.tuContent, space(0))
  	llExpand = lTrue(m.tlExpand)
 	llNoDisplay = lTrue(m.tlNoDisplay)
-	lcFormat = Iif(Pcount() >= 5 AND Vartype(m.tcFormat) == 'C', m.tcFormat, Space(0))
-	lcFormat = Evl(m.lcFormat, this.aaLog[L_cFORMAT, m.lnCol])
-	
-	* Si la colonne a une largeur positive
+	lcFormat = iif(pcount() >= 5 and vartype(m.tcFormat) == 'C', m.tcFormat, space(0))
+	lcFormat = evl(m.lcFormat, this.aaLog[L_cFORMAT, m.lnCol])
+
+* Si la colonne a une largeur positive
  		lnColWidth = this.aaLog[L_nWIDTH, m.lnCol]
  		llResult = m.lnColWidth > 0
- 	IF m.llResult
+ 	if m.llResult
 
-		* Charger la données originale dans la cellule
+* Charger la données originale dans la cellule
  		this.aaLog[L_uVALUE, m.lnCol] = m.luContent
- 		this.aaLog[L_cTYPE, m.lnCol] = Vartype(m.luContent)
- 		
- 		* Si la donnée est numérique, cumuler
- 		IF this.aaLog[L_cTYPE, m.lnCol] == 'N'
+ 		this.aaLog[L_cTYPE, m.lnCol] = vartype(m.luContent)
+
+* Si la donnée est numérique, cumuler
+ 		if this.aaLog[L_cTYPE, m.lnCol] == 'N'
  			this.aaLog[L_nSUM, m.lnCol] = this.aaLog[L_nSUM, m.lnCol] + m.luContent
- 		ENDIF
+ 		endif
 
-		* Si la colonne peut déborder
-		lcContent = Transform(m.luContent, m.lcFormat)
-	 	IF m.llExpand AND m.lnCol < m.lnCols
+* Si la colonne peut déborder
+		lcContent = transform(m.luContent, m.lcFormat)
+	 	if m.llExpand and m.lnCol < m.lnCols
 
-	 		LOCAL lnColX, lnColWidthX
+	 		local lnColX, lnColWidthX
 	 		lnColWidthX = m.lnColWidth
-	 		FOR m.lnColX = m.lnCol + 1 TO Alen(this.aaLog, 2)
+	 		for m.lnColX = m.lnCol + 1 to alen(this.aaLog, 2)
 			 	lnColWidthX = m.lnColWidthX + this.nColWidthTotal(m.lnColX)
-	 		ENDFOR
-	 		lnColWidth = Min(Len(m.lcContent), m.lnColWidthX)
-	 	ENDIF 
+	 		endfor
+	 		lnColWidth = min(len(m.lcContent), m.lnColWidthX)
+	 	endif
 
-		* Charger l'affichage dans la cellule
+* Charger l'affichage dans la cellule
  		this.aaLog[L_cDISPLAY, m.lnCol] = ;
  				this.cCellContent(m.tuContent, m.lnColWidth, m.llExpand, m.lcFormat)
 
-		llResult = m.llNoDisplay OR this.LineDisplay()
- 	ENDIF
-ENDIF
+		llResult = m.llNoDisplay or this.LineDisplay()
+ 	endif
+endif
 
-RETURN m.llResult
+return m.llResult
 
 * -------------------------------------------------
-PROCEDURE cCellContent && Contenu d'une cellule du tableau de compte-rendu, ajusté à la taille de la cellule
-LPARAMETERS ;
+procedure cCellContent && Contenu d'une cellule du tableau de compte-rendu, ajusté à la taille de la cellule
+lparameters ;
 	tuContent,; && Contenu à placer dans la colonne
 	tnColWidth,; && Largeur de la colonne en foxels
 	tlExpand,; && [.F.] Si le contenu est plus large que la colonne, déborder sur les colonnes de droite
 	tcFormat && [''] Format de présentation
 tlExpand = lTrue(m.tlExpand)
-tcFormat = Evl(m.tcFormat, '')
+tcFormat = evl(m.tcFormat, '')
 
- 	LOCAL lcType, lcResult
+ 	local lcType, lcResult
 
- 	lcType = Vartype(m.tuContent)
- 	IF m.lcType $ 'CNYLDT'
+ 	lcType = vartype(m.tuContent)
+ 	if m.lcType $ 'CNYLDT'
 
- 	lcResult = Transform(m.tuContent, m.tcFormat)
+ 	lcResult = transform(m.tuContent, m.tcFormat)
 
- 	* Manage position in column, trim if necessary
- 	DO CASE
+* Manage position in column, trim if necessary
+ 	do case
 
- 	CASE m.lcType $ 'NY'
-		lcResult = Iif(m.tlExpand;
+ 	case m.lcType $ 'NY'
+		lcResult = iif(m.tlExpand;
 			, this.cColJustified(m.lcResult, m.tnColWidth); && gauche
-			, Padl(m.lcResult, m.tnColWidth, Space(1)); && Aligner à droite avec un Space(1)
+			, padl(m.lcResult, m.tnColWidth, space(1)); && Aligner à droite avec un Space(1)
 			)
 
- 	CASE m.lcType = 'L'
-		lcResult = Iif(m.tlExpand;
+ 	case m.lcType = 'L'
+		lcResult = iif(m.tlExpand;
 				, this.cColJustified(m.lcResult, m.tnColWidth); && à gauche
-				, Padl(m.lcResult, m.tnColWidth/2+2, Space(1)); && centrer
+				, padl(m.lcResult, m.tnColWidth/2+2, space(1)); && centrer
 				)
 
- 	OTHERWISE
-		* Aligner à gauche en tentant de préserver les espaces en tête
+ 	otherwise
+* Aligner à gauche en tentant de préserver les espaces en tête
 		lcResult = this.cColJustified(m.lcResult, m.tnColWidth)
-	ENDCASE
+	endcase
 
-	lcResult = Padr(m.lcResult, m.tnColWidth, Space(1))
-ELSE
- 	lcResult = Space(0)
-ENDIF
+	lcResult = padr(m.lcResult, m.tnColWidth, space(1))
+else
+ 	lcResult = space(0)
+endif
 
- 	RETURN m.lcResult
+ 	return m.lcResult
 
 * -------------------------------------------------
-FUNCTION cColJustified && Justifie le contenu d'une cellule dans la largeur de la colonne
-LPARAMETERS ;
+function cColJustified && Justifie le contenu d'une cellule dans la largeur de la colonne
+lparameters ;
 	tcContent, ; && Contenu à placer dans la colonne
 	tnColWidth && Largeur de la colonne en foxels
 
-LOCAL lcResult
+local lcResult
 
 lcResult = m.tcContent
-IF Lenc(m.lcResult) > m.tnColWidth
+if lenc(m.lcResult) > m.tnColWidth
 
-	lcResult = Rtrim(m.lcResult)
-	IF Lenc(m.lcResult) > m.tnColWidth
+	lcResult = rtrim(m.lcResult)
+	if lenc(m.lcResult) > m.tnColWidth
 
-		lcResult = Ltrim(m.lcResult)
-		IF Lenc(m.lcResult) > m.tnColWidth
+		lcResult = ltrim(m.lcResult)
+		if lenc(m.lcResult) > m.tnColWidth
 
-			lcResult = Leftc(m.lcResult, m.tnColWidth-1) + POINTSUSP
-		ENDIF
-	ENDIF
-ENDIF
+			lcResult = leftc(m.lcResult, m.tnColWidth-1) + POINTSUSP
+		endif
+	endif
+endif
 
-RETURN m.lcResult
+return m.lcResult
 
 * -------------------------------------------------
-PROCEDURE LineFill && Écrit une nouvelle ligne à l'écran
-LPARAMETERS tuContent
+procedure LineFill && Écrit une nouvelle ligne à l'écran
+lparameters tuContent
 
-LOCAL lnResult && Position de la fin de ligne 
+local lnResult && Position de la fin de ligne
 
 lnResult = 0
-IF this.LineFeed()
-	this.acLine = Transform(m.tuContent)
-	IF m.this.alConsole
-		ACTIVATE SCREEN
-		?? m.this.acLine AT 0
-	ENDIF
-	lnResult = Len(m.this.acLine)
-ENDIF
+if this.LineFeed()
+	this.acLine = transform(m.tuContent)
+	if m.this.alConsole
+		activate screen
+		?? m.this.acLine at 0
+	endif
+	lnResult = len(m.this.acLine)
+endif
 
-RETURN m.lnResult
+return m.lnResult
 
 * -------------------------------------------------
-PROCEDURE LineAppend && Ajoute un contenu à la ligne courante et affiche le résultat
-LPARAMETERS ;
+procedure LineAppend && Ajoute un contenu à la ligne courante et affiche le résultat
+lparameters ;
 	tuContent, ; && Contenu à placer dans la colonne
 	tnPosition && [fin de ligne] Position où le contenu est ajouté
 
-LOCAL lnLine, lnResult && Position où le contenu a été ajouté
+local lnLine, lnResult && Position où le contenu a été ajouté
 
-this.acLine = Alltrim(this.acLine)
-lnLine = Len(this.acLine)
-lnResult = Iif(vartype(m.tnPosition)=='N', m.tnPosition, m.lnLine)
-this.acLine = Left(this.acLine, m.lnResult) + ;
-							Space(Iif(Empty(m.this.acLine), 0, 1)) + ;
-							Transform(m.tuContent)
+this.acLine = alltrim(this.acLine)
+lnLine = len(this.acLine)
+lnResult = iif(vartype(m.tnPosition)=='N', m.tnPosition, m.lnLine)
+this.acLine = left(this.acLine, m.lnResult) + ;
+							space(iif(empty(m.this.acLine), 0, 1)) + ;
+							transform(m.tuContent)
 
 * Compléter avec des espaces pour superposer la ligne précédente
-IF m.lnLine > Len(this.acLine)
-	this.acLine = Padr(this.acLine, m.lnLine, Space(1))								
-ENDIF
+if m.lnLine > len(this.acLine)
+	this.acLine = padr(this.acLine, m.lnLine, space(1))
+endif
 
-IF m.this.alConsole
-	ACTIVATE SCREEN
-	?? m.this.acLine AT 0
-ENDIF
+if m.this.alConsole
+	activate screen
+	?? m.this.acLine at 0
+endif
 
-RETURN m.lnResult
+return m.lnResult
 
 * -------------------------------------------------
-PROCEDURE LineDisplay && Affiche le contenu de l'en-tête ou de la ligne courante
-LPARAMETERS tlHeader && [.F.] Afficher l'en-tête du tableau
+procedure LineDisplay && Affiche le contenu de l'en-tête ou de la ligne courante
+lparameters tlHeader && [.F.] Afficher l'en-tête du tableau
 tlHeader = lTrue(m.tlHeader)
 
-LOCAL lcLineOut, lnDisplayWidth;
+local lcLineOut, lnDisplayWidth;
 , lnCol, lnColsWidth, lnColWidth;
 , lcCellDisplay, llLeftBar, llResult
 
 
 * Pour chaque colonne
-lcLineOut = Space(0)
-STORE 0 TO m.lnDisplayWidth, m.lnColsWidth
-FOR m.lnCol = 1 TO Alen(this.aaLog, 2)
+lcLineOut = space(0)
+store 0 to m.lnDisplayWidth, m.lnColsWidth
+for m.lnCol = 1 to alen(this.aaLog, 2)
 
-	lcCellDisplay = Iif(m.tlHeader;
+	lcCellDisplay = iif(m.tlHeader;
 			, this.cCellContent(this.aaLog[L_cHEADER, m.lnCol], this.aaLog[L_nWIDTH, m.lnCol]);
 			, this.aaLog[L_cDISPLAY, m.lnCol];
 			)
 	llLeftBar = this.aaLog[L_lBORDER, m.lnCol]
 	lnColWidth = 1 + this.aaLog[L_nWIDTH, m.lnCol]
 	llResult = ;
-			Vartype(m.lcCellDisplay) == 'C' ;
-		AND	Vartype(m.llLeftBar) == 'L' ;
-		AND	Vartype(m.lnColWidth) == 'N'
-	ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([La table de log est mal remplie.]))
-	IF m.llResult
+			vartype(m.lcCellDisplay) == 'C' ;
+		and	vartype(m.llLeftBar) == 'L' ;
+		and	vartype(m.lnColWidth) == 'N'
+	assert m.llResult message cAssertMsg(textmerge([La table de log est mal remplie.]))
+	if m.llResult
 
-		DO CASE
-		CASE m.lnDisplayWidth = m.lnColsWidth && start current column
-			lcLineOut = m.lcLineOut + Iif(m.llLeftBar, '|', Space(1)) + m.lcCellDisplay
-		CASE m.lnDisplayWidth >= m.lnColsWidth + m.lnColWidth && Beyond current column
-		OTHERWISE && inside current column
-			lcLineOut = Padr(m.lcLineOut, m.lnColsWidth + m.lnColWidth, Space(1))
-		ENDCASE
+		do case
+		case m.lnDisplayWidth = m.lnColsWidth && start current column
+			lcLineOut = m.lcLineOut + iif(m.llLeftBar, '|', space(1)) + m.lcCellDisplay
+		case m.lnDisplayWidth >= m.lnColsWidth + m.lnColWidth && Beyond current column
+		otherwise && inside current column
+			lcLineOut = padr(m.lcLineOut, m.lnColsWidth + m.lnColWidth, space(1))
+		endcase
 		lnColsWidth = m.lnColsWidth + m.lnColWidth
-		lnDisplayWidth = Len(m.lcLineOut)
-	ELSE
-		EXIT
-	ENDIF
-ENDFOR
+		lnDisplayWidth = len(m.lcLineOut)
+	else
+		exit
+	endif
+endfor
 
-IF m.llResult
-	this.acLine = m.lcLineOut + Iif(m.llLeftBar, '|', Space(0))
+if m.llResult
+	this.acLine = m.lcLineOut + iif(m.llLeftBar, '|', space(0))
 	this.lineShow(m.tlHeader)
-ENDIF
+endif
 
-RETURN m.llResult
-	
+return m.llResult
+
 * -------------------------------------------------
-PROCEDURE LineShow && Affiche la ligne courante à l'écran
-LPARAMETERS tlHeader && [.F.] Afficher l'en-tête
+procedure lineShow && Affiche la ligne courante à l'écran
+lparameters tlHeader && [.F.] Afficher l'en-tête
 
-IF m.this.alConsole
+if m.this.alConsole
 
-	ACTIVATE SCREEN
+	activate screen
 *!*			?? Space(0) AT 0 && bug de TEXT TO m.lcResult TEXTMERGE NOSHOW
-	?? Space(1) AT 0 && bug de TEXT TO m.lcResult TEXTMERGE NOSHOW
+	?? space(1) at 0 && bug de TEXT TO m.lcResult TEXTMERGE NOSHOW
 
-	IF lTrue(m.tlHeader)
+	if lTrue(m.tlHeader)
 		?
-	ENDIF
-	?? m.this.acLine AT 0
-ENDIF
-	
+	endif
+	?? m.this.acLine at 0
+endif
+
 * -------------------------------------------------
-PROCEDURE LineFeed && Vide la ligne courante pour en commencer une nouvelle
-LPARAMETERS ;
+procedure LineFeed && Vide la ligne courante pour en commencer une nouvelle
+lparameters ;
 	tlSepLine, ; && [.F.] Tracer une ligne séparatrice après la nouvelle ligne
 	tlDataLine && [.F.] La nouvelle ligne contient des données vivantes
 
-LOCAL lcLine, llResult
+local lcLine, llResult
 
 * Update line count
-IF this.anCols > 0
+if this.anCols > 0
 	this.anLine = this.anLine + 1
-	this.anDataLines = this.anDataLines + Iif(lTrue(m.tlDataLine), 1, 0)
-ENDIF
+	this.anDataLines = this.anDataLines + iif(lTrue(m.tlDataLine), 1, 0)
+endif
 
 * Flush and clear current line
 llResult = this.LineFlush()
-llResult = this.LineClear() AND m.llResult
+llResult = this.LineClear() and m.llResult
 
 * Move to ENDFOR line, with separation line if required
-IF lTrue(m.tlSepLine)
+if lTrue(m.tlSepLine)
 	lcLine = this.cSepLine()
-	StrToFile(CRLF + m.lcLine, this.acTxtLogAddr, .T.)
-ELSE
-	lcLine = Space(1)
-ENDIF
-IF m.this.alConsole
-	ACTIVATE SCREEN
+	strtofile(CRLF + m.lcLine, this.acTxtLogAddr, .t.)
+else
+	lcLine = space(1)
+endif
+if m.this.alConsole
+	activate screen
 	? m.lcLine
-ENDIF
+endif
 
-RETURN m.llResult
+return m.llResult
 
 * -------------------------------------------------
-PROCEDURE LineFlush && Sauve la ligne courante dans les fichiers de compte-rendu
+procedure LineFlush && Sauve la ligne courante dans les fichiers de compte-rendu
 
-LOCAL llResult
-llResult = .T.
+local llResult
+llResult = .t.
 
 * Ajouter au log texte
-IF NOT empty(this.acTxtLogAddr) AND NOT Empty(this.acLine)
-	llResult = StrToFile(CRLF + this.acLine, this.acTxtLogAddr, .T.) > 0
-ENDIF
+if not empty(this.acTxtLogAddr) and not empty(this.acLine)
+	llResult = strtofile(CRLF + this.acLine, this.acTxtLogAddr, .t.) > 0
+endif
 
 * Ajouter au log table
-IF NOT Empty(this.acDBFlogAddr)
-	llResult = Used(this.acDBFlogAlias) OR this.DBFlogCreate()
-	IF m.llResult
+if not empty(this.acDBFlogAddr)
+	llResult = used(this.acDBFlogAlias) or this.DBFlogCreate()
+	if m.llResult
 		llResult = this.DBFlogAppend()
-	ENDIF
-ENDIF
+	endif
+endif
 
-RETURN m.llResult
+return m.llResult
 
 * -------------------------------------------------
-PROCEDURE LineClear && Efface la ligne courante
+procedure LineClear && Efface la ligne courante
 
-LOCAL lnCol, lnWidth
-FOR m.lnCol = 1 TO Alen(this.aaLog, 2)
+local lnCol, lnWidth
+for m.lnCol = 1 to alen(this.aaLog, 2)
 	lnWidth = this.aaLog[L_nWIDTH, m.lnCol]
-	lnWidth = Iif(Vartype(m.lnWidth)=='N', m.lnWidth, 0)
-	this.aaLog[L_cDISPLAY, m.lnCol] = Space(m.lnWidth)
-	this.aaLog[L_uVALUE, m.lnCol] = .NULL.
-ENDFOR
+	lnWidth = iif(vartype(m.lnWidth)=='N', m.lnWidth, 0)
+	this.aaLog[L_cDISPLAY, m.lnCol] = space(m.lnWidth)
+	this.aaLog[L_uVALUE, m.lnCol] = .null.
+endfor
 
-this.acLine = Space(0)
+this.acLine = space(0)
 
 * -------------------------------------------------
-PROCEDURE Warning && Affiche un avertissement dans une fenêtre "WAIT WINDOW", ajoute au compte-rendu des avertissements si nouveau
-LPARAMETERS ;
+procedure Warning && Affiche un avertissement dans une fenêtre "WAIT WINDOW", ajoute au compte-rendu des avertissements si nouveau
+lparameters ;
 	tcWarning,; && Avertissement, vide pour nouvelle ligne
 	tlAppendNot && [.F.] Ne pas ajouter l'avertissement au compte-rendu
 
-LOCAL llWarnNew, lcWarning, lcCallingModule, llResult
+local llWarnNew, lcWarning, lcCallingModule, llResult
 
 * Si avertissement non vide
-IF .T.;
- and Vartype(m.tcWarning) == 'C';
- and not Empty(m.tcWarning)
+if .t.;
+ and vartype(m.tcWarning) == 'C';
+ and not empty(m.tcWarning)
 
-	tcWarning = Alltrim(m.tcWarning)
+	tcWarning = alltrim(m.tcWarning)
 
-	* Si nouvel avertissement
-	lcCallingModule = cTronc(Lower(cCallingModule()), 20)
-	lcWarning = Padr(m.lcCallingModule, 20) + m.tcWarning
-	llWarnNew = NOT Upper(m.lcWarning) $ Upper(m.this.acWarnings)
-	IF m.llWarnNew
+* Si nouvel avertissement
+	lcCallingModule = cTronc(lower(cCallingModule()), 20)
+	lcWarning = padr(m.lcCallingModule, 20) + m.tcWarning
+	llWarnNew = not upper(m.lcWarning) $ upper(m.this.acWarnings)
+	if m.llWarnNew
 
-		* Display warning
-		WAIT WINDOW cTronc('Module ' + m.lcCallingModule + ' : ' + m.tcWarning, 254) NOWAIT
+* Display warning
+		wait window cTronc('Module ' + m.lcCallingModule + ' : ' + m.tcWarning, 254) nowait
 *			?? Chr(7)
-	ENDIF
+	endif
 
-ELSE && blank line
+else && blank line
 
-	* Clear warning
-	WAIT CLEAR
-	llWarnNew = .T.
-	lcWarning = Space(0)
+* Clear warning
+	wait clear
+	llWarnNew = .t.
+	lcWarning = space(0)
 
-ENDIF
+endif
 
 * Append Warning to Log if requested
-IF m.llWarnNew;
- AND not (lTrue(m.tlAppendNot))
+if m.llWarnNew;
+ and not (lTrue(m.tlAppendNot))
 
 	lcWarning = CRLF + m.lcWarning
 	this.acWarnings = m.this.acWarnings + m.lcWarning
-	llResult = StrToFile(m.lcWarning, m.this.acWarnTxtLogAddr, .T.) > 0
-ELSE
-	llResult = .T.
-ENDIF
+	llResult = strtofile(m.lcWarning, m.this.acWarnTxtLogAddr, .t.) > 0
+else
+	llResult = .t.
+endif
 
-RETURN m.llResult
+return m.llResult
 
 * -------------------------------------------------
-FUNCTION cSepLine && Ligne séparatrice horizontale
-LPARAMETERS tlLeftBars && [.F.] Tracer une barre verticale au début de la nouvelle ligne
+function cSepLine && Ligne séparatrice horizontale
+lparameters tlLeftBars && [.F.] Tracer une barre verticale au début de la nouvelle ligne
 
-LOCAL lnCol, lnColWidth, llLeftBar, lcResult
+local lnCol, lnColWidth, llLeftBar, lcResult
 
-lcResult = Space(0)
-FOR m.lnCol = 1 TO Alen(this.aaLog, 2)
+lcResult = space(0)
+for m.lnCol = 1 to alen(this.aaLog, 2)
 
-	llLeftBar = m.tlLeftBars AND this.aaLog[L_lBORDER, m.lnCol]
+	llLeftBar = m.tlLeftBars and this.aaLog[L_lBORDER, m.lnCol]
 	lnColWidth = this.nColWidthTotal(m.lnCol)
-	llResult = 	Vartype(m.lnColWidth) = 'N' AND m.lnColWidth > 0
-	IF m.llResult
+	llResult = 	vartype(m.lnColWidth) = 'N' and m.lnColWidth > 0
+	if m.llResult
 
 		lcResult = m.lcResult + ;
-						Iif(m.llLeftBar, '|', '-') + ;
-						Replicate('-', m.lnColWidth - 1)
-	ELSE
-		EXIT
-	ENDIF
-ENDFOR
+						iif(m.llLeftBar, '|', '-') + ;
+						replicate('-', m.lnColWidth - 1)
+	else
+		exit
+	endif
+endfor
 
-RETURN Iif(m.llResult, m.lcResult + Iif(m.llLeftBar, '|', '-'), Space(0))
+return iif(m.llResult, m.lcResult + iif(m.llLeftBar, '|', '-'), space(0))
 
 * -------------------------------------------------
-PROCEDURE DBFlogCreate && Crée la table de compte-rendu
+procedure DBFlogCreate && Crée la table de compte-rendu
 
-LOCAL lcFields, lnCol;
+local lcFields, lnCol;
 , lcFieldName, lcFieldType, lnFieldLength, lcFieldExp;
 , lnSelect, llResult
 
-IF m.this.anCols > 0
+if m.this.anCols > 0
 
-	lcFields = Space(0)
-	FOR m.lnCol = 1 TO this.anCols
+	lcFields = space(0)
+	for m.lnCol = 1 to this.anCols
 		lcFieldName = cVFPname (this.aaLog[L_cHEADER, m.lnCol], 10)
-		lcFieldType = uDefault(Alltrim(this.aaLog[L_cTYPE, m.lnCol]), 'C')
-		lcFieldType = Evl(m.lcFieldType, 'C')
+		lcFieldType = uDefault(alltrim(this.aaLog[L_cTYPE, m.lnCol]), 'C')
+		lcFieldType = evl(m.lcFieldType, 'C')
 		lnFieldLength = this.aaLog[L_nWIDTH, m.lnCol]
-		lcFieldExp = cFieldExp(m.lcFieldName, m.lcFieldType, m.lnFieldLength,,.T.)
-		llResult = NOT Empty(m.lcFieldExp)
-		IF m.llResult
+		lcFieldExp = cFieldExp(m.lcFieldName, m.lcFieldType, m.lnFieldLength,,.t.)
+		llResult = not empty(m.lcFieldExp)
+		if m.llResult
 			lcFields = c2Words(m.lcFields, ',', m.lcFieldExp)
-		ELSE
-			EXIT
-		ENDIF
-	ENDFOR
-	IF m.llResult
+		else
+			exit
+		endif
+	endfor
+	if m.llResult
 
 		lcFields = '(' + m.lcFields + ')'
-		lnSelect = Select(0)
-		CREATE TABLE (this.acDBFlogAddr) FREE &lcFields
-		USE
+		lnSelect = select(0)
+		create table (this.acDBFlogAddr) free &lcFields
+		use
 		this.LogCheck(this.acDBFlogAddr)
-		USE (this.acDBFlogAddr) ALIAS (this.acDBFlogAlias) EXCLUSIVE
-		SELECT (m.lnSelect)
-	ENDIF
-ENDIF
+		use (this.acDBFlogAddr) alias (this.acDBFlogAlias) exclusive
+		select (m.lnSelect)
+	endif
+endif
 
-RETURN m.llResult
+return m.llResult
 
 * -------------------------------------------------
-PROCEDURE DBFlogAppend && Sauve la ligne courante du tableau dans la table de compte-rendu
+procedure DBFlogAppend && Sauve la ligne courante du tableau dans la table de compte-rendu
 
-LOCAL lnCols, llResult
+local lnCols, llResult
 
-lnCols = Alen(this.aaLog, 2)
-llResult = m.lnCols > 0 AND Used(this.acDBFlogAlias)
-IF m.llResult
+lnCols = alen(this.aaLog, 2)
+llResult = m.lnCols > 0 and used(this.acDBFlogAlias)
+if m.llResult
 
-	* Tabuler les champs de la table de log
-	LOCAL ARRAY laFields[1]
-	AFields(laFields, this.acDBFlogAlias)
-	
-	* Pour chaque colonne
-	LOCAL llAllEmpty, lnCol, lcFieldName, luFieldValue, lcFieldType, lnFieldLength, lcFieldExp, lnField, lcAlter
-	llAllEmpty = .T.
-	lcAlter = Space(0)
-	FOR lnCol = 1 TO m.lnCols
+* Tabuler les champs de la table de log
+	local array laFields[1]
+	afields(laFields, this.acDBFlogAlias)
 
-		* Déterminer les caractéristiques du champ pouvant contenir la donnée
+* Pour chaque colonne
+	local llAllEmpty, lnCol, lcFieldName, luFieldValue, lcFieldType, lnFieldLength, lcFieldExp, lnField, lcAlter
+	llAllEmpty = .t.
+	lcAlter = space(0)
+	for lnCol = 1 to m.lnCols
+
+* Déterminer les caractéristiques du champ pouvant contenir la donnée
 		lcFieldName = cVFPname(this.aaLog[L_cID, m.lnCol], 10)
 		luFieldValue = this.aaLog[L_uVALUE, m.lnCol]
 		lcFieldType = this.aaLog[L_cTYPE, m.lnCol]
 		lnFieldLength = this.aaLog[L_nWIDTH, m.lnCol]
-		IF Vartype(m.lcFieldType) = 'C' ;
-		 AND NOT Empty(m.lcFieldType) ;
-		 AND Vartype(m.lnFieldLength) = 'N' ;
-		 AND NOT Empty(m.lnFieldLength)
-			lcFieldExp = cFieldExp(m.lcFieldName, m.lcFieldType, m.lnFieldLength,,.T.)
-			lnField = Ascan(laFields, m.lcFieldName, 1, -1, 1, 1+2+4+8)
-			
-			* Si le champ n'existe pas
-			IF m.lnField = 0
+		if vartype(m.lcFieldType) = 'C' ;
+		 and not empty(m.lcFieldType) ;
+		 and vartype(m.lnFieldLength) = 'N' ;
+		 and not empty(m.lnFieldLength)
+			lcFieldExp = cFieldExp(m.lcFieldName, m.lcFieldType, m.lnFieldLength,,.t.)
+			lnField = ascan(laFields, m.lcFieldName, 1, -1, 1, 1+2+4+8)
+
+* Si le champ n'existe pas
+			if m.lnField = 0
 
 				lcAlter = lcAlter + ' ADD COLUMN ' + m.lcFieldExp
 
-			* Sinon (le champ existe)
-			ELSE
+* Sinon (le champ existe)
+			else
 
-				* Si le champ n'est pas de le bonne taille ou type
-				IF NOT m.lcFieldType $ VFP7_FIELD_TYPES_FIXED_LEN ;
-				 AND laFields[m.lnField, 3] < m.lnFieldLength ;
-				 OR NOT laFields[m.lnField, 2] == m.lcFieldType
-					
+* Si le champ n'est pas de le bonne taille ou type
+				if not m.lcFieldType $ VFP7_FIELD_TYPES_FIXED_LEN ;
+				 and laFields[m.lnField, 3] < m.lnFieldLength ;
+				 or not laFields[m.lnField, 2] == m.lcFieldType
+
 					lcAlter = lcAlter + ' ALTER COLUMN ' + m.lcFieldExp
-				ENDIF 
-			ENDIF
+				endif
+			endif
 
-			llAllEmpty = m.llAllEmpty AND (Empty(m.luFieldValue) OR IsNull(m.luFieldValue))
-		ENDIF
+			llAllEmpty = m.llAllEmpty and (empty(m.luFieldValue) or isnull(m.luFieldValue))
+		endif
 
-		LOCAL (m.lcFieldName)
-		STORE m.luFieldValue TO (m.lcFieldName) && pour GATHER MEMVAR plus loin
-	ENDFOR
+		local (m.lcFieldName)
+		store m.luFieldValue to (m.lcFieldName) && pour GATHER MEMVAR plus loin
+	endfor
 
-	* S'il faut changer la structure de la table
-	IF NOT Empty(m.lcAlter)
-		llResult = Used(ExclusiveForce(this.acDBFlogAlias))
-		IF m.llResult
+* S'il faut changer la structure de la table
+	if not empty(m.lcAlter)
+		llResult = used(ExclusiveForce(this.acDBFlogAlias))
+		if m.llResult
 			lcAlter = 'ALTER TABLE ' + cLitteral(this.acDBFlogAlias) + m.lcAlter
 			&lcAlter
-			USE IN (this.acDBFlogAlias)
-			USE (this.acDBFlogAddr) IN 0 SHARED ALIAS (this.acDBFlogAlias)
-		ENDIF
-	ENDIF
+			use in (this.acDBFlogAlias)
+			use (this.acDBFlogAddr) in 0 shared alias (this.acDBFlogAlias)
+		endif
+	endif
 
-	IF m.llResult AND NOT m.llAllEmpty
+	if m.llResult and not m.llAllEmpty
 
-		LOCAL loSelect
-		loSelect = CreateObject('abSelect', this.acDBFlogAlias)
-		APPEND BLANK
-		GATHER MEMVAR
-	ENDIF
-ENDIF
+		local loSelect
+		loSelect = createobject('abSelect', this.acDBFlogAlias)
+		append blank
+		gather memvar
+	endif
+endif
 
-RETURN m.llResult
+return m.llResult
 
 * -------------------------------------------------
-PROCEDURE FooterCreate && Crée un pied de tableau avec totaux ou moyennes
+procedure FooterCreate && Crée un pied de tableau avec totaux ou moyennes
 
 * En cas d'interruption anormale, vider la ligne en cours
-IF NOT Empty(m.this.acLine)
+if not empty(m.this.acLine)
 	this.LineFeed
-ENDIF
+endif
 
 * Si au moins une ligne de données
-IF m.this.anCols * m.this.anDataLines > 0
+if m.this.anCols * m.this.anDataLines > 0
 
-	* Tracer une ligne pour fermer le tableau
+* Tracer une ligne pour fermer le tableau
 	this.acLine = this.cSepLine()
-	this.LineShow()
+	this.lineShow()
 
-	* Si un pied de tableau a été demandé
-	IF m.this.alFooter
+* Si un pied de tableau a été demandé
+	if m.this.alFooter
 		this.LineFeed()
 
-		LOCAL lnCol, lnSum, luSum, llFooter, llTitle
+		local lnCol, lnSum, luSum, llFooter, llTitle
 
-		* Pour chaque colonne
-		FOR m.lnCol = 1 TO this.anCols
+* Pour chaque colonne
+		for m.lnCol = 1 to this.anCols
 			lnSum = this.aaLog[L_nSUM, m.lnCol]
 			luSum = this.aaLog[L_lSUM, m.lnCol]
 
-			* Si la colonne contient un total et qu'un bilan est demandé
-			IF m.lnSum > 0 AND NOT IsNull(m.luSum) && .NULL.: ne rien faire, ni total ni moyenne
-				this.CellFill(m.lnCol, m.lnSum / Iif(m.luSum, 1, m.this.anDataLines))
-				llFooter = .T.
-			ELSE
-				IF NOT m.llTitle
+* Si la colonne contient un total et qu'un bilan est demandé
+			if m.lnSum > 0 and not isnull(m.luSum) && .NULL.: ne rien faire, ni total ni moyenne
+				this.CellFill(m.lnCol, m.lnSum / iif(m.luSum, 1, m.this.anDataLines))
+				llFooter = .t.
+			else
+				if not m.llTitle
 					llTitle = this.CellFill(;
-							m.lnCol;
-						, Textmerge(ICase(;
+							M.lnCol;
+						, textmerge(icase(;
 								cLangUser() = 'fr',	[Totaux / moyennes des <<m.this.anDataLines>> lignes],; && copy-paste this line to add another language support
 																		[Total / averages of <<m.this.anDataLines>> lines];
 							));
-						, .T.;
+						, .t.;
 						)
-				ENDIF
-			ENDIF
-		ENDFOR
-		
-		* Si le pied d'état a été créé, le sortir
-		IF m.llFooter
-			this.LineFeed(.T.)
-		ENDIF
-	ENDIF
-ENDIF
+				endif
+			endif
+		endfor
+
+* Si le pied d'état a été créé, le sortir
+		if m.llFooter
+			this.LineFeed(.t.)
+		endif
+	endif
+endif
 
 * -------------------
-ENDDEFINE && CLASS cusBatchLog as Custom
+enddefine && CLASS cusBatchLog as Custom
 
 * -----------------------------------------------------
-PROCEDURE cusBatchLog_Test
-LOCAL lcSys16
-lcSys16 = Sys(16,0)
+procedure cusBatchLog_Test
+local lcSys16
+lcSys16 = sys(16,0)
 ? m.lcSys16
-LOCAL loBatchLog, lnPos
-loBatchLog = CreateObject('cusBatchLog', Addbs(Sys(2023)) + 'test')
-WITH m.loBatchLog
+local loBatchLog, lnPos
+loBatchLog = createobject('cusBatchLog', addbs(sys(2023)) + 'test')
+with m.loBatchLog
 	.LineFill('Ceci va commencer le test ...')
-	lnPos = .lineAppend('Première étape')
-	WAIT 'Test de cusBatchLog en cours ...' WINDOW TIMEOUT 3
-	.lineAppend('OK', m.lnPos)
+	lnPos = .LineAppend('Première étape')
+	wait 'Test de cusBatchLog en cours ...' window timeout 3
+	.LineAppend('OK', m.lnPos)
 	.ColAdd('First column', 18)
 	.ColAdd('Second column', 25)
-	.ColAdd('Third column', 15, .T.)
+	.ColAdd('Third column', 15, .t.)
 	.ColAdd('Fourth column', 15)
-	.LineFeed(.T.)
-	.LineDisplay(.T.)
-	.LineFeed(.T.)
-	.cellFill(1, Datetime())
-	.cellFill(2, 'Thierry Nivelet')
-	.cellFill(3, 524.25)
-	.cellFill(4, .F.)
-	.LineFeed(.T.)
-	.cellFill(1, Datetime())
-	.cellFill(2, 'Thierry Nivelet is a poor developper', .T.)
-	.cellFill(3, 524.25)
-	.cellFill(4, .F.)
-	.LineFeed(.T.)
+	.LineFeed(.t.)
+	.LineDisplay(.t.)
+	.LineFeed(.t.)
+	.CellFill(1, datetime())
+	.CellFill(2, 'Thierry Nivelet')
+	.CellFill(3, 524.25)
+	.CellFill(4, .f.)
+	.LineFeed(.t.)
+	.CellFill(1, datetime())
+	.CellFill(2, 'Thierry Nivelet is a poor developper', .t.)
+	.CellFill(3, 524.25)
+	.CellFill(4, .f.)
+	.LineFeed(.t.)
 	.Warning('Warning test OK')
-ENDWITH
+endwith
 
 * ========================================
-FUNCTION cModuleInfo && Nom, Chemin ou Adresse d'un module d'après Sys(16)
-LPARAMETERS ;
+function cModuleInfo && Nom, Chemin ou Adresse d'un module d'après Sys(16)
+lparameters ;
 	tcSys16,; && Chaîne obtenue par Sys(16)
 	tcInfo,; && ['N'] {N}ame, {A}ddress, {P}ath, {O}bject, {S}ys16, {L}ignée, {F}ull lignée
 	tlCase && [.F.] Respecter la casse sur disque
 
-tcInfo = Iif(Vartype(m.tcInfo) = 'C' AND NOT Empty(m.tcInfo), Upper(Left(Ltrim(m.tcInfo), 1)), 'N')
-tcInfo = Iif(m.tcInfo $ 'NAPSOLF', m.tcInfo, 'N')
+tcInfo = iif(vartype(m.tcInfo) = 'C' and not empty(m.tcInfo), upper(left(ltrim(m.tcInfo), 1)), 'N')
+tcInfo = iif(m.tcInfo $ 'NAPSOLF', m.tcInfo, 'N')
 tlCase = lTrue(m.tlCase)
 
-LOCAL llProc, lcAddr, lcProc, laMembers[1], lnMembers, llMethod;
+local llProc, lcAddr, lcProc, laMembers[1], lnMembers, llMethod;
 , llResult, lcResult
 
-lcResult = Space(0)
+lcResult = space(0)
 
 * Si le paramètre requis est valide
-llResult = Vartype(m.tcSys16) = 'C'
-ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([Invalid Sys(16) Information : <<cLitteral(m.tcSys16)>>]))
-IF m.llResult AND NOT Upper(Left(m.tcSys16, 2)) == 'ON' && ON ...
+llResult = vartype(m.tcSys16) = 'C'
+assert m.llResult message cAssertMsg(textmerge([Invalid Sys(16) Information : <<cLitteral(m.tcSys16)>>]))
+if m.llResult and not upper(left(m.tcSys16, 2)) == 'ON' && ON ...
 
-	* Repérer le nom de la procédure et l'adresse du fichier dans la chaine sys(16)
- 	llProc = Left(Upper(m.tcSys16), Lenc('PROCEDURE ')) == 'PROCEDURE '
- 	lcAddr = Iif(m.llProc;
- 		, Substr(m.tcSys16, Atc(' ', m.tcSys16, 2) + 1); && GetWordNum() ne fonctionne pas si l'adresse contient des espaces
+* Repérer le nom de la procédure et l'adresse du fichier dans la chaine sys(16)
+ 	llProc = left(upper(m.tcSys16), lenc('PROCEDURE ')) == 'PROCEDURE '
+ 	lcAddr = iif(m.llProc;
+ 		, substr(m.tcSys16, atc(' ', m.tcSys16, 2) + 1); && GetWordNum() ne fonctionne pas si l'adresse contient des espaces
  		, m.tcSys16;
  		)
- 	lcAddr = Iif(m.tlCase, cFileCased(m.lcAddr), m.lcAddr)
- 	lcProc = Iif(m.llProc, GetWordNum(m.tcSys16, 2), JustStem(m.lcAddr))
+ 	lcAddr = iif(m.tlCase, cFileCased(m.lcAddr), m.lcAddr)
+ 	lcProc = iif(m.llProc, getwordnum(m.tcSys16, 2), juststem(m.lcAddr))
  	llMethod = '.' $ m.lcProc
- 	IF m.llMethod
-	 	lnMembers = ALines(laMembers, m.lcProc, 1, '.')
- 	ELSE
- 		llResult = NOT m.tcInfo $ 'OLF'
-		ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([Invalid Information Type Specification : '<<m.tcInfo>>']))
- 	ENDIF
- 	IF m.llResult
+ 	if m.llMethod
+	 	lnMembers = alines(laMembers, m.lcProc, 1, '.')
+ 	else
+ 		llResult = not m.tcInfo $ 'OLF'
+		assert m.llResult message cAssertMsg(textmerge([Invalid Information Type Specification : '<<m.tcInfo>>']))
+ 	endif
+ 	if m.llResult
 
-	 	RETURN ICase(;
-	 		m.tcInfo == 'N',; && Procedure name (with object name if method)
-		 		Iif(m.llMethod;
-		 			, laMembers[m.lnMembers-1] + Iif(Empty(laMembers[m.lnMembers-1]) OR Empty(laMembers[m.lnMembers]), '', '.') + laMembers[m.lnMembers];
+	 	return icase(;
+	 		M.tcInfo == 'N',; && Procedure name (with object name if method)
+		 		iif(m.llMethod;
+		 			, laMembers[m.lnMembers-1] + iif(empty(laMembers[m.lnMembers-1]) or empty(laMembers[m.lnMembers]), '', '.') + laMembers[m.lnMembers];
 		 			, m.lcProc;
 		 			),;
-		 	m.tcInfo == 'A',; && Procedure file address
+		 	M.tcInfo == 'A',; && Procedure file address
 		 		m.lcAddr,;
-		 	m.tcInfo == 'P',; && Procedure file path
-		 		Addbs(JustPath(m.lcAddr)),;
-		 	m.tcInfo == 'S',; && Procedure file address
+		 	M.tcInfo == 'P',; && Procedure file path
+		 		addbs(justpath(m.lcAddr)),;
+		 	M.tcInfo == 'S',; && Procedure file address
 		 		m.tcSys16,;
-		 	m.tcInfo == 'O',; && Object name
+		 	M.tcInfo == 'O',; && Object name
 		 		laMembers[m.lnMembers-1],;
-		 	m.tcInfo == 'L',; && Lignée des objets
-		 		Leftc(m.lcProc, Ratc('.', m.lcProc)-1),;
-		 	m.tcInfo == 'F',; && Lignée complète de la méthode
+		 	M.tcInfo == 'L',; && Lignée des objets
+		 		leftc(m.lcProc, ratc('.', m.lcProc)-1),;
+		 	M.tcInfo == 'F',; && Lignée complète de la méthode
 		 		m.lcProc,;
 		 		'';
 		 	)
- 	ENDIF
-ENDIF
+ 	endif
+endif
 
-RETURN m.lcResult
+return m.lcResult
 
 * ------------------------------------
-PROCEDURE cModuleInfo_Test && Test cModuleInfo()
+procedure cModuleInfo_Test && Test cModuleInfo()
 && cf 'cModuleInfo_Test.prg' pour test par programme
 
-LOCAL loUnitTest as abUnitTest OF abDev.prg, lcSys16, loClassTest
-loUnitTest = NewObject('abUnitTest', 'abDev.prg')
-lcSys16 = Sys(16) && module courant
+local loUnitTest as abUnitTest of abDev.prg, lcSys16, loClassTest
+loUnitTest = newobject('abUnitTest', 'abDev.prg')
+lcSys16 = sys(16) && module courant
 
 loUnitTest.Test('CMODULEINFO_TEST', m.lcSys16, 'Name')
-loUnitTest.Test(Upper(DOS_AB), m.lcSys16, 'Path')
-loUnitTest.Test(Upper(DOS_AB) + 'ABDEV.FXP', m.lcSys16, 'Address')
+loUnitTest.Test(upper(DOS_AB), m.lcSys16, 'Path')
+loUnitTest.Test(upper(DOS_AB) + 'ABDEV.FXP', m.lcSys16, 'Address')
 
-loClassTest = CreateObject('cusModuleInfo_Test', m.loUnitTest)
-		
-RETURN loUnitTest.Result()
+loClassTest = createobject('cusModuleInfo_Test', m.loUnitTest)
 
-	* --------------------------------------
-	DEFINE CLASS cusModuleInfo_Test as Custom && Teste cModuleInfo() au sein d'une classe
-		PROCEDURE Init
-		LPARAMETERS toUnitTest
-		LOCAL lcSys16
-		lcSys16 = Sys(16) && module courant
+return loUnitTest.Result()
+
+* --------------------------------------
+define class cusModuleInfo_Test as custom && Teste cModuleInfo() au sein d'une classe
+		procedure init
+		lparameters toUnitTest
+		local lcSys16
+		lcSys16 = sys(16) && module courant
 		toUnitTest.Test('CUSMODULEINFO_TEST.INIT', m.lcSys16, 'Name')
-		toUnitTest.Test(Upper(DOS_AB), m.lcSys16, 'Path')
-		toUnitTest.Test(Upper(DOS_AB) + 'ABDEV.FXP', m.lcSys16, 'Address')
-	ENDDEFINE
+		toUnitTest.Test(upper(DOS_AB), m.lcSys16, 'Path')
+		toUnitTest.Test(upper(DOS_AB) + 'ABDEV.FXP', m.lcSys16, 'Address')
+	enddefine
 
 * ========================================
-FUNCTION cCallingModule && Nom du module appelant (programme, procédure, méthode, ...)
-LPARAMETERS ;
+function cCallingModule && Nom du module appelant (programme, procédure, méthode, ...)
+lparameters ;
 	tcAddress,; && [''] @ Adresse du fichier où se trouve le module appelant
 	tnStackUp && [0] nombre de niveaux avant le module appelant
 
-LOCAL lnLevelHere, lcSys16, lcResult
+local lnLevelHere, lcSys16, lcResult
 
-lcResult = Space(0)
+lcResult = space(0)
 
 * Si ce module est appelé par un module appelé
-lnLevelHere = Program(-1) && current program level
-IF m.lnLevelHere > 2
+lnLevelHere = program(-1) && current program level
+if m.lnLevelHere > 2
 
-	lcSys16 = Sys(16, m.lnLevelHere - 2 - Abs(Evl(m.tnStackUp, 0)))
+	lcSys16 = sys(16, m.lnLevelHere - 2 - abs(evl(m.tnStackUp, 0)))
 
 	tcAddress = cModuleInfo(m.lcSys16, 'Address')
 	lcResult = cModuleInfo(m.lcSys16, 'Name')
-ENDIF
+endif
 
-RETURN m.lcResult
+return m.lcResult
 
 * ------------------------------------
-PROCEDURE cCallingModule_Test
+procedure cCallingModule_Test
 
-LOCAL loUnitTest as abUnitTest of abDev.prg
-loUnitTest = NewObject('abUnitTest', 'abDev.prg')
+local loUnitTest as abUnitTest of abDev.prg
+loUnitTest = newobject('abUnitTest', 'abDev.prg')
 
-LOCAL lcSys16, lcSys16module, lcSys16address;
+local lcSys16, lcSys16module, lcSys16address;
 , lcModule, lcAddress;
 , loTest as cCallingModule_Test3 of abDev.prg;
 
-lcSys16 = Sys(16)
-lcSys16module = Upper(cModuleInfo(m.lcSys16, 'Name'))
-lcSys16address = Upper(cModuleInfo(m.lcSys16, 'Address'))
+lcSys16 = sys(16)
+lcSys16module = upper(cModuleInfo(m.lcSys16, 'Name'))
+lcSys16address = upper(cModuleInfo(m.lcSys16, 'Address'))
 
 lcModule = cCallingModule_Test1(@m.lcAddress)
 
-? Upper(m.lcModule) == m.lcSys16module
-? Upper(m.lcAddress) == m.lcSys16address
+? upper(m.lcModule) == m.lcSys16module
+? upper(m.lcAddress) == m.lcSys16address
 
 
 lcModule = cCallingModule_Test2(@m.lcAddress, -1)
 
-? Upper(m.lcModule) == m.lcSys16module
-? Upper(m.lcAddress) == m.lcSys16address
+? upper(m.lcModule) == m.lcSys16module
+? upper(m.lcAddress) == m.lcSys16address
 
 
-loTest = NewObject('cCallingModule_Test3', 'abDev.prg')
+loTest = newobject('cCallingModule_Test3', 'abDev.prg')
 
 lcModule = loTest.Test(@m.lcAddress, -1)
 
-? Upper(m.lcModule) == m.lcSys16module
-? Upper(m.lcAddress) == m.lcSys16address
+? upper(m.lcModule) == m.lcSys16module
+? upper(m.lcAddress) == m.lcSys16address
 
-	* ------------------------------------
-	PROCEDURE cCallingModule_Test1
-	LPARAMETERS tcAddress, tnStackUp
-	RETURN cCallingModule(@m.tcAddress, m.tnStackUp)
-
-	* ------------------------------------
-	PROCEDURE cCallingModule_Test2
-	LPARAMETERS tcAddress, tnStackUp
-	RETURN cCallingModule_Test1(@m.tcAddress, m.tnStackUp)
-
-	* ------------------------------------
-	define class cCallingModule_Test3 as Relation
-	procedure test
+* ------------------------------------
+	procedure cCallingModule_Test1
 	lparameters tcAddress, tnStackUp
-	RETURN cCallingModule_Test1(@m.tcAddress, m.tnStackUp)
+	return cCallingModule(@m.tcAddress, m.tnStackUp)
+
+* ------------------------------------
+	procedure cCallingModule_Test2
+	lparameters tcAddress, tnStackUp
+	return cCallingModule_Test1(@m.tcAddress, m.tnStackUp)
+
+* ------------------------------------
+define class cCallingModule_Test3 as relation
+	procedure Test
+	lparameters tcAddress, tnStackUp
+	return cCallingModule_Test1(@m.tcAddress, m.tnStackUp)
 	enddefine
 
 * ========================================
-FUNCTION cCallingModules && Modules appelants
-LPARAMETERS ;
+function cCallingModules && Modules appelants
+lparameters ;
 	tlCurrent,; && [.F.] Inclure le nom du module courant
 	tcInfo && [Name] 'Name', 'Address', 'Path', 'Object' ou 'Lignée'
 
 tlCurrent = lTrue(m.tlCurrent)
 
-LOCAL lnLevelHere, lnLevel, lcResult
-lcResult = Space(0)
+local lnLevelHere, lnLevel, lcResult
+lcResult = space(0)
 
 * Si cCallingModules est appelé par un module appelé
-lnLevelHere = Program(-1) && current program level
-IF m.lnLevelHere > Iif(m.tlCurrent, 1, 2)
+lnLevelHere = program(-1) && current program level
+if m.lnLevelHere > iif(m.tlCurrent, 1, 2)
 
-	FOR m.lnLevel = 1 TO m.lnLevelHere - Iif(m.tlCurrent, 1, 2)
-		lcResult = c2Words(m.lcResult, ' > ', Textmerge("<<m.lnLevel>>.<<Chr(160)>><<cModuleInfo(Sys(16, m.lnLevel), m.tcInfo)>>"))
-	ENDFOR
-ENDIF
+	for m.lnLevel = 1 to m.lnLevelHere - iif(m.tlCurrent, 1, 2)
+		lcResult = c2Words(m.lcResult, ' > ', textmerge("<<m.lnLevel>>.<<Chr(160)>><<cModuleInfo(Sys(16, m.lnLevel), m.tcInfo)>>"))
+	endfor
+endif
 
-RETURN Lower(m.lcResult)
+return lower(m.lcResult)
 
 * ========================================
-FUNCTION lCallingModule && Un module appelle le module appelant cette fonction
-LPARAMETERS ;
+function lCallingModule && Un module appelle le module appelant cette fonction
+lparameters ;
 	tcModule,; && Module: [class][.]procedure
 	tlModules && [.F.] && appel depuis lCallingModules()
 
-LOCAL llResult as Boolean;
-, liLevelBase as Integer;
-, liLevelHere as Integer;
-, liLevel as Integer;
-, lcLevel as String;
+local llResult as Boolean;
+, liLevelBase as integer;
+, liLevelHere as integer;
+, liLevel as integer;
+, lcLevel as string;
 , llMethod as Boolean;
 , llClassMethod as Boolean;
 
-IF Vartype(m.tcModule) == 'C' AND NOT Empty(m.tcModule)
+if vartype(m.tcModule) == 'C' and not empty(m.tcModule)
 
-	* Si ce module est appelé par un module appelé
-	liLevelHere = Program(-1) && current program level
-	liLevelBase = 2 + Iif(lTrue(m.tlModules), 1, 0)
-	IF m.liLevelHere > m.liLevelBase
+* Si ce module est appelé par un module appelé
+	liLevelHere = program(-1) && current program level
+	liLevelBase = 2 + iif(lTrue(m.tlModules), 1, 0)
+	if m.liLevelHere > m.liLevelBase
 
-		tcModule = Upper(Alltrim(m.tcModule))
-		llMethod = Leftc(m.tcModule, 1) == '.'
+		tcModule = upper(alltrim(m.tcModule))
+		llMethod = leftc(m.tcModule, 1) == '.'
 		llClassMethod = !m.llMethod and '.' $ m.tcModule
 
-		FOR m.liLevel = m.liLevelHere - m.liLevelBase TO 1 STEP -1
-			lcLevel = Program(m.liLevel)
+		for m.liLevel = m.liLevelHere - m.liLevelBase to 1 step -1
+			lcLevel = program(m.liLevel)
 
-			IF m.tcModule == ICase(;
-				m.llMethod,;
-					'.' + JustExt(m.lcLevel),;
-				m.llClassMethod,;
-					m.lcLevel,;
+			if m.tcModule == icase(;
+				M.llMethod,;
+					'.' + justext(m.lcLevel),;
+				M.llClassMethod,;
+					M.lcLevel,;
 				'.' $ m.lcLevel,;
-					JustExt(m.lcLevel),;
-					 m.lcLevel;
+					justext(m.lcLevel),;
+					 M.lcLevel;
 				)
-				llResult = .T.
-				EXIT
-			ENDIF
-		ENDFOR
-	ENDIF
-ENDIF
+				llResult = .t.
+				exit
+			endif
+		endfor
+	endif
+endif
 
-RETURN m.llResult
+return m.llResult
 
 * ========================================
-FUNCTION lCallingModules && Plusieurs modules appellent le module appelant cette fonction
-LPARAMETERS ;
+function lCallingModules && Plusieurs modules appellent le module appelant cette fonction
+lparameters ;
 	tcModules,; && Modules
 	tlOR && [.F.] Au moins un module appelle le module
 tlOR = lTrue(m.tlOR)
 
-LOCAL laModules[1], lcModule, llResult
-llResult = Vartype(m.tcModules) == 'C' AND ALines(laModules, Upper(m.tcModules), 1+4, ',', ';') > 0
-IF m.llResult
+local laModules[1], lcModule, llResult
+llResult = vartype(m.tcModules) == 'C' and alines(laModules, upper(m.tcModules), 1+4, ',', ';') > 0
+if m.llResult
 
-	FOR EACH lcModule IN laModules
+	for each lcModule in laModules
 
-		IF m.tlOR
-			llResult = lCallingModule(m.lcModule, .T.)
-			IF m.llResult
-				EXIT
-			ENDIF
-		ELSE
-			llResult = lCallingModule(m.lcModule, .T.) AND m.llResult
-			IF NOT m.llResult
-				EXIT
-			ENDIF
-		ENDIF
-	ENDFOR
-ENDIF
+		if m.tlOR
+			llResult = lCallingModule(m.lcModule, .t.)
+			if m.llResult
+				exit
+			endif
+		else
+			llResult = lCallingModule(m.lcModule, .t.) and m.llResult
+			if not m.llResult
+				exit
+			endif
+		endif
+	endfor
+endif
 
-RETURN m.llResult
+return m.llResult
 
 * ========================================
-FUNCTION lUserEventCalling && Un événement utilisateur appelle cette fonction
+function lUserEventCalling && Un événement utilisateur appelle cette fonction
 lparameters tcClassStart && Classe à partir de laquelle chercher dans la pile d'appel si elle s'y trouve
 
 local success as Boolean;
-, laStack[1] as String;
-, lnStack as Integer;
-, liStack as Integer;
+, laStack[1] as string;
+, lnStack as integer;
+, liStack as integer;
 , lClassStart as Boolean;
-, lcEvent as String;
-, liEvent as Integer;
+, lcEvent as string;
+, liEvent as integer;
 
-lnStack = AStackInfo(m.laStack)
+lnStack = astackinfo(m.laStack)
 if m.lnStack > 0 && should always be .T.
 
-	tcClassStart = Lower(Evl(m.tcClassStart, ''))
-	lClassStart = !Empty(m.tcClassStart)
+	tcClassStart = lower(evl(m.tcClassStart, ''))
+	lClassStart = !empty(m.tcClassStart)
 	for liStack = m.lnStack to 1 step -1
-		if m.lClassStart and Lower(GetWordNum(laStack[m.liStack, 3], 1, '.')) == m.tcClassStart
+		if m.lClassStart and lower(getwordnum(laStack[m.liStack, 3], 1, '.')) == m.tcClassStart
 *				liStack = Aelement(m.laStack, m.liStack, 3)
 			exit
 		endif
-		laStack[m.liStack, 3] = GetWordNum(laStack[m.liStack, 3], GetWordCount(laStack[m.liStack, 3], '.'), '.') && Module or Object name
+		laStack[m.liStack, 3] = getwordnum(laStack[m.liStack, 3], getwordcount(laStack[m.liStack, 3], '.'), '.') && Module or Object name
 	endfor
-	liStack = Evl(m.liStack, 1)
+	liStack = evl(m.liStack, 1)
 	text to lcEvent noshow flags 1 pretext 3 && could be rearranged for optimization (most frequent events first)
 		Activate
 		Afterdock
@@ -1296,10 +1296,10 @@ if m.lnStack > 0 && should always be .T.
 		UpClick
 		Valid
 		When
-	endtext
-	for liEvent = 1 to GetWordCount(m.lcEvent, CRLF)
-		if Ascan(m.laStack, GetWordNum(m.lcEvent, m.liEvent, CRLF), m.liStack, -1, 3, 7) > 0
-			success = .T.
+	ENDTEXT
+	for liEvent = 1 to getwordcount(m.lcEvent, CRLF)
+		if ascan(m.laStack, getwordnum(m.lcEvent, m.liEvent, CRLF), m.liStack, -1, 3, 7) > 0
+			success = .t.
 			exit
 		endif
 	endfor
@@ -1308,59 +1308,59 @@ endif
 return m.success
 
 * ------------------------------------
-PROCEDURE lUserEventCalling_Test && Teste lUserEventCalling()
+procedure lUserEventCalling_Test && Teste lUserEventCalling()
 
-LOCAL loUnitTest as abUnitTest of abDev.prg
-loUnitTest = NewObject('abUnitTest', 'abDev.prg')
+local loUnitTest as abUnitTest of abDev.prg
+loUnitTest = newobject('abUnitTest', 'abDev.prg')
 
-loUnitTest.Test(.F.)
-loUnitTest.Test(.F., 'abUnitTest')
-		
-RETURN m.loUnitTest.Result()
+loUnitTest.Test(.f.)
+loUnitTest.Test(.f., 'abUnitTest')
+
+return m.loUnitTest.Result()
 
 * ========================================
-FUNCTION uDefault && Valeur par défaut d'un paramètre /!\ .T. non supporté
-LPARAMETERS ;
+function uDefault && Valeur par défaut d'un paramètre /!\ .T. non supporté
+lparameters ;
 	tuParm,; && Paramètre dont il faut régler la valeur par défaut
 	tuDefault && Valeur par défaut /!\ .T. non supporté
 
-LOCAL lcType, luResult
-luResult = .NULL.
+local lcType, luResult
+luResult = .null.
 
 * Si deux paramètres ont été passés
-IF Pcount() = 2
+if pcount() = 2
 
-	* Si la valeur par défaut est supportée
-	lcType = Vartype(m.tuDefault)
-	IF NOT (m.lcType == 'L' AND m.tuDefault)
-	
-		* Si le paramètre est du type de la valeur par défaut, le retourner, sinon retourner la valeur par défaut
-		luResult = Iif(Vartype(m.tuParm) == m.lcType, m.tuParm, m.tuDefault)
-	ELSE
-		ASSERT .F. MESSAGE cAssertMsg(Textmerge([<<Proper(Program())>> ne supporte pas la valeur par défaut .T. comme second paramètre]))
-	ENDIF
-ENDIF
+* Si la valeur par défaut est supportée
+	lcType = vartype(m.tuDefault)
+	if not (m.lcType == 'L' and m.tuDefault)
 
-RETURN m.luResult
+* Si le paramètre est du type de la valeur par défaut, le retourner, sinon retourner la valeur par défaut
+		luResult = iif(vartype(m.tuParm) == m.lcType, m.tuParm, m.tuDefault)
+	else
+		assert .f. message cAssertMsg(textmerge([<<Proper(Program())>> ne supporte pas la valeur par défaut .T. comme second paramètre]))
+	endif
+endif
+
+return m.luResult
 
 * ------------------------------------
-PROCEDURE uDefault_Test && Teste uDefault()
+procedure uDefault_Test && Teste uDefault()
 
-LOCAL loUnitTest as abUnitTest of abDev.prg
-loUnitTest = NewObject('abUnitTest', 'abDev.prg')
+local loUnitTest as abUnitTest of abDev.prg
+loUnitTest = newobject('abUnitTest', 'abDev.prg')
 
-loUnitTest.Test('Name', .F., 'Name')
+loUnitTest.Test('Name', .f., 'Name')
 loUnitTest.Test('Name', 0, 'Name')
-loUnitTest.Test('Name', CreateObject('form'), 'Name')
+loUnitTest.Test('Name', createobject('form'), 'Name')
 
-LOCAL loAsserts as abSet of abDev.prg
+local loAsserts as abSet of abDev.prg
 loAsserts = abSet('Asserts', 'OFF')
-loUnitTest.Test(.NULL., 0, .T.)
-		
-RETURN loUnitTest.Result()
+loUnitTest.Test(.null., 0, .t.)
+
+return loUnitTest.Result()
 
 * ==================================
-DEFINE CLASS abMachineInfo as GA_LIGHTWEIGHT_CLASS of abGA.prg && Informations sur la machine : processeur, mémoire, etc.
+define class abMachineInfo as GA_LIGHTWEIGHT_CLASS of abGA.prg && Informations sur la machine : processeur, mémoire, etc.
 
 * Système
 nOEMid = 0
@@ -1370,7 +1370,7 @@ nAppAddrMax = 0
 nProcessorMask = 0
 nProcessors = 0
 nProcessorType = 0
-cProcessorName = Space(0)
+cProcessorName = space(0)
 nAllocationGranularity = 0
 nReserved = 0
 
@@ -1415,620 +1415,620 @@ cVersion = space(0)
 nVoltageCaps = 0
 
 * ------------------------------------
-PROCEDURE SystemInfo && Peuple les informations système
+procedure SystemInfo && Peuple les informations système
 
- DECLARE GetSystemInfo IN win32api STRING @lcSystemInfo
- LOCAL lcSysInfo
- m.lcSysInfo = SPACE(36)
+ declare GetSystemInfo in win32api string @lcSystemInfo
+ local lcSysInfo
+ m.lcSysInfo = space(36)
  GetSystemInfo(@m.lcSysInfo)
- 
- this.nOEMid = StrToLong(LEFT(m.lcSysInfo, 4))
- this.nPageSize = StrToLong(SUBSTR(m.lcSysInfo, 5, 4))
- this.nAppAddrMin = StrToLong(SUBSTR(m.lcSysInfo, 9, 4))
- this.nAppAddrMax = StrToLong(SUBSTR(m.lcSysInfo, 13, 4))
- this.nProcessorMask = StrToLong(SUBSTR(m.lcSysInfo, 17, 4))
- this.nProcessors = Int(StrToLong(SUBSTR(m.lcSysInfo, 21, 4)))
- this.nProcessorType = StrToLong(SUBSTR(m.lcSysInfo, 25, 4))
- this.nAllocationGranularity = StrToLong(SUBSTR(m.lcSysInfo, 29, 4))
- this.nReserved = StrToLong(SUBSTR(m.lcSysInfo, 33, 4))
 
- #DEFINE PROCESSOR_INTEL_386 386
- #DEFINE PROCESSOR_INTEL_486 486
- #DEFINE PROCESSOR_INTEL_PENTIUM 586
- #DEFINE PROCESSOR_MIPS_R4000 4000
- #DEFINE PROCESSOR_ALPHA_21064 21064
- DO CASE
- CASE this.nProcessorType = PROCESSOR_INTEL_386
+ this.nOEMid = StrToLong(left(m.lcSysInfo, 4))
+ this.nPageSize = StrToLong(substr(m.lcSysInfo, 5, 4))
+ this.nAppAddrMin = StrToLong(substr(m.lcSysInfo, 9, 4))
+ this.nAppAddrMax = StrToLong(substr(m.lcSysInfo, 13, 4))
+ this.nProcessorMask = StrToLong(substr(m.lcSysInfo, 17, 4))
+ this.nProcessors = int(StrToLong(substr(m.lcSysInfo, 21, 4)))
+ this.nProcessorType = StrToLong(substr(m.lcSysInfo, 25, 4))
+ this.nAllocationGranularity = StrToLong(substr(m.lcSysInfo, 29, 4))
+ this.nReserved = StrToLong(substr(m.lcSysInfo, 33, 4))
+
+ #define PROCESSOR_INTEL_386 386
+ #define PROCESSOR_INTEL_486 486
+ #define PROCESSOR_INTEL_PENTIUM 586
+ #define PROCESSOR_MIPS_R4000 4000
+ #define PROCESSOR_ALPHA_21064 21064
+ do case
+ case this.nProcessorType = PROCESSOR_INTEL_386
     this.cProcessorName = "INTEL 386"
- CASE this.nProcessorType = PROCESSOR_INTEL_486
+ case this.nProcessorType = PROCESSOR_INTEL_486
     this.cProcessorName = "INTEL 486"
- CASE this.nProcessorType = PROCESSOR_INTEL_PENTIUM
+ case this.nProcessorType = PROCESSOR_INTEL_PENTIUM
     this.cProcessorName = "INTEL Pentium"
- CASE this.nProcessorType = PROCESSOR_MIPS_R4000
+ case this.nProcessorType = PROCESSOR_MIPS_R4000
     this.cProcessorName = "MIPS R4000"
- CASE this.nProcessorType = PROCESSOR_ALPHA_21064
+ case this.nProcessorType = PROCESSOR_ALPHA_21064
     this.cProcessorName = "ALPHA 21064"
- ENDCASE
+ endcase
 
 * ------------------------------------
-PROCEDURE MemoryInfo && Peuple les informations mémoire
+procedure MemoryInfo && Peuple les informations mémoire
 
- DECLARE GlobalMemoryStatus IN win32api STRING @lcMemStat
- LOCAL lcMemStat
- m.lcMemStat = LongToStr(32) + REPLICATE(CHR(0), 28)
+ declare GlobalMemoryStatus in win32api string @lcMemStat
+ local lcMemStat
+ m.lcMemStat = LongToStr(32) + replicate(chr(0), 28)
  GlobalMemoryStatus(@m.lcMemStat)
 
- this.nMemLoad = StrToLong(SUBSTR(m.lcMemStat, 5, 4))
- this.nMemPhysTot = StrToLong(SUBSTR(m.lcMemStat, 9, 4))
- this.nMemPhysAvail = StrToLong(SUBSTR(m.lcMemStat, 13, 4))
- this.nPageFileTot = StrToLong(SUBSTR(m.lcMemStat, 17, 4))
- this.nPageFileAvail = StrToLong(SUBSTR(m.lcMemStat, 21, 4))
- this.nMemVirtualTot = StrToLong(SUBSTR(m.lcMemStat, 25, 4))
- this.nMemVirtualAvail = StrToLong(SUBSTR(m.lcMemStat, 29, 4))
+ this.nMemLoad = StrToLong(substr(m.lcMemStat, 5, 4))
+ this.nMemPhysTot = StrToLong(substr(m.lcMemStat, 9, 4))
+ this.nMemPhysAvail = StrToLong(substr(m.lcMemStat, 13, 4))
+ this.nPageFileTot = StrToLong(substr(m.lcMemStat, 17, 4))
+ this.nPageFileAvail = StrToLong(substr(m.lcMemStat, 21, 4))
+ this.nMemVirtualTot = StrToLong(substr(m.lcMemStat, 25, 4))
+ this.nMemVirtualAvail = StrToLong(substr(m.lcMemStat, 29, 4))
 
 * ------------------------------------
-PROCEDURE ProcessorInfo && Peuple les informations sur le processeur
+procedure ProcessorInfo && Peuple les informations sur le processeur
 
-LOCAL loWMIService, loItems, loItem
-loWMIService = Getobject("winmgmts:\\.\root\cimv2")
+local loWMIService, loItems, loItem
+loWMIService = getobject("winmgmts:\\.\root\cimv2")
 loItems = loWMIService.ExecQuery("Select * from Win32_Processor")
 
-For Each loItem In loItems
+for each loItem in loItems
 	this.nAddressWidth = loItem.AddressWidth
 	this.nArchitecture = loItem.Architecture
 	this.nAvailability = loItem.Availability
 	this.nCpuStatus = loItem.CpuStatus
 	this.nCurrentClockSpeed = loItem.CurrentClockSpeed
 	this.nDataWidth = loItem.DataWidth
-	this.cDescription = Alltrim(loItem.Description)
-	this.cDeviceID = Alltrim(loItem.DeviceID)
+	this.cDescription = alltrim(loItem.description)
+	this.cDeviceID = alltrim(loItem.DeviceID)
 	this.nExtClock = loItem.ExtClock
 	this.nFamily = loItem.Family
 	this.nL2CacheSize = loItem.L2CacheSize
 	this.nL2CacheSpeed = loItem.L2CacheSpeed
-	this.nLevel = loItem.Level
+	this.nLevel = loItem.level
 	this.nLoadPercentage = loItem.LoadPercentage
-	this.cManufacturer = Alltrim(loItem.Manufacturer)
+	this.cManufacturer = alltrim(loItem.Manufacturer)
 	this.nMaxClockSpeed = loItem.MaxClockSpeed
-	this.cProcessorFullName = Alltrim(loItem.Name)
+	this.cProcessorFullName = alltrim(loItem.name)
 	this.cPNPDeviceID = loItem.PNPDeviceID
-	this.cProcessorID = Alltrim(loItem.ProcessorId)
+	this.cProcessorID = alltrim(loItem.ProcessorId)
 	this.nProcessorType = loItem.ProcessorType
 	this.nRevision = loItem.Revision
-	this.cRole = Alltrim(loItem.Role)
-	this.cSocketDesignation = Alltrim(loItem.SocketDesignation)
+	this.cRole = alltrim(loItem.Role)
+	this.cSocketDesignation = alltrim(loItem.SocketDesignation)
 	this.nStatusInfo = loItem.StatusInfo
-	this.cStepping = Alltrim(loItem.Stepping)
-	this.cUniqueId = Alltrim(loItem.UniqueId)
+	this.cStepping = alltrim(loItem.Stepping)
+	this.cUniqueId = alltrim(loItem.UniqueId)
 	this.nUpgradeMethod = loItem.UpgradeMethod
-	this.cVersion = Alltrim(loItem.Version)
+	this.cVersion = alltrim(loItem.version)
 	this.nVoltageCaps = loItem.VoltageCaps
-ENDFOR
- 
-ENDDEFINE && CLASS abMachineInfo
+endfor
+
+enddefine && CLASS abMachineInfo
 
 * ==================================
-PROCEDURE abMachineInfo_Test && Teste abMachineInfo
+procedure abMachineInfo_Test && Teste abMachineInfo
 
-LOCAL lnSeconds, loMI as abMachineInfo of abDev.prg
-loMI = CreateObject('abMachineInfo')
+local lnSeconds, loMI as abMachineInfo of abDev.prg
+loMI = createobject('abMachineInfo')
 
-#DEFINE MEM_DISP_FORMAT '9 999 999 999'
+#define MEM_DISP_FORMAT '9 999 999 999'
 
-lnSeconds = Seconds()
-loMI.systemInfo()
-lnSeconds = Seconds() - m.lnSeconds
-MessageBox(;
+lnSeconds = seconds()
+loMI.SystemInfo()
+lnSeconds = seconds() - m.lnSeconds
+messagebox(;
 	"Informations Système:" + CR + ;
-	"- Identifiant OEM: " + Transform(m.loMI.nOEMid) + CR + ;
-  "- Taille de page : " + Transform(m.loMI.nPageSize) + CR + ;
-  "- Adresse application minimum : " + Transform(m.loMI.nAppAddrMin, MEM_DISP_FORMAT) + CR +;
-  "- Adresse application maximum : " + Transform(m.loMI.nAppAddrMax, MEM_DISP_FORMAT) + CR + ;
-  "- Masque de processeur: " + Transform(m.loMI.nProcessorMask) + CR + ;
-  "- Nombre de processeurs: " + Transform(m.loMI.nProcessors) + CR + ;
+	"- Identifiant OEM: " + transform(m.loMI.nOEMid) + CR + ;
+  "- Taille de page : " + transform(m.loMI.nPageSize) + CR + ;
+  "- Adresse application minimum : " + transform(m.loMI.nAppAddrMin, MEM_DISP_FORMAT) + CR +;
+  "- Adresse application maximum : " + transform(m.loMI.nAppAddrMax, MEM_DISP_FORMAT) + CR + ;
+  "- Masque de processeur: " + transform(m.loMI.nProcessorMask) + CR + ;
+  "- Nombre de processeurs: " + transform(m.loMI.nProcessors) + CR + ;
   "- Nom du processeur : " + m.loMI.cProcessorName + CR + ;
-  "- Granularité d'allocation (NDR?): " + Transform(m.loMI.nAllocationGranularity) + CR + ;
-  + CR + "Temps d'exécution : " + Transform(m.lnSeconds) + " secondes" ;
+  "- Granularité d'allocation (NDR?): " + transform(m.loMI.nAllocationGranularity) + CR + ;
+  + CR + "Temps d'exécution : " + transform(m.lnSeconds) + " secondes" ;
  ,64)
 
-lnSeconds = Seconds()
-loMI.memoryInfo()
-lnSeconds = Seconds() - m.lnSeconds
-MessageBox(;
+lnSeconds = seconds()
+loMI.MemoryInfo()
+lnSeconds = seconds() - m.lnSeconds
+messagebox(;
 	"Informations Mémoire:" + CR + ;
-  "- Mémoire utilisée : " + Transform(m.loMI.nMemLoad) + '%' + CR + ;
-  "- Mémoire physique totale : " + Transform(m.loMI.nMemPhysTot, MEM_DISP_FORMAT) + " octets" + CR + ;
-  "- Mémoire physique disponible : " + Transform(m.loMI.nMemPhysAvail, MEM_DISP_FORMAT) + " octets" + CR + ;
-  "- Mémoire paginée totale : " + Transform(m.loMI.nPageFileTot, MEM_DISP_FORMAT) + " octets" + CR + ;
-  "- Mémoire paginée disponible : " + Transform(m.loMI.nPageFileAvail, MEM_DISP_FORMAT) + " octets" + CR + ;
-  "- Mémoire virtuelle totale : " + Transform(m.loMI.nMemVirtualTot, MEM_DISP_FORMAT) + " octets" + CR + ;
-  "- Mémoire virtuelle disponible : " + Transform(m.loMI.nMemVirtualAvail, MEM_DISP_FORMAT) + " octets" + CR + ;
-  + CR + "Temps d'exécution : " + Transform(m.lnSeconds) + " secondes" ;
+  "- Mémoire utilisée : " + transform(m.loMI.nMemLoad) + '%' + CR + ;
+  "- Mémoire physique totale : " + transform(m.loMI.nMemPhysTot, MEM_DISP_FORMAT) + " octets" + CR + ;
+  "- Mémoire physique disponible : " + transform(m.loMI.nMemPhysAvail, MEM_DISP_FORMAT) + " octets" + CR + ;
+  "- Mémoire paginée totale : " + transform(m.loMI.nPageFileTot, MEM_DISP_FORMAT) + " octets" + CR + ;
+  "- Mémoire paginée disponible : " + transform(m.loMI.nPageFileAvail, MEM_DISP_FORMAT) + " octets" + CR + ;
+  "- Mémoire virtuelle totale : " + transform(m.loMI.nMemVirtualTot, MEM_DISP_FORMAT) + " octets" + CR + ;
+  "- Mémoire virtuelle disponible : " + transform(m.loMI.nMemVirtualAvail, MEM_DISP_FORMAT) + " octets" + CR + ;
+  + CR + "Temps d'exécution : " + transform(m.lnSeconds) + " secondes" ;
  ,64)
 
-lnSeconds = Seconds()
-loMI.processorInfo()
-lnSeconds = Seconds() - m.lnSeconds
- MessageBox(;
-	"- Address Width : " + Transform(m.loMI.nAddressWidth) + CR + ;
-	"- Architecture : " + Transform(m.loMI.nArchitecture) + CR + ;
-	"- Availability : " + Transform(m.loMI.nAvailability) + CR + ;
-	"- CPU Status : " + Transform(m.loMI.nCpuStatus) + CR + ;
-	"- Current Clock Speed : " + Transform(m.loMI.nCurrentClockSpeed) + CR + ;
-	"- Data Width : " + Transform(m.loMI.nDataWidth) + CR + ;
-	"- Description : " + Transform(m.loMI.cDescription) + CR + ;
-	"- Device ID : " + Transform(m.loMI.cDeviceID) + CR + ;
-	"- Ext Clock : " + Transform(m.loMI.nExtClock) + CR + ;
-	"- Family : " + Transform(m.loMI.nFamily) + CR + ;
-	"- L2 Cache Size : " + Transform(m.loMI.nL2CacheSize) + CR + ;
-	"- L2 Cache Speed : " + Transform(m.loMI.nL2CacheSpeed) + CR + ;
-	"- Level : " + Transform(m.loMI.nLevel) + CR + ;
-	"- Load Percentage : " + Transform(m.loMI.nLoadPercentage) + CR + ;
-	"- Manufacturer : " + Transform(m.loMI.cManufacturer) + CR + ;
-	"- Maximum Clock Speed : " + Transform(m.loMI.nMaxClockSpeed) + CR + ;
-	"- Processor Full Name : " + Transform(m.loMI.cProcessorFullName) + CR + ;
-	"- PNP Device ID : " + Transform(m.loMI.cPNPDeviceID) + CR + ;
-	"- Processor Id : " + Transform(m.loMI.cProcessorID) + CR + ;
-	"- Processor Type : " + Transform(m.loMI.nProcessorType) + CR + ;
-	"- Revision : " + Transform(m.loMI.nRevision) + CR + ;
-	"- Role : " + Transform(m.loMI.cRole) + CR + ;
-	"- Socket Designation : " + Transform(m.loMI.cSocketDesignation) + CR + ;
-	"- Status Information : " + Transform(m.loMI.nStatusInfo) + CR + ;
-	"- Stepping : " + Transform(m.loMI.cStepping) + CR + ;
-	"- Unique Id : " + Transform(m.loMI.cUniqueId) + CR + ;
-	"- Upgrade Method : " + Transform(m.loMI.nUpgradeMethod) + CR + ;
-	"- Version : " + Transform(m.loMI.cVersion) + CR + ;
-	"- Voltage Caps : " + Transform(m.loMI.nVoltageCaps)+ CR + ;
-  + CR + "Temps d'exécution : " + Transform(m.lnSeconds) + " secondes" ;
+lnSeconds = seconds()
+loMI.ProcessorInfo()
+lnSeconds = seconds() - m.lnSeconds
+ messagebox(;
+	"- Address Width : " + transform(m.loMI.nAddressWidth) + CR + ;
+	"- Architecture : " + transform(m.loMI.nArchitecture) + CR + ;
+	"- Availability : " + transform(m.loMI.nAvailability) + CR + ;
+	"- CPU Status : " + transform(m.loMI.nCpuStatus) + CR + ;
+	"- Current Clock Speed : " + transform(m.loMI.nCurrentClockSpeed) + CR + ;
+	"- Data Width : " + transform(m.loMI.nDataWidth) + CR + ;
+	"- Description : " + transform(m.loMI.cDescription) + CR + ;
+	"- Device ID : " + transform(m.loMI.cDeviceID) + CR + ;
+	"- Ext Clock : " + transform(m.loMI.nExtClock) + CR + ;
+	"- Family : " + transform(m.loMI.nFamily) + CR + ;
+	"- L2 Cache Size : " + transform(m.loMI.nL2CacheSize) + CR + ;
+	"- L2 Cache Speed : " + transform(m.loMI.nL2CacheSpeed) + CR + ;
+	"- Level : " + transform(m.loMI.nLevel) + CR + ;
+	"- Load Percentage : " + transform(m.loMI.nLoadPercentage) + CR + ;
+	"- Manufacturer : " + transform(m.loMI.cManufacturer) + CR + ;
+	"- Maximum Clock Speed : " + transform(m.loMI.nMaxClockSpeed) + CR + ;
+	"- Processor Full Name : " + transform(m.loMI.cProcessorFullName) + CR + ;
+	"- PNP Device ID : " + transform(m.loMI.cPNPDeviceID) + CR + ;
+	"- Processor Id : " + transform(m.loMI.cProcessorID) + CR + ;
+	"- Processor Type : " + transform(m.loMI.nProcessorType) + CR + ;
+	"- Revision : " + transform(m.loMI.nRevision) + CR + ;
+	"- Role : " + transform(m.loMI.cRole) + CR + ;
+	"- Socket Designation : " + transform(m.loMI.cSocketDesignation) + CR + ;
+	"- Status Information : " + transform(m.loMI.nStatusInfo) + CR + ;
+	"- Stepping : " + transform(m.loMI.cStepping) + CR + ;
+	"- Unique Id : " + transform(m.loMI.cUniqueId) + CR + ;
+	"- Upgrade Method : " + transform(m.loMI.nUpgradeMethod) + CR + ;
+	"- Version : " + transform(m.loMI.cVersion) + CR + ;
+	"- Voltage Caps : " + transform(m.loMI.nVoltageCaps)+ CR + ;
+  + CR + "Temps d'exécution : " + transform(m.lnSeconds) + " secondes" ;
  ,64)
 
 * ------------------------------------
- FUNCTION LongToStr && Représentation ASCII d'un entier 32 bits positif
- LPARAMETERS tnLongVal && Entier 32 bits positif
+ function LongToStr && Représentation ASCII d'un entier 32 bits positif
+ lparameters tnLongVal && Entier 32 bits positif
 
- LOCAL i, lnLongVal, lcResult
+ local i, lnLongVal, lcResult
 
- lcResult = Space(0)
+ lcResult = space(0)
  lnLongVal = m.tnLongVal
- FOR i = 24 TO 0 STEP -8
-    lcResult = Chr(Int(m.lnLongVal/(2^m.i))) + m.lcResult
-    lnLongval = Mod(m.lnLongVal, (2^m.i))
- ENDFOR
+ for i = 24 to 0 step -8
+    lcResult = chr(int(m.lnLongVal/(2^m.i))) + m.lcResult
+    lnLongVal = mod(m.lnLongVal, (2^m.i))
+ endfor
 
- RETURN lcResult
+ return lcResult
 
 * ------------------------------------
-FUNCTION StrToLong && Entier 32 bits positif d'après sa représentation ASCII
-LPARAMETERS tcLongStr && Représentation ASCII d'un entier 32 bits positif
+function StrToLong && Entier 32 bits positif d'après sa représentation ASCII
+lparameters tcLongStr && Représentation ASCII d'un entier 32 bits positif
 
-LOCAL i, lcLongStr, lnResult
+local i, lcLongStr, lnResult
 lnResult = 0
 lcLongStr = m.tcLongStr
-FOR i = 0 TO 24 STEP 8
-   lnResult = m.lnResult + (Asc(m.lcLongStr) * (2^m.i))
-   lcLongStr = Right(m.lcLongStr, Len(m.lcLongStr) - 1)
-ENDFOR
+for i = 0 to 24 step 8
+   lnResult = m.lnResult + (asc(m.lcLongStr) * (2^m.i))
+   lcLongStr = right(m.lcLongStr, len(m.lcLongStr) - 1)
+endfor
 
-RETURN lnResult 
+return lnResult
 
 * ------------------------------------
-FUNCTION cBarsSecs && Une barre pour 50 ms
-LPARAMETERS tnSeconds && Nombre de secondes obtenu par différence de seconds()
+function cBarsSecs && Une barre pour 50 ms
+lparameters tnSeconds && Nombre de secondes obtenu par différence de seconds()
 
-IF Vartype(m.tnSeconds) == 'N' AND m.tnSeconds >= 0
+if vartype(m.tnSeconds) == 'N' and m.tnSeconds >= 0
  	tnSeconds = m.tnSeconds * 1000 && ms
 
- 	LOCAL lcBars
- 	lcBars = Replicate('=', Min(Int(m.tnSeconds / 50), 100)) && 1 barre = 50 ms, 5 secs max
- 	RETURN m.lcBars;
- 		+ Space(Iif(Empty(m.lcBars), 0, 1));
- 		+ Iif(m.tnSeconds = 0, '< 1', Ltrim(Transform(m.tnSeconds, '99 999')));
+ 	local lcBars
+ 	lcBars = replicate('=', min(int(m.tnSeconds / 50), 100)) && 1 barre = 50 ms, 5 secs max
+ 	return m.lcBars;
+ 		+ space(iif(empty(m.lcBars), 0, 1));
+ 		+ iif(m.tnSeconds = 0, '< 1', ltrim(transform(m.tnSeconds, '99 999')));
  		+ " ms"
-ELSE
+else
 
-	RETURN Space(0)
-ENDIF
+	return space(0)
+endif
 
 * ------------------------------------
-PROCEDURE ProjectFilesInclude && Change l'inclusion de fichiers dans le projet courant
-LPARAMETERS ;
+procedure ProjectFilesInclude && Change l'inclusion de fichiers dans le projet courant
+lparameters ;
 	tcFileMask,; && [*.*] Expression régulière indiquant le masque de fichier à traiter
 	tlInclude,; && [.T.] .T.: Inclure, .F.: Exclure, .NULL. : Inverser
 	tnResult && @ Nombre de fichiers traités
 tnResult = 0
 
-LOCAL loProject, loProjectFiles, loRegExp as abRegExp OF abTxt.prg, llResult
+local loProject, loProjectFiles, loRegExp as abRegExp of abTxt.prg, llResult
 
 * Si un projet est actif
-loProject = _vfp.Activeproject
-llResult = Vartype(m.loProject) == 'O'
-IF m.llResult
-	
-	* Si le projet contient des fichiers
-	loProjectFiles = m.loProject.Files
+loProject = _vfp.activeproject
+llResult = vartype(m.loProject) == 'O'
+if m.llResult
+
+* Si le projet contient des fichiers
+	loProjectFiles = m.loProject.files
 	llResult = m.loProjectFiles.count > 0
-	IF m.llResult
+	if m.llResult
 
-		* Créer un objet 'Regular Expression'
-		loRegExp = CreateObject('abRegExp')
-		llResult = Vartype(m.loRegExp) == 'O'
-		IF m.llResult
+* Créer un objet 'Regular Expression'
+		loRegExp = createobject('abRegExp')
+		llResult = vartype(m.loRegExp) == 'O'
+		if m.llResult
 
-			* Donner leur valeur par défaut aux paramètres
-			LOCAL lcCarsNot, lcFileMask, llInclude, loFile as File
+* Donner leur valeur par défaut aux paramètres
+			local lcCarsNot, lcFileMask, llInclude, loFile as file
 			lcCarsNot = CAR_INT_DS_NOM_FICH
-			lcFileMask = Alltrim(uDefault(m.tcFileMask, Textmerge('[^<<m.lcCarsNot>>]+\.[^<<m.lcCarsNot>>]+')))
-			llInclude = Iif(Pcount() >=2 AND Vartype(m.tlInclude) $ 'LX', m.tlInclude, .T.)
-			
-			* Pour chaque fichier
-			loRegExp.Setup(m.lcFileMask, .T.)
-			FOR EACH loFile IN m.loProjectFiles
-			
-				* Si le nom du fichier correspond au masque
-				IF loRegExp.test(JustFname(m.loFile.Name))
-				
-					* Changer son inclusion
-					loFile.Exclude = Iif(IsNull(m.llInclude), NOT m.loFile.Exclude, m.llInclude)
-					tnResult = m.tnResult + 1
-				ENDIF
-			ENDFOR
-		ENDIF
-	ENDIF
-ENDIF
+			lcFileMask = alltrim(uDefault(m.tcFileMask, textmerge('[^<<m.lcCarsNot>>]+\.[^<<m.lcCarsNot>>]+')))
+			llInclude = iif(pcount() >=2 and vartype(m.tlInclude) $ 'LX', m.tlInclude, .t.)
 
-RETURN m.llResult
+* Pour chaque fichier
+			loRegExp.setup(m.lcFileMask, .t.)
+			for each loFile in m.loProjectFiles
+
+* Si le nom du fichier correspond au masque
+				if loRegExp.Test(justfname(m.loFile.name))
+
+* Changer son inclusion
+					loFile.Exclude = iif(isnull(m.llInclude), not m.loFile.Exclude, m.llInclude)
+					tnResult = m.tnResult + 1
+				endif
+			endfor
+		endif
+	endif
+endif
+
+return m.llResult
 
 * ------------------------------------
-PROCEDURE ProjectFilesRemove && Ôte des fichiers du projet courant
-LPARAMETERS ;
+procedure ProjectFilesRemove && Ôte des fichiers du projet courant
+lparameters ;
 	tcFileMask,; && [*.*] Expression régulière indiquant le masque de fichier à traiter
 	tnResult && @ Nombre de fichiers traités
 tnResult = 0
 
-LOCAL loProject, loProjectFiles, loRegExp as abRegExp OF abTxt.prg, llResult
+local loProject, loProjectFiles, loRegExp as abRegExp of abTxt.prg, llResult
 
 * Si un projet est actif
-loProject = _vfp.Activeproject
-llResult = Vartype(m.loProject) == 'O'
-IF m.llResult
-	
-	* Si le projet contient des fichiers
-	loProjectFiles = m.loProject.Files
+loProject = _vfp.activeproject
+llResult = vartype(m.loProject) == 'O'
+if m.llResult
+
+* Si le projet contient des fichiers
+	loProjectFiles = m.loProject.files
 	llResult = m.loProjectFiles.count > 0
-	IF m.llResult
+	if m.llResult
 
-		* Créer un objet 'Regular Expression'
-		loRegExp = CreateObject('abRegExp')
-		llResult = Vartype(m.loRegExp) == 'O'
-		IF m.llResult
+* Créer un objet 'Regular Expression'
+		loRegExp = createobject('abRegExp')
+		llResult = vartype(m.loRegExp) == 'O'
+		if m.llResult
 
-			* Donner leur valeur par défaut aux paramètres
-			LOCAL lcCarsNot, lcFileMask, llInclude, loFile AS File
+* Donner leur valeur par défaut aux paramètres
+			local lcCarsNot, lcFileMask, llInclude, loFile as file
 			lcCarsNot = CAR_INT_DS_NOM_FICH
-			lcFileMask = Alltrim(uDefault(m.tcFileMask, Textmerge('[^<<m.lcCarsNot>>]+\.[^<<m.lcCarsNot>>]+')))
-			llInclude = Iif(Pcount() >=2 AND Vartype(m.tlInclude) $ 'LX', m.tlInclude, .T.)
-			
-			* Pour chaque fichier
-			loRegExp.Setup(m.lcFileMask, .T.)
-			FOR EACH loFile IN m.loProjectFiles
-			
-				* Si le nom du fichier correspond au masque
-				IF loRegExp.test(JustFname(m.loFile.Name))
-				
-					* öter le fichier
-					loFile.Remove
-					tnResult = m.tnResult + 1
-				ENDIF
-			ENDFOR
-		ENDIF
-	ENDIF
-ENDIF
+			lcFileMask = alltrim(uDefault(m.tcFileMask, textmerge('[^<<m.lcCarsNot>>]+\.[^<<m.lcCarsNot>>]+')))
+			llInclude = iif(pcount() >=2 and vartype(m.tlInclude) $ 'LX', m.tlInclude, .t.)
 
-RETURN m.llResult
+* Pour chaque fichier
+			loRegExp.setup(m.lcFileMask, .t.)
+			for each loFile in m.loProjectFiles
+
+* Si le nom du fichier correspond au masque
+				if loRegExp.Test(justfname(m.loFile.name))
+
+* öter le fichier
+					loFile.remove
+					tnResult = m.tnResult + 1
+				endif
+			endfor
+		endif
+	endif
+endif
+
+return m.llResult
 
 
 *========================================
-FUNCTION cVFPname	&& Nom valide pour VFP, avec longueur limitée si nécessaire
-LPARAMETERS ;
+function cVFPname	&& Nom valide pour VFP, avec longueur limitée si nécessaire
+lparameters ;
 	tcVFPname, ; && Nom VFP à valider
 	tnLength && [len(tcVFPname)] Longueur maximale du nom (par ex. 10 pour un nom de champ de table libre)
-LOCAL lcResult
+local lcResult
 lcResult = space(0)
 
-IF Vartype(m.tcVFPname) = 'C' ;
- AND NOT Empty(m.tcVFPname)
-	
-	* Remove accents
-	LOCAL lcVFPname
-	lcVFPname = cEuroANSI(Alltrim(m.tcVFPname)) 
+if vartype(m.tcVFPname) = 'C' ;
+ and not empty(m.tcVFPname)
 
-	* Start with '_' if first is a digit
-	lcVFPname = Iif(IsDigit(m.lcVFPname), '_', Space(0)) + m.lcVFPname
+* Remove accents
+	local lcVFPname
+	lcVFPname = cEuroANSI(alltrim(m.tcVFPname))
 
-	* Turn characters neither digit or letter to '_'
-	LOCAL lnCar, lcCar
-	FOR m.lnCar = 1 TO Len(m.lcVFPname)
-		lcCar = Substrc(m.lcVFPname, m.lnCar, 1)
-		lcCar = Iif(isDigit(m.lcCar) or IsAlpha(m.lcCar), m.lcCar, '_')
-		lcResult = m.lcResult + Upper(m.lcCar)
-	ENDFOR
+* Start with '_' if first is a digit
+	lcVFPname = iif(isdigit(m.lcVFPname), '_', space(0)) + m.lcVFPname
 
-	* Remove duplicate underscores
+* Turn characters neither digit or letter to '_'
+	local lnCar, lcCar
+	for m.lnCar = 1 to len(m.lcVFPname)
+		lcCar = substrc(m.lcVFPname, m.lnCar, 1)
+		lcCar = iif(isdigit(m.lcCar) or isalpha(m.lcCar), m.lcCar, '_')
+		lcResult = m.lcResult + upper(m.lcCar)
+	endfor
+
+* Remove duplicate underscores
 	lcResult = cRepCharDel(m.lcResult, '_')
-	lcResult = Iif(m.lcResult == '_', Space(0), m.lcResult)
-	
-	* Trim right is required
-	IF Vartype(m.tnLength) = 'N' ;
-	 AND m.tnLength > 0
-		lcResult = Leftc(m.lcResult, m.tnLength)
-	ENDIF
-ENDIF
+	lcResult = iif(m.lcResult == '_', space(0), m.lcResult)
 
-RETURN m.lcResult
+* Trim right is required
+	if vartype(m.tnLength) = 'N' ;
+	 and m.tnLength > 0
+		lcResult = leftc(m.lcResult, m.tnLength)
+	endif
+endif
+
+return m.lcResult
 
 * -----------------------------------------------------------------
-PROCEDURE cVFPname_Test
+procedure cVFPname_Test
 
-LOCAL loUnitTest as abUnitTest OF abDev.prg
-loUnitTest = NewObject('abUnitTest', 'abDev.prg')
+local loUnitTest as abUnitTest of abDev.prg
+loUnitTest = newobject('abUnitTest', 'abDev.prg')
 
 loUnitTest.Test('_150', '150')
 loUnitTest.Test('_CARTABLE_POIRE', '%cartable/poiré')
 loUnitTest.Test('_2CARTABLE_POIRE', '2cartable.poiré')
 loUnitTest.Test('_2CARTABLE_POIRE', '2cartable.:poiré')
-loUnitTest.Test(Leftc('_2CARTABLE_POIRE', 9), '2cartable.:poiré', 9)
+loUnitTest.Test(leftc('_2CARTABLE_POIRE', 9), '2cartable.:poiré', 9)
 
-RETURN loUnitTest.Result()
+return loUnitTest.Result()
 
 *========================================
-FUNCTION lVFPname	&& Nom valide pour VFP
-LPARAMETERS tcVFPname && @ Nom VFP à valider
+function lVFPname	&& Nom valide pour VFP
+lparameters tcVFPname && @ Nom VFP à valider
 
-LOCAL llResult
-#if .F.
-Use only letters, underscores, and numbers.
-Begin the name with a letter or underscore.
-Use 1 to 128 characters, except for field names in free tables and index tags — those can be 10 characters at most.
-Avoid words reserved by Visual FoxPro.
+local llResult
+#if .f.
+use only letters, underscores, and numbers.
+begin the name with a letter or underscore.
+use 1 to 128 characters, except for field names in free tables and index tags — those can be 10 characters at most.
+Avoid words reserved by visual foxpro.
 #endif
 
-llResult = Vartype(m.tcVFPname) == 'C';
- AND NOT Empty(m.tcVFPname);
- AND (Left(m.tcVFPname, 1) == '_' or IsAlpha(m.tcVFPname));
- AND Empty(Chrtran(Upper(cEuroANSI(m.tcVFPname)), '_0123456789ABCDEFGHIJKLMONPQRSTUVWXYZ', ''));
- AND Len(m.tcVFPname) <= 128
+llResult = vartype(m.tcVFPname) == 'C';
+ and not empty(m.tcVFPname);
+ and (left(m.tcVFPname, 1) == '_' or isalpha(m.tcVFPname));
+ and empty(chrtran(upper(cEuroANSI(m.tcVFPname)), '_0123456789ABCDEFGHIJKLMONPQRSTUVWXYZ', ''));
+ and len(m.tcVFPname) <= 128
 
-IF m.llResult
-	tcVFPname = Upper(m.tcVFPname)
-ENDIF
+if m.llResult
+	tcVFPname = upper(m.tcVFPname)
+endif
 
-RETURN m.llResult
- 
+return m.llResult
+
 * ====================
-FUNCTION lProcLine && Ligne de code VFP définissant une procédure / fonction
-LPARAMETERS tcCodeLine && Ligne de code VFP
+function lProcLine && Ligne de code VFP définissant une procédure / fonction
+lparameters tcCodeLine && Ligne de code VFP
 
-LOCAL lcCodeLine, lcWord1, lcWord2, llResult
+local lcCodeLine, lcWord1, lcWord2, llResult
 
-llResult = Vartype(m.tcCodeLine) == 'C'
-ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([Invalid parameter type]))
-IF m.llResult
+llResult = vartype(m.tcCodeLine) == 'C'
+assert m.llResult message cAssertMsg(textmerge([Invalid parameter type]))
+if m.llResult
 
-	lcCodeLine = Upper(m.tcCodeLine)
-	lcWord1 = Left(GetWordNum(m.lcCodeLine, 1), 4)
-	lcWord2 = Left(GetWordNum(m.lcCodeLine, 2), 4)
+	lcCodeLine = upper(m.tcCodeLine)
+	lcWord1 = left(getwordnum(m.lcCodeLine, 1), 4)
+	lcWord2 = left(getwordnum(m.lcCodeLine, 2), 4)
 
 	llResult = m.lcWord1 $ 'PROC,FUNC' ;
-				OR m.lcWord1 $ 'PROT,HIDD' AND m.lcWord2 $ 'PROC,FUNC'
-ENDIF
+				or m.lcWord1 $ 'PROT,HIDD' and m.lcWord2 $ 'PROC,FUNC'
+endif
 
-RETURN m.llResult
-
-* ====================
-FUNCTION cProcType && Type de procédure / fonction défini dans une ligne
-LPARAMETERS tcCodeLine && Ligne de code VFP
-
-LOCAL lcCodeLine, lnProc, lnFunc, llParm, lcResult && 'P' ou 'F' ou vide si impossible de le définir
-
-lcResult = Space(0)
-llParm = Vartype(m.tcCodeLine) == 'C'
-ASSERT m.llParm MESSAGE cAssertMsg(Textmerge([Invalid parameter type]))
-IF m.llParm AND lProcLine(m.tcCodeLine)
-
-	lcCodeLine = Ltrim(Upper(m.tcCodeLine))
-	lnProc = Atc('PROC', m.lcCodeLine)
-	lnFunc = Atc('FUNC', m.lcCodeLine)
-
-	lcResult = Iif(m.lnProc > 0 AND m.lnFunc > 0, Iif(m.lnProc < m.lnFunc, 'P', 'F'), ;
-									Iif(m.lnProc > 0, 'P', 'F'))
-ENDIF
-
-RETURN m.lcResult
+return m.llResult
 
 * ====================
-FUNCTION lCommandLine && Ligne de code VFP contenant une commande
-LPARAMETERS tcCodeLine && Ligne de code VFP
+function cProcType && Type de procédure / fonction défini dans une ligne
+lparameters tcCodeLine && Ligne de code VFP
 
-LOCAL llResult
+local lcCodeLine, lnProc, lnFunc, llParm, lcResult && 'P' ou 'F' ou vide si impossible de le définir
 
-llResult = Vartype(m.tcCodeLine) == 'C'
-ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([Invalid parameter type]))
-IF m.llResult
+lcResult = space(0)
+llParm = vartype(m.tcCodeLine) == 'C'
+assert m.llParm message cAssertMsg(textmerge([Invalid parameter type]))
+if m.llParm and lProcLine(m.tcCodeLine)
+
+	lcCodeLine = ltrim(upper(m.tcCodeLine))
+	lnProc = atc('PROC', m.lcCodeLine)
+	lnFunc = atc('FUNC', m.lcCodeLine)
+
+	lcResult = iif(m.lnProc > 0 and m.lnFunc > 0, iif(m.lnProc < m.lnFunc, 'P', 'F'), ;
+									iif(m.lnProc > 0, 'P', 'F'))
+endif
+
+return m.lcResult
+
+* ====================
+function lCommandLine && Ligne de code VFP contenant une commande
+lparameters tcCodeLine && Ligne de code VFP
+
+local llResult
+
+llResult = vartype(m.tcCodeLine) == 'C'
+assert m.llResult message cAssertMsg(textmerge([Invalid parameter type]))
+if m.llResult
 
 	llResult = ;
-			NOT lCommentLine(m.tcCodeLine) ;
-		AND NOT Left(GetWordNum(m.tcCodeLine, 1), 1) == '#' && directive de compilation
-ENDIF
+			not lCommentLine(m.tcCodeLine) ;
+		and not left(getwordnum(m.tcCodeLine, 1), 1) == '#' && directive de compilation
+endif
 
-RETURN m.llResult
+return m.llResult
 
 * ====================
-FUNCTION lCommentLine && Ligne de commentaire VFP
-LPARAMETERS tcCodeLine && Ligne de code VFP
-LOCAL llResult && c'est une ligne de commentaire
+function lCommentLine && Ligne de commentaire VFP
+lparameters tcCodeLine && Ligne de code VFP
+local llResult && c'est une ligne de commentaire
 
-llResult = Vartype(m.tcCodeLine) == 'C'
-ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([Invalid parameter type]))
-IF m.llResult
+llResult = vartype(m.tcCodeLine) == 'C'
+assert m.llResult message cAssertMsg(textmerge([Invalid parameter type]))
+if m.llResult
 
-	LOCAL lcWord1
-	lcWord1 = GetWordNum(m.tcCodeLine, 1)
+	local lcWord1
+	lcWord1 = getwordnum(m.tcCodeLine, 1)
 	llResult = ;
-					Empty(m.tcCodeLine) ;
-				OR Left(m.lcWord1, 1) == '*' ;
-				OR Left(m.lcWord1, 2) == Replicate('&', 2)
-ENDIF
+					empty(m.tcCodeLine) ;
+				or left(m.lcWord1, 1) == '*' ;
+				or left(m.lcWord1, 2) == replicate('&', 2)
+endif
 
-RETURN m.llResult
+return m.llResult
 
 * ====================
-FUNCTION lSeparatorLine && Ligne de commentaire de séparation 
-LPARAMETERS tcCodeLine && Ligne de code VFP
-LOCAL llResult && c'est une ligne de séparation
+function lSeparatorLine && Ligne de commentaire de séparation
+lparameters tcCodeLine && Ligne de code VFP
+local llResult && c'est une ligne de séparation
 
 * Si le paramètre est correct
-llResult = Vartype(m.tcCodeLine) == 'C'
-ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([Invalid parameter type]))
-IF m.llResult
+llResult = vartype(m.tcCodeLine) == 'C'
+assert m.llResult message cAssertMsg(textmerge([Invalid parameter type]))
+if m.llResult
 
-	* si c'est une ligne de commentaire
+* si c'est une ligne de commentaire
 	llResult = lCommentLine(m.tcCodeLine)
-	IF m.llResult
-	
-		* Si la ligne n'est pas vide
-		llResult = Empty(m.tcCodeLine)
-		IF NOT m.llResult
-		
-			* Si la ligne ne comporte aucune lettre ou chiffre
-			LOCAL lnCar, lcCar
-			FOR m.lnCar = 1 TO Lenc(m.tcCodeLine)
-				lcCar = Substrc(m.tcCodeLine, m.lnCar, 1)
-				llResult = NOT (IsAlpha(m.lcCar) or IsDigit(m.lcCar))
-				IF NOT m.llResult
-					EXIT
-				ENDIF
-			ENDFOR
-		ENDIF
-	ENDIF
-ENDIF
+	if m.llResult
 
-RETURN m.llResult
+* Si la ligne n'est pas vide
+		llResult = empty(m.tcCodeLine)
+		if not m.llResult
+
+* Si la ligne ne comporte aucune lettre ou chiffre
+			local lnCar, lcCar
+			for m.lnCar = 1 to lenc(m.tcCodeLine)
+				lcCar = substrc(m.tcCodeLine, m.lnCar, 1)
+				llResult = not (isalpha(m.lcCar) or isdigit(m.lcCar))
+				if not m.llResult
+					exit
+				endif
+			endfor
+		endif
+	endif
+endif
+
+return m.llResult
 
 * ====================
-FUNCTION cLineComment && Commentaire dans une ligne de code
-LPARAMETERS tcCodeLine && Ligne de code ; si @, retournée sans commentaire ni espaces
+function cLineComment && Commentaire dans une ligne de code
+lparameters tcCodeLine && Ligne de code ; si @, retournée sans commentaire ni espaces
 
-LOCAL lcResult; && Commentaire dans la ligne de code
+local lcResult; && Commentaire dans la ligne de code
 , llResult;
 , lnAt, lnAt1;
 
-lcResult = Space(0)
+lcResult = space(0)
 
 * Si la ligne de code est valide
 tcCodeLine = cCodeLineClean(m.tcCodeLine) && Ligne de code sans caractères parasites
-llResult = NOT IsNull(m.tcCodeLine)
-ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([Line de code invalide : <<m.tcCodeLine>>]))
-IF m.llResult
-	
-	* Si la ligne comporte un commentaire
-	lnAt = At_c('*', m.tcCodeLine)
-	IF m.lnAt > 0
-		lnAt1 = m.lnAt + 1
-	ELSE
-		lnAt = At_c(Replicate('&', 2), m.tcCodeLine)
-		IF m.lnAt > 0
-			lnAt1 = m.lnAt + 2
-		ENDIF
-	ENDIF
-	IF m.lnAt > 0
-	
-		* Extraire le commentaire et le supprimer
-		lcResult = m.tcCodeLine
-		lcResult = Alltrim(Substrc(m.lcResult, m.lnAt1))
-		lcResult = Upper(Substrc(m.lcResult, 1, 1)) + Substrc(m.lcResult, 2) && capitalise le premier caractère
-		tcCodeLine = Substrc(m.tcCodeLine, 1, m.lnAt - 1) && Ligne sans le commentaire
-	ENDIF
-ENDIF
+llResult = not isnull(m.tcCodeLine)
+assert m.llResult message cAssertMsg(textmerge([Line de code invalide : <<m.tcCodeLine>>]))
+if m.llResult
 
-RETURN m.lcResult
+* Si la ligne comporte un commentaire
+	lnAt = at_c('*', m.tcCodeLine)
+	if m.lnAt > 0
+		lnAt1 = m.lnAt + 1
+	else
+		lnAt = at_c(replicate('&', 2), m.tcCodeLine)
+		if m.lnAt > 0
+			lnAt1 = m.lnAt + 2
+		endif
+	endif
+	if m.lnAt > 0
+
+* Extraire le commentaire et le supprimer
+		lcResult = m.tcCodeLine
+		lcResult = alltrim(substrc(m.lcResult, m.lnAt1))
+		lcResult = upper(substrc(m.lcResult, 1, 1)) + substrc(m.lcResult, 2) && capitalise le premier caractère
+		tcCodeLine = substrc(m.tcCodeLine, 1, m.lnAt - 1) && Ligne sans le commentaire
+	endif
+endif
+
+return m.lcResult
 
 * --------------------
-PROCEDURE cLineComment_Test && Teste cLineComment
+procedure cLineComment_Test && Teste cLineComment
 
-LOCAL loUnitTest as abUnitTest OF abDev.prg
-loUnitTest = NewObject('abUnitTest', 'abDev.prg')
+local loUnitTest as abUnitTest of abDev.prg
+loUnitTest = newobject('abUnitTest', 'abDev.prg')
 
-LOCAL lcLine
-lcLine = '      Procedure test ' + Replicate('&', 2) + '   test réussi'
+local lcLine
+lcLine = '      Procedure test ' + replicate('&', 2) + '   test réussi'
 loUnitTest.Test('Test réussi', m.lcLine)
 
-lcLine = '* Procedure test ' + Replicate('&', 2) + '   test réussi'
-loUnitTest.Test('Procedure test ' + Replicate('&', 2) + ' test réussi', m.lcLine)
+lcLine = '* Procedure test ' + replicate('&', 2) + '   test réussi'
+loUnitTest.Test('Procedure test ' + replicate('&', 2) + ' test réussi', m.lcLine)
 
-RETURN loUnitTest.Result()
+return loUnitTest.Result()
 
 * ====================
-FUNCTION cCodeLineClean && Ligne de code sans caractères parasites
-LPARAMETERS tcCodeLine && Ligne de code
+function cCodeLineClean && Ligne de code sans caractères parasites
+lparameters tcCodeLine && Ligne de code
 
-LOCAL llResult
+local llResult
 
-llResult = Vartype(m.tcCodeLine)=='C'
-ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([Function argument type is invalid : <<m.tcCodeLine>>]))
-IF m.llResult
+llResult = vartype(m.tcCodeLine)=='C'
+assert m.llResult message cAssertMsg(textmerge([Function argument type is invalid : <<m.tcCodeLine>>]))
+if m.llResult
 
-	RETURN	cRepCharDel(; && supprime les espaces répétés
-						Chrtran(Ltrim(m.tcCodeLine), Chr(9), Space(1)); && remplace les tabs par des espaces
+	return	cRepCharDel(; && supprime les espaces répétés
+						chrtran(ltrim(m.tcCodeLine), chr(9), space(1)); && remplace les tabs par des espaces
 					)
-ELSE
-	RETURN .NULL.
-ENDIF
+else
+	return .null.
+endif
 
 * ====================
-FUNCTION cCommentStripped && Code sans commentaires
-LPARAMETERS ;
+function cCommentStripped && Code sans commentaires
+lparameters ;
 	tcInsts; && Instructions
 , tlInLineCommentKeep
 
-LOCAL laInst[1], lcInst, lcInst_, llCRLF;
+local laInst[1], lcInst, lcInst_, llCRLF;
 , llResult, lcResult
 
-lcResult = Space(0)
+lcResult = space(0)
 
-llResult = Vartype(m.tcInsts) == 'C'
-ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([Invalid code block: <<m.tcInsts>>]))
-IF m.llResult
-	
-	IF ALines(laInst, m.tcInsts) > 0 && garder les espaces en début et fin de ligne
-		
-		llCRLF = Rightc(m.tcInsts, 2) == CRLF
-		FOR EACH lcInst IN m.laInst
+llResult = vartype(m.tcInsts) == 'C'
+assert m.llResult message cAssertMsg(textmerge([Invalid code block: <<m.tcInsts>>]))
+if m.llResult
 
-			lcInst_ = Ltrim(m.lcInst, Space(1), Chr(9))
-			lcResult = m.lcResult + Iif(Left(m.lcInst_, 1) == '*' OR Left(m.lcInst_, 2) == '&'+'&' OR Upper(Left(m.lcInst_, 5)) == 'NOTE ';
-				, Space(0);
-				, Iif(m.tlInLineCommentKeep, m.lcInst, cInLineCommentStripped(m.lcInst)) + CRLF;
+	if alines(laInst, m.tcInsts) > 0 && garder les espaces en début et fin de ligne
+
+		llCRLF = rightc(m.tcInsts, 2) == CRLF
+		for each lcInst in m.laInst
+
+			lcInst_ = ltrim(m.lcInst, space(1), chr(9))
+			lcResult = m.lcResult + iif(left(m.lcInst_, 1) == '*' or left(m.lcInst_, 2) == '&'+'&' or upper(left(m.lcInst_, 5)) == 'NOTE ';
+				, space(0);
+				, iif(m.tlInLineCommentKeep, m.lcInst, cInLineCommentStripped(m.lcInst)) + CRLF;
 				)
-		ENDFOR
+		endfor
 
-		lcResult = Iif(m.llCRLF;
+		lcResult = iif(m.llCRLF;
 			, m.lcResult;
-			, Rtrim(m.lcResult, CR, LF);
+			, rtrim(m.lcResult, CR, LF);
 			)
-	ENDIF
-ENDIF
+	endif
+endif
 
-RETURN m.lcResult
+return m.lcResult
 
 * ====================
-FUNCTION cInLineCommentStripped && Instructions sans commentaire de ligne
-LPARAMETERS ;
-	tcInsts as String,; && Instructions
-	tcComment as String && @ Commentaires trouvés
+function cInLineCommentStripped && Instructions sans commentaire de ligne
+lparameters ;
+	tcInsts as string,; && Instructions
+	tcComment as string && @ Commentaires trouvés
 
 tcComment = ''
 
-LOCAL lcResult;
+local lcResult;
 , llResult;
 , liComment;
 , liCR
@@ -2036,134 +2036,134 @@ LOCAL lcResult;
 lcResult = ''
 
 * Si code valide
-llResult = Vartype(m.tcInsts) == 'C'
-ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([Invalid Code: <<cL(m.tcInsts)>>]))
-IF m.llResult
+llResult = vartype(m.tcInsts) == 'C'
+assert m.llResult message cAssertMsg(textmerge([Invalid Code: <<cL(m.tcInsts)>>]))
+if m.llResult
 
 	lcResult = m.tcInsts
 
-	DO WHILE .T.
+	do while .t.
 
-		liComment = At_c(Replicate('&', 2), m.lcResult)
-		IF m.liComment > 0
+		liComment = at_c(replicate('&', 2), m.lcResult)
+		if m.liComment > 0
 
-			liCR = At_c(CR, Substrc(m.lcResult, m.liComment))
+			liCR = at_c(CR, substrc(m.lcResult, m.liComment))
 
 			tcComment = m.tcComment;
-				+ Iif(Empty(m.tcComment), '', CRLF);
-				+ Iif(m.liCR > 0;
-					, Substrc(m.tcInsts, m.liComment, m.liCR - m.liComment);
-					, Substrc(m.tcInsts, m.liComment);
+				+ iif(empty(m.tcComment), '', CRLF);
+				+ iif(m.liCR > 0;
+					, substrc(m.tcInsts, m.liComment, m.liCR - m.liComment);
+					, substrc(m.tcInsts, m.liComment);
 					);
-			
-			lcResult = '';
-				+ Rtrim(Substrc(m.lcResult, 1, m.liComment - 1), Space(1), TABUL);
-				+ Iif(m.liCR > 0, Substrc(m.lcResult, m.liComment + m.liCR-1), '')
-		ELSE
-			EXIT
-		ENDIF
-	ENDDO
-ENDIF
 
-RETURN m.lcResult
+			lcResult = '';
+				+ rtrim(substrc(m.lcResult, 1, m.liComment - 1), space(1), TABUL);
+				+ iif(m.liCR > 0, substrc(m.lcResult, m.liComment + m.liCR-1), '')
+		else
+			exit
+		endif
+	enddo
+endif
+
+return m.lcResult
 
 * ----------------------------
-PROCEDURE cInLineCommentStripped_Test && Teste cInLineCommentStripped()
+procedure cInLineCommentStripped_Test && Teste cInLineCommentStripped()
 
-LOCAL loUnitTest AS abUnitTest of abDev.prg, lcCode, lcComment, lcExpected
+local loUnitTest as abUnitTest of abDev.prg, lcCode, lcComment, lcExpected
 
-loUnitTest = NewObject('abUnitTest', 'abDev.prg')
+loUnitTest = newobject('abUnitTest', 'abDev.prg')
 
 lcCode = [Moved &] + [& Occurs when an object is moved to a new position or a container object's Top or Left property settings have been changed programmatically]
 loUnitTest.Test('Moved', m.lcCode, @m.lcComment)
 loUnitTest.assert([&] + [& Occurs when an object is moved to a new position or a container object's Top or Left property settings have been changed programmatically], m.lcComment)
 
-TEXT TO lcCode NOSHOW FLAGS 1 PRETEXT 3
+text TO lcCode NOSHOW FLAGS 1 PRETEXT 3
 	MouseWheel && Occurs ...
 	Moved && Occurs when an object is moved to a new position or a container object's Top or Left property settings have been changed programmatically
 	OLECompleteDrag && Occurs ...
 ENDTEXT
 
-TEXT TO lcExpected NOSHOW FLAGS 1 PRETEXT 3
+text TO lcExpected NOSHOW FLAGS 1 PRETEXT 3
 	MouseWheel
 	Moved
 	OLECompleteDrag
 ENDTEXT
 
 loUnitTest.Test(m.lcExpected, m.lcCode)
-		
-RETURN loUnitTest.Result()
+
+return loUnitTest.Result()
 
 * ====================
-FUNCTION aInLineCommentsStripped && Lignes de code sans commentaires de ligne
-LPARAMETERS taCodeLines && @ Lignes de code
-EXTERNAL ARRAY taCodeLines
+function aInLineCommentsStripped && Lignes de code sans commentaires de ligne
+lparameters taCodeLines && @ Lignes de code
+external array taCodeLines
 
-LOCAL lnCodeLine, llResult, lnResult
+local lnCodeLine, llResult, lnResult
 lnResult = 0
 
-llResult = Type('m.taCodeLines[1]') == 'C' AND Alen(m.taCodeLines, 2) = 0
-ASSERT m.llResult MESSAGE Program() + ' - Code Lines expected: ' + cLitteral(m.taCodeLines)
-IF m.llResult
+llResult = type('m.taCodeLines[1]') == 'C' and alen(m.taCodeLines, 2) = 0
+assert m.llResult message program() + ' - Code Lines expected: ' + cLitteral(m.taCodeLines)
+if m.llResult
 
-	lnResult = Alen(taCodeLines)
-	FOR m.lnCodeLine = 1 TO m.lnResult
+	lnResult = alen(taCodeLines)
+	for m.lnCodeLine = 1 to m.lnResult
 		taCodeLines[m.lnCodeLine] = cInLineCommentStripped(taCodeLines[m.lnCodeLine])
-	ENDFOR
-ENDIF
+	endfor
+endif
 
-RETURN m.lnResult
+return m.lnResult
 
 * =================================================
-FUNCTION abON as abON of abDev.prg && Saves and restores ON ...
-LPARAMETERS ;
+function abON as abON of abDev.prg && Saves and restores ON ...
+lparameters ;
 	tcSetting,; && ON ... to be set
 	tvValueNew && Value to set
 
-RETURN CreateObject('abON', m.tcSetting, m.tvValueNew)
+return createobject('abON', m.tcSetting, m.tvValueNew)
 
 * =================================================
-DEFINE CLASS abON as GA_LIGHTWEIGHT_CLASS of abGA.prg && Saves and restores ON ...
+define class abON as GA_LIGHTWEIGHT_CLASS of abGA.prg && Saves and restores ON ...
 * =================================================
 
-cSetting = Space(0)
-vValueOld = .NULL.
+cSetting = space(0)
+vValueOld = .null.
 
 * ------------------------------------
-PROCEDURE Init
-LPARAMETERS ;
+procedure init
+lparameters ;
 	tcSetting,; && ON ... to be set
 	tvValueNew && Value to set
 
-LOCAL llResult
+local llResult
 
-TRY
+try
 	this.cSetting = m.tcSetting
-	this.vValueOld = On(m.tcSetting)
-	ON &tcSetting &tvValueNew
-	llResult = .T.
-CATCH
-ENDTRY
+	this.vValueOld = on(m.tcSetting)
+	on &tcSetting &tvValueNew
+	llResult = .t.
+catch
+endtry
 
-RETURN m.llResult
+return m.llResult
 
 * ------------------------------------
-PROCEDURE Destroy
+procedure destroy
 
-LOCAL lcSetting, lcValue
+local lcSetting, lcValue
 
 lcSetting = m.this.cSetting
 lcValue = m.this.vValueOld
 
-ON &lcSetting &lcValue
+on &lcSetting &lcValue
 
 * =================================================
-ENDDEFINE && CLASS abOn
+enddefine && CLASS abOn
 * =================================================
 
 * =================================================
-FUNCTION labSet as Boolean
-LPARAMETERS ;
+function labSet as Boolean
+lparameters ;
 	toObj as abSet of abDev.prg,; && @ abSet Object back
 	tcSetting,; && Setting to perform
 	tvValueNew,; && Value to set, .T. to toggle ON - OFF
@@ -2173,21 +2173,21 @@ LPARAMETERS ;
 
 toObj = abSet(m.tcSetting, m.tvValueNew, m.tnSetting, m.tlChangeAlways, m.tlSupported)
 
-RETURN Vartype(m.toObj) == 'O'
+return vartype(m.toObj) == 'O'
 
 * =================================================
-FUNCTION abSet as abSet of abDev.prg
-LPARAMETERS ;
+function abSet as abSet of abDev.prg
+lparameters ;
 	tcSetting,; && Setting to perform
 	tvValueNew,; && Value to set, .T. to toggle ON - OFF
 	tnSetting,; && Setting number when appropriate for tcSetting, as of 2nd parameter of set()
 	tlChangeAlways,; && [.F.] Change setting even if required value is current
 	tlSupported && [.F.] assume setting is supported (optimization)
 
-RETURN CreateObject('abSet', m.tcSetting, m.tvValueNew, m.tnSetting, m.tlChangeAlways, m.tlSupported)
+return createobject('abSet', m.tcSetting, m.tvValueNew, m.tnSetting, m.tlChangeAlways, m.tlSupported)
 
 * =================================================
-DEFINE CLASS abSet as GA_LIGHTWEIGHT_CLASS of abGA.prg && Saves and restores SET ...
+define class abSet as GA_LIGHTWEIGHT_CLASS of abGA.prg && Saves and restores SET ...
 * =================================================
 
 cSetting  = ''
@@ -2195,124 +2195,124 @@ cParm2    = ''
 nSetting  = .null.
 vValueOld = .null.
 vValueNew = .null.
-lOnOff = .F.
+lOnOff = .f.
 
 * ------------------------------------
-protected procedure Init && If valid and supported, performs required environment setting
-LPARAMETERS ;
+protected procedure init && If valid and supported, performs required environment setting
+lparameters ;
 	tcSetting,; && Setting to perform
 	tvValueNew,; && Value to set, .T. to toggle ON <> OFF
 	tnSetting,; && Setting number when appropriate for tcSetting, as of 2nd parameter of set(), eg Set("Alternate", 1) for FileName
 	tlChangeAlways,; && [.F.] Change setting even if required value is current
 	tlSupported && [.F.] assume setting is supported (optimization)
 
-LOCAL success as Boolean;
+local success as Boolean;
 , lnSetting;
 , lvValueCur;
 , lcTypeCur;
 , lcTypeNew;
 , llToggle
 
-lnSetting = Vartype(m.tnSetting) == 'N'
+lnSetting = vartype(m.tnSetting) == 'N'
 
 * If parameters are valid
-success = ga_Type_IsChar(m.tcSetting, .T.)
-ASSERT m.success MESSAGE cAssertMsg(Textmerge([Invalid setting <<cLitteral(m.tcSetting)>>]))
-IF m.success
+success = ga_Type_IsChar(m.tcSetting, .t.)
+assert m.success message cAssertMsg(textmerge([Invalid setting <<cLitteral(m.tcSetting)>>]))
+if m.success
 
-	success = .F.;
+	success = .f.;
 		or !m.lnSetting;
-		or ga_Type_IsInteger(m.tnSetting) and Between(m.tnSetting, 1, 4)
-	ASSERT m.success MESSAGE cAssertMsg(Textmerge([Invalid value <<cLitteral(m.tnSetting)>>]))
-	IF m.success
+		or ga_Type_IsInteger(m.tnSetting) and between(m.tnSetting, 1, 4)
+	assert m.success message cAssertMsg(textmerge([Invalid value <<cLitteral(m.tnSetting)>>]))
+	if m.success
 
-		tcSetting = Upper(Alltrim(m.tcSetting))
-		this.nSetting = Iif(m.lnSetting, m.tnSetting, .null.)
-		this.cParm2 = Iif(m.lnSetting, ',' + Transform(m.tnSetting), '')
+		tcSetting = upper(alltrim(m.tcSetting))
+		this.nSetting = iif(m.lnSetting, m.tnSetting, .null.)
+		this.cParm2 = iif(m.lnSetting, ',' + transform(m.tnSetting), '')
 
-		* If setting is OK
-		success = .T.;
-			and (.F.;
-				OR lTrue(m.tlSupported);
-				OR Vartype(m.tvValueNew) == 'C' AND InList(Upper(Alltrim(m.tvValueNew)), 'ON', 'OFF');
-				OR this.lSupported(m.tcSetting, m.this.cParm2); && supported
+* If setting is OK
+		success = .t.;
+			and (.f.;
+				or lTrue(m.tlSupported);
+				or vartype(m.tvValueNew) == 'C' and inlist(upper(alltrim(m.tvValueNew)), 'ON', 'OFF');
+				or this.lSupported(m.tcSetting, m.this.cParm2); && supported
 				);
-			and this.Get(@m.lvValueCur, m.tcSetting, m.this.cParm2) && current value can be read
-		IF m.success
+			and this.get(@m.lvValueCur, m.tcSetting, m.this.cParm2) && current value can be read
+		if m.success
 
-			* If required value is valid
-			lcTypeCur = Vartype(m.lvValueCur)
-			lcTypeNew = Vartype(m.tvValueNew)
-			llToggle = m.lcTypeNew == 'L' AND m.tvValueNew
-			success = m.llToggle OR m.lcTypeNew == m.lcTypeCur
-			ASSERT m.success MESSAGE cAssertMsg(Textmerge([For setting '<<m.tcSetting>>', value <<cLitteral(m.tvValueNew)>> should be of type '<<m.lcTypeCur>>']))
-			IF m.success
-				
-				* Adjust value when appropriate
-				tvValueNew = Iif(m.tcSetting == 'DEFAULT', Addbs(Fullpath(m.tvValueNew)), m.tvValueNew)
-					
-				* If setting must be changed
-				IF .F.;
-				 OR m.llToggle;
-				 OR lTrue(m.tlChangeAlways);
-				 OR !luEqual(m.lvValueCur, m.tvValueNew,, .T.)
-					
-					this.lOnOff = m.lcTypeCur == 'C' AND (m.lvValueCur == 'ON' or m.lvValueCur == 'OFF')
+* If required value is valid
+			lcTypeCur = vartype(m.lvValueCur)
+			lcTypeNew = vartype(m.tvValueNew)
+			llToggle = m.lcTypeNew == 'L' and m.tvValueNew
+			success = m.llToggle or m.lcTypeNew == m.lcTypeCur
+			assert m.success message cAssertMsg(textmerge([For setting '<<m.tcSetting>>', value <<cLitteral(m.tvValueNew)>> should be of type '<<m.lcTypeCur>>']))
+			if m.success
 
-					* Toggle value if asked and appropriate
-					IF m.llToggle AND m.this.lOnOff
-						tvValueNew = Iif(m.lvValueCur = 'ON', 'OFF', 'ON')
-					ENDIF
+* Adjust value when appropriate
+				tvValueNew = iif(m.tcSetting == 'DEFAULT', addbs(fullpath(m.tvValueNew)), m.tvValueNew)
 
-					* If new setting can be performed
-					success = this.Set(m.tcSetting, m.tvValueNew)
-				ENDIF
-				IF m.success
-					
-					* Persist current values to properties
+* If setting must be changed
+				if .f.;
+				 or m.llToggle;
+				 or lTrue(m.tlChangeAlways);
+				 or !luEqual(m.lvValueCur, m.tvValueNew,, .t.)
+
+					this.lOnOff = m.lcTypeCur == 'C' and (m.lvValueCur == 'ON' or m.lvValueCur == 'OFF')
+
+* Toggle value if asked and appropriate
+					if m.llToggle and m.this.lOnOff
+						tvValueNew = iif(m.lvValueCur = 'ON', 'OFF', 'ON')
+					endif
+
+* If new setting can be performed
+					success = this.set(m.tcSetting, m.tvValueNew)
+				endif
+				if m.success
+
+* Persist current values to properties
 					this.cSetting = m.tcSetting
 					this.vValueOld = m.lvValueCur
 					this.vValueNew = m.tvValueNew
-				ENDIF
-			ENDIF
-		ENDIF
+				endif
+			endif
+		endif
 	endif
-ENDIF
+endif
 
-RETURN m.success
+return m.success
 
 * ------------------------------------
-HIDDEN FUNCTION Get && état courant d'un SET
+hidden function get && état courant d'un SET
 lparameters lvResult, tcSetting, lcParm2
 
-local llError, loError as Exception
+local llError, loError as exception
 
-TRY
-	lvResult = Iif(m.tcSetting == 'DEFAULT';
-		, Set('DEFAULT') + Curdir();
-		, Evaluate("Set('" + m.tcSetting + "'" + m.lcParm2 + ")");
+try
+	lvResult = iif(m.tcSetting == 'DEFAULT';
+		, set('DEFAULT') + curdir();
+		, evaluate("Set('" + m.tcSetting + "'" + m.lcParm2 + ")");
 		)
 
-CATCH TO loError
-	llError = .T.
-	ASSERT .F. MESSAGE cAssertMsg(Textmerge([The requested setting cannot be read: <<"Set('" + m.tcSetting + "'" + m.lcParm2 + ")">> : <<cException(m.loError)>>]))
+catch to loError
+	llError = .t.
+	assert .f. message cAssertMsg(textmerge([The requested setting cannot be read: <<"Set('" + m.tcSetting + "'" + m.lcParm2 + ")">> : <<cException(m.loError)>>]))
 
-ENDTRY
+endtry
 
 return !m.llError
 
 * ------------------------------------
-FUNCTION Set && Saves current environment setting and changes to new value
+function set && Saves current environment setting and changes to new value
 && public car appelé par awSets.Set()
-LPARAMETERS ;
+lparameters ;
 	tcSetting,; && Setting to work on - upper case, trimmed
 	tvValueNew && Value to set
 
-LOCAL llResult as Boolean;
-, lcSetting as String
+local llResult as Boolean;
+, lcSetting as string
 
-llResult = .T.
-lcSetting = Upper(Left(m.tcSetting, 4))
+llResult = .t.
+lcSetting = upper(left(m.tcSetting, 4))
 
 do case
 
@@ -2320,96 +2320,96 @@ case m.this.lOnOff
 	set &tcSetting &tvValueNew
 
 case m.lcSetting == 'TEXT' and m.this.nSetting = 1
-	tvValueNew = '"' + Stuffc(m.tvValueNew, Len(m.tvValueNew)/2 + 1, 0, '","') + '"'
+	tvValueNew = '"' + stuffc(m.tvValueNew, len(m.tvValueNew)/2 + 1, 0, '","') + '"'
 	set textmerge delimiters to &tvValueNew
-	
+
 case m.lcSetting == 'PROC'
 	llResult = setProcedure(m.tvValueNew)
 
 otherwise
 	llResult = this.Set_(;
-		  m.tcSetting;
+		  M.tcSetting;
 		, m.tvValueNew;
 		)
 
 endcase
 
-ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([Unable to do the following setting : SET <<m.tcSetting>> <<m.tvValueNew>>]))
+assert m.llResult message cAssertMsg(textmerge([Unable to do the following setting : SET <<m.tcSetting>> <<m.tvValueNew>>]))
 
-this.vValueNew = Iif(m.llResult, m.tvValueNew, .null.)
+this.vValueNew = iif(m.llResult, m.tvValueNew, .null.)
 
-RETURN m.llResult
+return m.llResult
 
 * ------------------------------------
-HIDDEN FUNCTION Set_ && Changes setting to new value
-LPARAMETERS ;
+hidden function Set_ && Changes setting to new value
+lparameters ;
 	tcSetting,; && Setting to work on
 	tvValueNew && Value to set
 
-LOCAL llResult as Boolean;
-, loResult as Exception;
-, lcValue as String
+local llResult as Boolean;
+, loResult as exception;
+, lcValue as string
 
-lcValue = Iif(Vartype(m.tvValueNew) == 'C';
-	, Iif(m.tcSetting == 'PATH'; && 21/10/12 - SET PATH does not support literal
+lcValue = iif(vartype(m.tvValueNew) == 'C';
+	, iif(m.tcSetting == 'PATH'; && 21/10/12 - SET PATH does not support literal
 		, m.tvValueNew;
-		, Iif("'" $ m.tvValueNew, '"' + Rtrim(m.tvValueNew) + '"', "'" + Rtrim(m.tvValueNew) + "'");
+		, iif("'" $ m.tvValueNew, '"' + rtrim(m.tvValueNew) + '"', "'" + rtrim(m.tvValueNew) + "'");
 		);
-	, Transform(m.tvValueNew);
+	, transform(m.tvValueNew);
 	)
 
-TRY
-	SET &tcSetting &lcValue
-	llResult = .T.
-CATCH to m.loResult
+try
+	set &tcSetting &lcValue
+	llResult = .t.
+catch to m.loResult
 
-	TRY
-		SET &tcSetting &tvValueNew
-		llResult = .T.
-	CATCH to m.loResult
+	try
+		set &tcSetting &tvValueNew
+		llResult = .t.
+	catch to m.loResult
 
-		TRY
-			SET &tcSetting TO (&lcValue)
-			llResult = .T.
-		CATCH to m.loResult
+		try
+			set &tcSetting to (&lcValue)
+			llResult = .t.
+		catch to m.loResult
 
-			TRY
-				SET &tcSetting TO &lcValue
-				llResult = .T.
-			CATCH to m.loResult
+			try
+				set &tcSetting to &lcValue
+				llResult = .t.
+			catch to m.loResult
 
-				TRY
-					SET &tcSetting TO &tvValueNew
-					llResult = .T.
-				CATCH to m.loResult
-				ENDTRY
-			ENDTRY
-		ENDTRY
-	ENDTRY
-ENDTRY
+				try
+					set &tcSetting to &tvValueNew
+					llResult = .t.
+				catch to m.loResult
+				endtry
+			endtry
+		endtry
+	endtry
+endtry
 
-RETURN m.llResult
+return m.llResult
 
 * ------------------------------------
-HIDDEN FUNCTION lSupported && Requested environment setting is supported
-LPARAMETERS ;
+hidden function lSupported && Requested environment setting is supported
+lparameters ;
 	tcSetting,; && Setting to work on
 	lcParm2 && Second parameter of set()
 
-tcSetting = Upper(Alltrim(m.tcSetting))
-lcParm2 = Alltrim(m.lcParm2, ' ', ',')
+tcSetting = upper(alltrim(m.tcSetting))
+lcParm2 = alltrim(m.lcParm2, ' ', ',')
 
-LOCAL llResult as Boolean;
+local llResult as Boolean;
 , lcUnsupported;
 , lcUntested;
 , laResult[1];
 , lnResult;
 , liResult;
-, loResult AS Exception
+, loResult as exception
 
 &&	Reprocess && strange options
 
-TEXT TO m.lcUnsupported NOSHOW FLAGS 1 PRETEXT 3 && Unsupported (or ill-tested) sets
+text TO m.lcUnsupported NOSHOW FLAGS 1 PRETEXT 3 && Unsupported (or ill-tested) sets
 	Century, , 3
 	Clock, , 1 && does not restore properly
 	Color && Included for backward compatibility
@@ -2424,7 +2424,7 @@ TEXT TO m.lcUnsupported NOSHOW FLAGS 1 PRETEXT 3 && Unsupported (or ill-tested) 
 	Topic, .T., 1 && unable to restore
 	View && unable to restore
 ENDTEXT
-TEXT TO m.lcUntested NOSHOW FLAGS 1 PRETEXT 3 && Untested sets
+text TO m.lcUntested NOSHOW FLAGS 1 PRETEXT 3 && Untested sets
 	Help, , 1
 	Help, , 2
 	Help, , 3
@@ -2438,64 +2438,64 @@ TEXT TO m.lcUntested NOSHOW FLAGS 1 PRETEXT 3 && Untested sets
 	Helpfilter
 	Pdsetup
 	Relation
-endtext
+ENDTEXT
 
-#if .F.
-	Textmerge, , 1 && unable to restore - set textmerge delimiters to ...
+#if .f.
+	textmerge, , 1 && unable to restore - set textmerge delimiters to ...
 #endif
 
-TRY && aLinesCols() may not be in scope
-	
+try && aLinesCols() may not be in scope
+
 	if lProperty(_screen, 'abSet_aSupported')
-		lnResult = Alen(_screen.abSet_aSupported, 1)
+		lnResult = alen(_screen.abSet_aSupported, 1)
 		dimension laResult[m.lnResult, Alen(_screen.abSet_aSupported, 2)]
-		Acopy(_screen.abSet_aSupported, laResult)
+		acopy(_screen.abSet_aSupported, laResult)
 	else
 		lnResult = aLinesCols(; && very long ! - to be optimized
 			  @m.laResult;
-			, Upper(Chrtran(cInLineCommentStripped(m.lcUnsupported + CRLF + m.lcUntested), Space(1), Space(0)));
+			, upper(chrtran(cInLineCommentStripped(m.lcUnsupported + CRLF + m.lcUntested), space(1), space(0)));
 			, ',';
 			, 'CLC';
 			)
-		Asort(m.laResult, 1)
-		AddProperty(_screen, 'abSet_aSupported[1]')
+		asort(m.laResult, 1)
+		addproperty(_screen, 'abSet_aSupported[1]')
 		dimension _screen.abSet_aSupported[m.lnResult, Alen(laResult, 2)]
-		Acopy(laResult, _screen.abSet_aSupported)
+		acopy(laResult, _screen.abSet_aSupported)
 	endif
-	FOR liResult = 1 TO m.lnResult
+	for liResult = 1 to m.lnResult
 
-		llResult = NOT (m.tcSetting == m.laResult[m.liResult, 1] AND m.lcParm2 == m.laResult[m.liResult, 3])
-		IF NOT m.llResult
-			EXIT
-		ENDIF
-	ENDFOR
-	ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([this setting is not supported: <<m.tcSetting>> <<m.lcParm2>>]))
+		llResult = not (m.tcSetting == m.laResult[m.liResult, 1] and m.lcParm2 == m.laResult[m.liResult, 3])
+		if not m.llResult
+			exit
+		endif
+	endfor
+	assert m.llResult message cAssertMsg(textmerge([this setting is not supported: <<m.tcSetting>> <<m.lcParm2>>]))
 
-CATCH TO loResult
-	llResult = .T. && assume setting is supported
-ENDTRY
+catch to loResult
+	llResult = .t. && assume setting is supported
+endtry
 
-RETURN m.llResult
+return m.llResult
 
 * ------------------------------------
-hidden function Destroy && Restores setting to its original value
+hidden function destroy && Restores setting to its original value
 
 local lvValue
 
-return .T.;
-	and this.Get(@m.lvValue, m.this.cSetting, m.this.cParm2);
-	and (.F.;
+return .t.;
+	and this.get(@m.lvValue, m.this.cSetting, m.this.cParm2);
+	and (.f.;
 		or m.lvValue == m.this.vValueOld; && lvValue et this.vValueOld sont obtenus par this.Get() donc sont de même type et casse
-		or this.Set(m.this.cSetting, m.this.vValueOld);
+		or this.set(m.this.cSetting, m.this.vValueOld);
 		)
 
 * =================================================
-ENDDEFINE
+enddefine
 * =================================================
 
 * ------------------------------------
-PROCEDURE abSet1 && Règle un set pour test
-LPARAMETERS ;
+procedure abSet1 && Règle un set pour test
+lparameters ;
 	tcSetting,; && Setting to perform
 	tvValueNew,; && Value to set, .T. to toggle ON - OFF
 	tnSetting,; && Setting number when appropriate for tcSetting, as of 2nd parameter of set()
@@ -2504,7 +2504,7 @@ LPARAMETERS ;
 
 local loSet
 
-RETURN labSet(;
+return labSet(;
 		@m.loSet;
 	, m.tcSetting;
 	, m.tvValueNew;
@@ -2514,34 +2514,34 @@ RETURN labSet(;
 	)
 
 * ------------------------------------
-PROCEDURE abSet1_Test && Teste le réglage d'un set pour mesurer le temps d'exécution
+procedure abSet1_Test && Teste le réglage d'un set pour mesurer le temps d'exécution
 
-LOCAL loUnitTest as abUnitTest of abDev.prg, loAsserts as abSet
-loUnitTest = NewObject('abUnitTest', 'abDev.prg')
+local loUnitTest as abUnitTest of abDev.prg, loAsserts as abSet
+loUnitTest = newobject('abUnitTest', 'abDev.prg')
 loAsserts = abSet('ASSERTS', 'OFF') && pour les settings non supportés
 
-loUnitTest.Test(.T., 'Deleted', 'ON',,,.T.)
-loUnitTest.Test(.T., 'Exact', 'ON')
-loUnitTest.Test(.T., 'Ansi', 'ON')
-loUnitTest.Test(.T., 'Asserts', 'ON')
-loUnitTest.Test(.T., 'Safety', 'OFF')
-loUnitTest.Test(.T., 'Notify', 'OFF')
-loUnitTest.Test(.T., 'Talk', 'OFF')
-loUnitTest.Test(.T., 'NullDisplay', '-')
-loUnitTest.Test(.T., 'Datasession', 2)
+loUnitTest.Test(.t., 'Deleted', 'ON',,,.t.)
+loUnitTest.Test(.t., 'Exact', 'ON')
+loUnitTest.Test(.t., 'Ansi', 'ON')
+loUnitTest.Test(.t., 'Asserts', 'ON')
+loUnitTest.Test(.t., 'Safety', 'OFF')
+loUnitTest.Test(.t., 'Notify', 'OFF')
+loUnitTest.Test(.t., 'Talk', 'OFF')
+loUnitTest.Test(.t., 'NullDisplay', '-')
+loUnitTest.Test(.t., 'Datasession', 2)
 
-loUnitTest.Test(.F., 'Skip', 'TO cALIAS')
-		
-RETURN loUnitTest.Result()
+loUnitTest.Test(.f., 'Skip', 'TO cALIAS')
+
+return loUnitTest.Result()
 
 * ------------------------------------
-PROCEDURE abSet_Tests && Tests the abSet Class
+procedure abSet_Tests && Tests the abSet Class
 
-LOCAL llResult;
+local llResult;
 , lcResult, lnSeconds;
 , loSelect as abSelect, loTalk as abSet, loStatusBar as abSet, loAsserts as abSet;
-, lcTestFile, laPrinters[1], loSession as Session;
-, laSets[1], lnSets, lcSet, llSet, loSet as abSet OF abDev.prg;
+, lcTestFile, laPrinters[1], loSession as session;
+, laSets[1], lnSets, lcSet, llSet, loSet as abSet of abDev.prg;
 , lnFailed;
 , lcSetting, lvValueOld, lvValueNew, lcParm2;
 , llRestore
@@ -2552,102 +2552,102 @@ loStatusBar = abSet('Status Bar', 'OFF')
 loAsserts = abSet('Asserts', 'OFF')
 
 * Prepare test resources
-lcTestFile = Sys(2023) + 'abSet.txt'
-APrinters(m.laPrinters)
+lcTestFile = sys(2023) + 'abSet.txt'
+aprinters(m.laPrinters)
 
-OPEN DATABASE (_samples + 'Tastrade\Data\tastrade.dbc')
-USE IN Select('customer')
-USE tastrade!customer SHARED ORDER COMPANY_NA
-SET DATABASE TO
+open database (_samples + 'Tastrade\Data\tastrade.dbc')
+use in select('customer')
+use tastrade!customer shared order COMPANY_NA
+set database to
 
-loSession = CreateObject('session')
-	
-lnSeconds = Seconds()
+loSession = createobject('session')
+
+lnSeconds = seconds()
 lcResult = ''
 lnFailed = 0
-STORE .T. TO m.llResult, m.llSet, m.llRestore
+store .t. to m.llResult, m.llSet, m.llRestore
 
 * For each test Set
 lnSets = abSet_Tests_aSets(@m.laSets)
-FOR EACH m.lcSet IN m.laSets
+for each m.lcSet in m.laSets
 
 	lcSet = cInLineCommentStripped(m.lcSet)
 
-	* If Setting object can be instanciated
+* If Setting object can be instanciated
 	loSet = abSet(&lcSet)
-	llSet = Vartype(m.loSet) == 'O' AND NOT IsNull(m.loSet)
-	IF m.llSet
-	
-		* Memorize old values
+	llSet = vartype(m.loSet) == 'O' and not isnull(m.loSet)
+	if m.llSet
+
+* Memorize old values
 		lcSetting = m.loSet.cSetting
 		lvValueOld = m.loSet.vValueOld
 		lcParm2 = m.loSet.cParm2
-	ELSE
-		STORE Space(0) TO m.lcSetting, m.lvValueOld, m.lcParm2
-	ENDIF
+	else
+		store space(0) to m.lcSetting, m.lvValueOld, m.lcParm2
+	endif
 
-	* Check new value was correctly SET
+* Check new value was correctly SET
 
-	* Release Setting object to restore original setting
-	loSet = .NULL.
+* Release Setting object to restore original setting
+	loSet = .null.
 
-	* Check old value was correctly restored
-	IF m.llSet
-		lvValueNew = Evaluate('Set("' + m.lcSetting + '"' + m.lcParm2 + ')')
-		lvValueNew = Iif(Upper(m.lcSetting) == 'DEFAULT', m.lvValueNew + Curdir(), m.lvValueNew)
-		lvValueNew = Iif(Upper(m.lcSetting) == 'PATH', Chrtran(m.lvValueNew, ['"], Space(0)), m.lvValueNew)
+* Check old value was correctly restored
+	if m.llSet
+		lvValueNew = evaluate('Set("' + m.lcSetting + '"' + m.lcParm2 + ')')
+		lvValueNew = iif(upper(m.lcSetting) == 'DEFAULT', m.lvValueNew + curdir(), m.lvValueNew)
+		lvValueNew = iif(upper(m.lcSetting) == 'PATH', chrtran(m.lvValueNew, ['"], space(0)), m.lvValueNew)
 		llRestore = m.lvValueOld == m.lvValueNew
 		llSet = m.llRestore
 	endif
-	
+
 	clear
 
-	* Save any Error
-	IF NOT m.llSet
+* Save any Error
+	if not m.llSet
 		lnFailed = m.lnFailed + 1
 		lcResult = m.lcResult + CRLF + '- ' + ;
-			Iif(m.llRestore, ;
-				"Unable to set" + Replicate('.', 5) + m.lcSet, ;
-				"Unable to restore" + Replicate('.', 3) + m.lcSetting + ', '  + Left(Transform(m.lvValueOld), 50) + m.lcParm2) 
-		llResult = .F.
-	ENDIF
-ENDFOR
+			iif(m.llRestore, ;
+				"Unable to set" + replicate('.', 5) + m.lcSet, ;
+				"Unable to restore" + replicate('.', 3) + m.lcSetting + ', '  + left(transform(m.lvValueOld), 50) + m.lcParm2)
+		llResult = .f.
+	endif
+endfor
 
-USE
-CLOSE DATABASES
+use
+close databases
 
 * Display result
-lcResult = Iif(m.llResult, ;
-		'Congratulation, the ' + Transform(m.lnSets) + ' Tested Sets Worked !', ;
-		Transform(m.lnFailed) + ' of ' + Transform(m.lnSets) + ' Set' + Iif(m.lnFailed > 1, 's', '') + ' did not work :' + ;
+lcResult = iif(m.llResult, ;
+		'Congratulation, the ' + transform(m.lnSets) + ' Tested Sets Worked !', ;
+		transform(m.lnFailed) + ' of ' + transform(m.lnSets) + ' Set' + iif(m.lnFailed > 1, 's', '') + ' did not work :' + ;
 			CRLF + m.lcResult + ;
 			CRLF + CRLF + "This message is copied to the clipboard for later check.")
 
 lcResult = m.lcResult + ;
-	CRLF + CRLF + "Average execution time : " + Transform((Seconds()-m.lnSeconds)/m.lnSets * 1000) + " ms" + ;
+	CRLF + CRLF + "Average execution time : " + transform((seconds()-m.lnSeconds)/m.lnSets * 1000) + " ms" + ;
 	CRLF + CRLF + "Thank you for testing abSet class." + ;
 	CRLF + "Please check out http://foxincloud.com/"
-	
-_cliptext = m.lcResult
-MessageBox(m.lcResult, 64)
 
-RETURN m.llResult
+_cliptext = m.lcResult
+messagebox(m.lcResult, 64)
+
+return m.llResult
 
 * ------------------------------------
-PROCEDURE abSet_Tests_aSets && Tested Sets
-LPARAMETERS taSets && @ Array where tested sets should be stored
-EXTERNAL ARRAY taSets
+procedure abSet_Tests_aSets && Tested Sets
+lparameters taSets && @ Array where tested sets should be stored
+external array taSets
 
-LOCAL lnResult; && Number of Tested Sets
+local lnResult; && Number of Tested Sets
 , lnVersion;
 , lcSets, lcSetsVFP7, lcSetsVFP8, lcSetsVFP9
 
 lnResult = 0
 
-TEXT TO m.lcSetsVFP7 NOSHOW && SET, .T. on "ON/OFF"-type Settings to toggle, TO ...
+text TO m.lcSetsVFP7 NOSHOW && SET, .T. on "ON/OFF"-type Settings to toggle, TO ...
 	'Textmerge', '<<>>' , 1 && throws an error because not supported
 	'Aternate', m.lcTestFile, 1 && throws an error because misspelled ('Aternate' instead of 'Alternate')
-	'Alternate', .T. 
+	'Alternate', .T.
 	'Alternate', m.lcTestFile, 1
 	'Ansi', .T.
 	'Asserts', .T.
@@ -2755,137 +2755,137 @@ TEXT TO m.lcSetsVFP7 NOSHOW && SET, .T. on "ON/OFF"-type Settings to toggle, TO 
 	'Unique', .T.
 ENDTEXT
 
-TEXT TO m.lcSetsVFP8 NOSHOW
+text TO m.lcSetsVFP8 NOSHOW
 	'EngineBehavior', 70
 	'TableValidate', 8
 	'AutoincError', .T.
 ENDTEXT
 
-TEXT TO m.lcSetsVFP9 NOSHOW
+text TO m.lcSetsVFP9 NOSHOW
 	'ReportBehavior', 80
 	'SQLBuffering', .T.
 	'TablePrompt', .T.
 	'VarCharMapping', .T.
 ENDTEXT
 
-lnVersion = Version(5)
+lnVersion = version(5)
 
 lcSets = '';
 	+ m.lcSetsVFP7;
-	+ Iif(m.lnVersion >= 800, CRLF + m.lcSetsVFP8, Space(0));
-	+ Iif(m.lnVersion >= 900, CRLF + m.lcSetsVFP9, Space(0))
-lcSets = Strtran(m.lcSets, CRLF2, CRLF)
+	+ iif(m.lnVersion >= 800, CRLF + m.lcSetsVFP8, space(0));
+	+ iif(m.lnVersion >= 900, CRLF + m.lcSetsVFP9, space(0))
+lcSets = strtran(m.lcSets, CRLF2, CRLF)
 
-lnResult = ALines(m.taSets, m.lcSets)
+lnResult = alines(m.taSets, m.lcSets)
 
-RETURN m.lnResult
+return m.lnResult
 
 * ===========================================
-DEFINE CLASS abSets as GA_LIGHTWEIGHT_CLASS of abGA.prg && Règle plusieurs Sets et les restaure à la destruction && Custom pour pouvoir être .AddObjected(), mais impossible dans awAppHost as session
+define class abSets as GA_LIGHTWEIGHT_CLASS of abGA.prg && Règle plusieurs Sets et les restaure à la destruction && Custom pour pouvoir être .AddObjected(), mais impossible dans awAppHost as session
 * ===========================================
 
-PROTECTED lSupported, lInit
+protected lSupported, lInit
 
-lSupported = .F. && assume abSet supports all the settings required
-lInit = .T. && all settings were successful && See in this.Set() why default is .T.
+lSupported = .f. && assume abSet supports all the settings required
+lInit = .t. && all settings were successful && See in this.Set() why default is .T.
 
 *---------------------------------------------------------------------------
-PROCEDURE Init
-lparameters result && @ {en} error if any {fr} erreur éventuelle
+procedure init
+lparameters Result && @ {en} error if any {fr} erreur éventuelle
 
-#if .F. && Sample implementation
-WITH m.this as abSets of abDev.prg
-	.Set('EngineBehavior', 70)
-	.Set('Deleted', 'ON')
-	.Set('Exact', 'ON')
-	.Set('Ansi', 'ON')
-	.Set('Palette', 'OFF')
-	.Set('Asserts', 'ON')
-	.Set('Safety', 'OFF')
-	.Set('Notify', 'OFF')
-	.Set('Talk', 'OFF')
-ENDWITH
+#if .f. && Sample implementation
+with m.this as abSets of abDev.prg
+	.set('EngineBehavior', 70)
+	.set('Deleted', 'ON')
+	.set('Exact', 'ON')
+	.set('Ansi', 'ON')
+	.set('Palette', 'OFF')
+	.set('Asserts', 'ON')
+	.set('Safety', 'OFF')
+	.set('Notify', 'OFF')
+	.set('Talk', 'OFF')
+endwith
 #endif && Sample implementation
 
-RETURN m.this.lInit && always keep this instruction and/or call dodefault() in sub-class!
+return m.this.lInit && always keep this instruction and/or call dodefault() in sub-class!
 
 *---------------------------------------------------------------------------
-PROTECTED PROCEDURE Set && Effectue un réglage d'environnement
-LPARAMETERS ;
+protected procedure set && Effectue un réglage d'environnement
+lparameters ;
 	tcSetting,; && Nom du SET à régler
 	tvValueNew,; && Valeur à régler
 	tnSetting,; && Setting number when appropriate for tcSetting, as of 2nd parameter of set()
 	tlChangeAlways,; && [.T.] Change setting even if required value is current
 	tlSupported && [this.lSupported] assume abSet() supports this setting
 
-LOCAL success as Boolean;
+local success as Boolean;
 , loExact as abSet of abDev.prg;
-, lcProp as String;
+, lcProp as string;
 , loProp as abSet of abDev.prg;
 
 * Si le Set est défini
-success = NOT Empty(m.tcSetting)
+success = not empty(m.tcSetting)
 assert m.success
-IF m.success
+if m.success
 
-	tcSetting = Iif(ga_Type_IsChar(m.tcSetting, .T.), Upper(m.tcSetting), '')
+	tcSetting = iif(ga_Type_IsChar(m.tcSetting, .t.), upper(m.tcSetting), '')
 
-	tlSupported = Iif(Pcount() >= 5;
+	tlSupported = iif(pcount() >= 5;
 		, lTrue(m.tlSupported);
 		, m.this.lSupported;
 		)
 
 	loExact = abSet('EXACT', 'OFF')
 
-	lcProp = Chrtran(m.tcSetting, ' ', '')
+	lcProp = chrtran(m.tcSetting, ' ', '')
 	lcProp = 'o';
-		+ Iif(InList(m.lcProp, Upper('Auto'), Upper('color'), Upper('event'), Upper('status'));
+		+ iif(inlist(m.lcProp, upper('Auto'), upper('color'), upper('event'), upper('status'));
 			, m.lcProp;
-			, Left(m.lcProp, 4);
+			, left(m.lcProp, 4);
 			);
-		+ Iif(Empty(m.tnSetting), '', Cast(m.tnSetting as M))
+		+ iif(empty(m.tnSetting), '', cast(m.tnSetting as M))
 
 	loExact = .null.
 
 	do case
 
 	case !lProperty(m.this, m.lcProp)
-		success = .T.;
-			and AddProperty(m.this, m.lcProp, abSet(m.tcSetting, m.tvValueNew, m.tnSetting, m.tlChangeAlways, m.tlSupported));
-			and Vartype(GetPem(m.this, m.lcProp)) == 'O'
+		success = .t.;
+			and addproperty(m.this, m.lcProp, abSet(m.tcSetting, m.tvValueNew, m.tnSetting, m.tlChangeAlways, m.tlSupported));
+			and vartype(getpem(m.this, m.lcProp)) == 'O'
 
-	case .T.;
-	 and varSet(@m.loProp, Evaluate('m.this.' + m.lcProp));
+	case .t.;
+	 and varSet(@m.loProp, evaluate('m.this.' + m.lcProp));
 	 and m.loProp.vValueNew # m.tvValueNew
-	
+
 		success = m.loProp.set(m.tcSetting, m.tvValueNew)
 
 	endcase
 endif
 
-this.lInit = m.this.lInit AND m.success
+this.lInit = m.this.lInit and m.success
 
-assert m.success message cAssertMsg(Textmerge(ICase(;
+assert m.success message cAssertMsg(textmerge(icase(;
 	cLangUser() = 'fr',	[Le réglage de SET <<m.tcSetting>> à la valeur <<cL(m.tvValueNew)>> a échoué.],; && copy-paste this line to add another language support
 											[Setting <<m.tcSetting>> to value <<cL(m.tvValueNew)>> failed.];
 	)))
 
-RETURN m.success
+return m.success
 
 * ===========================================
-ENDDEFINE && CLASS abSets
+enddefine && CLASS abSets
 * ===========================================
 
 * ===========================================
 function abSetsMaintain && Sauve les sets critiques et les restore s'ils ont changé
-return CreateObject('abSetsMaintain')
+return createobject('abSetsMaintain')
 
 * ------------------------------------
-PROCEDURE abSetsMaintain_Test && Test abSetsMaintain()
+procedure abSetsMaintain_Test && Test abSetsMaintain()
 
-LOCAL loUnitTest as abUnitTest OF abDev.prg, loResult
-loUnitTest = NewObject('abUnitTest', 'abDev.prg')
-loResult = NewObject('abSetsMaintain', 'abDev.prg')
+local loUnitTest as abUnitTest of abDev.prg, loResult
+loUnitTest = newobject('abUnitTest', 'abDev.prg')
+loResult = newobject('abSetsMaintain', 'abDev.prg')
 
 *loUnitTest.coverageSet(.T.)
 loUnitTest.Test(.null.) && 1 ms
@@ -2894,27 +2894,27 @@ loUnitTest.Test(.null.) && 1 ms
 return m.loUnitTest.Result()
 
 * ===========================================
-DEFINE CLASS abSetsMaintain as GA_LIGHTWEIGHT_CLASS of abGA.prg && Sauve les sets critiques et les restore s'ils ont changé
+define class abSetsMaintain as GA_LIGHTWEIGHT_CLASS of abGA.prg && Sauve les sets critiques et les restore s'ils ont changé
 * ===========================================
 
 hidden aSet[1], nSets
 
 *---------------------------------------------------------------------------
-protected procedure Init
+protected procedure init
 lparameters tlProcClass && [.F.] also save Set("Procedure") & Set("Classlib")
 
 local success as Boolean;
 , lcSets, lnSets, laSet[1], liSet
 
-#if .F.
-	COMPATIBLE, 1
-	CENTURY, 2
-	REPROCESS, 1
-	REPROCESS, 2
-	REPROCESS, 3
-	TALK, 1
-	TEXTMERGE, 4
-	NOTIFY, 1
+#if .f.
+	compatible, 1
+	century, 2
+	reprocess, 1
+	reprocess, 2
+	reprocess, 3
+	talk, 1
+	textmerge, 4
+	notify, 1
 #endif
 
 text to lcSets noshow flags 1 pretext 3
@@ -3001,56 +3001,56 @@ text to lcSets noshow flags 1 pretext 3
 	CURRENCY, 1
 	DELIMITERS, 1
 	MESSAGE, 1
-endtext
+ENDTEXT
 
-lcSets = m.lcSets + Iif(m.tlProcClass;
+lcSets = m.lcSets + iif(m.tlProcClass;
 	, CRLF;
 		+ 'PROCEDURE' + CRLF;
 		+ 'CLASSLIB' + CRLF;
 	, '';
 	)
 
-store aLines(m.laSet, m.lcSets, 5) to lnSets, this.nSets
+store alines(m.laSet, m.lcSets, 5) to lnSets, this.nSets
 success = m.lnSets > 0
 if m.success
 
 	aColsIns(@m.laSet, 1, 2)
-	
+
 	for liSet = 1 to m.lnSets
 
-		laSet[m.liSet, 2] = Evl(Int(Val(GetWordNum(m.laSet[m.liSet, 1], 2, ','))), '')
-		laSet[m.liSet, 1] = Alltrim(GetWordNum(m.laSet[m.liSet, 1], 1, ','))
-		laSet[m.liSet, 3] = this.uSet(laSet[m.liSet, 1], laSet[m.liSet, 2])
-		
+		laSet[m.liSet, 2] = evl(int(val(getwordnum(m.laSet[m.liSet, 1], 2, ','))), '')
+		laSet[m.liSet, 1] = alltrim(getwordnum(m.laSet[m.liSet, 1], 1, ','))
+		laSet[m.liSet, 3] = this.uset(laSet[m.liSet, 1], laSet[m.liSet, 2])
+
 	endfor
-	
+
 	dimension this.aSet[m.lnSets, 3]
-	Acopy(m.laSet, this.aSet)
+	acopy(m.laSet, this.aSet)
 
 endif
 
 return m.success
 
 *---------------------------------------------------------------------------
-protected procedure uSet
+protected procedure uset
 lparameters lcSet, lnSet
 
-return ICase(;
-		m.lcSet == 'DEFAULT',;
-			Set(m.lcSet) + Curdir(),;
-		Empty(m.lnSet),;
-			Set(m.lcSet),;
-			Set(m.lcSet, m.lnSet);
+return icase(;
+		M.lcSet == 'DEFAULT',;
+			set(m.lcSet) + curdir(),;
+		empty(m.lnSet),;
+			set(m.lcSet),;
+			set(m.lcSet, m.lnSet);
 		)
 
 *---------------------------------------------------------------------------
-protected procedure Destroy
+protected procedure destroy
 
 local liSet, lcSet, luSet, lnSet
 
 for liSet = 1 to this.nSets
 
-	if !this.aSet[m.liSet, 3] == this.uSet(this.aSet[m.liSet, 1], this.aSet[m.liSet, 2])
+	if !this.aSet[m.liSet, 3] == this.uset(this.aSet[m.liSet, 1], this.aSet[m.liSet, 2])
 
 		lcSet = this.aSet[m.liSet, 1]
 		lnSet = this.aSet[m.liSet, 2]
@@ -3058,21 +3058,21 @@ for liSet = 1 to this.nSets
 
 		do case
 
-		case Empty(m.lnSet) and Vartype(m.luSet) == 'C' and m.luSet $ 'ON,OFF'
+		case empty(m.lnSet) and vartype(m.luSet) == 'C' and m.luSet $ 'ON,OFF'
 			set &lcSet &luSet
 
 		case m.lcSet == 'TEXTMERGE'
 			do case
 			case m.lnSet = 1 && cLeftDelimiter and cRightDelimiter
-				luSet = '"' + Stuffc(m.luSet, Len(m.luSet)/2 + 1, 0, '","') + '"'
+				luSet = '"' + stuffc(m.luSet, len(m.luSet)/2 + 1, 0, '","') + '"'
 				set textmerge delimiters to &luSet
 			case m.lnSet = 2 && cFileName
 				set textmerge to (m.luSet)
 			case m.lnSet = 3 && SHOW/NOSHOW
 				set textmerge to &luSet
 			endcase
-		
-		case InList(m.lcSet, 'CENTURY', 'FIELDS', 'MOUSE', 'REFRESH', 'NOCPTRANS')
+
+		case inlist(m.lcSet, 'CENTURY', 'FIELDS', 'MOUSE', 'REFRESH', 'NOCPTRANS')
 			set &lcSet to &luSet
 
 		otherwise
@@ -3084,344 +3084,344 @@ endfor
 
 
 * ===========================================
-ENDDEFINE && CLASS abSetsMaintain
+enddefine && CLASS abSetsMaintain
 * ===========================================
 
 
 * ========================================
-FUNCTION lSetClasslib && Un jeu de Set("Classlib") est dans le Set("Classlib") courant
-LPARAMETERS tcSetClasslib && Jeu de Set("Classlib")
+function lSetClasslib && Un jeu de Set("Classlib") est dans le Set("Classlib") courant
+lparameters tcSetClasslib && Jeu de Set("Classlib")
 
-LOCAL laClasslib[1], lcClasslib, lcSetClasslib, llResult
+local laClasslib[1], lcClasslib, lcSetClasslib, llResult
 
-llResult = ALines(laClasslib, m.tcSetClasslib, 5, ',') = 0
-IF NOT m.llResult
-	
-	lcSetClasslib = Set("Classlib")
+llResult = alines(laClasslib, m.tcSetClasslib, 5, ',') = 0
+if not m.llResult
 
-	FOR EACH lcClasslib IN laClasslib
+	lcSetClasslib = set("Classlib")
+
+	for each lcClasslib in laClasslib
 
 		llResult = m.lcClasslib $ m.lcSetClasslib
-		IF NOT m.llResult
-			EXIT
-		ENDIF
-	ENDFOR
-ENDIF
+		if not m.llResult
+			exit
+		endif
+	endfor
+endif
 
-RETURN m.llResult
+return m.llResult
 
 * ========================================
-FUNCTION lSetProcedure && Un jeu de Set("Procedure") est dans le Set("Procedure") courant
-LPARAMETERS tcSetProcedure && Jeu de Set("Procedure")
+function lSetProcedure && Un jeu de Set("Procedure") est dans le Set("Procedure") courant
+lparameters tcSetProcedure && Jeu de Set("Procedure")
 
-LOCAL laProcedure[1], lcProcedure, lcSetProc, llResult
+local laProcedure[1], lcProcedure, lcSetProc, llResult
 
-llResult = ALines(laProcedure, m.tcSetProcedure, 5, ',') = 0
-IF NOT m.llResult
+llResult = alines(laProcedure, m.tcSetProcedure, 5, ',') = 0
+if not m.llResult
 
-	lcSetProc = Set("Procedure")
+	lcSetProc = set("Procedure")
 
-	FOR EACH lcProcedure IN laProcedure
+	for each lcProcedure in laProcedure
 
 		llResult = m.lcProcedure $ m.lcSetProc
-		IF NOT m.llResult
-			EXIT
-		ENDIF
-	ENDFOR
-ENDIF
+		if not m.llResult
+			exit
+		endif
+	endfor
+endif
 
-RETURN m.llResult
+return m.llResult
 
 * ========================================
-FUNCTION cFuncCallParmAdd && Ajoute un paramètre à un appel de fonction
-LPARAMETERS ;
+function cFuncCallParmAdd && Ajoute un paramètre à un appel de fonction
+lparameters ;
 	tcFuncCall,; && Chaîne contenant un appel de fonction
 	tcParm && Chaîne à ajouter comme paramètre (ex. '@MonParm') /!\ non vérifié
-LOCAL llResult, lcResult
-lcResult = Space(0)
+local llResult, lcResult
+lcResult = space(0)
 
-llResult = Vartype(m.tcFuncCall) == 'C'
-IF m.llResult
-	lcResult = Alltrim(m.tcFuncCall)
-	llResult = Right(m.lcResult, 1) == ')'
-	IF m.llResult
-	
-		llResult = Vartype(m.tcParm) == 'C' AND NOT Empty(m.tcParm)
-		IF m.llResult
-		
-			LOCAL lcParm
-			lcParm = Alltrim(m.tcParm)
-			lcParm = Iif(Left(m.lcParm, 1) == ',', Space(0), ',') + m.lcParm
-			lcResult = Left(m.lcResult, Len(m.lcResult) - 1) + m.lcParm + ')'
-		ENDIF
-	ENDIF
-ENDIF
+llResult = vartype(m.tcFuncCall) == 'C'
+if m.llResult
+	lcResult = alltrim(m.tcFuncCall)
+	llResult = right(m.lcResult, 1) == ')'
+	if m.llResult
 
-RETURN m.lcResult
+		llResult = vartype(m.tcParm) == 'C' and not empty(m.tcParm)
+		if m.llResult
+
+			local lcParm
+			lcParm = alltrim(m.tcParm)
+			lcParm = iif(left(m.lcParm, 1) == ',', space(0), ',') + m.lcParm
+			lcResult = left(m.lcResult, len(m.lcResult) - 1) + m.lcParm + ')'
+		endif
+	endif
+endif
+
+return m.lcResult
 
 * ------------------------------------
-PROCEDURE cFuncCallParmAdd_Test && Teste cFuncCallParmAdd()
+procedure cFuncCallParmAdd_Test && Teste cFuncCallParmAdd()
 
-LOCAL loUnitTest as abUnitTest of abDev.prg
-loUnitTest = NewObject('abUnitTest', 'abDev.prg')
+local loUnitTest as abUnitTest of abDev.prg
+loUnitTest = newobject('abUnitTest', 'abDev.prg')
 
 loUnitTest.Test('myFunc(toto,m.lcTest)', ' myFunc(toto)', 'm.lcTest')
-		
-RETURN loUnitTest.Result()
+
+return loUnitTest.Result()
 
 * ========================================
-FUNCTION cException && Message d'exception standard
-LPARAMETERS toException as Exception && Objet exception
+function cException && Message d'exception standard
+lparameters toException as exception && Objet exception
 
-LOCAL lcResult, luUserValue
+local lcResult, luUserValue
 
 lcResult = ''
 
-IF Vartype(m.toException) == 'O' AND Type('m.toException.BaseClass') == 'C' and m.toException.BaseClass == 'Exception'
+if vartype(m.toException) == 'O' and type('m.toException.BaseClass') == 'C' and m.toException.baseclass == 'Exception'
 
-	WITH m.toException AS Exception
-		
-		lcResult = cLitteral(.LineContents)
-		lcResult = Iif(_VFP.StartMode = 0;
-			, Textmerge(ICase(;
+	with m.toException as exception
+
+		lcResult = cLitteral(.linecontents)
+		lcResult = iif(_vfp.startmode = 0;
+			, textmerge(icase(;
 					cLangUser() = 'fr',	[ (<<Iif('...' $ .LineContents, 'code source N/D', m.lcResult)>>)],; && copy-paste this line to add another language support
 															[ (<<Iif('...' $ .LineContents, 'source code N/A', m.lcResult)>>)];
 				));
-			, Space(0);
+			, space(0);
 			)
-		luUserValue = Iif(Vartype(.UserValue) == 'O' AND Proper(.UserValue.BaseClass) == 'Exception', cException(.UserValue), .UserValue)
-		lcResult = Textmerge(ICase(;
+		luUserValue = iif(vartype(.uservalue) == 'O' and proper(.uservalue.baseclass) == 'Exception', cException(.uservalue), .uservalue)
+		lcResult = textmerge(icase(;
 			cLangUser() = 'fr',	[Méthode ou procédure <<.Procedure>>() : erreur n° <<.ErrorNo>> ("<<c2Words(.Message,' - ', m.luUserValue)>>") à la ligne n° <<.LineNo>><<m.lcResult>>],; && copy-paste this line to add another language support
 													[Method or procedure <<.Procedure>>(): error #<<.ErrorNo>> ("<<c2Words(.Message,' - ', m.luUserValue)>>") at code line #<<.LineNo>><<m.lcResult>>];
 			))
-	ENDWITH
-ENDIF
+	endwith
+endif
 
-RETURN m.lcResult
+return m.lcResult
 
 * ------------------------------------
-PROCEDURE cException_Test && Teste cException()
+procedure cException_Test && Teste cException()
 
-LOCAL loUnitTest AS abUnitTest of abDev.prg, lcCmd, loException as Exception, lcResult
+local loUnitTest as abUnitTest of abDev.prg, lcCmd, loException as exception, lcResult
 
-loUnitTest = NewObject('abUnitTest', 'abDev.prg')
-TRY
+loUnitTest = newobject('abUnitTest', 'abDev.prg')
+try
 	lcCmd = 'crash'
 	&lcCmd
-CATCH TO loException
+catch to loException
 	lcResult = "Une exception s'est produite :";
-	+ CRLF + "> Méthode : " + m.loException.Procedure ;
-	+ CRLF + "> Erreur n° : " + Transform(m.loException.ErrorNo) ;
-	+ CRLF + "> Erreur : " + m.loException.Message ;
-	+ CRLF + "> Ligne de code n° : " + Transform(m.loException.LineNo) ;
-	+ CRLF + "> Ligne de code : " + m.loException.LineContents
-FINALLY
+	+ CRLF + "> Méthode : " + m.loException.procedure ;
+	+ CRLF + "> Erreur n° : " + transform(m.loException.errorno) ;
+	+ CRLF + "> Erreur : " + m.loException.message ;
+	+ CRLF + "> Ligne de code n° : " + transform(m.loException.lineno) ;
+	+ CRLF + "> Ligne de code : " + m.loException.linecontents
+finally
 	loUnitTest.Test(m.lcResult, m.loException)
-ENDTRY 
-	
-RETURN loUnitTest.Result()
+endtry
+
+return loUnitTest.Result()
 
 * ---------------------------------------------------
-PROCEDURE FilesCompile && Compile des fichiers d'après un squelette
-LPARAMETERS ;
+procedure FilesCompile && Compile des fichiers d'après un squelette
+lparameters ;
 	tcFilesSkeleton,; && Squelette d'adresse de fichiers
 	tcFilesFailed && @ [''] Fichiers dont la compilation a échoué
-tcFilesFailed = Space(0)
+tcFilesFailed = space(0)
 
-LOCAL lnFiles, laFiles[1], llResult, lnResult && Nombre de fichiers compilés avec succès
+local lnFiles, laFiles[1], llResult, lnResult && Nombre de fichiers compilés avec succès
 lnResult = 0
 
 * S'il existe au moins un fichier répondant au masque spécifié
 lnFiles = aFiles(@m.laFiles, m.tcFilesSkeleton)
 llResult = m.lnFiles > 0
-ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([No file match the specified skeleton: <<cLitteral(m.tcFilesSkeleton)>>]))
-IF m.llResult
+assert m.llResult message cAssertMsg(textmerge([No file match the specified skeleton: <<cLitteral(m.tcFilesSkeleton)>>]))
+if m.llResult
 
-	LOCAL lcFolderAddr, loProc, loClass, lnFile, lcFile, lnFilesFailed, laFilesFailed[1]
-	lcFolderAddr = Addbs(JustPath(m.tcFilesSkeleton))
-	
-	* Sauver les set car COMPILE ferme automatiquement les fichiers
-	loProc = abSet('PROCEDURE', Set("Procedure"),,, .T.)
-	loClass = abSet('CLASSLIB', Set("ClassLib"),,, .T.)
+	local lcFolderAddr, loProc, loClass, lnFile, lcFile, lnFilesFailed, laFilesFailed[1]
+	lcFolderAddr = addbs(justpath(m.tcFilesSkeleton))
 
-	DEBUGOUT Space(1)
-	DEBUGOUT Replicate('=', 50)
-	DEBUGOUT "Compiling", Transform(m.lnFiles), 'files in', m.lcFolderAddr
+* Sauver les set car COMPILE ferme automatiquement les fichiers
+	loProc = abSet('PROCEDURE', set("Procedure"),,, .t.)
+	loClass = abSet('CLASSLIB', set("ClassLib"),,, .t.)
 
-	* Pour chaque fichier
+	debugout space(1)
+	debugout replicate('=', 50)
+	debugout "Compiling", transform(m.lnFiles), 'files in', m.lcFolderAddr
+
+* Pour chaque fichier
 	lnFilesFailed = 0
-	FOR lnFile = 1 TO m.lnFiles
+	for lnFile = 1 to m.lnFiles
 		lcFile = laFiles[m.lnFile, 1]
-		
-		* Compiler le fichier
+
+* Compiler le fichier
 		llResult = FileCompile(m.lcFolderAddr + m.lcFile)
-		
-		* Si succès, compter
-		IF m.llResult
+
+* Si succès, compter
+		if m.llResult
 			lnResult = m.lnResult + 1
-		* Sinon, tabuler
-		ELSE
+* Sinon, tabuler
+		else
 			lnFilesFailed = lnFilesFailed + 1
-			DIMENSION laFilesFailed[m.lnFilesFailed]
+			dimension laFilesFailed[m.lnFilesFailed]
 			laFilesFailed[m.lnFilesFailed] = m.lcFile
-		ENDIF
-	ENDFOR
-	
-	RELEASE loProc, loClass && Rétablit les SET
+		endif
+	endfor
 
-	DEBUGOUT Transform(m.lnResult), "files compiled out of", Transform(m.lnFiles)
-	DEBUGOUT Replicate('=', 50)
-	
-	* Si échec(s), lister les fichiers
-	IF m.lnFilesFailed > 0
+	release loProc, loClass && Rétablit les SET
+
+	debugout transform(m.lnResult), "files compiled out of", transform(m.lnFiles)
+	debugout replicate('=', 50)
+
+* Si échec(s), lister les fichiers
+	if m.lnFilesFailed > 0
 		tcFilesFailed = cListOfArray(@m.laFilesFailed)
-	ENDIF
-ENDIF
+	endif
+endif
 
-RETURN m.lnResult
+return m.lnResult
 
 * ---------------------------------------------------
-PROCEDURE FileCompile && Compile un fichier
-LPARAMETERS ;
+procedure FileCompile && Compile un fichier
+lparameters ;
 	tcFileAddr,; && Adresse du fichier
 	tcResult,; && @ [''] Résultat de la compilation
 	tcClause,; && [''] Clauses de compilation (pour *.prg)
 	tnResult && [0] @ nombre d'erreurs de compilation
 tcResult = ''
-tcClause = Evl(m.tcClause, Space(0))
+tcClause = evl(m.tcClause, space(0))
 tnResult = 0
 
-LOCAL llResult;
+local llResult;
 , loLogErrors as abSet of abDev.prg;
 , loNotify as abSet of abDev.prg;
 , lcExt;
 , llInSet;
 
-llResult = File(m.tcFileAddr)
-tcResult = Textmerge([Le fichier à compiler '<<m.tcFileAddr>>' est introuvable])
-ASSERT m.llResult MESSAGE cAssertMsg(m.tcResult)
-IF m.llResult
+llResult = file(m.tcFileAddr)
+tcResult = textmerge([Le fichier à compiler '<<m.tcFileAddr>>' est introuvable])
+assert m.llResult message cAssertMsg(m.tcResult)
+if m.llResult
 
 	loLogErrors = abSet('LOGERRORS', 'ON')
 	loNotify = abSet('NOTIFY', 'OFF') && supprime le thermomètre d'avancement
 
-	* Tenter la compilation
-	tcFileAddr = FullPath(m.tcFileAddr)
-	lcExt = JustExt(m.tcFileAddr)
-	TRY
+* Tenter la compilation
+	tcFileAddr = fullpath(m.tcFileAddr)
+	lcExt = justext(m.tcFileAddr)
+	try
 
-		DO CASE
+		do case
 
-		CASE InList(m.lcExt, 'PRG', 'QPR', 'MPR')
-			llInSet = ForceExt(m.tcFileAddr, ICase(m.lcExt == 'PRG', 'FXP', m.lcExt == 'QPR', 'QPX', 'MPX')) $ Set("Procedure")
-			COMPILE (m.tcFileAddr) &tcClause
+		case inlist(m.lcExt, 'PRG', 'QPR', 'MPR')
+			llInSet = forceext(m.tcFileAddr, icase(m.lcExt == 'PRG', 'FXP', m.lcExt == 'QPR', 'QPX', 'MPX')) $ set("Procedure")
+			compile (m.tcFileAddr) &tcClause
 			if m.llInSet
 				set procedure to (m.tcFileAddr) additive
 			endif
 
-		CASE m.lcExt = 'VCX'
-			CLEAR CLASSLIB (m.tcFileAddr) && par sécurité
-			COMPILE CLASSLIB (m.tcFileAddr)
+		case m.lcExt = 'VCX'
+			clear classlib (m.tcFileAddr) && par sécurité
+			compile classlib (m.tcFileAddr)
 
-		CASE m.lcExt = 'SCX'
-			COMPILE FORM (m.tcFileAddr)
+		case m.lcExt = 'SCX'
+			compile form (m.tcFileAddr)
 
-	 	CASE m.lcExt = 'FRX'
-			COMPILE REPORT (m.tcFileAddr)
+	 	case m.lcExt = 'FRX'
+			compile report (m.tcFileAddr)
 
-	 	CASE m.lcExt = 'LBX'
-			COMPILE LABEL (m.tcFileAddr)
+	 	case m.lcExt = 'LBX'
+			compile label (m.tcFileAddr)
 
-		CASE m.lcExt = 'DBC'
-			loSet = abSet('DATABASE', '',,, .T.)
-			COMPILE DATABASE (m.tcFileAddr)
+		case m.lcExt = 'DBC'
+			loSet = abSet('DATABASE', '',,, .t.)
+			compile database (m.tcFileAddr)
 
-		CASE InList(m.lcExt, 'INI', 'TXT', 'LOG', 'H')
+		case inlist(m.lcExt, 'INI', 'TXT', 'LOG', 'H')
 
-		OTHERWISE
-			tcResult = Textmerge(ICase(;
+		otherwise
+			tcResult = textmerge(icase(;
 				cLangUser() = 'fr',	[La compilation du fichier '<<JustFname(m.tcFileAddr)>>' n'est pas supportée],; && copy-paste this line to add another language support
 														[Compiling file '<<JustFname(m.tcFileAddr)>>' is not supported]; && default: English
 				))
-			llResult = .F.
-		ENDCASE
+			llResult = .f.
+		endcase
 
 *- Inutile car COMPILE fait le PACK
 *-				IF InList(m.lcExt, 'SCX', 'VCX', 'FRX', 'LBX', 'DBX') && le code source est dans une table
 *-					PACK (m.tcFileAddr)
 *-				ENDIF
 
-		IF m.llResult
-			tcResult = ForceExt(m.tcFileAddr, 'err')
-			llResult = NOT File(m.tcResult)
-			tnResult = Iif(m.llResult, 0, Evl(Occurs('Error in line', FileToStr(m.tcResult)), 1))
-			tcResult = Iif(m.llResult;
-				, ICase(;
+		if m.llResult
+			tcResult = forceext(m.tcFileAddr, 'err')
+			llResult = not file(m.tcResult)
+			tnResult = iif(m.llResult, 0, evl(occurs('Error in line', filetostr(m.tcResult)), 1))
+			tcResult = iif(m.llResult;
+				, icase(;
 						cLangUser() = 'fr',	[sans erreur],; && copy-paste this line to add another language support
 																[successfully]; && default: English
 					);
-				, ICase(;
+				, icase(;
 						cLangUser() = 'fr',	[avec erreur(s) : ],; && copy-paste this line to add another language support
 																[with error(s): ]; && default: English
-					) + CRLF + FileToStr(m.tcResult);
+					) + CRLF + filetostr(m.tcResult);
 				)
-			tcResult = Textmerge(ICase(;
+			tcResult = textmerge(icase(;
 					cLangUser() = 'fr',	[Fichier '<<JustFname(m.tcFileAddr)>>' compilé <<m.tcResult>>],; && copy-paste this line to add another language support
 															[File '<<JustFname(m.tcFileAddr)>>' compiled <<m.tcResult>>]; && default: English
 				))
-		ENDIF
-		
-	CATCH TO m.loException
+		endif
 
-		llResult = .F.
+	catch to m.loException
+
+		llResult = .f.
 		tcResult = '';
 			+ cException(m.loException);
 			+ ' - ';
-			+ Textmerge(ICase(;
+			+ textmerge(icase(;
 					cLangUser() = 'fr',	[Fichier '<<JustFname(m.tcFileAddr)>>'],; && copy-paste this line to add another language support
 															[File '<<JustFname(m.tcFileAddr)>>']; && default: English
 				));
-			+ Iif(Empty(m.tcClause), Space(0), ' - ' + m.tcClause)
-				
-		?? Chr(7)
-	ENDTRY
+			+ iif(empty(m.tcClause), space(0), ' - ' + m.tcClause)
 
-	tcResult = Iif(Empty(m.tcResult), '', Textmerge([[<<Proper(Program())>>() - <<m.tcResult>>]))
-	DEBUGOUT m.tcResult
-ENDIF
+		?? chr(7)
+	endtry
 
-RETURN m.llResult
+	tcResult = iif(empty(m.tcResult), '', textmerge([[<<Proper(Program())>>() - <<m.tcResult>>]))
+	debugout m.tcResult
+endif
+
+return m.llResult
 
 * ========================================
-PROCEDURE ProcEmpty && Sert à mesurer le temps moyen d'appel d'une procédure
-LPARAMETERS ;
+procedure ProcEmpty && Sert à mesurer le temps moyen d'appel d'une procédure
+lparameters ;
 	Parm1,; && Bidon
 	Parm2,; && Bidon
 	Parm3,; && Bidon
 	Parm4,; && Bidon
 	Parm5,; && Bidon
 	Parm6 && Bidon
-LOCAL llResult
-llResult = .T.
+local llResult
+llResult = .t.
 uDefault(m.Parm1, 'bidon')
-RETURN m.llResult
+return m.llResult
 
 * ------------------------------------
-PROCEDURE ProcEmpty_Test && Teste ProcEmpty()
+procedure ProcEmpty_Test && Teste ProcEmpty()
 
-LOCAL loUnitTest AS abUnitTest OF abDev.prg
-loUnitTest = NewObject('abUnitTest', 'abDev.prg')
+local loUnitTest as abUnitTest of abDev.prg
+loUnitTest = newobject('abUnitTest', 'abDev.prg')
 
-loUnitTest.test(.T.)
-loUnitTest.test(.T., 2, 'bidon', .F., date())
+loUnitTest.Test(.t.)
+loUnitTest.Test(.t., 2, 'bidon', .f., date())
 
-RETURN loUnitTest.Result()
+return loUnitTest.Result()
 
 * ========================================
-FUNCTION cPWRand && Mot de passe aléatoire sûr selon indications Windows
-LPARAMETERS tnLength && [8] Nombre de caractères
+function cPWRand && Mot de passe aléatoire sûr selon indications Windows
+lparameters tnLength && [8] Nombre de caractères
 
-LOCAL lcResult, lcCars, lnCars, lnCar
+local lcResult, lcCars, lnCars, lnCar
 
 && Passwords must contain characters from three of the following five categories:
 lcCars = '';
@@ -3431,64 +3431,64 @@ lcCars = '';
 	+ '!@#$%&*_-+=/|\(){}[];"' + ['<>,.?]; && Nonalphanumeric characters && ^~`: removed those difficult to type or conflicting with usual syntax
 	+ '' && Any Unicode character that is categorized as an alphabetic character but is not uppercase or lowercase. This includes Unicode characters from Asian languages.
 
-lnCars = Len(m.lcCars)
+lnCars = len(m.lcCars)
 lcResult = ''
 
-Rand(-1) && To achieve the most random sequence of numbers, issue RAND( ) initially with a negative argument and then issue RAND( ) without an argument. 
-FOR lnCar = 1 TO Iif(Vartype(m.tnLength) = 'N' AND m.tnLength > 0, m.tnLength, 8)
-	lcResult = m.lcResult + Substr(m.lcCars, Min(Max(Int(Rand() * m.lnCars), 1), m.lnCars), 1)
-ENDFOR
+rand(-1) && To achieve the most random sequence of numbers, issue RAND( ) initially with a negative argument and then issue RAND( ) without an argument.
+for lnCar = 1 to iif(vartype(m.tnLength) = 'N' and m.tnLength > 0, m.tnLength, 8)
+	lcResult = m.lcResult + substr(m.lcCars, min(max(int(rand() * m.lnCars), 1), m.lnCars), 1)
+endfor
 
-RETURN m.lcResult
+return m.lcResult
 
 * -------------------------------------------------------------
-FUNCTION cPWRand_Test && Teste cPWRand
+function cPWRand_Test && Teste cPWRand
 
-? Sys(16)
+? sys(16)
 ? cPWRand()
 ? cPWRand(15)
 
 * ========================================
-DEFINE CLASS abProject as GA_LIGHTWEIGHT_CLASS of abGA.prg && ouvre un projet et le referme automatiquement
+define class abProject as GA_LIGHTWEIGHT_CLASS of abGA.prg && ouvre un projet et le referme automatiquement
 
-oProject = .NULL. && Référence au projet
-lOpened = .F. && Le projet a été ouvert - .NULL. le projet a été créé
+oProject = .null. && Référence au projet
+lOpened = .f. && Le projet a été ouvert - .NULL. le projet a été créé
 
 * ----------------
-PROTECTED PROCEDURE Init
-LPARAMETERS ;
+protected procedure init
+lparameters ;
 	tcPJX,; && Adresse du projet
 	tcResult && @ Résultat en cas d'échec
 
-LOCAL llOpened, llResult
+local llOpened, llResult
 
 this.oProject = oProject(m.tcPJX, @m.tcResult, @m.llOpened)
 this.lOpened = m.llOpened
 
-RETURN Vartype(m.this.oProject) == 'O'
+return vartype(m.this.oProject) == 'O'
 
 * ----------------
-PROTECTED PROCEDURE Destroy
+protected procedure destroy
 
-IF m.this.lOpened OR IsNull(m.this.lOpened)
-	this.oProject.Close
-ENDIF
+if m.this.lOpened or isnull(m.this.lOpened)
+	this.oProject.close
+endif
 
-ENDDEFINE && CLASS abProject
+enddefine && CLASS abProject
 * ========================================
 
 * ========================================
-FUNCTION lProject && Un projet est ouvert
-LPARAMETERS tcPJX && Nom du projet
+function lProject && Un projet est ouvert
+lparameters tcPJX && Nom du projet
 
 local success as Boolean;
-, oProject as Project
+, oProject as project
 
-if _VFP.Projects.Count > 0
-	tcPJX = Lower(JustFname(ForceExt(m.tcPJX, 'pjx')))
-	for each oProject in _VFP.Projects foxobject
-		if Lower(JustFname(m.oProject.Name)) == m.tcPJX
-			success = .T.
+if _vfp.projects.count > 0
+	tcPJX = lower(justfname(forceext(m.tcPJX, 'pjx')))
+	for each oProject in _vfp.projects foxobject
+		if lower(justfname(m.oProject.name)) == m.tcPJX
+			success = .t.
 			exit
 		endif
 	endfor
@@ -3497,427 +3497,427 @@ endif
 return m.success
 
 * ========================================
-FUNCTION oProject && Référence à un projet (ouvert ou créé)
-LPARAMETERS ;
+function oProject && Référence à un projet (ouvert ou créé)
+lparameters ;
 	tcPJX,; && Adresse du projet
 	tcResult,; && @ Résultat en cas d'erreur
 	tlOpened && @ Le projet a été ouvert - .NULL. le projet a été créé
-tcResult = Space(0)
-tlOpened = .F.
+tcResult = space(0)
+tlOpened = .f.
 
-LOCAL loResult AS Project;
-, loProject AS Project;
+local loResult as project;
+, loProject as project;
 , llResult as Boolean;
-, loException as Exception
+, loException as exception
 
-loResult = .NULL.
+loResult = .null.
 
-IF Vartype(m.tcPJX) == 'C'
+if vartype(m.tcPJX) == 'C'
 
-	tcPJX = Iif(Empty(JustExt(m.tcPJX)), ForceExt(m.tcPJX, 'pjx'), m.tcPJX)
-	IF Lower(JustExt(m.tcPJX)) == 'pjx'
-	 
-	 	IF File(m.tcPJX)
-		 	tcPJX = FullPath(m.tcPJX)
+	tcPJX = iif(empty(justext(m.tcPJX)), forceext(m.tcPJX, 'pjx'), m.tcPJX)
+	if lower(justext(m.tcPJX)) == 'pjx'
 
-			* Si le projet n'est pas déjà ouvert
-			llResult = _VFP.Projects.Count > 0
-			IF m.llResult
-				llResult = .F.
-				FOR EACH loProject IN _VFP.Projects foxobject
-					IF FullPath(m.loProject.Name) == m.tcPJX
-						llResult = .T.
+	 	if file(m.tcPJX)
+		 	tcPJX = fullpath(m.tcPJX)
+
+* Si le projet n'est pas déjà ouvert
+			llResult = _vfp.projects.count > 0
+			if m.llResult
+				llResult = .f.
+				for each loProject in _vfp.projects foxobject
+					if fullpath(m.loProject.name) == m.tcPJX
+						llResult = .t.
 						loResult = m.loProject && after EXIT, FOR EACH resets loProject to .F.
-						EXIT
-					ENDIF
-				ENDFOR
-			ENDIF
-	 	ELSE
-	 		tlOpened = .NULL.
-	 	ENDIF
-		IF NOT m.llResult
-			
-			* Ouvrir le projet
-			TRY && évite les erreurs à l'ouverture tel que les fichiers non trouvés && en fait non ça n'empêche pas l'erreur
-				MODIFY PROJECT (m.tcPJX) SAVE NOWAIT NOSHOW NOPROJECTHOOK
-				loResult = _VFP.ActiveProject
-				tlOpened = Iif(IsNull(m.tlOpened), m.tlOpened, .T.)
-			CATCH TO loException
-				loResult = .NULL.
+						exit
+					endif
+				endfor
+			endif
+	 	else
+	 		tlOpened = .null.
+	 	endif
+		if not m.llResult
+
+* Ouvrir le projet
+			try && évite les erreurs à l'ouverture tel que les fichiers non trouvés && en fait non ça n'empêche pas l'erreur
+				modify project (m.tcPJX) save nowait noshow noprojecthook
+				loResult = _vfp.activeproject
+				tlOpened = iif(isnull(m.tlOpened), m.tlOpened, .t.)
+			catch to loException
+				loResult = .null.
 				tcResult = cException(m.loException)
-			ENDTRY
-		ENDIF
-	ELSE
-		tcResult = Textmerge([<<Proper(Program())>>() - Invalid project file extension : <<cLitteral(m.tcPJX)>>])
-	ENDIF
-ELSE
-	tcResult = Textmerge([<<Proper(Program())>>() - Invalid project specification : <<cLitteral(m.tcPJX)>>])
-ENDIF
+			endtry
+		endif
+	else
+		tcResult = textmerge([<<Proper(Program())>>() - Invalid project file extension : <<cLitteral(m.tcPJX)>>])
+	endif
+else
+	tcResult = textmerge([<<Proper(Program())>>() - Invalid project specification : <<cLitteral(m.tcPJX)>>])
+endif
 
-RETURN m.loResult
+return m.loResult
 
 * ========================================
-PROCEDURE ProjectClose && Ferme un projet
-LPARAMETERS tcProject && Nom du projet tel qu'il apparaît dans sa barre de titre
+procedure ProjectClose && Ferme un projet
+lparameters tcProject && Nom du projet tel qu'il apparaît dans sa barre de titre
 
-LOCAL loProject as Project, lcProject, llResult, lcResult && Adresse du projet pour le réouvrir ultérieurement
+local loProject as project, lcProject, llResult, lcResult && Adresse du projet pour le réouvrir ultérieurement
 
-lcResult = Space(0)
-llResult = Vartype(m.tcProject) == 'C' AND NOT Empty(m.tcProject)
-ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([Invalid project specification : <<cLitteral(m.tcProject)>>]))
-IF m.llResult AND _vfp.Projects.Count > 0
+lcResult = space(0)
+llResult = vartype(m.tcProject) == 'C' and not empty(m.tcProject)
+assert m.llResult message cAssertMsg(textmerge([Invalid project specification : <<cLitteral(m.tcProject)>>]))
+if m.llResult and _vfp.projects.count > 0
 
-	* Pour chaque projet ouvert
-	tcProject = Upper(Alltrim(m.tcProject))
-	FOR EACH m.loProject IN _vfp.Projects
-		lcProject = m.loProject.Name
-	
-		* si c'est le projet cherché
-		IF Upper(JustStem(m.lcProject)) == m.tcProject
-			
-			* Fermer
-			loProject.Close
+* Pour chaque projet ouvert
+	tcProject = upper(alltrim(m.tcProject))
+	for each m.loProject in _vfp.projects
+		lcProject = m.loProject.name
+
+* si c'est le projet cherché
+		if upper(juststem(m.lcProject)) == m.tcProject
+
+* Fermer
+			loProject.close
 			lcResult = m.lcProject
-			EXIT
-		ENDIF
-	ENDFOR
-ENDIF
+			exit
+		endif
+	endfor
+endif
 
-RETURN m.lcResult
-
-* ========================================
-FUNCTION abProjectsClose as abProjectsClose of abDev.prg && Ferme les projets à .Init(), les rouvre à .Destroy()
-RETURN CreateObject('abProjectsClose')
+return m.lcResult
 
 * ========================================
-DEFINE CLASS abProjectsClose as GA_LIGHTWEIGHT_CLASS of abGA.prg && Ferme les projets à .Init(), les rouvre à .Destroy()
+function abProjectsClose as abProjectsClose of abDev.prg && Ferme les projets à .Init(), les rouvre à .Destroy()
+return createobject('abProjectsClose')
+
+* ========================================
+define class abProjectsClose as GA_LIGHTWEIGHT_CLASS of abGA.prg && Ferme les projets à .Init(), les rouvre à .Destroy()
 * ========================================
 
-	HIDDEN aProjects[1], nProjects
+	hidden aProjects[1], nProjects
 
-	* ---------------
-	PROCEDURE Init
+* ---------------
+	procedure init
 
-	this.nProjects = Iif(lDevMode();
-		, _VFP.Projects.Count;
+	this.nProjects = iif(lDevMode();
+		, _vfp.projects.count;
 		, 0;
 		)
 
-	IF Empty(m.this.nProjects)
-		return .F.
+	if empty(m.this.nProjects)
+		return .f.
 	endif
 
-	LOCAL lnProject, loProject as project
+	local lnProject, loProject as project
 
-	DIMENSION this.aProjects[m.this.nProjects]
+	dimension this.aProjects[m.this.nProjects]
 
-	FOR lnProject = m.this.nProjects TO 1 STEP -1
-		loProject = _vfp.Projects(m.lnProject)
-		this.aProjects[m.lnProject] = m.loProject.Name
-		loProject.Close
-	ENDFOR
+	for lnProject = m.this.nProjects to 1 step -1
+		loProject = _vfp.projects(m.lnProject)
+		this.aProjects[m.lnProject] = m.loProject.name
+		loProject.close
+	endfor
 
-	* ---------------
-	PROCEDURE Destroy
+* ---------------
+	procedure destroy
 
-	IF m.this.nProjects > 0
-		LOCAL lnProject
-		FOR lnProject = m.this.nProjects TO 1 STEP -1
-			MODIFY PROJECT (this.aProjects[m.lnProject]) NOWAIT
-		ENDFOR
-	ENDIF
-
-* ========================================
-ENDDEFINE && CLASS abProjectsClose
-* ========================================
+	if m.this.nProjects > 0
+		local lnProject
+		for lnProject = m.this.nProjects to 1 step -1
+			modify project (this.aProjects[m.lnProject]) nowait
+		endfor
+	endif
 
 * ========================================
-DEFINE CLASS abDBCsClose as GA_LIGHTWEIGHT_CLASS of abGA.prg && Init() ferme les bases de données, Destroy() les rouvre
+enddefine && CLASS abProjectsClose
 * ========================================
 
-	HIDDEN aDBCs[1], nDBCs, cDBCCur
-
-	* ---------------
-	PROCEDURE Init
-
-	this.nDBCs = ADatabases(this.aDBCs) && [nom | adresse]
-
-	IF this.nDBCs > 0
-		this.cDBCCur = Dbc()
-
-		LOCAL lnDBC
-		FOR lnDBC = 1 TO this.nDBCs
-			SET DATABASE TO (this.aDBCs[m.lnDBC, 1]) && nom
-			CLOSE DATABASES
-		ENDFOR
-	ENDIF
-
-	* ---------------
-	PROCEDURE Destroy
-
-	IF this.nDBCs > 0
-
-		LOCAL lnDBC
-		FOR lnDBC = 1 TO this.nDBCs
-			OPEN DATABASE (this.aDBCs[m.lnDBC, 2]) && adresse
-		ENDFOR
-		IF File(this.cDBCCur)
-			SET DATABASE TO (m.this.cDBCCur)
-		ENDIF
-	ENDIF
-
 * ========================================
-ENDDEFINE && CLASS abDBCsClose 
+define class abDBCsClose as GA_LIGHTWEIGHT_CLASS of abGA.prg && Init() ferme les bases de données, Destroy() les rouvre
 * ========================================
 
+	hidden aDBCs[1], nDBCs, cDBCCur
+
+* ---------------
+	procedure init
+
+	this.nDBCs = adatabases(this.aDBCs) && [nom | adresse]
+
+	if this.nDBCs > 0
+		this.cDBCCur = dbc()
+
+		local lnDBC
+		for lnDBC = 1 to this.nDBCs
+			set database to (this.aDBCs[m.lnDBC, 1]) && nom
+			close databases
+		endfor
+	endif
+
+* ---------------
+	procedure destroy
+
+	if this.nDBCs > 0
+
+		local lnDBC
+		for lnDBC = 1 to this.nDBCs
+			open database (this.aDBCs[m.lnDBC, 2]) && adresse
+		endfor
+		if file(this.cDBCCur)
+			set database to (m.this.cDBCCur)
+		endif
+	endif
 
 * ========================================
-FUNCTION nFColor && Couleur d'avant plan
-LPARAMETERS tcFColor && Chaîne selon format "RRR,GGG,BBB"
-LOCAL lnResult
+enddefine && CLASS abDBCsClose
+* ========================================
+
+
+* ========================================
+function nFColor && Couleur d'avant plan
+lparameters tcFColor && Chaîne selon format "RRR,GGG,BBB"
+local lnResult
 lnResult = 0 && black
 
-IF Vartype(m.tcFColor) == 'C' AND Occurs(',', m.tcFColor) = 2
-	LOCAL ARRAY laFColors[1]
-	ALines(laFColors, m.tcFColor, 1, ',')
-	lnResult = Rgb(Val(laFColors[1]), Val(laFColors[2]), Val(laFColors[3]))
-ENDIF
+if vartype(m.tcFColor) == 'C' and occurs(',', m.tcFColor) = 2
+	local array laFColors[1]
+	alines(laFColors, m.tcFColor, 1, ',')
+	lnResult = rgb(val(laFColors[1]), val(laFColors[2]), val(laFColors[3]))
+endif
 
-RETURN m.lnResult
+return m.lnResult
 
 * ========================================
-FUNCTION nBColor && Couleur d'arrière plan
-LPARAMETERS tcBColor && Chaîne selon format "RRR,GGG,BBB"
+function nBColor && Couleur d'arrière plan
+lparameters tcBColor && Chaîne selon format "RRR,GGG,BBB"
 
-LOCAL lnResult
-lnResult = Rgb(255, 255, 255) && white
+local lnResult
+lnResult = rgb(255, 255, 255) && white
 
-IF Vartype(m.tcBColor) == 'C' AND Occurs(',', m.tcBColor) = 2
-	LOCAL ARRAY laBColors[1]
-	ALines(laBColors, m.tcBColor, 1, ',')
-	lnResult = Rgb(Val(laBColors[1]), Val(laBColors[2]), Val(laBColors[3]))
-ENDIF
+if vartype(m.tcBColor) == 'C' and occurs(',', m.tcBColor) = 2
+	local array laBColors[1]
+	alines(laBColors, m.tcBColor, 1, ',')
+	lnResult = rgb(val(laBColors[1]), val(laBColors[2]), val(laBColors[3]))
+endif
 
-RETURN m.lnResult
+return m.lnResult
 
 * =================================================
 function abISX && Arrête et redémarre ISX (nécessaire en développement de formulaires)
-return CreateObject('abISX')
+return createobject('abISX')
 
 * =================================================
-DEFINE CLASS abISX as GA_LIGHTWEIGHT_CLASS of abGA.prg && Arrête et redémarre ISX (nécessaire en développement de formulaires)
+define class abISX as GA_LIGHTWEIGHT_CLASS of abGA.prg && Arrête et redémarre ISX (nécessaire en développement de formulaires)
 * =================================================
-HIDDEN lISX, cISX
+hidden lISX, cISX
 
-lISX = File('ISX.fxp')
+lISX = file('ISX.fxp')
 
 * ------------------------------------
-PROCEDURE Init && Désactive ISX
+procedure init && Désactive ISX
 
 *	return .F.
 
-IF m.this.lISX and lDevMode() && lDevMode() par sécurité, évite un WAIT en unattended server mode
-	this.cISX = FullPath('ISX.fxp')
-	LOCAL lcISX
+if m.this.lISX and lDevMode() && lDevMode() par sécurité, évite un WAIT en unattended server mode
+	this.cISX = fullpath('ISX.fxp')
+	local lcISX
 	lcISX = "ISX('QUIT')" && évite d'embarquer ISX dans le projet
 	&lcISX
 else
-	return .F.
-ENDIF
+	return .f.
+endif
 
 * ------------------------------------
-PROCEDURE Destroy && Résactive ISX
-LOCAL lcISX
+procedure destroy && Résactive ISX
+local lcISX
 lcISX = 'DO "' + m.this.cISX + '"' && évite d'embarquer ISX dans le projet
 &lcISX
 
 * =================================================
-ENDDEFINE && CLASS abISX
+enddefine && CLASS abISX
 * =================================================
 
 * ------------------------------------
-FUNCTION uValue && Valeur convertie selon le varType spécifié (AKA coercition de type)
-LPARAMETERS ;
+function uValue && Valeur convertie selon le varType spécifié (AKA coercition de type)
+lparameters ;
 	tuValue,; && Valeur source
  	tcTypeDest && Type de valeur attendu selon codification de la fonction VFP varType()
 
 && /!\ pourrait être simplifiée et optimisée avec Cast()
 
-LOCAL luResult;
+local luResult;
 , llResult;
 , lcTypeSrce;
 , lcTypeDest;
 
-luResult = .NULL.
+luResult = .null.
 
-#IF .F. && Vartype() VFP9
+#if .f. && Vartype() VFP9
 	C && Character, Memo, Varchar, Varchar (Binary)
-	D && Date 
-	G && General 
-	L && Logical 
-	N && Numeric, Float, Double, or Integer
+	D && Date
+	G && General
+	L && Logical
+	n && Numeric, Float, Double, or Integer
 	O && Object
 	Q && Blob, Varbinary
-	T && DateTime 
+	t && DateTime
 	U && Unknown or variable does not exist
 	X && .NULL.
-	Y && Currency
-	I && Integer && support additionnel
-#ENDIF
+	y && Currency
+	i && Integer && support additionnel
+#endif
 
-llResult = Vartype(m.tcTypeDest) == 'C'
-IF m.llResult
-	lcTypeDest = Upper(Alltrim(m.tcTypeDest))
-	llResult = Len(m.lcTypeDest) = 1 AND m.lcTypeDest $ 'CDGLNOQTUXYI'
-ENDIF
-ASSERT m.llResult MESSAGE cAssertMsg(Textmerge("Spécification de type non supportée : <<cLitteral(m.tcTypeDest)>>"))
-IF m.llResult
+llResult = vartype(m.tcTypeDest) == 'C'
+if m.llResult
+	lcTypeDest = upper(alltrim(m.tcTypeDest))
+	llResult = len(m.lcTypeDest) = 1 and m.lcTypeDest $ 'CDGLNOQTUXYI'
+endif
+assert m.llResult message cAssertMsg(textmerge("Spécification de type non supportée : <<cLitteral(m.tcTypeDest)>>"))
+if m.llResult
 
-	lcTypeSrce = Vartype(m.tuValue)
+	lcTypeSrce = vartype(m.tuValue)
 	llResult = m.lcTypeSrce $ 'CNYLDTX'
-	ASSERT m.llResult MESSAGE cAssertMsg(Textmerge("Type de valeur non supportée : <<cLitteral(m.lcTypeSrce)>>"))
-	IF m.llResult
-	
-		IF m.lcTypeDest == m.lcTypeSrce
+	assert m.llResult message cAssertMsg(textmerge("Type de valeur non supportée : <<cLitteral(m.lcTypeSrce)>>"))
+	if m.llResult
+
+		if m.lcTypeDest == m.lcTypeSrce
 			luResult = m.tuValue
-		ELSE
+		else
 
-			DO CASE
+			do case
 
-			CASE m.lcTypeSrce == 'C'
-				tuValue = Upper(Alltrim(m.tuValue))
-				IF m.lcTypeDest $ 'YNI'
+			case m.lcTypeSrce == 'C'
+				tuValue = upper(alltrim(m.tuValue))
+				if m.lcTypeDest $ 'YNI'
 
-					* Normaliser le point décimal éventuel, supprimer les séparateurs de milliers
-					LOCAL lcPoint, lcSeparator, lcChars
-					lcPoint = Set("Point")
-					lcSeparator = Set("Separator")
-					lcChars = m.lcSeparator + Space(1) + Set("Currency", 1) + '$'
-					tuValue = Iif(m.lcSeparator == '.';
-						, Chrtran(m.tuValue, m.lcChars, '');
-						, Chrtran(m.tuValue, '.' + m.lcChars, m.lcPoint);
+* Normaliser le point décimal éventuel, supprimer les séparateurs de milliers
+					local lcPoint, lcSeparator, lcChars
+					lcPoint = set("Point")
+					lcSeparator = set("Separator")
+					lcChars = m.lcSeparator + space(1) + set("Currency", 1) + '$'
+					tuValue = iif(m.lcSeparator == '.';
+						, chrtran(m.tuValue, m.lcChars, '');
+						, chrtran(m.tuValue, '.' + m.lcChars, m.lcPoint);
 						)
-					ASSERT Occurs(m.lcPoint, m.tuValue) <= 1 MESSAGE cAssertMsg(Textmerge([Plus d'un séparateur décimal dans le nombre <<m.tuValue>>]))
-				ENDIF
-				luResult = ICase(;
-					m.lcTypeDest == 'N', Val(m.tuValue),;
-					m.lcTypeDest == 'Y', Ntom(Val(m.tuValue)),;
-					m.lcTypeDest == 'I', Int(Val(m.tuValue)),;
-					m.lcTypeDest == 'L', ICase(InList(m.tuValue, 'T', '.T.', 'VRAI', 'TRUE'), .T., Empty(m.tuValue) OR InList(m.tuValue, 'F', '.F.', 'FAUX', 'FALSE'), .F., Evaluate(m.tuValue)),;
-					m.lcTypeDest $ 'DT', Iif(Left(m.tuValue, 1) = '{', Evaluate(m.tuValue), uValue_TD(m.tuValue, m.lcTypeDest)),;
-					.NULL.)
-				IF m.lcTypeDest $ 'DT' && Ctod() et Ctot() peuvent produire un résultat invalide
-					TRY
-						Dtoc(m.luResult)
-					CATCH
-						luResult = Iif(m.lcTypeDest == 'D', {}, {/:})
-					ENDTRY
-				ENDIF
+					assert occurs(m.lcPoint, m.tuValue) <= 1 message cAssertMsg(textmerge([Plus d'un séparateur décimal dans le nombre <<m.tuValue>>]))
+				endif
+				luResult = icase(;
+					M.lcTypeDest == 'N', val(m.tuValue),;
+					M.lcTypeDest == 'Y', ntom(val(m.tuValue)),;
+					M.lcTypeDest == 'I', int(val(m.tuValue)),;
+					M.lcTypeDest == 'L', icase(inlist(m.tuValue, 'T', '.T.', 'VRAI', 'TRUE'), .t., empty(m.tuValue) or inlist(m.tuValue, 'F', '.F.', 'FAUX', 'FALSE'), .f., evaluate(m.tuValue)),;
+					M.lcTypeDest $ 'DT', iif(left(m.tuValue, 1) = '{', evaluate(m.tuValue), uValue_TD(m.tuValue, m.lcTypeDest)),;
+					.null.)
+				if m.lcTypeDest $ 'DT' && Ctod() et Ctot() peuvent produire un résultat invalide
+					try
+						dtoc(m.luResult)
+					catch
+						luResult = iif(m.lcTypeDest == 'D', {}, {/:})
+					endtry
+				endif
 
-			CASE m.lcTypeSrce == 'N'
-				luResult = ICase(;
-					m.lcTypeDest == 'C', Transform(m.tuValue),;
-					m.lcTypeDest == 'I', Int(m.tuValue),;
-					m.lcTypeDest == 'Y', Ntom(m.tuValue),;
-					m.lcTypeDest == 'L', m.tuValue != 0,;
-					.NULL.)	
+			case m.lcTypeSrce == 'N'
+				luResult = icase(;
+					M.lcTypeDest == 'C', transform(m.tuValue),;
+					M.lcTypeDest == 'I', int(m.tuValue),;
+					M.lcTypeDest == 'Y', ntom(m.tuValue),;
+					M.lcTypeDest == 'L', m.tuValue != 0,;
+					.null.)
 
-			CASE m.lcTypeSrce $ 'DT'
-				luResult = ICase(;
-					m.lcTypeDest == 'C', cLitteral(m.tuValue),; && mieux que Cast()
-					m.lcTypeDest == 'D', Ttod(m.tuValue),;
-					m.lcTypeDest == 'T', Dtot(m.tuValue),;
-					.NULL.)	
+			case m.lcTypeSrce $ 'DT'
+				luResult = icase(;
+					M.lcTypeDest == 'C', cLitteral(m.tuValue),; && mieux que Cast()
+					m.lcTypeDest == 'D', ttod(m.tuValue),;
+					M.lcTypeDest == 'T', dtot(m.tuValue),;
+					.null.)
 
-			CASE m.lcTypeSrce == 'L'
-				luResult = ICase(;
-					m.lcTypeDest == 'C', cLitteral(m.tuValue),;
-					m.lcTypeDest $ 'NI', Iif(m.tuValue, 1, 0),;
-					.NULL.)	
-			
-			CASE m.lcTypeSrce == 'Y'
-				luResult = ICase(;
-					m.lcTypeDest == 'C', Transform(m.tuValue),;
-					m.lcTypeDest == 'N', Mton(m.tuValue),;
-					m.lcTypeDest == 'I', Int(Mton(m.tuValue)),;
-					m.lcTypeDest == 'L', NOT m.tuValue = Ntom(0),;
-					.NULL.)	
+			case m.lcTypeSrce == 'L'
+				luResult = icase(;
+					M.lcTypeDest == 'C', cLitteral(m.tuValue),;
+					M.lcTypeDest $ 'NI', iif(m.tuValue, 1, 0),;
+					.null.)
 
-			CASE m.lcTypeSrce == 'X'
+			case m.lcTypeSrce == 'Y'
+				luResult = icase(;
+					M.lcTypeDest == 'C', transform(m.tuValue),;
+					M.lcTypeDest == 'N', mton(m.tuValue),;
+					M.lcTypeDest == 'I', int(mton(m.tuValue)),;
+					M.lcTypeDest == 'L', not m.tuValue = ntom(0),;
+					.null.)
+
+			case m.lcTypeSrce == 'X'
 				luResult = uEmpty(m.lcTypeDest)
 
-			OTHERWISE
-				luResult = .NULL.
-			ENDCASE
-		ENDIF
-	ENDIF
-ENDIF
+			otherwise
+				luResult = .null.
+			endcase
+		endif
+	endif
+endif
 
-RETURN m.luResult
+return m.luResult
 
 * ------------------------------------
-FUNCTION uValue_TD
-LPARAMETERS ;
+function uValue_TD
+lparameters ;
   tuValue; && Valeur source
 , tcTypeDest; && Type de valeur attendu selon codification de la fonction VFP varType()
 
 local cMark, lCentury, cDate, cTime
 
-cMark = Evl(Set("Mark"), '/')
+cMark = evl(set("Mark"), '/')
 
-tuValue = Strtran(Strtran(Strtran(Strtran(Chrtran(cRepCharDel(Alltrim(m.tuValue));
+tuValue = strtran(strtran(strtran(strtran(chrtran(cRepCharDel(alltrim(m.tuValue));
 	, '-', m.cMark); && iPhone
 	, ' ' + m.cMark, m.cMark);
 	, m.cMark + ' ', m.cMark);
 	, ' :', ':');
 	, ': ', ':');
 
-lCentury = Len(GetWordNum(m.tuValue, 1, '/')) = 4 && YYYY/MM/DD assumed
+lCentury = len(getwordnum(m.tuValue, 1, '/')) = 4 && YYYY/MM/DD assumed
 
 do case
 
-case !Vartype(m.tuValue) == 'C';
- or Occurs(m.cMark, m.tuValue) # 2; && 2015-06-16 - {en} default values in case m.tuValue is not a date, eg. "boto" - contributor Gilles Lajot-Sarthou
- or Empty(Chrtran(m.tuValue, m.cMark+':APM', ''))
-	return Iif(m.tcTypeDest = 'D', {/}, {/:}) && {en} empty date[-time] {fr} date[-time] vide
+case !vartype(m.tuValue) == 'C';
+ or occurs(m.cMark, m.tuValue) # 2; && 2015-06-16 - {en} default values in case m.tuValue is not a date, eg. "boto" - contributor Gilles Lajot-Sarthou
+ or empty(chrtran(m.tuValue, m.cMark+':APM', ''))
+	return iif(m.tcTypeDest = 'D', {/}, {/:}) && {en} empty date[-time] {fr} date[-time] vide
 
-case Left(m.tuValue, 1) == '{' and Right(m.tuValue, 1) == '}' && litteral
-	return Evaluate(m.tuValue)
+case left(m.tuValue, 1) == '{' and right(m.tuValue, 1) == '}' && litteral
+	return evaluate(m.tuValue)
 
-case m.lCentury and m.tcTypeDest = 'D' && 
+case m.lCentury and m.tcTypeDest = 'D' &&
 	cDate = m.tuValue
-	return Date(;
-		  Evl(Int(Val(GetWordNum(m.cDate, 1, m.cMark))), Year(Date())); && year
-		, Evl(Int(Val(GetWordNum(m.cDate, 2, m.cMark))), Month(Date())); && month
-		, Evl(Int(Val(GetWordNum(m.cDate, 3, m.cMark))), Day(Date())); && day
+	return date(;
+		  evl(int(val(getwordnum(m.cDate, 1, m.cMark))), year(date())); && year
+		, evl(int(val(getwordnum(m.cDate, 2, m.cMark))), month(date())); && month
+		, evl(int(val(getwordnum(m.cDate, 3, m.cMark))), day(date())); && day
 		)
 
 case m.lCentury && m.tcTypeDest = 'T'
-	cDate = GetWordNum(m.tuValue, 1)
-	cTime = GetWordNum(m.tuValue, 2)
-	return Datetime(;
-		  Evl(Int(Val(GetWordNum(m.cDate, 1, m.cMark))), Year(Date())); && year
-		, Evl(Int(Val(GetWordNum(m.cDate, 2, m.cMark))), Month(Date())); && month
-		, Evl(Int(Val(GetWordNum(m.cDate, 3, m.cMark))), Day(Date())); && day
-		, Int(Val(GetWordNum(m.cTime, 1, ':'))); && hour
-		, Int(Val(GetWordNum(m.cTime, 2, ':'))); && minute
-		, Int(Val(GetWordNum(m.cTime, 3, ':'))); && seconds
+	cDate = getwordnum(m.tuValue, 1)
+	cTime = getwordnum(m.tuValue, 2)
+	return datetime(;
+		  evl(int(val(getwordnum(m.cDate, 1, m.cMark))), year(date())); && year
+		, evl(int(val(getwordnum(m.cDate, 2, m.cMark))), month(date())); && month
+		, evl(int(val(getwordnum(m.cDate, 3, m.cMark))), day(date())); && day
+		, int(val(getwordnum(m.cTime, 1, ':'))); && hour
+		, int(val(getwordnum(m.cTime, 2, ':'))); && minute
+		, int(val(getwordnum(m.cTime, 3, ':'))); && seconds
 		)
 
 case m.tcTypeDest = 'D'
-	return Ctod(m.tuValue)
+	return ctod(m.tuValue)
 
 otherwise
-	return Ctot(m.tuValue)
+	return ctot(m.tuValue)
 
 endcase
 endfunc
 
 * -----------------------------------------------------------------
-PROCEDURE uValue_Test && Teste uValue()
+procedure uValue_Test && Teste uValue()
 
-LOCAL loUnitTest AS abUnitTest OF abDev.prg
-loUnitTest = NewObject('uValue_Test', 'abDev.prg')
+local loUnitTest as abUnitTest of abDev.prg
+loUnitTest = newobject('uValue_Test', 'abDev.prg')
 
 loUnitTest.Test(1421.5, '1 421,5', 'N')
 loUnitTest.Test(1421.5, '1 421.5', 'N')
@@ -3925,24 +3925,24 @@ loUnitTest.Test(1421.5, '1 421.5', 'N')
 loUnitTest.Test($1421.5, '$    1 421.5', 'Y')
 loUnitTest.Test(1421, '1 421.5', 'I')
 
-loUnitTest.Test(.T., 'T', 'L')
-loUnitTest.Test(.T., 2, 'L')
+loUnitTest.Test(.t., 'T', 'L')
+loUnitTest.Test(.t., 2, 'L')
 loUnitTest.Test({}, '23/09/194', 'D') && date invalide && ajouté le 15/05/09
 
 loUnitTest.Test({/}, 'boto', 'D') && 2015-06-16 - contributor Gilles Lajot-Sarthou
 
-RETURN loUnitTest.Result()
+return loUnitTest.Result()
 
-	DEFINE CLASS uValue_Test AS abUnitTest OF abDev.prg
-		PROCEDURE Init
-		DoDefault()
-		SET SEPARATOR TO Chr(160)
-		SET POINT TO ','
-	ENDDEFINE
+define class uValue_Test as abUnitTest of abDev.prg
+		procedure init
+		dodefault()
+		set separator to chr(160)
+		set point to ','
+	enddefine
 
 * =================================================
-FUNCTION luEqual && Deux valeurs sont égales en tenant compte des .NULL.
-LPARAMETERS ;
+function luEqual && Deux valeurs sont égales en tenant compte des .NULL.
+lparameters ;
 	tu1,; && Valeur 1, par référence si Array
 	tu2,; && Valeur 2, par référence si Array
 	tlStrict,; && [.F.] comparaison de chaînes stricte
@@ -3950,276 +3950,276 @@ LPARAMETERS ;
 tlStrict = lTrue(m.tlStrict)
 tlCaseIgnore = lTrue(m.tlCaseIgnore)
 
-LOCAL lcType1, lcType2
+local lcType1, lcType2
 
-lcType1 = Type('tu1', 1)
-lcType1 = Iif(m.lcType1 == 'A', m.lcType1, Vartype(m.tu1))
-tu1 = Iif(m.lcType1 == 'C' and m.tlCaseIgnore, Lower(m.tu1), m.tu1)
+lcType1 = type('tu1', 1)
+lcType1 = iif(m.lcType1 == 'A', m.lcType1, vartype(m.tu1))
+tu1 = iif(m.lcType1 == 'C' and m.tlCaseIgnore, lower(m.tu1), m.tu1)
 
-lcType2 = Type('tu2', 1)
-lcType2 = Iif(m.lcType2 == 'A', m.lcType2, Vartype(m.tu2))
-tu2 = Iif(m.lcType2 == 'C' and m.tlCaseIgnore, Lower(m.tu2), m.tu2)
+lcType2 = type('tu2', 1)
+lcType2 = iif(m.lcType2 == 'A', m.lcType2, vartype(m.tu2))
+tu2 = iif(m.lcType2 == 'C' and m.tlCaseIgnore, lower(m.tu2), m.tu2)
 
-RETURN m.lcType1 == m.lcType2;
-	AND	(m.lcType1 == 'X';
-			OR ICase(;
-				m.lcType1 == 'O', luEqual_Object(m.tu1, m.tu2),;
-				m.lcType1 == 'A', laEqual(@m.tu1, @m.tu2),;
-				m.lcType1 == 'C' AND NOT m.tlStrict, Trim(m.tu1) == Trim(m.tu2),;
-			 	m.tu1 == m.tu2;
+return m.lcType1 == m.lcType2;
+	and	(m.lcType1 == 'X';
+			or icase(;
+				M.lcType1 == 'O', luEqual_Object(m.tu1, m.tu2),;
+				M.lcType1 == 'A', laEqual(@m.tu1, @m.tu2),;
+				M.lcType1 == 'C' and not m.tlStrict, trim(m.tu1) == trim(m.tu2),;
+			 	M.tu1 == m.tu2;
 			 	);
 		 	)
 
 * --------------------
-FUNCTION luEqual_Object	&& Deux objets sont identiques
-LPARAMETERS ;
+function luEqual_Object	&& Deux objets sont identiques
+lparameters ;
 	tu1,; && objet 1
 	tu2 && objet 2
 
-LOCAL laProp[1], lcProp, liItem, la1[1], la2[1], llResult
+local laProp[1], lcProp, liItem, la1[1], la2[1], llResult
 
 llResult = m.tu1 = m.tu2 && référence au même objet
-IF NOT m.llResult 
+if not m.llResult
 
-	llResult = AMembers(laProp, m.tu2) + AMembers(laProp, m.tu1) = 0
-	IF NOT m.llResult
-		
-		FOR EACH lcProp IN laProp
+	llResult = amembers(laProp, m.tu2) + amembers(laProp, m.tu1) = 0
+	if not m.llResult
 
-			llResult = .F.;
-			 OR InList(m.lcProp, 'PARENT', 'CONTROLS', 'OBJECTS', 'PAGES', 'COLUMNS');
-			 OR .T.;
-			  AND PemStatus(m.tu2, m.lcProp, 5); && extent
-			  AND NOT PemStatus(m.tu1, m.lcProp, 2); && protected
-			  AND NOT PemStatus(m.tu2, m.lcProp, 2); && protected
-				AND Iif(Type('m.tu1.' + m.lcProp, 1) == 'A';
-					, .T.;
-						AND Type('m.tu2.' + m.lcProp, 1) == 'A';
-						AND Acopy(m.tu1.&lcProp, la1) = Acopy(m.tu2.&lcProp, la2);
-						AND laEqual(@m.la1, @m.la2);
-					, luEqual(GetPem(m.tu1, m.lcProp), GetPem(m.tu2, m.lcProp));
+		for each lcProp in laProp
+
+			llResult = .f.;
+			 or inlist(m.lcProp, 'PARENT', 'CONTROLS', 'OBJECTS', 'PAGES', 'COLUMNS');
+			 or .t.;
+			  and pemstatus(m.tu2, m.lcProp, 5); && extent
+			  and not pemstatus(m.tu1, m.lcProp, 2); && protected
+			  and not pemstatus(m.tu2, m.lcProp, 2); && protected
+				and iif(type('m.tu1.' + m.lcProp, 1) == 'A';
+					, .t.;
+						and type('m.tu2.' + m.lcProp, 1) == 'A';
+						and acopy(m.tu1.&lcProp, la1) = acopy(m.tu2.&lcProp, la2);
+						and laEqual(@m.la1, @m.la2);
+					, luEqual(getpem(m.tu1, m.lcProp), getpem(m.tu2, m.lcProp));
 					)
-			IF NOT m.llResult
-				EXIT
-			ENDIF
-		ENDFOR
-	ENDIF
+			if not m.llResult
+				exit
+			endif
+		endfor
+	endif
 
-	IF m.llResult AND loBaseClass(m.tu1, 'Collection')
-		llResult = loBaseClass(m.tu2, 'Collection') AND m.tu1.Count = m.tu2.Count
-		IF m.llResult AND  m.tu1.Count > 0
-			FOR liItem = 1 TO m.tu1.Count
-				llResult = .T.;
-					AND luEqual(m.tu1.Item(m.liItem), m.tu2.Item(m.liItem));
-					AND m.tu1.getKey(m.liItem) == m.tu2.GetKey(m.liItem)
-				IF NOT m.llResult
-					EXIT
-				ENDIF
-			ENDFOR
-		ENDIF
-	ENDIF
-ENDIF
+	if m.llResult and loBaseClass(m.tu1, 'Collection')
+		llResult = loBaseClass(m.tu2, 'Collection') and m.tu1.count = m.tu2.count
+		if m.llResult and  m.tu1.count > 0
+			for liItem = 1 to m.tu1.count
+				llResult = .t.;
+					and luEqual(m.tu1.item(m.liItem), m.tu2.item(m.liItem));
+					and m.tu1.getkey(m.liItem) == m.tu2.getkey(m.liItem)
+				if not m.llResult
+					exit
+				endif
+			endfor
+		endif
+	endif
+endif
 
-RETURN m.llResult
+return m.llResult
 
 * --------------------
-PROCEDURE luEqual_Test && Teste luEqual
+procedure luEqual_Test && Teste luEqual
 
-LOCAL loUnitTest as abUnitTest OF abDev.prg
-loUnitTest = NewObject('abUnitTest', 'abDev.prg')
+local loUnitTest as abUnitTest of abDev.prg
+loUnitTest = newobject('abUnitTest', 'abDev.prg')
 
-loUnitTest.test(.T., .NULL., .NULL.)
-loUnitTest.test(.F., .NULL., 2)
-loUnitTest.test(.F., 2, .NULL.)
-loUnitTest.test(.F., 3, 2)
-loUnitTest.test(.F., 3, '2')
-loUnitTest.test(.T., 2, 2)
-loUnitTest.test(.T., 'toto', 'toto')
-loUnitTest.test(.F., 'toto', 'tot')
-loUnitTest.test(.F., 'TOTO ', 'toto', .T., .T.)
-loUnitTest.test(.T., 'TOTO ', 'toto', , .T.)
+loUnitTest.Test(.t., .null., .null.)
+loUnitTest.Test(.f., .null., 2)
+loUnitTest.Test(.f., 2, .null.)
+loUnitTest.Test(.f., 3, 2)
+loUnitTest.Test(.f., 3, '2')
+loUnitTest.Test(.t., 2, 2)
+loUnitTest.Test(.t., 'toto', 'toto')
+loUnitTest.Test(.f., 'toto', 'tot')
+loUnitTest.Test(.f., 'TOTO ', 'toto', .t., .t.)
+loUnitTest.Test(.t., 'TOTO ', 'toto', , .t.)
 
-RETURN loUnitTest.Result()
-
-* =================================================
-FUNCTION cSetPath(tlSort) && Set("Path") bien présenté
-
-LOCAL laResult[1]
-
-ALines(laResult, Set("Path"), 1, ',', ';')
-IF m.tlSort
-	Asort(laResult)
-ENDIF
-
-RETURN cListOfArray(@m.laResult, CRLF)
+return loUnitTest.Result()
 
 * =================================================
-FUNCTION cSetProc(tlSort) && Set("Procedure") bien présenté
+function cSetPath(tlSort) && Set("Path") bien présenté
 
-LOCAL laResult[1]
+local laResult[1]
 
-ALines(laResult, Set("Procedure"), 1, ',', ';')
-IF m.tlSort
-	Asort(laResult)
-ENDIF
+alines(laResult, set("Path"), 1, ',', ';')
+if m.tlSort
+	asort(laResult)
+endif
 
-RETURN cListOfArray(@m.laResult, CRLF)
-
-* =================================================
-FUNCTION cSetClass(tlSort) && Set("Classlib") bien présenté
-
-LOCAL laResult[1]
-
-ALines(laResult, Set("Classlib"), 1, ',', ';')
-IF m.tlSort
-	Asort(laResult)
-ENDIF
-
-RETURN cListOfArray(@m.laResult, CRLF)
+return cListOfArray(@m.laResult, CRLF)
 
 * =================================================
-FUNCTION cMBcmdCaption && Label d'un bouton d'une messageBox() d'après son type
-LPARAMETERS ;
+function cSetProc(tlSort) && Set("Procedure") bien présenté
+
+local laResult[1]
+
+alines(laResult, set("Procedure"), 1, ',', ';')
+if m.tlSort
+	asort(laResult)
+endif
+
+return cListOfArray(@m.laResult, CRLF)
+
+* =================================================
+function cSetClass(tlSort) && Set("Classlib") bien présenté
+
+local laResult[1]
+
+alines(laResult, set("Classlib"), 1, ',', ';')
+if m.tlSort
+	asort(laResult)
+endif
+
+return cListOfArray(@m.laResult, CRLF)
+
+* =================================================
+function cMBcmdCaption && Label d'un bouton d'une messageBox() d'après son type
+lparameters ;
 	tiType,; && [1] Type selon doc messageBox()
 	tcLang,; && [cLangUser()] Langue
 	tlHotKey && [.F.] souligner la lettre de raccourci
-tiType = Int(Evl(Nvl(m.tiType, 0), 1)) && OK par défaut
+tiType = int(evl(nvl(m.tiType, 0), 1)) && OK par défaut
 tcLang = cLangUser(m.tcLang)
 
-RETURN Iif(lTrue(m.tlHotKey), '\<', '');
-	+	ICase(;
-			m.tiType = 1, 'OK',;
-			m.tiType = 2, ICase(;
-        m.tcLang = 'fr',	'Annuler',; && copy-paste this line to add another language support
+return iif(lTrue(m.tlHotKey), '\<', '');
+	+	icase(;
+			M.tiType = 1, 'OK',;
+			M.tiType = 2, icase(;
+        M.tcLang = 'fr',	'Annuler',; && copy-paste this line to add another language support
         m.tcLang = 'es',	'Cancelar',; && copy-paste this line to add another language support
                           'Cancel'),;
-			m.tiType = 3, ICase(;
-        m.tcLang = 'fr',	'Abandonner',; && copy-paste this line to add another language support
+			M.tiType = 3, icase(;
+        M.tcLang = 'fr',	'Abandonner',; && copy-paste this line to add another language support
         m.tcLang = 'es',	'Abortar',; && copy-paste this line to add another language support
                           'Abort'),;
-			m.tiType = 4, ICase(;
-        m.tcLang = 'fr',	'Réessayer',; && copy-paste this line to add another language support
+			M.tiType = 4, icase(;
+        M.tcLang = 'fr',	'Réessayer',; && copy-paste this line to add another language support
         m.tcLang = 'es',	'Reintentar',; && copy-paste this line to add another language support
                          	'Retry'),;
-			m.tiType = 5, ICase(;
-        m.tcLang = 'fr',	'Ignorer',; && copy-paste this line to add another language support
+			M.tiType = 5, icase(;
+        M.tcLang = 'fr',	'Ignorer',; && copy-paste this line to add another language support
         m.tcLang = 'es',	'Ignorar',; && copy-paste this line to add another language support
                           'Ignore'),;
-			m.tiType = 6, ICase(;
-        m.tcLang = 'fr',	'Oui',; && copy-paste this line to add another language support
+			M.tiType = 6, icase(;
+        M.tcLang = 'fr',	'Oui',; && copy-paste this line to add another language support
         m.tcLang = 'es',	'Sí',; && copy-paste this line to add another language support
                           'Yes'),;
-			m.tiType = 7, ICase(;
-        m.tcLang = 'fr',	'Non',; && copy-paste this line to add another language support
+			M.tiType = 7, icase(;
+        M.tcLang = 'fr',	'Non',; && copy-paste this line to add another language support
         m.tcLang = 'es',	'No',; && copy-paste this line to add another language support
                           'No'),;
 			'??';
 		)
 
 * =================================================
-FUNCTION nDialogBoxTypeParms && Composantes du paramètre 'nDialogBoxType' d'une messageBox()
-LPARAMETERS ;
+function nDialogBoxTypeParms && Composantes du paramètre 'nDialogBoxType' d'une messageBox()
+lparameters ;
 	nDialogBoxType,; && cf. messageBox()
 	tnButtons,; && @ (0-5) boutons à afficher
 	tnIcon,; && @ (16,32,48 ou 64) icône à afficher
 	tnDefault && @ (0,256,512) Bouton actif par défaut
 
-tnButtons = Bitand(m.nDialogBoxType, Bitset(Bitset(Bitset(0, 0),1),2))
-tnButtons = Iif(Between(m.tnButtons, 0, 5), m.tnButtons, 0)
+tnButtons = bitand(m.nDialogBoxType, bitset(bitset(bitset(0, 0),1),2))
+tnButtons = iif(between(m.tnButtons, 0, 5), m.tnButtons, 0)
 
-tnIcon = Bitand(m.nDialogBoxType, Bitset(Bitset(Bitset(0, 4),5),6))
-tnIcon = Iif(InList(m.tnIcon, 16,32,48,64), m.tnIcon, 0)
+tnIcon = bitand(m.nDialogBoxType, bitset(bitset(bitset(0, 4),5),6))
+tnIcon = iif(inlist(m.tnIcon, 16,32,48,64), m.tnIcon, 0)
 
-tnDefault = Bitand(m.nDialogBoxType, Bitset(Bitset(0, 8),9))
-tnDefault = Iif(InList(m.tnDefault, 256, 512), m.tnDefault, 0)
+tnDefault = bitand(m.nDialogBoxType, bitset(bitset(0, 8),9))
+tnDefault = iif(inlist(m.tnDefault, 256, 512), m.tnDefault, 0)
 
-RETURN m.nDialogBoxType
+return m.nDialogBoxType
 
 * --------------------
-PROCEDURE nDialogBoxTypeParms_Test && Teste nDialogBoxTypeParms()
+procedure nDialogBoxTypeParms_Test && Teste nDialogBoxTypeParms()
 
-LOCAL loUnitTest as abUnitTest OF abDev.prg
-loUnitTest = NewObject('abUnitTest', 'abDev.prg')
+local loUnitTest as abUnitTest of abDev.prg
+loUnitTest = newobject('abUnitTest', 'abDev.prg')
 
-LOCAL lnDialogBoxType,; && cf. messageBox()
+local lnDialogBoxType,; && cf. messageBox()
 	lnButtons,; && @ (0-5) boutons à afficher
 	lnIcon,; && @ (16,32,48 ou 64) icône à afficher
 	lnDefault && @ (0,256,512) Bouton actif par défaut
 
 lnDialogBoxType = 5
-loUnitTest.test(m.lnDialogBoxType, m.lnDialogBoxType, @m.lnButtons, @m.lnIcon, @m.lnDefault)
+loUnitTest.Test(m.lnDialogBoxType, m.lnDialogBoxType, @m.lnButtons, @m.lnIcon, @m.lnDefault)
 loUnitTest.assert(5, m.lnButtons)
 loUnitTest.assert(0, m.lnIcon)
 loUnitTest.assert(0, m.lnDefault)
 
 lnDialogBoxType = 5+32
-loUnitTest.test(m.lnDialogBoxType, m.lnDialogBoxType, @m.lnButtons, @m.lnIcon, @m.lnDefault)
+loUnitTest.Test(m.lnDialogBoxType, m.lnDialogBoxType, @m.lnButtons, @m.lnIcon, @m.lnDefault)
 loUnitTest.assert(5, m.lnButtons)
 loUnitTest.assert(32, m.lnIcon)
 loUnitTest.assert(0, m.lnDefault)
 
 lnDialogBoxType = 5+32+256
-loUnitTest.test(m.lnDialogBoxType, m.lnDialogBoxType, @m.lnButtons, @m.lnIcon, @m.lnDefault)
+loUnitTest.Test(m.lnDialogBoxType, m.lnDialogBoxType, @m.lnButtons, @m.lnIcon, @m.lnDefault)
 loUnitTest.assert(5, m.lnButtons)
 loUnitTest.assert(32, m.lnIcon)
 loUnitTest.assert(256, m.lnDefault)
 
 
 lnDialogBoxType = 7+32+256
-loUnitTest.test(m.lnDialogBoxType, m.lnDialogBoxType, @m.lnButtons, @m.lnIcon, @m.lnDefault)
+loUnitTest.Test(m.lnDialogBoxType, m.lnDialogBoxType, @m.lnButtons, @m.lnIcon, @m.lnDefault)
 loUnitTest.assert(0, m.lnButtons)
 loUnitTest.assert(32, m.lnIcon)
 loUnitTest.assert(256, m.lnDefault)
 
 * =================================================
-FUNCTION nScreenDockOffset && Nombre de colonnes où commence la partie gauche du _Screen du fait des fenêtres dockées à gauche
-LPARAMETERS tlRows && [.F.] décalage ; .T.: vertical (rows), .F.: horizontal (cols)
+function nScreenDockOffset && Nombre de colonnes où commence la partie gauche du _Screen du fait des fenêtres dockées à gauche
+lparameters tlRows && [.F.] décalage ; .T.: vertical (rows), .F.: horizontal (cols)
 tlRows = lTrue(m.tlRows)
 
-LOCAL laDock[1], lnDocks, lnDock, lnResult
+local laDock[1], lnDocks, lnDock, lnResult
 
 lnResult = 0
-lnDocks = ADockState(laDock, 1) && 
-IF m.lnDocks > 0
-	FOR m.lnDock = 1 TO m.lnDocks
-		IF laDock[m.lnDock, 2] = 1;
-		 AND laDock[m.lnDock, 3] = Iif(m.tlRows;
+lnDocks = adockstate(laDock, 1) &&
+if m.lnDocks > 0
+	for m.lnDock = 1 to m.lnDocks
+		if laDock[m.lnDock, 2] = 1;
+		 and laDock[m.lnDock, 3] = iif(m.tlRows;
 		 	, 0; && top
 		 	, 1); && left
-		 AND laDock[m.lnDock, 4] = _Screen.Caption
+		 and laDock[m.lnDock, 4] = _screen.caption
 
-			lnResult = m.lnResult + Iif(m.tlRows, Wrows(laDock[m.lnDock, 1]), Wcols(laDock[m.lnDock, 1]))
-		ENDIF
-	ENDFOR
-ENDIF
+			lnResult = m.lnResult + iif(m.tlRows, wrows(laDock[m.lnDock, 1]), wcols(laDock[m.lnDock, 1]))
+		endif
+	endfor
+endif
 
-RETURN m.lnResult
+return m.lnResult
 
 * =================================================
-FUNCTION cABuserDataPath && Adresse standard du dossier où résident les données AB
+function cABuserDataPath && Adresse standard du dossier où résident les données AB
 
-LOCAL lcResult
+local lcResult
 
-lcResult = Home(7) + 'AB\' && Visual FoxPro subdirectory in the user's Visual FoxPro Application Data directory
-IF NOT Directory(m.lcResult)
-	MD (m.lcResult)
-ENDIF
+lcResult = home(7) + 'AB\' && Visual FoxPro subdirectory in the user's Visual FoxPro Application Data directory
+if not directory(m.lcResult)
+	md (m.lcResult)
+endif
 
-RETURN m.lcResult
+return m.lcResult
 
 * ===========================
-FUNCTION cABmoduleTestAddr && Adresse du fichier de test d'un module
-LPARAMETERS tcModule
-LOCAL lcPrevious, lcResult
-lcResult = cABuserDataPath() + ForceExt(m.tcModule, 'tst')
+function cABmoduleTestAddr && Adresse du fichier de test d'un module
+lparameters tcModule
+local lcPrevious, lcResult
+lcResult = cABuserDataPath() + forceext(m.tcModule, 'tst')
 
 * Si le fichier est à l'ancienne adresse, déplacer dans la nouvelle
-lcPrevious = DOS_AB + ForceExt(m.tcModule, 'tst')
-IF lFile(m.lcPrevious)
+lcPrevious = DOS_AB + forceext(m.tcModule, 'tst')
+if lFile(m.lcPrevious)
 	FileMove(m.lcPrevious, m.lcResult)
-ENDIF
+endif
 
-RETURN m.lcResult
+return m.lcResult
 
 * ===========================
 function cLocalized && Chaîne localisée
@@ -4227,137 +4227,137 @@ lparameters ;
   tcString; && Chaîne à localiser
 , tcLangUser; && [cLangUser()] Langue de l'utilisateur
 
-local result as String;
-, liLangUser as Integer;
-, liEN as Integer;
+local Result as string;
+, liLangUser as integer;
+, liEN as integer;
 
-tcLangUser = Iif(ga_Type_IsChar(m.tcLangUser, .T.) and Lenc(m.tcLangUser) = 2, m.tcLangUser, cLangUser())
+tcLangUser = iif(ga_Type_IsChar(m.tcLangUser, .t.) and lenc(m.tcLangUser) = 2, m.tcLangUser, cLangUser())
 
-liLangUser = At_c('{' + m.tcLangUser + '}', m.tcString)
-liEN = At_c('{en}', m.tcString)
+liLangUser = at_c('{' + m.tcLangUser + '}', m.tcString)
+liEN = at_c('{en}', m.tcString)
 
-result = ICase(;
-	m.liLangUser > 0,;
-		Substrc(m.tcString, m.liLangUser + 4),;
-	m.liEN > 0,;
-		Substrc(m.tcString, m.liEN + 4),;
-		m.tcString;
+Result = icase(;
+	M.liLangUser > 0,;
+		substrc(m.tcString, m.liLangUser + 4),;
+	M.liEN > 0,;
+		substrc(m.tcString, m.liEN + 4),;
+		M.tcString;
 	)
 
-return Alltrim(Iif(m.liEN + m.liLangUser > 0;
-	, Leftc(m.result, Evl(At_c('{', m.result), Lenc(m.result)+1)-1);
-	, m.result;
-	), CR, LF, ' ', Chr(9))
+return alltrim(iif(m.liEN + m.liLangUser > 0;
+	, leftc(m.Result, evl(at_c('{', m.Result), lenc(m.Result)+1)-1);
+	, m.Result;
+	), CR, LF, ' ', chr(9))
 endfunc
 
 * ------------------------------------
-PROCEDURE cLocalized_Test && Teste cLocalized()
+procedure cLocalized_Test && Teste cLocalized()
 
-LOCAL loUnitTest as abUnitTest of abDev.prg
-loUnitTest = NewObject('abUnitTest', 'abDev.prg')
+local loUnitTest as abUnitTest of abDev.prg
+loUnitTest = newobject('abUnitTest', 'abDev.prg')
 
 loUnitTest.Test([formulaire où s'est produit l'événement], [ {en} requested form {fr} formulaire où s'est produit l'événement], 'fr')
 loUnitTest.Test([requested form], [ {en} requested form {fr} formulaire où s'est produit l'événement], 'en')
-		
-RETURN m.loUnitTest.Result()
+
+return m.loUnitTest.Result()
 
 
 * -----------------------------------
-FUNCTION cLangUser && Code langue de l'utilisateur courant
-LPARAMETERS tuLocale && [.F.] @ Code langue avec locale (genre 'fr-fr') ou langue forcée
+function cLangUser && Code langue de l'utilisateur courant
+lparameters tuLocale && [.F.] @ Code langue avec locale (genre 'fr-fr') ou langue forcée
 
-LOCAL lcType, llForce, loShell AS wScript.Shell, lcLang, lcResult
+local lcType, llForce, loShell as wScript.shell, lcLang, lcResult
 
-lcType = Vartype(m.tuLocale)
+lcType = vartype(m.tuLocale)
 
-llForce = m.lcType == 'C' AND NOT Empty(m.tuLocale)
+llForce = m.lcType == 'C' and not empty(m.tuLocale)
 
-IF .T.;
+if .t.;
  and not m.llForce;
- and Type('_Screen.cLangUser') == 'C';
- and NOT Empty(_Screen.cLangUser)
+ and type('_Screen.cLangUser') == 'C';
+ and not empty(_screen.cLangUser)
 
-	tuLocale = _Screen.cLangUser
-	RETURN _Screen.cLangUser
+	tuLocale = _screen.cLangUser
+	return _screen.cLangUser
 
-ELSE
+else
 
-	IF m.llForce
+	if m.llForce
 
-		lcResult = Alltrim(m.tuLocale)
+		lcResult = alltrim(m.tuLocale)
 
-	ELSE
-		
-		DECLARE INTEGER GetUserDefaultUILanguage IN Win32API
-		loShell = CreateObject('wScript.Shell')
+	else
 
-		lcResult = Alltrim(GetWordNum('';
+		declare integer GetUserDefaultUILanguage in Win32API
+		loShell = createobject('wScript.Shell')
+
+		lcResult = alltrim(getwordnum('';
 			+ loShell.RegRead("HKLM\Software\Classes\MIME\Database\RFC1766\";
-			+ Right(Transform(GetUserDefaultUILanguage(), '@0'), 4));
+			+ right(transform(GetUserDefaultUILanguage(), '@0'), 4));
 			, 1, ';'))
 
-		lcResult = Iif(m.lcType == 'L' AND m.tuLocale;
-			, m.lcResult + Iif('-' $ m.lcResult, '', '-' + m.lcResult);
-			, Left(m.lcResult, 2);
+		lcResult = iif(m.lcType == 'L' and m.tuLocale;
+			, m.lcResult + iif('-' $ m.lcResult, '', '-' + m.lcResult);
+			, left(m.lcResult, 2);
 			)
 
-	ENDIF
-	
-	store Lower(m.lcResult) to lcResult, tuLocale
-	AddProperty(_Screen, 'cLangUser', m.lcResult)
+	endif
 
-	RETURN m.lcResult
-ENDIF
+	store lower(m.lcResult) to lcResult, tuLocale
+	addproperty(_screen, 'cLangUser', m.lcResult)
+
+	return m.lcResult
+endif
 
 * =====================================================
 procedure abUnitTests && Teste les modules (abUnitTest) du programme appelant
 
-LOCAL success;
+local success;
 , lcSys16, lcProcFile, lcProcName;
 , lcProcs, lnProc, laProc[1], liProc, lcProc, lcProcU;
 , lnProcPrinc, lnProcTest
 
-success = .T.
+success = .t.
 
-lcSys16 = Sys(16, Program(-1) -1) && calling procedure
-lcProcFile = cModuleInfo(m.lcSys16, 'Address', .T.)
-lcProcName = cModuleInfo(m.lcSys16, 'Name', .T.)
-lcProcs = ForceExt(m.lcProcFile, 'txt')
-StrToFile(Space(0), m.lcProcs) && vide la liste
+lcSys16 = sys(16, program(-1) -1) && calling procedure
+lcProcFile = cModuleInfo(m.lcSys16, 'Address', .t.)
+lcProcName = cModuleInfo(m.lcSys16, 'Name', .t.)
+lcProcs = forceext(m.lcProcFile, 'txt')
+strtofile(space(0), m.lcProcs) && vide la liste
 
 * Tabuler les éléments contenus dans le fichier source
-lnProc = aProcInfo(laProc, ForceExt(m.lcProcFile, 'PRG')) && 0 (default) - Populates the array with all document information.
+lnProc = aprocinfo(laProc, forceext(m.lcProcFile, 'PRG')) && 0 (default) - Populates the array with all document information.
 
 * Si au moins un élément,
-IF m.lnProc > 0
+if m.lnProc > 0
 
-	Asort(m.laProc, 1, -1, 0, 1)
+	asort(m.laProc, 1, -1, 0, 1)
 
-	* Pour chaque élément
-	STORE 0 TO m.lnProcPrinc, m.lnProcTest
-	FOR m.liProc = 1 TO m.lnProc
+* Pour chaque élément
+	store 0 to m.lnProcPrinc, m.lnProcTest
+	for m.liProc = 1 to m.lnProc
 
-		* Si l'élément est une procédure
-		IF Upper(laProc[m.liProc, 3]) = 'PROCEDURE'
+* Si l'élément est une procédure
+		if upper(laProc[m.liProc, 3]) = 'PROCEDURE'
 			lcProc = laProc[m.liProc, 1]
-			lcProcU = Upper(m.lcProc)
+			lcProcU = upper(m.lcProc)
 
-			* Si procédure principale, lister
-			IF NOT '_' $ m.lcProc
+* Si procédure principale, lister
+			if not '_' $ m.lcProc
 				lnProcPrinc = m.lnProcPrinc + 1
-				StrToFile(str(m.lnProcPrinc, 2) + '-' + m.lcProc + CRLF, m.lcProcs, 1)
-			ENDIF
-		
-			* Si procédure de test, exécuter
-			IF .T.;
-			 AND Rightc(m.lcProcU, Lenc('_TEST')) == '_TEST' ;
-			 AND NOT m.lcProcU == m.lcProcName && this procedure
-			 	? 
+				strtofile(str(m.lnProcPrinc, 2) + '-' + m.lcProc + CRLF, m.lcProcs, 1)
+			endif
+
+* Si procédure de test, exécuter
+			if .t.;
+			 and rightc(m.lcProcU, lenc('_TEST')) == '_TEST' ;
+			 and not m.lcProcU == m.lcProcName && this procedure
+			 	?
 			 	lnProcTest = m.lnProcTest + 1
-				wait window Textmerge("<<m.lcProcFile>>!<<m.lcProc>>() [<<m.lnProcTest>>]") AT 10, 10 nowait noclear
-				success = Evaluate(m.lcProc + '()') and m.success
-			ENDIF
-		ENDIF
+				wait window textmerge("<<m.lcProcFile>>!<<m.lcProc>>() [<<m.lnProcTest>>]") at 10, 10 nowait noclear
+				success = evaluate(m.lcProc + '()') and m.success
+			endif
+		endif
 	endfor
 	wait clear
 endif
@@ -4369,20 +4369,20 @@ function abUnitTest && Objet abUnitTest
 lparameters ;
 	tcModule,; && [Module appelant sans le suffixe '_test'] Nom du module à tester
 	tcAddress && [Adresse du code source du module appelant] Adresse contenant le répertoire où créer le Compte-rendu de test
-return CreateObject('abUnitTest', m.tcModule, m.tcAddress)
+return createobject('abUnitTest', m.tcModule, m.tcAddress)
 endfunc
 
 * =============================================
-DEFINE CLASS abUnitTest AS Session
+define class abUnitTest as session
 * =============================================
 
-lSingleTest = .F. && exécuter seulement une fois && cas où la fonction à tester produit un résultat cumulatif et/ou des tableaux
+lSingleTest = .f. && exécuter seulement une fois && cas où la fonction à tester produit un résultat cumulatif et/ou des tableaux
 
-PROTECTED nTest, lResult
+protected nTest, lResult
 nTest = 0 && Nombre de tests réalisés
-lResult = .T. && Résultat des testes (.T. tant qu'aucun test n'est réalisé)
+lResult = .t. && Résultat des testes (.T. tant qu'aucun test n'est réalisé)
 
-HIDDEN ;
+hidden ;
 	cModule,; && Nom du module à tester
 	cAddress,; && Adresse du fichier contenant le module à tester
 	oObject,; && Référence à l'objet si le module est une méthode
@@ -4395,154 +4395,154 @@ HIDDEN ;
 	aTest[1,1] && Résultats des tests
 
 * -----------------------------------
-PROCEDURE Init
-LPARAMETERS ;
+procedure init
+lparameters ;
 	tcModule,; && [Module appelant sans le suffixe '_test'] Nom du module à tester
 	tcAddress && [Adresse du code source du module appelant] Adresse contenant le répertoire où créer le Compte-rendu de test
 
-SET SYSFORMATS ON
-SET MULTILOCKS ON
+set sysformats on
+set multilocks on
 
-this.AddProperty('oEscape', abSet('ESCAPE', 'ON'))
-this.AddProperty('oAsserts', abSet('ASSERTS', 'ON'))
+this.addproperty('oEscape', abSet('ESCAPE', 'ON'))
+this.addproperty('oAsserts', abSet('ASSERTS', 'ON'))
 
-LOCAL lcModule, lcAddress, llResult
+local lcModule, lcAddress, llResult
 
 * Si le nom du module n'est pas précisé, prendre le défaut
-llResult = Vartype(m.tcModule) == 'C' AND NOT Empty(m.tcModule)
-IF m.llResult
+llResult = vartype(m.tcModule) == 'C' and not empty(m.tcModule)
+if m.llResult
 	lcModule = m.tcModule
 	lcAddress = m.tcAddress
-ELSE
-	lcModule = Evl(this.cModuleDefault(cCallingModule(@m.lcAddress)), this.cModuleDefault(cCallingModule(@m.lcAddress, -1)))
-	llResult = NOT Empty(m.lcModule)
-ENDIF
+else
+	lcModule = evl(this.cModuleDefault(cCallingModule(@m.lcAddress)), this.cModuleDefault(cCallingModule(@m.lcAddress, -1)))
+	llResult = not empty(m.lcModule)
+endif
 
 * Si le nom du module est défini, vérifier son existence
-IF m.llResult
+if m.llResult
 
 	llResult = this.ModuleSet(m.lcModule, m.lcAddress)
 
-	* Si le module est exécutable, régler la session de données
-	IF m.llResult
-		SET MEMOWIDTH TO Wcols(Wontop()) && Fenêtre résultats du test
-	ENDIF
-ENDIF
+* Si le module est exécutable, régler la session de données
+	if m.llResult
+		set memowidth to wcols(wontop()) && Fenêtre résultats du test
+	endif
+endif
 
-IF Directory(DOS_AB)
-	
-	* S'il existe des fichiers de test ou de coverage à l'ancienne adresse, déplacer à la nouvelle
-	LOCAL laFiles[1], lcFile
-	IF aFiles(@m.laFiles, DOS_AB + '*.tst') > 0
-		FOR EACH lcFile IN laFiles
-			FileMove(DOS_AB + m.lcFile, cABmoduleTestAddr(JustStem(m.lcFile)))
-		ENDFOR
-	ENDIF
-	IF aFiles(@m.laFiles, DOS_AB + '*.cov') > 0
-		FOR EACH lcFile IN laFiles
+if directory(DOS_AB)
+
+* S'il existe des fichiers de test ou de coverage à l'ancienne adresse, déplacer à la nouvelle
+	local laFiles[1], lcFile
+	if aFiles(@m.laFiles, DOS_AB + '*.tst') > 0
+		for each lcFile in laFiles
+			FileMove(DOS_AB + m.lcFile, cABmoduleTestAddr(juststem(m.lcFile)))
+		endfor
+	endif
+	if aFiles(@m.laFiles, DOS_AB + '*.cov') > 0
+		for each lcFile in laFiles
 			FileMove(DOS_AB + m.lcFile, cABuserDataPath() + m.lcFile)
-		ENDFOR
-	ENDIF
-ENDIF
+		endfor
+	endif
+endif
 
-RETURN m.llResult
+return m.llResult
 
 * -----------------------------------
-PROCEDURE EnvSet && Règle l'environnement de la session de données privée avant le(s) test(s)
-LPARAMETERS ;
+procedure EnvSet && Règle l'environnement de la session de données privée avant le(s) test(s)
+lparameters ;
 	tcEnvCommand && Commande d'environnement
 
-IF Vartype(m.tcEnvCommand) == 'C'
+if vartype(m.tcEnvCommand) == 'C'
 	&tcEnvCommand
-ENDIF
+endif
 
 * -----------------------------------
-PROCEDURE ModuleSet && Définit le nom et l'adresse du module à tester
-LPARAMETERS ;
+procedure ModuleSet && Définit le nom et l'adresse du module à tester
+lparameters ;
 	tcModule,; && [Module appelant sans le suffixe '_test'] Nom du module à tester
 	tcAddress && [Adresse du code source du module] Répertoire où créer le fichier de CR de test
-LOCAL llResult
+local llResult
 
 * Si le module est spécifié correctement
-LOCAL lcModule, lcAddress
-lcModule = Evl(m.tcModule, cCallingModule(@m.lcAddress))
-lcAddress = cFileCased(Evl(m.tcAddress, m.lcAddress))
-llResult = NOT Empty(m.lcModule) AND File(m.lcAddress)
-ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([le nom et/ou l'adresse de module est incorrect]))
-IF m.llResult
-		
-	* Si le module existe
-	LOCAL lnError, lcError, loAsserts
+local lcModule, lcAddress
+lcModule = evl(m.tcModule, cCallingModule(@m.lcAddress))
+lcAddress = cFileCased(evl(m.tcAddress, m.lcAddress))
+llResult = not empty(m.lcModule) and file(m.lcAddress)
+assert m.llResult message cAssertMsg(textmerge([le nom et/ou l'adresse de module est incorrect]))
+if m.llResult
+
+* Si le module existe
+	local lnError, lcError, loAsserts
 	lnError = 0
-	lcError = On('ERROR')
-	ON ERROR m.lnError = Error() && this.ModuleSet_nError(cModuleInfo(Sys(16)))
+	lcError = on('ERROR')
+	on error m.lnError = error() && this.ModuleSet_nError(cModuleInfo(Sys(16)))
 	loAsserts = abSet('ASSERTS', 'OFF')
-	Evaluate(m.lcModule + "(this, 'junk', Date(), 0, .F.)")
-	ON ERROR &lcError
-	RELEASE loAsserts
-	llResult = NOT m.lnError = 1 && file not found
-	ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([le module " + m.lcModule + " ne peut être exécuté.]))
-	IF m.llResult
-		
-		* Mémoriser le nom du module
+	evaluate(m.lcModule + "(this, 'junk', Date(), 0, .F.)")
+	on error &lcError
+	release loAsserts
+	llResult = not m.lnError = 1 && file not found
+	assert m.llResult message cAssertMsg(textmerge([le module " + m.lcModule + " ne peut être exécuté.]))
+	if m.llResult
+
+* Mémoriser le nom du module
 		this.cAddress = m.lcAddress
 		this.cModule  = m.lcModule
-		
-		* Définir l'adresse de son fichier résultats
-		this.cResultAddr = cABmoduleTestAddr(m.lcModule)
-		this.cCoverageAddr = ForceExt(this.cResultAddr, 'cov.log')
-	ELSE
-		STORE Space(0) TO this.cModule, this.cResultAddr, this.cCoverageAddr
-	ENDIF
-ENDIF
 
-RETURN m.llResult
+* Définir l'adresse de son fichier résultats
+		this.cResultAddr = cABmoduleTestAddr(m.lcModule)
+		this.cCoverageAddr = forceext(this.cResultAddr, 'cov.log')
+	else
+		store space(0) to this.cModule, this.cResultAddr, this.cCoverageAddr
+	endif
+endif
+
+return m.llResult
 
 * -----------------------------------
-HIDDEN FUNCTION ModuleSet_nError && N° d'erreur rencontrée lors de la tentative d'exécution du module
-LPARAMETERS ;
+hidden function ModuleSet_nError && N° d'erreur rencontrée lors de la tentative d'exécution du module
+lparameters ;
 	tcProc && Nom de la procédure où retourner en cas d'erreur
 
-RETURN && TO ModuleSet
+return && TO ModuleSet
 
 * -----------------------------------
-HIDDEN FUNCTION cModuleDefault && Nom du module à tester d'après le nom du module appelant
-LPARAMETERS tcCallingModule && Se termine normalement par '_Test'
+hidden function cModuleDefault && Nom du module à tester d'après le nom du module appelant
+lparameters tcCallingModule && Se termine normalement par '_Test'
 
-LOCAL lcTest, lnTest, lcResult
-lcResult = Space(0)
+local lcTest, lnTest, lcResult
+lcResult = space(0)
 
-IF Vartype(m.tcCallingModule) == 'C'
+if vartype(m.tcCallingModule) == 'C'
 
-	tcCallingModule = JustStem(Upper(Alltrim(m.tcCallingModule)))
+	tcCallingModule = juststem(upper(alltrim(m.tcCallingModule)))
 	lcTest = '_TEST'
-	lnTest = Len(m.lcTest)
-	IF Right(m.tcCallingModule, m.lnTest) == m.lcTest
+	lnTest = len(m.lcTest)
+	if right(m.tcCallingModule, m.lnTest) == m.lcTest
 
-		lcResult = Left(m.tcCallingModule, Len(m.tcCallingModule) - m.lnTest)
-	ENDIF
-ENDIF
+		lcResult = left(m.tcCallingModule, len(m.tcCallingModule) - m.lnTest)
+	endif
+endif
 
-RETURN m.lcResult
+return m.lcResult
 
 * -----------------------------------
-PROCEDURE CoverageSet && Démarre / arrête l'enregistrement des temps d'exécution pendant le test
-LPARAMETERS tlCoverage && [.F.] démarrer / arrêter l'enregistrement pendant le test
+procedure CoverageSet && Démarre / arrête l'enregistrement des temps d'exécution pendant le test
+lparameters tlCoverage && [.F.] démarrer / arrêter l'enregistrement pendant le test
 
 this.lCoverage = lTrue(m.tlCoverage)
 
 * -----------------------------------
-PROCEDURE CoverageClear && Efface le fichier de coverage
+procedure CoverageClear && Efface le fichier de coverage
 
-DELETE FILE (m.this.cCoverageAddr)
+delete file (m.this.cCoverageAddr)
 
 * -----------------------------------
-PROCEDURE Test && Teste le module
-LPARAMETERS ;
+procedure Test && Teste le module
+lparameters ;
 	tuExpected,; && @ Résultat attendu retourné par le module testé - .NULL. : résultat attendu inconnu
 	tuParm01,tuParm02,tuParm03,tuParm04,tuParm05,tuParm06,tuParm07,tuParm08,tuParm09,tuParm10,tuParm11,tuParm12,tuParm13,tuParm14 && @ paramètres passés au module testé
 
-LOCAL luResult as Variant; && résultat du test
+local luResult as Variant; && résultat du test
 , lnParm;
 , lcParms;
 , liParm;
@@ -4551,36 +4551,36 @@ LOCAL luResult as Variant; && résultat du test
 , laStatus1[1];
 , laStatus2[1];
 
-luResult = .NULL.
-	
+luResult = .null.
+
 * Si le module est bien défini
-IF Empty(this.cModule)
-	return .F.
+if empty(this.cModule)
+	return .f.
 else
-	
-	* Bâtir la chaine des paramètres à passer au module
-	lnParm = Max(Pcount() - 1, 0)
+
+* Bâtir la chaine des paramètres à passer au module
+	lnParm = max(pcount() - 1, 0)
 	lcParms = this.Test_cParms(m.lnParm) && liste des paramètres à passert au module testé
 
-	#DEFINE NCOLSFIXES 8 && /!\ utilisé par this.Test_aTestsDim()
+	#define NCOLSFIXES 8 && /!\ utilisé par this.Test_aTestsDim()
 
-	* Ajuster le tableau de résultats de tests
+* Ajuster le tableau de résultats de tests
 	this.nTest = this.nTest + 1
 	this.Test_aTestsDim(m.lnParm)
 	this.aTest[m.this.nTest, NCOLSFIXES] = m.lnParm && Nombre de paramètres passés (peut varier d'un test à l'autre)
 
-	IF m.lnParm > 0
-		FOR liParm = 1 TO m.lnParm
-			luParm = Evaluate(this.Test_cParm(m.liParm)) && Valeur du paramètre
-			this.aTest[m.this.nTest, NCOLSFIXES + m.liParm] = Iif(Vartype(m.luParm) == 'C';
+	if m.lnParm > 0
+		for liParm = 1 to m.lnParm
+			luParm = evaluate(this.Test_cParm(m.liParm)) && Valeur du paramètre
+			this.aTest[m.this.nTest, NCOLSFIXES + m.liParm] = iif(vartype(m.luParm) == 'C';
 				, '"' + m.luParm + '"';
 				, cLitteral(m.luParm);
 				)
-		ENDFOR
-	ENDIF
-	
-	* Exécuter le test
-	* ===========================
+		endfor
+	endif
+
+* Exécuter le test
+* ===========================
 	luResult = this.Test_Exec(; && si le résultat est objet, littéral de cet objet
 		  m.lcParms;
 		, @m.lnElapsed;
@@ -4601,41 +4601,41 @@ else
 		, @m.tuParm13;
 		, @m.tuParm14;
 		)
-	* ===========================
+* ===========================
 
-	* Tabuler le résultat du test
-	LOCAL lcStatus
+* Tabuler le résultat du test
+	local lcStatus
 	this.aTest[m.this.nTest, 1] = this.lCoverage && Coverage ON
 	this.aTest[m.this.nTest, 2] = m.lnElapsed && Temps d'exécution (non significatif si COVERAGE)
-	this.aTest[m.this.nTest, 3] = Empty(Pcount()) or IsNull(m.tuExpected) or luEqual(Iif(Vartype(m.tuExpected ) == 'O', cL(m.tuExpected), m.tuExpected), m.luResult) && Valeur produite = valeur attendue && Empty(m.tuExpected) OR
+	this.aTest[m.this.nTest, 3] = empty(pcount()) or isnull(m.tuExpected) or luEqual(iif(vartype(m.tuExpected ) == 'O', cL(m.tuExpected), m.tuExpected), m.luResult) && Valeur produite = valeur attendue && Empty(m.tuExpected) OR
 	this.aTest[m.this.nTest, 4] = m.tuExpected && Résultat attendu
 	this.aTest[m.this.nTest, 5] = m.luResult && Résultat produit
 	this.aTest[m.this.nTest, 6] = this.lStatus(@m.laStatus1, @m.laStatus2, @m.lcStatus) && Environnement modifié ?
 	this.aTest[m.this.nTest, 7] = m.lcStatus && Modification d'environnement éventuelle
-ENDIF
+endif
 
 return m.luResult
 
 * -----------------------------------
-PROCEDURE Assert && Teste une valeur (par exemple élément d'un tableau résultat)
-LPARAMETERS ;
+procedure assert && Teste une valeur (par exemple élément d'un tableau résultat)
+lparameters ;
 	tuExpected,; && @ Résultat attendu
 	tuValue && @ Valeur à tester
 
-if Pcount() >= 2
+if pcount() >= 2
 
 	this.aTest[m.this.nTest, 3] = luEqual(@m.tuExpected, @m.tuValue) && Valeur produite == valeur attendue
 
-	ASSERT m.this.aTest[m.this.nTest, 3] MESSAGE cAssertMsg(Textmerge(ICase(;
+	assert m.this.aTest[m.this.nTest, 3] message cAssertMsg(textmerge(icase(;
 		cLangUser() = 'fr',	[Échec d'assertion au test n° <<m.this.nTest>> - résultat attendu: <<cL(m.tuExpected)>>, obtenu: <<cL(m.tuValue)>>],; && copy-paste this line to add another language support
 		 										[Assertion failed at test # <<m.this.nTest>> - result expected: <<cL(m.tuExpected)>>, obtained: <<cL(m.tuValue)>>]; && Default: English
 		)))
 
 else
 
-	this.aTest[m.this.nTest, 3] = Cast(m.tuExpected as L)
+	this.aTest[m.this.nTest, 3] = cast(m.tuExpected as L)
 
-	ASSERT m.this.aTest[m.this.nTest, 3] MESSAGE cAssertMsg(Textmerge(ICase(;
+	assert m.this.aTest[m.this.nTest, 3] message cAssertMsg(textmerge(icase(;
 		cLangUser() = 'fr',	[Échec d'assertion au test n° <<m.this.nTest>>],; && copy-paste this line to add another language support
 		 										[Assertion failed at test # <<m.this.nTest>>]; && Default: English
 		)))
@@ -4645,47 +4645,47 @@ endif
 return m.this.aTest[m.this.nTest, 3]
 
 * -----------------------------------
-HIDDEN FUNCTION Test_cParm && Nom d'un paramètre selon sa position
-LPARAMETERS tiParm && Position du paramètre
+hidden function Test_cParm && Nom d'un paramètre selon sa position
+lparameters tiParm && Position du paramètre
 
-RETURN 'tuParm' + Padl(m.tiParm, 2, '0')
+return 'tuParm' + padl(m.tiParm, 2, '0')
 
 * -----------------------------------
-HIDDEN PROCEDURE Test_cParms && Liste de paramètres à passer au module testé
-LPARAMETERS ;
+hidden procedure Test_cParms && Liste de paramètres à passer au module testé
+lparameters ;
 	tnParms && Nombre de paramètres passés à this.test()
 
-LOCAL lcResult && Liste de paramètres
-lcResult = Space(0)
+local lcResult && Liste de paramètres
+lcResult = space(0)
 
-IF m.tnParms > 0
-	
-	* Pour chaque paramètre passé
-	LOCAL liParm, lcParm
-	FOR liParm = 1 TO m.tnParms
+if m.tnParms > 0
 
-		* Reconstituer le nom du paramètre
+* Pour chaque paramètre passé
+	local liParm, lcParm
+	for liParm = 1 to m.tnParms
+
+* Reconstituer le nom du paramètre
 		lcParm = '@' + this.Test_cParm(m.liParm)
 
-		* Ajouter au résultat en passant par référence
+* Ajouter au résultat en passant par référence
 		lcResult = c2Words(m.lcResult, ',', m.lcParm)
-	ENDFOR
-ENDIF
+	endfor
+endif
 
-RETURN m.lcResult
+return m.lcResult
 
 * -----------------------------------
-HIDDEN PROCEDURE Test_Exec && Exécute le test du module
-LPARAMETERS ;
+hidden procedure Test_Exec && Exécute le test du module
+lparameters ;
 	tcParms,; && Chaîne de paramètres à passer au module testé
 	tnElapsed,; && @ Temps d'exécution en millisecondes
 	taStatus1,; && @ Environnement avant exécution du test
 	taStatus2,; && @ Environnement après exécution du test
 	tuParm01,tuParm02,tuParm03,tuParm04,tuParm05,tuParm06,tuParm07,tuParm08,tuParm09,tuParm10,tuParm11,tuParm12,tuParm13,tuParm14
 
-EXTERNAL ARRAY taStatus1, taStatus2
+external array taStatus1, taStatus2
 
-LOCAL luResult as Variant; && Résultat du module testé
+local luResult as Variant; && Résultat du module testé
 , lnParm, liParm, lcParm, lcParm_;
 , lnRows, lnCols;
 , lcArray;
@@ -4694,337 +4694,337 @@ LOCAL luResult as Variant; && Résultat du module testé
 , lnSeconds;
 
 * Sauvegarder les paramètres
-lnParm = Pcount() - 4
-FOR liParm = 1 TO m.lnParm
+lnParm = pcount() - 4
+for liParm = 1 to m.lnParm
 	lcParm = this.Test_cParm(m.liParm)
 	lcParm_ = m.lcParm + '_'
-	IF Type(m.lcParm, 1) == 'A'
-		lnRows = Alen(&lcParm, 1)
-		lnCols = Alen(&lcParm, 2)
-		lcArray = m.lcParm_ + Textmerge(Iif(m.lnCols > 0, '[<<m.lnRows>>,<<m.lnCols>>]', '[<<m.lnRows>>]'))
-		LOCAL ARRAY &lcArray
-		Acopy(&lcParm, &lcParm_)
-	ELSE
-		LOCAL (m.lcParm_)
-		STORE Evaluate(m.lcParm) TO (m.lcParm_)
-	ENDIF
-ENDFOR
+	if type(m.lcParm, 1) == 'A'
+		lnRows = alen(&lcParm, 1)
+		lnCols = alen(&lcParm, 2)
+		lcArray = m.lcParm_ + textmerge(iif(m.lnCols > 0, '[<<m.lnRows>>,<<m.lnCols>>]', '[<<m.lnRows>>]'))
+		local array &lcArray
+		acopy(&lcParm, &lcParm_)
+	else
+		local (m.lcParm_)
+		store evaluate(m.lcParm) to (m.lcParm_)
+	endif
+endfor
 
 lnAttempt = 1
-DO WHILE .T.
+do while .t.
 
-	* Si c'est le premier test
-	IF m.lnAttempt = 1
+* Si c'est le premier test
+	if m.lnAttempt = 1
 
-		* Mémoriser l'environnement VFP AVANT l'exécution
+* Mémoriser l'environnement VFP AVANT l'exécution
 		this.aStatus(@m.taStatus1)
 
-		* Si le coverage a été demandé, le démarrer
-		IF m.this.lCoverage
-			LOCAL lcCoverage
-			lcCoverage = Set('COVERAGE', 1)
-			SET COVERAGE TO (m.this.cCoverageAddr) ADDITIVE
-		ENDIF
-	ENDIF
+* Si le coverage a été demandé, le démarrer
+		if m.this.lCoverage
+			local lcCoverage
+			lcCoverage = set('COVERAGE', 1)
+			set coverage to (m.this.cCoverageAddr) additive
+		endif
+	endif
 
 	tnElapsed = 0
-	FOR liAttempt = 1 TO m.lnAttempt
-		
-		* Restaurer les paramètres
-		FOR liParm = 1 TO m.lnParm
+	for liAttempt = 1 to m.lnAttempt
+
+* Restaurer les paramètres
+		for liParm = 1 to m.lnParm
 			lcParm = this.Test_cParm(m.liParm)
 			lcParm_ = m.lcParm + '_'
-			IF Type(m.lcParm_, 1) == 'A'
-				lnRows = Alen(&lcParm_, 1)
-				lnCols = Alen(&lcParm_, 2)
-				lcArray = m.lcParm + Textmerge(Iif(m.lnCols > 0, '[<<m.lnRows>>,<<m.lnCols>>]', '[<<m.lnRows>>]'))
-				DIMENSION &lcArray
-				Acopy(&lcParm_, &lcParm)
-			ELSE
-				STORE Evaluate(m.lcParm_) TO (m.lcParm)
-			ENDIF
-		ENDFOR
+			if type(m.lcParm_, 1) == 'A'
+				lnRows = alen(&lcParm_, 1)
+				lnCols = alen(&lcParm_, 2)
+				lcArray = m.lcParm + textmerge(iif(m.lnCols > 0, '[<<m.lnRows>>,<<m.lnCols>>]', '[<<m.lnRows>>]'))
+				dimension &lcArray
+				acopy(&lcParm_, &lcParm)
+			else
+				store evaluate(m.lcParm_) to (m.lcParm)
+			endif
+		endfor
 
-		* Exécuter la procédure / fonction
-		* ===========================================================
-		lnSeconds = Seconds()
-		luResult = Evaluate(this.cModule + '(' + m.tcParms + ')')
+* Exécuter la procédure / fonction
+* ===========================================================
+		lnSeconds = seconds()
+		luResult = evaluate(this.cModule + '(' + m.tcParms + ')')
 		tnElapsed = m.tnElapsed + nMS(m.lnSeconds) && millisecondes
-		* ===========================================================
+* ===========================================================
 
-	ENDFOR
+	endfor
 
-	luResult = Iif(Vartype(m.luResult) == 'O'; && exécute .Destroy()
+	luResult = iif(vartype(m.luResult) == 'O'; && exécute .Destroy()
 		, cL(m.luResult);
 		, m.luResult;
 		)
 
-	* Si c'est le premier test
-	IF m.lnAttempt = 1
+* Si c'est le premier test
+	if m.lnAttempt = 1
 
-		* Si le coverage a été demandé, l'arrêter
-		IF this.lCoverage
-			SET COVERAGE TO &lcCoverage
-		ENDIF
+* Si le coverage a été demandé, l'arrêter
+		if this.lCoverage
+			set coverage to &lcCoverage
+		endif
 
-		* Mémoriser l'environnement VFP après l'exécution
+* Mémoriser l'environnement VFP après l'exécution
 		this.aStatus(@m.taStatus2)
-	ENDIF
+	endif
 
-	* Si le temps d'exécution est significatif, terminer
-	IF .F.;
-	 OR m.this.lCoverage;  && avec Coverage, une seule exécution
-	 OR m.this.lSingleTest; && simple test demandé
-	 OR m.tnElapsed > 2 && && millisecondes (précision au moins 5%)
+* Si le temps d'exécution est significatif, terminer
+	if .f.;
+	 or m.this.lCoverage;  && avec Coverage, une seule exécution
+	 or m.this.lSingleTest; && simple test demandé
+	 or m.tnElapsed > 2 && && millisecondes (précision au moins 5%)
 
-		EXIT
+		exit
 
-	* sinon, répéter le test
-	ELSE
-		lnAttempt = m.lnAttempt * 10 
-	ENDIF
-ENDDO
+* sinon, répéter le test
+	else
+		lnAttempt = m.lnAttempt * 10
+	endif
+enddo
 
 tnElapsed = m.tnElapsed / m.lnAttempt
 
 *this.lSingleTest = .F.
 
-RETURN m.luResult
+return m.luResult
 
 * -----------------------------------
-HIDDEN PROCEDURE Test_aTestsDim && Dimensionne le tableau des résultats pour recevoir ceux du dernier test
-LPARAMETERS tnParms && Nombre de paramètres passés pour le test courant
+hidden procedure Test_aTestsDim && Dimensionne le tableau des résultats pour recevoir ceux du dernier test
+lparameters tnParms && Nombre de paramètres passés pour le test courant
 
-LOCAL lnCols
-lnCols = Alen(this.aTest, 2)
+local lnCols
+lnCols = alen(this.aTest, 2)
 
 * Ajouter une nouvelle LIGNE au tableau de test
-DIMENSION this.aTest[m.this.nTest, m.lnCols]
+dimension this.aTest[m.this.nTest, m.lnCols]
 
 * Si nouveaux paramètres,
-LOCAL lnColsParms
+local lnColsParms
 lnColsParms = NCOLSFIXES + m.tnParms
-IF m.lnColsParms > m.lnCols
+if m.lnColsParms > m.lnCols
 
-	* Ajouter le nombre de COLONNES nécessaires au tableau résultat
-	LOCAL ARRAY laTests[1]
-	Acopy(this.aTest, m.laTests)
+* Ajouter le nombre de COLONNES nécessaires au tableau résultat
+	local array laTests[1]
+	acopy(this.aTest, m.laTests)
 	aColsIns(@m.laTests, m.lnCols, m.lnColsParms - m.lnCols)
-	DIMENSION this.aTest[m.this.nTest, m.lnColsParms]
-	Acopy(m.laTests, this.aTest)
-ENDIF
+	dimension this.aTest[m.this.nTest, m.lnColsParms]
+	acopy(m.laTests, this.aTest)
+endif
 
 * -----------------------------------
-PROCEDURE Result
+procedure Result
 
-IF NOT this.lResultOut
+if not this.lResultOut
 	this.ResultOut()
-ENDIF
+endif
 
-RETURN this.lResult
+return this.lResult
 
 * -----------------------------------
-HIDDEN PROCEDURE ResultOut && Sort le résultat des test à l'écran et dans le log de test
+hidden procedure ResultOut && Sort le résultat des test à l'écran et dans le log de test
 
-LOCAL lcResult, llResult
+local lcResult, llResult
 
 lcResult = this.cResult()
-llResult = NOT Empty(m.lcResult)
-ASSERT m.llResult MESSAGE cAssertMsg("Aucun résultat de test à sortir !")
-IF m.llResult
-	
-	llResult = StrToFile(m.lcResult, m.this.cResultAddr, .T.) > 0
-	ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([Impossible d'écrire les résultats dans le fichier <<cLitteral(m.this.cResultAddr)>>]))
+llResult = not empty(m.lcResult)
+assert m.llResult message cAssertMsg("Aucun résultat de test à sortir !")
+if m.llResult
+
+	llResult = strtofile(m.lcResult, m.this.cResultAddr, .t.) > 0
+	assert m.llResult message cAssertMsg(textmerge([Impossible d'écrire les résultats dans le fichier <<cLitteral(m.this.cResultAddr)>>]))
 	? m.lcResult
 	debugout m.lcResult
 
 	this.lResultOut = m.llResult
-ENDIF
+endif
 
-RETURN m.llResult
+return m.llResult
 
 * -----------------------------------
-HIDDEN FUNCTION cResult && Résultat de test(s)
+hidden function cResult && Résultat de test(s)
 
-LOCAL lcResult
-lcResult = Space(0)
+local lcResult
+lcResult = space(0)
 
 * Si le module est défini
-IF .T.;
- AND Vartype(this.cModule) == 'C' ;
- AND NOT Empty(this.cModule)
+if .t.;
+ and vartype(this.cModule) == 'C' ;
+ and not empty(this.cModule)
 
-	* Si des tests ont été réalisés sur le module
-	IF m.this.nTest > 0
+* Si des tests ont été réalisés sur le module
+	if m.this.nTest > 0
 
-		* Pour chaque test réalisé
-		LOCAL lnCoverage, lnElapsed, lnElapsedMin, lnElapsedMax, lnElapsedAvg, lnSuccess
+* Pour chaque test réalisé
+		local lnCoverage, lnElapsed, lnElapsedMin, lnElapsedMax, lnElapsedAvg, lnSuccess
 		lnElapsedMin = 10^10
-		STORE 0 TO m.lnCoverage, m.lnElapsedMax, m.lnElapsedAvg, m.lnSuccess
-		LOCAL lnTest
-		FOR lnTest = 1 TO this.nTest
+		store 0 to m.lnCoverage, m.lnElapsedMax, m.lnElapsedAvg, m.lnSuccess
+		local lnTest
+		for lnTest = 1 to this.nTest
 
-			* Synthétiser les résultats
-			IF this.aTest[m.lnTest, 1] && les temps d'exécution avec COVERAGE ON ne sont pas significatifs
+* Synthétiser les résultats
+			if this.aTest[m.lnTest, 1] && les temps d'exécution avec COVERAGE ON ne sont pas significatifs
 				lnCoverage = m.lnCoverage + 1
-			ELSE
+			else
 				lnElapsed = uDefault(this.aTest[m.lnTest, 2], 0)
-				lnElapsedMin = Min(m.lnElapsedMin, m.lnElapsed)
-				lnElapsedMax = Max(m.lnElapsedMax, m.lnElapsed)
+				lnElapsedMin = min(m.lnElapsedMin, m.lnElapsed)
+				lnElapsedMax = max(m.lnElapsedMax, m.lnElapsed)
 				lnElapsedAvg = m.lnElapsedAvg + m.lnElapsed
-			ENDIF
+			endif
 			lnSuccess = m.lnSuccess + ;
-				Iif(this.aTest[m.lnTest, 3] AND this.aTest[m.lnTest, 6], 1, 0)
-		ENDFOR
+				iif(this.aTest[m.lnTest, 3] and this.aTest[m.lnTest, 6], 1, 0)
+		endfor
 
-		* Rectifier le temps moyen en cas de coverage sur certains tests
-		LOCAL lnCoverageLess
+* Rectifier le temps moyen en cas de coverage sur certains tests
+		local lnCoverageLess
 		lnCoverageLess = this.nTest - m.lnCoverage
-		IF m.lnCoverageLess > 0
+		if m.lnCoverageLess > 0
 			lnElapsedAvg = m.lnElapsedAvg / m.lnCoverageLess
-		ENDIF
+		endif
 
-		* Compter les échecs
-		LOCAL lnFailure
+* Compter les échecs
+		local lnFailure
 		lnFailure = this.nTest - m.lnSuccess
 
-		TEXT TO m.lcResult TEXTMERGE NOSHOW FLAGS 1
+		text TO m.lcResult TEXTMERGE NOSHOW FLAGS 1
 ===========================================
 <<Datetime()>>
-Module : <<DisplayPath(m.this.cAddress, 50)>>!<<this.cModule>>() 
+Module : <<DisplayPath(m.this.cAddress, 50)>>!<<this.cModule>>()
 Résultats de <<m.this.nTest>> test<<Iif(this.nTest = 1, Space(0), 's')>> dont <<m.lnCoverage>> avec coverage dans '<<m.this.cCoverageAddr>>'
-<<Iif(m.lnCoverageLess > 0, "Temps d'exécution sans coverage Mini | Moyen | Maxi : " + this.cMS(m.lnElapsedMin) + '|' + this.cMS(m.lnElapsedAvg) + '|' + this.cMS(m.lnElapsedMax), Space(0))>> 
+<<Iif(m.lnCoverageLess > 0, "Temps d'exécution sans coverage Mini | Moyen | Maxi : " + this.cMS(m.lnElapsedMin) + '|' + this.cMS(m.lnElapsedAvg) + '|' + this.cMS(m.lnElapsedMax), Space(0))>>
 
 		ENDTEXT
 
-		* Si au moins un test a réussi
-		IF m.lnSuccess > 0
+* Si au moins un test a réussi
+		if m.lnSuccess > 0
 
-			TEXT TO m.lcResult ADDITIVE TEXTMERGE NOSHOW FLAGS 1
+			text TO m.lcResult ADDITIVE TEXTMERGE NOSHOW FLAGS 1
 ---------------------------------------------
 <<m.lnSuccess>> <<Iif(m.lnSuccess = 1, "test réalisé", "tests réalisés")>> avec succès
 
 			ENDTEXT
-		ENDIF
+		endif
 
-		* Si au moins un test a échoué
+* Si au moins un test a échoué
 		this.lResult = m.lnFailure = 0
-		IF NOT this.lResult
-			TEXT TO m.lcResult ADDITIVE TEXTMERGE NOSHOW FLAGS 1
+		if not this.lResult
+			text TO m.lcResult ADDITIVE TEXTMERGE NOSHOW FLAGS 1
 ---------------------------------------------
 <<m.lnFailure>> <<Iif(m.lnFailure = 1, "test a échoué", "tests ont échoué")>> :
 
 			ENDTEXT
-			
-			LOCAL lnParms, liParm, lcParms;
+
+			local lnParms, liParm, lcParms;
 			, llString, lnString, liString, lcString
 
-			* Pour chaque test échoué
-			FOR lnTest = 1 TO this.nTest
-				DO CASE
-				
-				* Cas où l'échec est dû à un mauvais résultat
-				CASE NOT m.this.aTest[m.lnTest, 3]
+* Pour chaque test échoué
+			for lnTest = 1 to this.nTest
+				do case
 
-					* S'il y en a des paramètres, lister leurs valeurs sous forme de constantes
+* Cas où l'échec est dû à un mauvais résultat
+				case not m.this.aTest[m.lnTest, 3]
+
+* S'il y en a des paramètres, lister leurs valeurs sous forme de constantes
 					lnParms = this.aTest[m.lnTest, NCOLSFIXES]
-					lcParms = Space(0)
-					IF m.lnParms > 0
-						FOR liParm = 1 TO m.lnParms
+					lcParms = space(0)
+					if m.lnParms > 0
+						for liParm = 1 to m.lnParms
 							lcParms = m.lcParms + CRLF;
-								+ Chr(9) + '  ' + Transform(m.liParm) + '. ' + this.aTest[m.lnTest, NCOLSFIXES + m.liParm]
-						ENDFOR
-					ENDIF
-					
-					llString = Vartype(this.aTest[m.lnTest, 4]) == 'C'
-					lcString = Space(0)
-					lnString = Iif(m.llString, Lenc(this.aTest[m.lnTest, 4]), 0)
-					IF m.lnString > 0
-						FOR liString = 1 TO m.lnString
-							lcString = Substrc(m.this.aTest[m.lnTest, 4], m.liString, 1)
-							IF NOT m.lcString == Substrc(m.this.aTest[m.lnTest, 5], m.liString, 1)
-								lcString = Textmerge([Différence au caractère <<m.liString>> ('<<m.lcString>>') du résultat attendu]) + CRLF
-								EXIT
-							ENDIF
-						ENDFOR
-					ENDIF
+								+ chr(9) + '  ' + transform(m.liParm) + '. ' + this.aTest[m.lnTest, NCOLSFIXES + m.liParm]
+						endfor
+					endif
 
-					* écrire le n° de test, les résultats attendus et obtenus, les paramètres
+					llString = vartype(this.aTest[m.lnTest, 4]) == 'C'
+					lcString = space(0)
+					lnString = iif(m.llString, lenc(this.aTest[m.lnTest, 4]), 0)
+					if m.lnString > 0
+						for liString = 1 to m.lnString
+							lcString = substrc(m.this.aTest[m.lnTest, 4], m.liString, 1)
+							if not m.lcString == substrc(m.this.aTest[m.lnTest, 5], m.liString, 1)
+								lcString = textmerge([Différence au caractère <<m.liString>> ('<<m.lcString>>') du résultat attendu]) + CRLF
+								exit
+							endif
+						endfor
+					endif
+
+* écrire le n° de test, les résultats attendus et obtenus, les paramètres
 					local lcType
-					lcType = Vartype(this.aTest[m.lnTest, 5])
-					TEXT TO m.lcResult ADDITIVE TEXTMERGE NOSHOW FLAGS 1
+					lcType = vartype(this.aTest[m.lnTest, 5])
+					text TO m.lcResult ADDITIVE TEXTMERGE NOSHOW FLAGS 1
 - Test n° : <<Transform(m.lnTest)>>
-	Resultats : 
+	Resultats :
 	- attendu:	<<Iif(m.llString, '"' + this.aTest[m.lnTest, 4] + '"', cLitteral(this.aTest[m.lnTest, 4]))>>
 	- obtenu :	<<ICase(m.lcType == 'C' and Lower(Leftc(this.aTest[m.lnTest, 5], Len('Object '))) == Lower('Object '), this.aTest[m.lnTest, 5], m.lcType == 'C', '"' + this.aTest[m.lnTest, 5] + '"', cLitteral(this.aTest[m.lnTest, 5]))>>
 	<<m.lcString>><<m.lnParms>> paramètres passés<<Iif(m.lnParms > 0, ' :', '')>><<m.lcParms>>
 
 					ENDTEXT
 
-				* Case où l'échec est dû à une modification d'environnement
-				CASE NOT this.aTest[m.lnTest, 6]
+* Case où l'échec est dû à une modification d'environnement
+				case not this.aTest[m.lnTest, 6]
 
-					* écrire la variable d'environnement modifiée
-					TEXT TO m.lcResult ADDITIVE TEXTMERGE NOSHOW
+* écrire la variable d'environnement modifiée
+					text TO m.lcResult ADDITIVE TEXTMERGE NOSHOW
 - Test n° <<m.lnTest>>
 	L'environnement VFP a changé comme suit :
 		<<this.aTest[m.lnTest, 7]>>
 
 					ENDTEXT
 
-				ENDCASE
-			ENDFOR
-TEXT TO m.lcResult ADDITIVE TEXTMERGE NOSHOW
+				endcase
+			endfor
+text TO m.lcResult ADDITIVE TEXTMERGE NOSHOW
 ===========================================
 
 ENDTEXT
-		ENDIF
+		endif
 
-	ELSE
-		lcResult = "Aucun test n'a été réalisé sur le module" + Space(1) + this.cModule
-	ENDIF
-ENDIF
+	else
+		lcResult = "Aucun test n'a été réalisé sur le module" + space(1) + this.cModule
+	endif
+endif
 
-RETURN m.lcResult
-
-* -----------------------------------
-HIDDEN FUNCTION cMS && Temps en avec unité millisecondes
-LPARAMETERS tnMS && Temps en millisecondes
-RETURN Space(1) + Ltrim(Transform(m.tnMS, '9,999.999  ms'))
+return m.lcResult
 
 * -----------------------------------
-HIDDEN FUNCTION aStatus && Environnement Visual FoxPro
-LPARAMETERS taStatus && @ Tableau de statut
+hidden function cMS && Temps en avec unité millisecondes
+lparameters tnMS && Temps en millisecondes
+return space(1) + ltrim(transform(m.tnMS, '9,999.999  ms'))
 
-LOCAL lnStatus, lcStatus, laUsed[1], lnResult && Nombre d'éléments d'environnement
+* -----------------------------------
+hidden function aStatus && Environnement Visual FoxPro
+lparameters taStatus && @ Tableau de statut
+
+local lnStatus, lcStatus, laUsed[1], lnResult && Nombre d'éléments d'environnement
 
 * Tabuler les éléments de statut
-lnResult = ALines(m.taStatus, this.cStatus(), .T.)
+lnResult = alines(m.taStatus, this.cStatus(), .t.)
 aColsIns(@m.taStatus) && ajoute une colonne pour les résultats
 
 * Pour chaque élément de statut valide
-FOR lnStatus = 1 TO m.lnResult
+for lnStatus = 1 to m.lnResult
 
 	lcStatus = m.taStatus[m.lnStatus, 1]
-	IF NOT lCommentLine(m.lcStatus)
+	if not lCommentLine(m.lcStatus)
 
-		* Évaluer
-		TRY
-			taStatus[m.lnStatus, 2] = Evaluate(m.lcStatus)
-		CATCH
-		ENDTRY
-	ENDIF
-ENDFOR
+* Évaluer
+		try
+			taStatus[m.lnStatus, 2] = evaluate(m.lcStatus)
+		catch
+		endtry
+	endif
+endfor
 
-RETURN m.lnResult
+return m.lnResult
 
-EXTERNAL PROCEDURE lCommentLine && dans abModuleDir.prg
+external procedure lCommentLine && dans abModuleDir.prg
 
 * -----------------------------------
-HIDDEN FUNCTION cStatus && Environnement Visual FoxPro
-LOCAL lcResult
+hidden function cStatus && Environnement Visual FoxPro
+local lcResult
 
-TEXT TO m.lcResult NOSHOW PRETEXT 1+2+4
+text TO m.lcResult NOSHOW PRETEXT 1+2+4
 
 * Nombre de tables ouvertes
 AUsed(laUsed)
@@ -5179,112 +5179,112 @@ Set("Unique")
 Set("View")
 ENDTEXT
 
-RETURN m.lcResult
+return m.lcResult
 
 * -----------------------------------
-HIDDEN FUNCTION lStatus && Compare deux environnements VFP
-LPARAMETERS ;
+hidden function lStatus && Compare deux environnements VFP
+lparameters ;
 	taStatus1,; && @ Tableau de statut 1 (créé par this.aStatus())
 	taStatus2,; && @ Tableau de statut 2 (créé par this.aStatus())
 	tcModifs && @ Éléments d'environnement ayant évolué (si m.llResult = .F.)
 
-LOCAL llResult && L'environnement VFP est identique
-llResult = .NULL.
-tcModifs = Space(0)
+local llResult && L'environnement VFP est identique
+llResult = .null.
+tcModifs = space(0)
 
 * Si le statut a bien été tabulé après test
-LOCAL lnStatusCount
-lnStatusCount = Alen(m.taStatus1, 1)
-IF Alen(m.taStatus2, 1) = m.lnStatusCount
-	
-	* Pour chaque élément d'environnement
-	LOCAL lnStatus, llStatus
-	llResult = .T.
-	FOR lnStatus = 1 TO m.lnStatusCount
+local lnStatusCount
+lnStatusCount = alen(m.taStatus1, 1)
+if alen(m.taStatus2, 1) = m.lnStatusCount
 
-		* Si l'élément n'a pas la même valeur dans les 2 tableaux
+* Pour chaque élément d'environnement
+	local lnStatus, llStatus
+	llResult = .t.
+	for lnStatus = 1 to m.lnStatusCount
+
+* Si l'élément n'a pas la même valeur dans les 2 tableaux
 		llStatus = m.taStatus1[m.lnStatus, 2] == m.taStatus2[m.lnStatus, 2]
-		IF NOT m.llStatus
-			
-			* Ajouter la modification au message retourné
+		if not m.llStatus
+
+* Ajouter la modification au message retourné
 			tcModifs = c2Words(m.tcModifs, CRLF, ;
 				taStatus1[m.lnStatus, 1] + ;
-				Space(1) + '-' + Space(1) + 'avant Test : ' + cLitteral(m.taStatus1[m.lnStatus, 2]) + ;
-				Space(1) + '-' + Space(1) + 'après Test : ' + cLitteral(m.taStatus2[m.lnStatus, 2]))
-			llResult = .F.
-		ENDIF
-	ENDFOR
-ENDIF
+				space(1) + '-' + space(1) + 'avant Test : ' + cLitteral(m.taStatus1[m.lnStatus, 2]) + ;
+				space(1) + '-' + space(1) + 'après Test : ' + cLitteral(m.taStatus2[m.lnStatus, 2]))
+			llResult = .f.
+		endif
+	endfor
+endif
 
-RETURN m.llResult
+return m.llResult
 
 * -----------------------------------
-PROCEDURE Destroy
+procedure destroy
 
 * Sortir le résultat si ça n'a pas été fait
-IF NOT this.lResultOut
+if not this.lResultOut
 	this.ResultOut()
-ENDIF
+endif
 
 * Fermer proprement les Aliases ouverts pour le(s) test(s)
-LOCAL laAlias[1], lcAlias
-IF AUsed(m.laAlias) > 0
-	FOR each lcAlias in laAlias
-		USE IN (m.lcAlias)
-	ENDFOR
-ENDIF
+local laAlias[1], lcAlias
+if aused(m.laAlias) > 0
+	for each lcAlias in laAlias
+		use in (m.lcAlias)
+	endfor
+endif
 
 * =============================================
-ENDDEFINE && CLASS abUnitTest
+enddefine && CLASS abUnitTest
 * =============================================
 
 * -----------------------------------
-FUNCTION FooTest && Bidon pour démontrer la classe de test abUnitTest
-LPARAMETERS tuFoo
+function FooTest && Bidon pour démontrer la classe de test abUnitTest
+lparameters tuFoo
 
-LOCAL lcType, luResult
-lcType = Vartype(m.tuFoo)
+local lcType, luResult
+lcType = vartype(m.tuFoo)
 
-DO CASE
+do case
 
-CASE m.lcType == 'C' && échec car changement de Set("Deleted")
-	LOCAL lcDeleted
-	lcDeleted = Set("Deleted")
-	lcDeleted = Iif(m.lcDeleted == 'ON', 'OFF', 'ON')
-	SET DELETED &lcDeleted
+case m.lcType == 'C' && échec car changement de Set("Deleted")
+	local lcDeleted
+	lcDeleted = set("Deleted")
+	lcDeleted = iif(m.lcDeleted == 'ON', 'OFF', 'ON')
+	set deleted &lcDeleted
 	luResult = m.tuFoo
-	
-CASE m.lcType == 'N'
+
+case m.lcType == 'N'
 	luResult = 2 * m.tuFoo
 
-CASE m.lcType == 'L'
-	luResult = NOT m.tuFoo
+case m.lcType == 'L'
+	luResult = not m.tuFoo
 
-CASE m.lcType == 'D'
+case m.lcType == 'D'
 	luResult = m.tuFoo + 10
 
-OTHERWISE
-	luResult = .F.
-ENDCASE
+otherwise
+	luResult = .f.
+endcase
 
-RETURN m.luResult
+return m.luResult
 
 *------------------------------------
-FUNCTION Fox2Pix && foxels to pixels && courtesy Sergey Berezniker http://www.berezniker.com/content/pages/visual-foxpro/pixels-and-foxels
-LPARAMETERS ;
+function Fox2Pix && foxels to pixels && courtesy Sergey Berezniker http://www.berezniker.com/content/pages/visual-foxpro/pixels-and-foxels
+lparameters ;
 	tnFoxels,; && foxels to convert
 	tlVertical,; && vertical coordinates
 	tcFontName,; && [current form's] font name
 	tnFontSize && [current form's] font size
- 
-RETURN Iif(Pcount() >= 4;
-	, m.tnFoxels * Fontmetric(Iif(m.tlVertical, 1, 6), m.tcFontName, m.tnFontSize);
-	, m.tnFoxels * Fontmetric(Iif(m.tlVertical, 1, 6));
+
+return iif(pcount() >= 4;
+	, m.tnFoxels * fontmetric(iif(m.tlVertical, 1, 6), m.tcFontName, m.tnFontSize);
+	, m.tnFoxels * fontmetric(iif(m.tlVertical, 1, 6));
 	)
- 
+
 *------------------------------------
-FUNCTION Pix2Fox && pixels to foxels && courtesy Sergey Berezniker http://www.berezniker.com/content/pages/visual-foxpro/pixels-and-foxels
-LPARAMETERS ;
+function Pix2Fox && pixels to foxels && courtesy Sergey Berezniker http://www.berezniker.com/content/pages/visual-foxpro/pixels-and-foxels
+lparameters ;
 	tnPixels,; && pixels to convert
 	tlVertical,; && vertical coordinates
 	tcFontName,; && [current form's] font name
@@ -5292,91 +5292,91 @@ LPARAMETERS ;
 
 local lnResult, llResult
 
-lnResult = Iif(Pcount() >= 4;
-	, m.tnPixels / Fontmetric(Iif(m.tlVertical, 1, 6), m.tcFontName, m.tnFontSize);
-	, m.tnPixels / Fontmetric(Iif(m.tlVertical, 1, 6));
+lnResult = iif(pcount() >= 4;
+	, m.tnPixels / fontmetric(iif(m.tlVertical, 1, 6), m.tcFontName, m.tnFontSize);
+	, m.tnPixels / fontmetric(iif(m.tlVertical, 1, 6));
 	)
-	
-llResult = Between(m.lnResult, -32768+1, 32767-1) && 19/12/13 - Invalid coordinates (Error 1959) Coordinate values must be greater than -32768 and less than 32767
-assert m.llResult message cAssertMsg(Textmerge([<<m.lnResult>> from: <<m.tnPixels>>px <<Iif(m.tlVertical, 'Vertical', 'Horizontal')>>, Font: <<Evl(m.tcFontName, .null.)>> <<Evl(m.tnFontSize, .null.)>>pt]))
 
-RETURN Iif(m.llResult;
+llResult = between(m.lnResult, -32768+1, 32767-1) && 19/12/13 - Invalid coordinates (Error 1959) Coordinate values must be greater than -32768 and less than 32767
+assert m.llResult message cAssertMsg(textmerge([<<m.lnResult>> from: <<m.tnPixels>>px <<Iif(m.tlVertical, 'Vertical', 'Horizontal')>>, Font: <<Evl(m.tcFontName, .null.)>> <<Evl(m.tnFontSize, .null.)>>pt]))
+
+return iif(m.llResult;
 	, m.lnResult;
 	, 0;
 	)
 
 * ==============================
-FUNCTION cExprEval && Expression pour évaluer une expression
-LPARAMETERS tcExpr && Expression
+function cExprEval && Expression pour évaluer une expression
+lparameters tcExpr && Expression
 
-LOCAL laOp[1], lcOp, lcOpU, lcExpr, lcResult
-STORE Space(0) TO lcExpr, lcResult
+local laOp[1], lcOp, lcOpU, lcExpr, lcResult
+store space(0) to lcExpr, lcResult
 
 * Pour chaque opérande de l'expression
-IF ALines(laOp, m.tcExpr, 1, '+') > 0
-	FOR EACH lcOp IN laOp
-		
-		* Si l'opérande est un Chr()
-		lcOpU = Chrtran(Upper(m.lcOp), Space(1), Space(0))
-		IF Left(m.lcOpU, 4) == 'CHR(' OR InList(m.lcOpU, 'CR', 'CRLF')
+if alines(laOp, m.tcExpr, 1, '+') > 0
+	for each lcOp in laOp
 
-			* Ajouter les opérandes accumulés au résultat
+* Si l'opérande est un Chr()
+		lcOpU = chrtran(upper(m.lcOp), space(1), space(0))
+		if left(m.lcOpU, 4) == 'CHR(' or inlist(m.lcOpU, 'CR', 'CRLF')
+
+* Ajouter les opérandes accumulés au résultat
 			lcResult = cWords('+', m.lcResult, cExprEval_cOp(m.lcExpr), m.lcOp)
-			lcExpr = Space(0)
-		ELSE
+			lcExpr = space(0)
+		else
 			lcExpr = c2Words(m.lcExpr, '+', m.lcOp)
-		ENDIF
-	ENDFOR
+		endif
+	endfor
 	lcResult = c2Words(m.lcResult, '+', cExprEval_cOp(m.lcExpr))
-ENDIF
+endif
 
-RETURN m.lcResult
+return m.lcResult
 
 * -----------------------------
-FUNCTION cExprEval_cOp && Adapte un opérande d'une expression
-LPARAMETERS tcOp && Opérande
+function cExprEval_cOp && Adapte un opérande d'une expression
+lparameters tcOp && Opérande
 
-RETURN Iif(Empty(m.tcOp), Space(0), Textmerge([cLitteral(Evaluate(<<cLitteral(m.tcOp)>>))]))
+return iif(empty(m.tcOp), space(0), textmerge([cLitteral(Evaluate(<<cLitteral(m.tcOp)>>))]))
 
 * ==============================
-FUNCTION uEval && Expression évaluée si possible
-LPARAMETERS tcExpr
+function uEval && Expression évaluée si possible
+lparameters tcExpr
 
-LOCAL luResult
+local luResult
 
-TRY
-	luResult = Evaluate(m.tcExpr)
-CATCH
+try
+	luResult = evaluate(m.tcExpr)
+catch
 	luResult = m.tcExpr
-ENDTRY
+endtry
 
-RETURN m.luResult
+return m.luResult
 
 * ==============================
-FUNCTION cIndented && Texte indenté
-LPARAMETERS ;
+function cIndented && Texte indenté
+lparameters ;
 	tcCode,; && Texte à indenter
 	tcIndent,; && [tab] Caractère(s) d'indentation
 	tlEmptyDel,; && [.F.] Supprimer les lignes vides
 	tcCharEOL && [''] Caractère de fin de ligne
-tcCode = Iif(Vartype(m.tcCode) == 'C', m.tcCode, '')
-tcIndent = Iif(Vartype(m.tcIndent) == 'C' AND Lenc(m.tcIndent) > 0, m.tcIndent, Chr(9)) && Evl() ne marche pas sur space() et tab
+tcCode = iif(vartype(m.tcCode) == 'C', m.tcCode, '')
+tcIndent = iif(vartype(m.tcIndent) == 'C' and lenc(m.tcIndent) > 0, m.tcIndent, chr(9)) && Evl() ne marche pas sur space() et tab
 tlEmptyDel = lTrue(m.tlEmptyDel)
-tcCharEOL = Evl(m.tcCharEOL, Space(0))
+tcCharEOL = evl(m.tcCharEOL, space(0))
 
-RETURN '';
+return '';
 	+ m.tcIndent;
-	+ Trim(;
-	   ICase(;
+	+ trim(;
+	   icase(;
 			CRLF $ m.tcCode,;
-				Strtran(Strtran(Iif(m.tlEmptyDel, cRepCharsDel(m.tcCode, CRLF), m.tcCode);
+				strtran(strtran(iif(m.tlEmptyDel, cRepCharsDel(m.tcCode, CRLF), m.tcCode);
 					, m.tcCharEOL + CRLF, m.tcCharEOL + CRLF + m.tcIndent);
 					, CRLF + m.tcIndent + CRLF, CRLF2),;
 			CR $ m.tcCode,;
-				Strtran(Strtran(Iif(m.tlEmptyDel, cRepCharDel(m.tcCode, CR), m.tcCode);
+				strtran(strtran(iif(m.tlEmptyDel, cRepCharDel(m.tcCode, CR), m.tcCode);
 					, m.tcCharEOL + CR, m.tcCharEOL + CR + m.tcIndent);
 					, CR + m.tcIndent + CR, CR2),;
-				Strtran(Strtran(Iif(m.tlEmptyDel, cRepCharDel(m.tcCode, LF), m.tcCode); && LF $ m.tcCode, memo par exemple
+				strtran(strtran(iif(m.tlEmptyDel, cRepCharDel(m.tcCode, LF), m.tcCode); && LF $ m.tcCode, memo par exemple
 					, m.tcCharEOL + LF, m.tcCharEOL + LF + m.tcIndent);
 					, LF + m.tcIndent + LF, LF2);
 			);
@@ -5384,36 +5384,36 @@ RETURN '';
 		)
 
 * ==============================
-FUNCTION cIndentedNo && Texte non indenté && /!\ à modifier pour fonctionner en multi-lignes
-LPARAMETERS tcCode
+function cIndentedNo && Texte non indenté && /!\ à modifier pour fonctionner en multi-lignes
+lparameters tcCode
 
-RETURN Ltrim(ICase(;
+return ltrim(icase(;
 		CRLF $ m.tcCode,;
-			Strtran(Strtran(m.tcCode, CRLF + TABUL, CRLF), CRLF + Space(1), CRLF),;
+			strtran(strtran(m.tcCode, CRLF + TABUL, CRLF), CRLF + space(1), CRLF),;
 		CR $ m.tcCode,;
-			Strtran(Strtran(m.tcCode, CR + TABUL, CR), CR + Space(1), CR),;
-			Strtran(Strtran(m.tcCode, LF + TABUL, LF), LF + Space(1), LF); && memo par exemple
-		), TABUL, Space(1))
+			strtran(strtran(m.tcCode, CR + TABUL, CR), CR + space(1), CR),;
+			strtran(strtran(m.tcCode, LF + TABUL, LF), LF + space(1), LF); && memo par exemple
+		), TABUL, space(1))
 
 * ==============================
-FUNCTION cCommented && Instruction(s) commentée(s)
-LPARAMETERS ;
+function cCommented && Instruction(s) commentée(s)
+lparameters ;
 	tcCode,; && Instruction(s)
 	tcCom,; && [* ] caractère de commentaire
 	tlEmptyDel && [.F.] Supprimer les lignes vides
-tcCom = Evl(m.tcCom, '* ')
+tcCom = evl(m.tcCom, '* ')
 tlEmptyDel = lTrue(m.tlEmptyDel)
 
-RETURN Iif(Empty(m.tcCode);
+return iif(empty(m.tcCode);
 	, '';
-	, Strtran(Strtran(Strtran('';
+	, strtran(strtran(strtran('';
 			+ m.tcCom;
-			+ Trim(ICase(;
+			+ trim(icase(;
 					CRLF $ m.tcCode,;
-						Strtran(Iif(m.tlEmptyDel, cRepCharsDel(m.tcCode, CRLF), m.tcCode), CRLF, CRLF + m.tcCom),;
+						strtran(iif(m.tlEmptyDel, cRepCharsDel(m.tcCode, CRLF), m.tcCode), CRLF, CRLF + m.tcCom),;
 					CR $ m.tcCode,;
-						Strtran(Iif(m.tlEmptyDel, cRepCharDel(m.tcCode, CR), m.tcCode), CR, CR + m.tcCom),;
-						Strtran(Iif(m.tlEmptyDel, cRepCharDel(m.tcCode, LF), m.tcCode), LF, LF + m.tcCom); && memo par exemple
+						strtran(iif(m.tlEmptyDel, cRepCharDel(m.tcCode, CR), m.tcCode), CR, CR + m.tcCom),;
+						strtran(iif(m.tlEmptyDel, cRepCharDel(m.tcCode, LF), m.tcCode), LF, LF + m.tcCom); && memo par exemple
 					), m.tcCom); && ? Trim('totu', 'tu') && 'to'
 		, m.tcCom + CRLF, CRLF); && les lignes vides ne sont pas commentées
 		, m.tcCom + CR, CR); && les lignes vides ne sont pas commentées
@@ -5421,48 +5421,48 @@ RETURN Iif(Empty(m.tcCode);
 	)
 
 * ==============================
-FUNCTION lDevMode && Mode développement
-RETURN _VFP.StartMode = 0;
- AND NOT InList(Lower(JustExt(cModuleInfo(Sys(16, 0), 'Address'))), 'app', 'exe')
+function lDevMode && Mode développement
+return _vfp.startmode = 0;
+ and not inlist(lower(justext(cModuleInfo(sys(16, 0), 'Address'))), 'app', 'exe')
 
 * ===================================================================
-FUNCTION cAssertMsg && MESSAGE pour ASSERT limité à 120 caractères sous les IDE non-US
-LPARAMETERS tcMsg
-tcMsg = Ltrim(Evl(Nvl(m.tcMsg, ''), 'empty message?'))
+function cAssertMsg && MESSAGE pour ASSERT limité à 120 caractères sous les IDE non-US
+lparameters tcMsg
+tcMsg = ltrim(evl(nvl(m.tcMsg, ''), 'empty message?'))
 
-LOCAL lcProgram
+local lcProgram
 
-lcProgram = Proper(Program(Program(-1)-1)) && back compat.
+lcProgram = proper(program(program(-1)-1)) && back compat.
 
-?? Chr(7) && ding && ?? pour ne pas ajouter une ligne à la fenêtre qui a le focus
+?? chr(7) && ding && ?? pour ne pas ajouter une ligne à la fenêtre qui a le focus
 
-RETURN cTronc('';
-    + Iif(Lower(Left(m.tcMsg, Len(m.lcProgram))) == Lower(m.lcProgram);
+return cTronc('';
+    + iif(lower(left(m.tcMsg, len(m.lcProgram))) == lower(m.lcProgram);
 			, '';
 			, cResultHeader(-2);
 			);
 	  + m.tcMsg;
-	, Iif(Version(3) == '00'; && 00 - English - 14/06/12 - crédit Francis Faure - http://www.atoutfox.org/nntp.asp?ID=0000009184
+	, iif(version(3) == '00'; && 00 - English - 14/06/12 - crédit Francis Faure - http://www.atoutfox.org/nntp.asp?ID=0000009184
 		, 254; && http://www.atoutfox.org/nntp.asp?ID=0000009201
 		, 120;
 		);
-	, .T.; && split on a word end
+	, .t.; && split on a word end
 	)
 
 * =============================================
-DEFINE CLASS abVoid AS Custom
-	PROCEDURE init
-	RETURN .F.
-ENDDEFINE && CLASS abVoid
+define class abVoid as custom
+	procedure init
+	return .f.
+enddefine && CLASS abVoid
 
 * =============================================
-PROCEDURE lSetProcedure && a Set("Procedure") is in current Set("Procedure")
-LPARAMETERS tcSetProcedure && Set("Procedure") antérieur
-RETURN setProcedure(m.tcSetProcedure, .T.)
+procedure lSetProcedure && a Set("Procedure") is in current Set("Procedure")
+lparameters tcSetProcedure && Set("Procedure") antérieur
+return setProcedure(m.tcSetProcedure, .t.)
 
 * =============================================
-PROCEDURE setProcedure && Restores previous Set("Procedure")
-LPARAMETERS ;
+procedure setProcedure && Restores previous Set("Procedure")
+lparameters ;
 	tcSetPro_,; && Set("Procedure") antérieur
 	tlCheck,; && [.F.] Vérifier si Set("Procedure") antérieur est dans Set("Procedure") courant
 	tlAdditive && [.F.] Ajouter tcSetPro_ à Set("Procedure") courant
@@ -5470,7 +5470,7 @@ LPARAMETERS ;
 tlCheck = lTrue(m.tlCheck)
 tlAdditive = lTrue(m.tlAdditive)
 
-LOCAL llResult as Boolean;
+local llResult as Boolean;
 , laSetProc[1];
 , lnSetProc;
 , laSetPro_[1];
@@ -5479,40 +5479,40 @@ LOCAL llResult as Boolean;
 , liProcedure;
 , lcProcedure;
 
-llResult = .T.
-lnSetPro_ = ALines(laSetPro_, Upper(m.tcSetPro_), 5, ',')
-lnSetProc = ALines(laSetProc, Set("Procedure"), 5, ',')
+llResult = .t.
+lnSetPro_ = alines(laSetPro_, upper(m.tcSetPro_), 5, ',')
+lnSetProc = alines(laSetProc, set("Procedure"), 5, ',')
 
 do case
 
 case m.tlCheck
 	for each lcProcedure in m.laSetPro_
-		if Empty(Ascan(m.laSetProc, m.lcProcedure, 1, -1, 1, 6))
-			llResult = .F.
+		if empty(ascan(m.laSetProc, m.lcProcedure, 1, -1, 1, 6))
+			llResult = .f.
 			exit
 		endif
 	endfor
 
-case Empty(m.lnSetPro_) and !m.tlAdditive
+case empty(m.lnSetPro_) and !m.tlAdditive
 	set procedure to
 
 otherwise
 
 	if m.lnSetPro_ > 0
 		for liProcedure = 1 to lnSetPro_
-			laSetPro_[m.liProcedure] = FullPath(Alltrim(laSetPro_[m.liProcedure], '"'))
+			laSetPro_[m.liProcedure] = fullpath(alltrim(laSetPro_[m.liProcedure], '"'))
 		endfor
 	endif
 
 	if m.lnSetProc > 0
 		for liProcedure = 1 to m.lnSetProc
-			laSetProc[m.liProcedure] = FullPath(Alltrim(laSetProc[m.liProcedure], '"'))
+			laSetProc[m.liProcedure] = fullpath(alltrim(laSetProc[m.liProcedure], '"'))
 		endfor
-	endif	
+	endif
 
 	if m.lnSetPro_ > 0
 		for each lcProcedure in m.laSetPro_
-			if File(m.lcProcedure) and Empty(Ascan(m.laSetProc, m.lcProcedure, 1, -1, 1, 6))
+			if file(m.lcProcedure) and empty(ascan(m.laSetProc, m.lcProcedure, 1, -1, 1, 6))
 				set procedure to (m.lcProcedure) additive
 			endif
 		endfor
@@ -5520,7 +5520,7 @@ otherwise
 
 	if m.lnSetProc > 0 and !m.tlAdditive
 		for each lcProcedure in laSetProc
-			if Empty(Ascan(laSetPro_, m.lcProcedure, 1, -1, 1, 6))
+			if empty(ascan(laSetPro_, m.lcProcedure, 1, -1, 1, 6))
 				release procedure (m.lcProcedure)
 			endif
 		endfor
@@ -5528,12 +5528,12 @@ otherwise
 
 endcase
 
-RETURN m.llResult
+return m.llResult
 
 * ========================================
 procedure SetProcClassRestore as Boolean && restores Set("Classlib") or Set("Procedure") to a previous value
 lparameters ;
-  tcSetAnte as String; && previous Set("Classlib") or Set("Procedure")
+  tcSetAnte as string; && previous Set("Classlib") or Set("Procedure")
 , tlClassLib as Boolean && [.F.] tcSetAnte is Set("Classlib")
 
 tlClassLib = lTrue(m.tlClassLib)
@@ -5541,36 +5541,36 @@ tlClassLib = lTrue(m.tlClassLib)
 local success as Boolean;
 , laFileAnte[1];
 , laFilePost[1];
-, lcThisFile as String;
-, lcFile as String
+, lcThisFile as string;
+, lcFile as string
 
-success = .T.
+success = .t.
 
-if .T.;
- and ALines(laFileAnte, m.tcSetAnte, 5, ',') > 0;
- and ALines(laFilePost, Set(Iif(m.tlClassLib, "Classlib", "Procedure")), 5, ',') > 0;
+if .t.;
+ and alines(laFileAnte, m.tcSetAnte, 5, ',') > 0;
+ and alines(laFilePost, set(iif(m.tlClassLib, "Classlib", "Procedure")), 5, ',') > 0;
 
-	lcThisFile = cModuleInfo(Sys(16), 'Address')
-	
-	* Remove unused files
+	lcThisFile = cModuleInfo(sys(16), 'Address')
+
+* Remove unused files
 	for each lcFile in m.laFilePost
 		try
 			do case
-			case Ascan(m.laFileAnte, m.lcFile, 1, -1, 1, 7) > 0
-				&& in previous Set()
+			case ascan(m.laFileAnte, m.lcFile, 1, -1, 1, 7) > 0
+&& in previous Set()
 			case m.tlClassLib
-				lcFile = Iif(' IN ' $ m.lcFile;
+				lcFile = iif(' IN ' $ m.lcFile;
 					, '';
-						+ Ltrim(Substrc(m.lcFile, At_c(' ALIAS ', m.lcFile)));
-						+ Substrc(m.lcFile;
-							, At_c(' IN ', m.lcFile);
-							, At_c(' ALIAS ', m.lcFile) - At_c(' IN ', m.lcFile);
+						+ ltrim(substrc(m.lcFile, at_c(' ALIAS ', m.lcFile)));
+						+ substrc(m.lcFile;
+							, at_c(' IN ', m.lcFile);
+							, at_c(' ALIAS ', m.lcFile) - at_c(' IN ', m.lcFile);
 							);
 					, m.lcFile;
 					)
 				release classlib &lcFile
 			case cOfLitteral(m.lcFile) == m.lcThisFile
-				&& do not remove this file, we currently use it
+&& do not remove this file, we currently use it
 			otherwise
 				release procedure &lcFile
 			endcase
@@ -5578,17 +5578,17 @@ if .T.;
 		endtry
 	endfor
 
-	* Add previous files no longer in Set("Classlib") or Set("Procedure")
+* Add previous files no longer in Set("Classlib") or Set("Procedure")
 	for each lcFile in m.laFileAnte
 		try
 			do case
-			case Ascan(m.laFilePost, m.lcFile, 1, -1, 1, 7) > 0
-				&& already in Set()
-			case !File(alltrim(Iif(m.tlClassLib;
-				, Trim(Substrc(m.lcFile, 1, At_c('ALIAS', m.lcFile)-1));
+			case ascan(m.laFilePost, m.lcFile, 1, -1, 1, 7) > 0
+&& already in Set()
+			case !file(alltrim(iif(m.tlClassLib;
+				, trim(substrc(m.lcFile, 1, at_c('ALIAS', m.lcFile)-1));
 				, m.lcFile;
 				), '"', "'"))
-				&& File can't be found
+&& File can't be found
 			case m.tlClassLib
 				set classlib to &lcFile additive
 			otherwise
@@ -5603,8 +5603,8 @@ endif
 return m.success
 
 * =============================================
-FUNCTION cResultAdd && Ajoute une entrée à un résultat cumulatif
-LPARAMETERS ;
+function cResultAdd && Ajoute une entrée à un résultat cumulatif
+lparameters ;
   tcResult; && @ résultat cumulatif
 , tuItem; && élément à ajouter au résultat - type 'N': assumes Seconds() for execution time tracking
 , tlLine; && [.F.] Sauter une ligne au lieu de 2
@@ -5612,105 +5612,105 @@ LPARAMETERS ;
 , tnStackMinus; && [0] nombre de niveaux de pile à retrancher - .T.: ne pas ajouter l'en-tête
 , tlDateTime; && [.F.] add date-time header
 
-tcResult = Iif(Vartype(m.tcResult) == 'C', m.tcResult, '')
+tcResult = iif(vartype(m.tcResult) == 'C', m.tcResult, '')
 
-tuItem = Iif(Vartype(m.tuItem) == 'N' and m.tuItem > 0;
-	, ICase(;
+tuItem = iif(vartype(m.tuItem) == 'N' and m.tuItem > 0;
+	, icase(;
 		cLangUser() = 'fr',	[terminé en],; && copy-paste this line to add another language support
 												[completed in];
 		) + ' ' + cSeconds(@m.tuItem);
 	, m.tuItem;
 	)
 
-if .T.;
- and ga_Type_IsChar(m.tuItem, .T.);
+if .t.;
+ and ga_Type_IsChar(m.tuItem, .t.);
  and not m.tuItem $ m.tcResult
 
-	tuItem = Alltrim(m.tuItem, CR, LF)
-	
-	local lcHeader as String
+	tuItem = alltrim(m.tuItem, CR, LF)
 
-	lcHeader = Iif(Empty(m.tnStackMinus) or Vartype(m.tnStackMinus) == 'N';
-		, cResultHeader(- 2 - Abs(Evl(m.tnStackMinus, 0)), m.tlDateTime);
+	local lcHeader as string
+
+	lcHeader = iif(empty(m.tnStackMinus) or vartype(m.tnStackMinus) == 'N';
+		, cResultHeader(- 2 - abs(evl(m.tnStackMinus, 0)), m.tlDateTime);
 		, '';
 		)
 
 	tuItem = '';
-		+ Iif(Left(m.tuItem, Lenc(m.lcHeader)) == m.lcHeader, '', m.lcHeader);
+		+ iif(left(m.tuItem, lenc(m.lcHeader)) == m.lcHeader, '', m.lcHeader);
 		+ m.tuItem
 
 	tcResult = '';
-		+ Iif(lTrue(m.tlPrepend);
-		  , c2Words(m.tuItem, Iif(m.tlLine, CRLF, CRLF2), m.tcResult);
-		  , c2Words(m.tcResult, Iif(m.tlLine, CRLF, CRLF2), m.tuItem);
+		+ iif(lTrue(m.tlPrepend);
+		  , c2Words(m.tuItem, iif(m.tlLine, CRLF, CRLF2), m.tcResult);
+		  , c2Words(m.tcResult, iif(m.tlLine, CRLF, CRLF2), m.tuItem);
 		  )
 
 endif
 
-RETURN .F. && impératif
+return .f. && impératif
 
 * ===================================================================
-FUNCTION cResultHeader && En-tête standard d'un résultat
-LPARAMETERS ;
+function cResultHeader && En-tête standard d'un résultat
+lparameters ;
   tnStackOffset; && [-1]
 , tlDateTime; && [.F.] add date-time header
 
-LOCAL lnStack, lcSys16
+local lnStack, lcSys16
 
-tnStackOffset = Evl(m.tnStackOffset, -1)
+tnStackOffset = evl(m.tnStackOffset, -1)
 assert m.tnStackOffset < 0
-tnStackOffset = Iif(m.tnStackOffset < 0, m.tnStackOffset, -1)
+tnStackOffset = iif(m.tnStackOffset < 0, m.tnStackOffset, -1)
 
-lnStack = Program(-1) + m.tnStackOffset
+lnStack = program(-1) + m.tnStackOffset
 assert m.lnStack > 0
-lnStack = Max(m.lnStack, 1)
+lnStack = max(m.lnStack, 1)
 
-lcSys16 = Sys(16, m.lnStack)
+lcSys16 = sys(16, m.lnStack)
 
-RETURN '';
-		+ Iif(lTrue(m.tlDateTime), Transform(Datetime()) + ' - ', '');
-		+ Lower(JustFname(cModuleInfo(m.lcSys16, 'Address')));
+return '';
+		+ iif(lTrue(m.tlDateTime), transform(datetime()) + ' - ', '');
+		+ lower(justfname(cModuleInfo(m.lcSys16, 'Address')));
 		+ '!';
-		+ Proper(cModuleInfo(m.lcSys16, 'Name'));
+		+ proper(cModuleInfo(m.lcSys16, 'Name'));
 		+ [() - ]
 
 * =============================================
-FUNCTION lUserAnAdmin As Variant && Current User is an administrator
-lparameters result as String && @
+function lUserAnAdmin as Variant && Current User is an administrator
+lparameters Result as string && @
 
-LOCAL success As Variant
+local success as Variant
 
-TRY
+try
 
-	DECLARE Integer IsUserAnAdmin IN Shell32
+	declare integer IsUserAnAdmin in Shell32
 
-	#if .F.
+	#if .f.
 		IsUserAnAdmin function && http://msdn.microsoft.com/en-us/library/bb776463.aspx
-		Minimum supported client: Windows XP [desktop apps only]
-		Minimum supported server: Windows Server 2003 [desktop apps only]
-		End of client support: Windows Vista && because of UAC I guess - looks good on Windows 7!
-		End of server support: Windows Server 2008
+		Minimum supported client: windows XP [desktop apps only]
+		Minimum supported server: windows server 2003 [desktop apps only]
+		end of client support: windows Vista && because of UAC I guess - looks good on Windows 7!
+		end of server support: windows server 2008
 	#endif
-	
-	success = IsUserAnAdmin() # 0
-CATCH
-	success = .NULL. && IsUserAnAdmin() not supported, we don't know
-ENDTRY
 
-result = Iif(IsNull(m.success);
-	, Textmerge('';
+	success = IsUserAnAdmin() # 0
+catch
+	success = .null. && IsUserAnAdmin() not supported, we don't know
+endtry
+
+Result = iif(isnull(m.success);
+	, textmerge('';
 		+ [<<Proper(Program())>>() ];
-		+ ICase(;
+		+ icase(;
 				cLangUser() = 'fr',	[n'a pu déterminer si le compte utilisateur courant '<<GetEnv("USERNAME")>>' est un administrateur car],; && copy-paste this line to add another language support
 														[could not determine whether current user account '<<GetEnv("USERNAME")>>' is an administrator because]; && Default: English
 				);
 		+ ' ';
-		+ Iif(lUAC(); && Windows > Vista / Server 2008 - end of support of lUserAnAdmin()/IsUserAnAdmin() function according to http://msdn.microsoft.com/en-us/library/bb776463.aspx
-			, ICase(;
+		+ iif(lUAC(); && Windows > Vista / Server 2008 - end of support of lUserAnAdmin()/IsUserAnAdmin() function according to http://msdn.microsoft.com/en-us/library/bb776463.aspx
+			, icase(;
 					cLangUser() = 'fr',	[Shell32!IsUserAnAdmin() n'est plus supporté sur <<wcWindowsEdition()>>],; && copy-paste this line to add another language support
 															[Shell32!IsUserAnAdmin() is no longer supported on <<wcWindowsEdition()>>]; && Default: English
 					);
-			, ICase(;
+			, icase(;
 					cLangUser() = 'fr',	[<<wcWindowsEdition()>> est trop ancien pour supporter Shell32!IsUserAnAdmin()],; && copy-paste this line to add another language support
 															[<<wcWindowsEdition()>> is too old to support Shell32!IsUserAnAdmin()]; && Default: English
 					);
@@ -5719,102 +5719,102 @@ result = Iif(IsNull(m.success);
 	, '';
 	)
 
-RETURN m.success
+return m.success
 
 * =============================================
-FUNCTION lUAC As Boolean && Current Windows version supports UAC
-return Val(GetWordNum(Os(1), 2)) > 6.0
+function lUAC as Boolean && Current Windows version supports UAC
+return val(getwordnum(os(1), 2)) > 6.0
 endfunc
 
 * ========================================
-PROCEDURE ProceduresAdd && Ajoute des fichiers prg au Set("Procedure")
-LPARAMETERS tcPrgMask && [*.prg] Masque de fichier prg
+procedure ProceduresAdd && Ajoute des fichiers prg au Set("Procedure")
+lparameters tcPrgMask && [*.prg] Masque de fichier prg
 
-LOCAL lcPrgMask, laPrgs[1], lnPrgs, lnPrg, lnResult && Nombre de fichiers prg ajoutés
+local lcPrgMask, laPrgs[1], lnPrgs, lnPrg, lnResult && Nombre de fichiers prg ajoutés
 
 lnResult = 0
-lcPrgMask = Iif(Vartype(m.tcPrgMask)=='C' AND NOT Empty(m.tcPrgMask), m.tcPrgMask, '*.prg')
-lnPrgs = ADir(laPrgs, m.lcPrgMask)
-IF m.lnPrgs > 0
-	FOR lnPrg = 1 TO m.lnPrgs
-		lnResult = m.lnResult + Iif(ProcedureAdd(laPrgs[m.lnPrg, 1]), 1, 0)
-	ENDFOR
-ENDIF
+lcPrgMask = iif(vartype(m.tcPrgMask)=='C' and not empty(m.tcPrgMask), m.tcPrgMask, '*.prg')
+lnPrgs = adir(laPrgs, m.lcPrgMask)
+if m.lnPrgs > 0
+	for lnPrg = 1 to m.lnPrgs
+		lnResult = m.lnResult + iif(ProcedureAdd(laPrgs[m.lnPrg, 1]), 1, 0)
+	endfor
+endif
 
-RETURN m.lnResult
+return m.lnResult
 endproc
 
 * ========================================
-PROCEDURE ProcedureAdd && Ajoute un fichier prg à Set("Procedure") s'il n'y est déjà
-LPARAMETERS ;
+procedure ProcedureAdd && Ajoute un fichier prg à Set("Procedure") s'il n'y est déjà
+lparameters ;
 	tcPrg,; && fichier prg
 	tlRemove && [.F.] Ôter de Set("Procedure")
 
-LOCAL llResult && le fichier a été ajouté ou ôté selon la demande
-IF Vartype(m.tcPrg) == 'C' AND File(m.tcPrg) AND InList(Upper(JustExt(m.tcPrg)), 'PRG', 'FXP')
+local llResult && le fichier a été ajouté ou ôté selon la demande
+if vartype(m.tcPrg) == 'C' and file(m.tcPrg) and inlist(upper(justext(m.tcPrg)), 'PRG', 'FXP')
 
-	tcPrg = FullPath(ForceExt(m.tcPrg, 'FXP'))
+	tcPrg = fullpath(forceext(m.tcPrg, 'FXP'))
 	tlRemove = lTrue(m.tlRemove)
 
-	IF '"' + m.tcPrg + '"' $ Set("Procedure")
-		IF m.tlRemove
-			RELEASE PROCEDURE (m.tcPrg)
-			llResult = .T.
-		ENDIF
-	ELSE
-		IF NOT m.tlRemove
-			SET PROCEDURE TO (m.tcPrg) ADDITIVE
-			llResult = .T.
-		ENDIF
-	ENDIF
-ENDIF
+	if '"' + m.tcPrg + '"' $ set("Procedure")
+		if m.tlRemove
+			release procedure (m.tcPrg)
+			llResult = .t.
+		endif
+	else
+		if not m.tlRemove
+			set procedure to (m.tcPrg) additive
+			llResult = .t.
+		endif
+	endif
+endif
 
-RETURN m.llResult
-
-* ========================================
-PROCEDURE ClassLibRemove && Ôte un fichier vcx de Set("ClassLib") s'il y est
-LPARAMETERS tcVCX && fichier vcx
-
-RETURN ClassLibAdd(m.tcVCX, .T.)
+return m.llResult
 
 * ========================================
-PROCEDURE ClassLibAdd && Ajoute un fichier vcx à Set("ClassLib") s'il n'y est déjà
-LPARAMETERS ;
+procedure ClassLibRemove && Ôte un fichier vcx de Set("ClassLib") s'il y est
+lparameters tcVCX && fichier vcx
+
+return ClassLibAdd(m.tcVCX, .t.)
+
+* ========================================
+procedure ClassLibAdd && Ajoute un fichier vcx à Set("ClassLib") s'il n'y est déjà
+lparameters ;
 	tcVCX,; && fichier(s) vcx
 	tlRemove && [.F.] RELEASE CLASSLIB
 
-LOCAL laVCX[1], lcVCX, llSet, lcAlias, llResult && le fichier a été ajouté ou retiré
+local laVCX[1], lcVCX, llSet, lcAlias, llResult && le fichier a été ajouté ou retiré
 
-IF .T.;
- and Vartype(m.tcVCX) == 'C';
- and ALines(laVCX, m.tcVCX, 5, ',', ';') > 0
- 
- 	FOR EACH lcVCX IN m.laVCX
+if .t.;
+ and vartype(m.tcVCX) == 'C';
+ and alines(laVCX, m.tcVCX, 5, ',', ';') > 0
 
-		lcAlias = Upper(JustStem(m.lcVCX))
-		llSet = ' ALIAS ' + m.lcAlias + ',' $ Set("Classlib") + ','
-		IF lTrue(m.tlRemove)
-			IF m.llSet
-				RELEASE CLASSLIB (m.lcVCX)
-				llResult = .T.
-			ENDIF
-		ELSE
-			IF NOT m.llSet AND File(m.lcVCX)
-				SET CLASSLIB TO (m.lcVCX) ADDITIVE
-				llResult = .T.
-			ENDIF
-		ENDIF
- 	ENDFOR
-ENDIF
+ 	for each lcVCX in m.laVCX
 
-RETURN m.llResult
+		lcAlias = upper(juststem(m.lcVCX))
+		llSet = ' ALIAS ' + m.lcAlias + ',' $ set("Classlib") + ','
+		if lTrue(m.tlRemove)
+			if m.llSet
+				release classlib (m.lcVCX)
+				llResult = .t.
+			endif
+		else
+			if not m.llSet and file(m.lcVCX)
+				set classlib to (m.lcVCX) additive
+				llResult = .t.
+			endif
+		endif
+ 	endfor
+endif
+
+return m.llResult
 endproc
 
 * ========================================
 function Sys3 && Sys(3) unique même sur une machine rapide
 local Sys3
-Sys3 = Sys(3)
-do while m.Sys3 == Sys(3)
+Sys3 = sys(3)
+do while m.Sys3 == sys(3)
 enddo
 return m.Sys3
 endfunc
@@ -5822,8 +5822,8 @@ endfunc
 * ========================================
 function Sys2015 && Sys(2015) unique même sur une machine rapide - alias de cSys2015Unique()
 local Sys2015
-Sys2015 = Sys(2015)
-do while m.Sys2015 == Sys(2015)
+Sys2015 = sys(2015)
+do while m.Sys2015 == sys(2015)
 enddo
 return m.Sys2015
 endfunc
@@ -5834,24 +5834,24 @@ return Sys2015()
 endfunc
 
 * ========================================
-procedure varStore(out, in) As Boolean && assigne une variable - alias de varSet()
+procedure varStore(out, in) as Boolean && assigne une variable - alias de varSet()
 store m.in to out && http://blogs.msdn.com/b/calvin_hsia/archive/2004/12/14/301282.aspx - Calvin: the STORE command doesn't do as much as the "x=y" command. More in a future blog.
 endproc
 
 * =============================================
-procedure varSet(out, in) As Boolean && assigne une variable - alias de varStore()
+procedure varSet(out, in) as Boolean && assigne une variable - alias de varStore()
 store m.in to out && http://blogs.msdn.com/b/calvin_hsia/archive/2004/12/14/301282.aspx - Calvin: the STORE command doesn't do as much as the "x=y" command. More in a future blog.
 endproc
 
 * =============================================
-function iInc(int, inc) As Integer && incrémente une variable
-int = m.int + Evl(m.inc, 1)
+function iInc(int, inc) as integer && incrémente une variable
+int = m.int + evl(m.inc, 1)
 return m.int
 endproc
 
 * =============================================
-procedure setStepOn(condition as Boolean) As Boolean
-if (Cast(m.condition as L) or Empty(Pcount())) && and lDevMode() useless
+procedure setStepOn(condition as Boolean) as Boolean
+if (cast(m.condition as L) or empty(pcount())) && and lDevMode() useless
 	set step on
 endif
 endproc
@@ -5863,7 +5863,7 @@ lparameters ;
 , lAdditive as Boolean; && [.F.] {en} Add to the same file
 , lProduction as Boolean; && [.F.] {fr} Forcer le Coverage en mode production
 
-return Iif(Empty(Pcount());
+return iif(empty(pcount());
 	, oCoverage();
 	, oCoverage(m.condition, m.lAdditive, m.lProduction);
 	)
@@ -5879,39 +5879,39 @@ lparameters ;
 
 * loCoverage = oCoverage([condition]) && {en} Starts log {fr} Commence l'historique
 * 	--<{en} code you want to trace {fr} Code que vous voulez tracer >--
-* loCoverage = .null. && {en} Stops log {fr} Arrête l'historique 
+* loCoverage = .null. && {en} Stops log {fr} Arrête l'historique
 
-if .T.;
- and (Empty(Pcount()) or lTrue(m.condition));
- and (lDevMode() OR lTrue(m.lProduction))
- 
+if .t.;
+ and (empty(pcount()) or lTrue(m.condition));
+ and (lDevMode() or lTrue(m.lProduction))
+
 	lAdditive = lTrue(m.lAdditive)
 
-	LOCAL lcFile as String
+	local lcFile as string
 
 	lcFile = '';
-		+ Lower(cModuleInfo(Sys(16,0), 'Address')); && root program
-		+ '_' + Lower(cModuleInfo(Sys(16, Program(-1)-1), 'Name'));
-		+ Iif(m.lAdditive;
+		+ lower(cModuleInfo(sys(16,0), 'Address')); && root program
+		+ '_' + lower(cModuleInfo(sys(16, program(-1)-1), 'Name'));
+		+ iif(m.lAdditive;
 			, '';
 			, '_' + TtocSep(, '-');
 			);
 		+ '.cov.log'
 
-	IF m.lAdditive
-		StrToFile(CRLF + Ttoc(Datetime()) + ' ' + Replicate('-', 50), m.lcFile, .T.)
-	ENDIF
+	if m.lAdditive
+		strtofile(CRLF + ttoc(datetime()) + ' ' + replicate('-', 50), m.lcFile, .t.)
+	endif
 
-	RETURN abSet('COVERAGE';
+	return abSet('COVERAGE';
 			, '"' + m.lcFile + '"';
-				+ Iif(m.lAdditive, ' ADDITIVE', '');
-			,,,.T.)
+				+ iif(m.lAdditive, ' ADDITIVE', '');
+			,,,.t.)
 
 endif
 endfunc
 
 * =============================================
-FUNCTION RC4(cTexte, cClef)
+function RC4(cTexte, cClef)
 
 *!*    Objet : Implémention en VisualFoxPro de l'algorithme de cryptage RC4
 *!*    Auteur : C.Chenavier
@@ -5947,42 +5947,42 @@ FUNCTION RC4(cTexte, cClef)
 *!*    a = RC4(STRCONV(c,16),STRCONV(k,16))
 *!*    Info(STRCONV(a,15)="66A0949F8AF7D6891F7F832BA833C00C892EBE30143CE28740011ECF")
 
-LOCAL I, J, K, nLongClef, nInt, cResult
-LOCAL ARRAY aInt(256)
+local i, J, K, nLongClef, nInt, cResult
+local array aInt(256)
 
-FOR I = 1 TO 256
-    aInt(I) = I-1
-ENDFOR
+for i = 1 to 256
+    aInt(i) = i-1
+endfor
 
 J = 0
-M.nLongClef = LEN(M.cClef)
-FOR I = 1 TO 256
-    J = BITAND(J + aInt(I) + ASC(SUBSTR(M.cClef, MOD(I-1,M.nLongClef)+1, 1)), 255)
-    M.nInt = aInt(I)
-    aInt(I) = aInt(J+1)
+m.nLongClef = len(M.cClef)
+for i = 1 to 256
+    J = bitand(J + aInt(i) + asc(substr(M.cClef, mod(i-1,M.nLongClef)+1, 1)), 255)
+    m.nInt = aInt(i)
+    aInt(i) = aInt(J+1)
     aInt(J+1) = M.nInt
-ENDFOR
+endfor
 
-I = 1
+i = 1
 J = 0
-M.cResult = ''
-FOR K = 1 TO LEN(M.cTexte)
-    I = BITAND(I, 255) + 1
-    J = BITAND(J + aInt(I), 255)
-    M.nInt = aInt(I)
-    aInt(I) = aInt(J+1)
+m.cResult = ''
+for K = 1 to len(M.cTexte)
+    i = bitand(i, 255) + 1
+    J = bitand(J + aInt(i), 255)
+    m.nInt = aInt(i)
+    aInt(i) = aInt(J+1)
     aInt(J+1) = M.nInt
-    M.cResult = M.cResult + CHR(BITXOR(ASC(SUBSTR(M.cTexte, K, 1)), ;
-                                       aInt(BITAND(aInt(I) + M.nInt, 255)+1)))
-ENDFOR
+    m.cResult = M.cResult + chr(bitxor(asc(substr(M.cTexte, K, 1)), ;
+                                       aInt(bitand(aInt(i) + M.nInt, 255)+1)))
+endfor
 
-RETURN M.cResult
+return M.cResult
 endfunc
 
 * =============================================
 function cObjectCamelCase && Nom ou adresse d'objet où les abréviations des classes sont en casse mixte
 lparameters cObject
-return Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(m.cObject;
+return strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(m.cObject;
 , 'cad', 'Cad', 1, -1, 1);
 , 'cbo', 'Cbo', 1, -1, 1);
 , 'chk', 'Chk', 1, -1, 1);
@@ -6027,25 +6027,25 @@ endfunc
 
 * =============================================
 function nEvl(uValue, notEmpty, typeForce) && substitute value instead of not empty value
-return ICase(;
-	!Empty(m.uValue),;
-		m.notEmpty,;
+return icase(;
+	!empty(m.uValue),;
+		M.notEmpty,;
 	lTrue(m.typeForce),;
-		uEmpty(Vartype(m.notEmpty)),;
-		m.uValue;
+		uEmpty(vartype(m.notEmpty)),;
+		M.uValue;
 	)
 endfunc
 
 * =============================================
 function nNvl && substitute value instead of a not null value
 lparameters value, substitute
-return Iif(IsNull(m.value), m.value, m.substitute)
+return iif(isnull(m.value), m.value, m.substitute)
 endfunc
 
 * =============================================
 function isNullOrEmpty && null or empty value
 lparameters value
-return !Vartype(m.value) == 'O' and Empty(Nvl(m.value, .F.))
+return !vartype(m.value) == 'O' and empty(nvl(m.value, .f.))
 endfunc
 * --------------------------------------------
 function isEmptyOrNull && empty or null value
@@ -6054,69 +6054,69 @@ return isNullOrEmpty(m.value)
 endfunc
 
 * =============================================
-function ENvl && substitute value instead of an empty or null value
+function envl && substitute value instead of an empty or null value
 lparameters value, substitute
-return Iif(isNullOrEmpty(m.value), m.substitute, m.value)
+return iif(isNullOrEmpty(m.value), m.substitute, m.value)
 endfunc
 
 * =============================================
 function nENvl && substitute value instead of not empty and not null value
 lparameters value, substitute
-return Iif(isNullOrEmpty(m.value), m.value, m.substitute)
+return iif(isNullOrEmpty(m.value), m.value, m.substitute)
 endfunc
 
 * =============================================
 function EvlNull && turns empty value into .null.
 lparameters value
-return Iif(!Vartype(m.value) == 'O' and Empty(m.value), .null., m.value)
+return iif(!vartype(m.value) == 'O' and empty(m.value), .null., m.value)
 endfunc
 
 * =============================================
 function lTrue && a value is .T.
 lparameters value
-return Vartype(m.value) == 'L' and m.value
+return vartype(m.value) == 'L' and m.value
 endfunc
 * =============================================
 function lFalse && a value is .F.
 lparameters value
-return Vartype(m.value) == 'L' and !m.value
+return vartype(m.value) == 'L' and !m.value
 endfunc
 
-#if .F. && https://raw.githubusercontent.com/npm/node-semver/master/semver.js
+#if .f. && https://raw.githubusercontent.com/npm/node-semver/master/semver.js
 
 exports = module.exports = SemVer;
 
-// The debug function is excluded entirely from the minified version.
+// the debug function is excluded entirely from the minified version.
 /* nomin */ var debug;
 /* nomin */ if (typeof process === 'object' &&
     /* nomin */ process.env &&
     /* nomin */ process.env.NODE_DEBUG &&
-    /* nomin */ /\bsemver\b/i.test(process.env.NODE_DEBUG))
+    /* nomin */ /\bsemver\b/i.Test(process.env.NODE_DEBUG))
   /* nomin */ debug = function() {
-    /* nomin */ var args = Array.prototype.slice.call(arguments, 0);
+    /* nomin */ var args = array.prototype.slice.call(arguments, 0);
     /* nomin */ args.unshift('SEMVER');
     /* nomin */ console.log.apply(console, args);
     /* nomin */ };
 /* nomin */ else
   /* nomin */ debug = function() {};
 
-// Note: this is the semver.org version of the spec that it implements
-// Not necessarily the package version of this code.
+// note: this is the SemVer.org version of the spec that it implements
+// not necessarily the package version of this code.
 exports.SEMVER_SPEC_VERSION = '2.0.0';
 
 var MAX_LENGTH = 256;
-var MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER || 9007199254740991;
+var MAX_SAFE_INTEGER = number.MAX_SAFE_INTEGER || 9007199254740991;
 
-// The actual regexps go on exports.re
+// the actual regexps go on exports.re
 var re = exports.re = [];
 var src = exports.src = [];
 var R = 0;
 
-// The following Regular Expressions can be used for tokenizing,
+// the following Regular Expressions can be used for tokenizing,
 // validating, and parsing SemVer version strings.
 
 // ## Numeric Identifier
-// A single `0`, or a non-zero digit followed by zero or more digits.
+// a single `0`, or a non-zero digit followed by zero or more digits.
 
 var NUMERICIDENTIFIER = R++;
 src[NUMERICIDENTIFIER] = '0|[1-9]\\d*';
@@ -6124,16 +6124,16 @@ var NUMERICIDENTIFIERLOOSE = R++;
 src[NUMERICIDENTIFIERLOOSE] = '[0-9]+';
 
 
-// ## Non-numeric Identifier
-// Zero or more digits, followed by a letter or hyphen, and then zero or
+// ## non-Numeric Identifier
+// zero or more digits, followed by a letter or hyphen, and then zero or
 // more letters, digits, or hyphens.
 
 var NONNUMERICIDENTIFIER = R++;
 src[NONNUMERICIDENTIFIER] = '\\d*[a-zA-Z-][a-zA-Z0-9-]*';
 
 
-// ## Main Version
-// Three dot-separated numeric identifiers.
+// ## main version
+// Three dot-separated Numeric identifiers.
 
 var MAINVERSION = R++;
 src[MAINVERSION] = '(' + src[NUMERICIDENTIFIER] + ')\\.' +
@@ -6145,8 +6145,8 @@ src[MAINVERSIONLOOSE] = '(' + src[NUMERICIDENTIFIERLOOSE] + ')\\.' +
                         '(' + src[NUMERICIDENTIFIERLOOSE] + ')\\.' +
                         '(' + src[NUMERICIDENTIFIERLOOSE] + ')';
 
-// ## Pre-release Version Identifier
-// A numeric identifier, or a non-numeric identifier.
+// ## Pre-release version Identifier
+// a Numeric Identifier, or a non-Numeric Identifier.
 
 var PRERELEASEIDENTIFIER = R++;
 src[PRERELEASEIDENTIFIER] = '(?:' + src[NUMERICIDENTIFIER] +
@@ -6157,8 +6157,8 @@ src[PRERELEASEIDENTIFIERLOOSE] = '(?:' + src[NUMERICIDENTIFIERLOOSE] +
                                  '|' + src[NONNUMERICIDENTIFIER] + ')';
 
 
-// ## Pre-release Version
-// Hyphen, followed by one or more dot-separated pre-release version
+// ## Pre-release version
+// hyphen, followed by one or more dot-separated Pre-release version
 // identifiers.
 
 var PRERELEASE = R++;
@@ -6169,31 +6169,31 @@ var PRERELEASELOOSE = R++;
 src[PRERELEASELOOSE] = '(?:-?(' + src[PRERELEASEIDENTIFIERLOOSE] +
                        '(?:\\.' + src[PRERELEASEIDENTIFIERLOOSE] + ')*))';
 
-// ## Build Metadata Identifier
-// Any combination of digits, letters, or hyphens.
+// ## build Metadata Identifier
+// any combination of digits, letters, or hyphens.
 
 var BUILDIDENTIFIER = R++;
 src[BUILDIDENTIFIER] = '[0-9A-Za-z-]+';
 
-// ## Build Metadata
-// Plus sign, followed by one or more period-separated build metadata
+// ## build Metadata
+// Plus sign, followed by one or more period-separated build Metadata
 // identifiers.
 
-var BUILD = R++;
+var build = R++;
 src[BUILD] = '(?:\\+(' + src[BUILDIDENTIFIER] +
              '(?:\\.' + src[BUILDIDENTIFIER] + ')*))';
 
 
-// ## Full Version String
-// A main version, followed optionally by a pre-release version and
-// build metadata.
+// ## full version string
+// a main version, followed optionally by a Pre-release version and
+// build Metadata.
 
-// Note that the only major, minor, patch, and pre-release sections of
-// the version string are capturing groups.  The build metadata is not a
+// note that the only major, minor, patch, and Pre-release sections of
+// the version string are capturing groups.  the build Metadata is not a
 // capturing group, because it should not ever be used in version
 // comparison.
 
-var FULL = R++;
+var full = R++;
 var FULLPLAIN = 'v?' + src[MAINVERSION] +
                 src[PRERELEASE] + '?' +
                 src[BUILD] + '?';
@@ -6201,7 +6201,7 @@ var FULLPLAIN = 'v?' + src[MAINVERSION] +
 src[FULL] = '^' + FULLPLAIN + '$';
 
 // like full, but allows v1.2.3 and =1.2.3, which people do sometimes.
-// also, 1.0.0alpha1 (prerelease without the hyphen) which is pretty
+// also, 1.0.0alpha1 (PRERELEASE without the hyphen) which is pretty
 // common in the npm registry.
 var LOOSEPLAIN = '[v=\\s]*' + src[MAINVERSIONLOOSE] +
                  src[PRERELEASELOOSE] + '?' +
@@ -6214,8 +6214,8 @@ var GTLT = R++;
 src[GTLT] = '((?:<|>)?=?)';
 
 // Something like "2.*" or "1.2.x".
-// Note that "x.x" is a valid xRange identifer, meaning "any version"
-// Only the first item is strictly required.
+// note that "x.x" is a valid xRange identifer, meaning "any version"
+// only the first item is strictly required.
 var XRANGEIDENTIFIERLOOSE = R++;
 src[XRANGEIDENTIFIERLOOSE] = src[NUMERICIDENTIFIERLOOSE] + '|x|X|\\*';
 var XRANGEIDENTIFIER = R++;
@@ -6237,13 +6237,13 @@ src[XRANGEPLAINLOOSE] = '[v=\\s]*(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
                         src[BUILD] + '?' +
                         ')?)?';
 
-var XRANGE = R++;
+var xRange = R++;
 src[XRANGE] = '^' + src[GTLT] + '\\s*' + src[XRANGEPLAIN] + '$';
 var XRANGELOOSE = R++;
 src[XRANGELOOSE] = '^' + src[GTLT] + '\\s*' + src[XRANGEPLAINLOOSE] + '$';
 
 // Tilde ranges.
-// Meaning is "reasonably at or greater than"
+// meaning is "reasonably at or greater than"
 var LONETILDE = R++;
 src[LONETILDE] = '(?:~>?)';
 
@@ -6252,13 +6252,13 @@ src[TILDETRIM] = '(\\s*)' + src[LONETILDE] + '\\s+';
 re[TILDETRIM] = new RegExp(src[TILDETRIM], 'g');
 var tildeTrimReplace = '$1~';
 
-var TILDE = R++;
+var Tilde = R++;
 src[TILDE] = '^' + src[LONETILDE] + src[XRANGEPLAIN] + '$';
 var TILDELOOSE = R++;
 src[TILDELOOSE] = '^' + src[LONETILDE] + src[XRANGEPLAINLOOSE] + '$';
 
 // Caret ranges.
-// Meaning is "at least and backwards compatible with"
+// meaning is "at least and backwards compatible with"
 var LONECARET = R++;
 src[LONECARET] = '(?:\\^)';
 
@@ -6267,32 +6267,32 @@ src[CARETTRIM] = '(\\s*)' + src[LONECARET] + '\\s+';
 re[CARETTRIM] = new RegExp(src[CARETTRIM], 'g');
 var caretTrimReplace = '$1^';
 
-var CARET = R++;
+var Caret = R++;
 src[CARET] = '^' + src[LONECARET] + src[XRANGEPLAIN] + '$';
 var CARETLOOSE = R++;
 src[CARETLOOSE] = '^' + src[LONECARET] + src[XRANGEPLAINLOOSE] + '$';
 
-// A simple gt/lt/eq thing, or just "" to indicate "any version"
+// a simple gt/lt/eq thing, or just "" to indicate "any version"
 var COMPARATORLOOSE = R++;
 src[COMPARATORLOOSE] = '^' + src[GTLT] + '\\s*(' + LOOSEPLAIN + ')$|^$';
 var COMPARATOR = R++;
 src[COMPARATOR] = '^' + src[GTLT] + '\\s*(' + FULLPLAIN + ')$|^$';
 
 
-// An expression to strip any whitespace between the gtlt and the thing
+// An expression to strip any whitespace between the GTLT and the thing
 // it modifies, so that `> 1.2.3` ==> `>1.2.3`
 var COMPARATORTRIM = R++;
 src[COMPARATORTRIM] = '(\\s*)' + src[GTLT] +
                       '\\s*(' + LOOSEPLAIN + '|' + src[XRANGEPLAIN] + ')';
 
-// this one has to use the /g flag
+// this one has to use the /G flag
 re[COMPARATORTRIM] = new RegExp(src[COMPARATORTRIM], 'g');
 var comparatorTrimReplace = '$1$2$3';
 
 
 // Something like `1.2.3 - 1.2.4`
-// Note that these all use the loose form, because they'll be
-// checked against either the strict or loose comparator form
+// note that these all use the LOOSE form, because they'll be
+// checked against either the strict or LOOSE COMPARATOR form
 // later.
 var HYPHENRANGE = R++;
 src[HYPHENRANGE] = '^\\s*(' + src[XRANGEPLAIN] + ')' +
@@ -6306,12 +6306,12 @@ src[HYPHENRANGELOOSE] = '^\\s*(' + src[XRANGEPLAINLOOSE] + ')' +
                         '(' + src[XRANGEPLAINLOOSE] + ')' +
                         '\\s*$';
 
-// Star ranges basically just allow anything at all.
-var STAR = R++;
+// star ranges basically just allow anything at all.
+var star = R++;
 src[STAR] = '(<|>)?=?\\s*\\*';
 
-// Compile to actual regexp objects.
-// All are flag-free, unless they were created above with a flag.
+// compile to actual RegExp objects.
+// all are flag-free, unless they were created above with a flag.
 for (var i = 0; i < R; i++) {
   debug(i, src[i]);
   if (!re[i])
@@ -6319,7 +6319,7 @@ for (var i = 0; i < R; i++) {
 }
 
 exports.parse = parse;
-function parse(version, loose) {
+function parse(version, LOOSE) {
   if (version instanceof SemVer)
     return version;
 
@@ -6329,35 +6329,35 @@ function parse(version, loose) {
   if (version.length > MAX_LENGTH)
     return null;
 
-  var r = loose ? re[LOOSE] : re[FULL];
-  if (!r.test(version))
+  var R = LOOSE ? re[LOOSE] : re[FULL];
+  if (!R.Test(version))
     return null;
 
   try {
-    return new SemVer(version, loose);
+    return new SemVer(version, LOOSE);
   } catch (er) {
     return null;
   }
 }
 
 exports.valid = valid;
-function valid(version, loose) {
-  var v = parse(version, loose);
+function valid(version, LOOSE) {
+  var v = parse(version, LOOSE);
   return v ? v.version : null;
 }
 
 
 exports.clean = clean;
-function clean(version, loose) {
-  var s = parse(version.trim().replace(/^[=v]+/, ''), loose);
+function clean(version, LOOSE) {
+  var s = parse(version.trim().replace(/^[=v]+/, ''), LOOSE);
   return s ? s.version : null;
 }
 
 exports.SemVer = SemVer;
 
-function SemVer(version, loose) {
+function SemVer(version, LOOSE) {
   if (version instanceof SemVer) {
-    if (version.loose === loose)
+    if (version.LOOSE === LOOSE)
       return version;
     else
       version = version.version;
@@ -6369,21 +6369,21 @@ function SemVer(version, loose) {
     throw new TypeError('version is longer than ' + MAX_LENGTH + ' characters')
 
   if (!(this instanceof SemVer))
-    return new SemVer(version, loose);
+    return new SemVer(version, LOOSE);
 
-  debug('SemVer', version, loose);
-  this.loose = loose;
-  var m = version.trim().match(loose ? re[LOOSE] : re[FULL]);
+  debug('SemVer', version, LOOSE);
+  this.LOOSE = LOOSE;
+  var M = version.trim().match(LOOSE ? re[LOOSE] : re[FULL]);
 
-  if (!m)
+  if (!M)
     throw new TypeError('Invalid Version: ' + version);
 
   this.raw = version;
 
   // these are actually numbers
-  this.major = +m[1];
-  this.minor = +m[2];
-  this.patch = +m[3];
+  this.major = +M[1];
+  this.minor = +M[2];
+  this.patch = +M[3];
 
   if (this.major > MAX_SAFE_INTEGER || this.major < 0)
     throw new TypeError('Invalid major version')
@@ -6394,12 +6394,12 @@ function SemVer(version, loose) {
   if (this.patch > MAX_SAFE_INTEGER || this.patch < 0)
     throw new TypeError('Invalid patch version')
 
-  // numberify any prerelease numeric ids
-  if (!m[4])
-    this.prerelease = [];
+  // numberify any PRERELEASE Numeric ids
+  if (!M[4])
+    this.PRERELEASE = [];
   else
-    this.prerelease = m[4].split('.').map(function(id) {
-      if (/^[0-9]+$/.test(id)) {
+    this.PRERELEASE = M[4].split('.').map(function(id) {
+      if (/^[0-9]+$/.Test(id)) {
         var num = +id
         if (num >= 0 && num < MAX_SAFE_INTEGER)
           return num
@@ -6407,14 +6407,14 @@ function SemVer(version, loose) {
       return id;
     });
 
-  this.build = m[5] ? m[5].split('.') : [];
+  this.build = M[5] ? M[5].split('.') : [];
   this.format();
 }
 
 SemVer.prototype.format = function() {
   this.version = this.major + '.' + this.minor + '.' + this.patch;
-  if (this.prerelease.length)
-    this.version += '-' + this.prerelease.join('.');
+  if (this.PRERELEASE.length)
+    this.version += '-' + this.PRERELEASE.join('.');
   return this.version;
 };
 
@@ -6427,16 +6427,16 @@ SemVer.prototype.toString = function() {
 };
 
 SemVer.prototype.compare = function(other) {
-  debug('SemVer.compare', this.version, this.loose, other);
+  debug('SemVer.compare', this.version, this.LOOSE, other);
   if (!(other instanceof SemVer))
-    other = new SemVer(other, this.loose);
+    other = new SemVer(other, this.LOOSE);
 
   return this.compareMain(other) || this.comparePre(other);
 };
 
 SemVer.prototype.compareMain = function(other) {
   if (!(other instanceof SemVer))
-    other = new SemVer(other, this.loose);
+    other = new SemVer(other, this.LOOSE);
 
   return compareIdentifiers(this.major, other.major) ||
          compareIdentifiers(this.minor, other.minor) ||
@@ -6445,20 +6445,20 @@ SemVer.prototype.compareMain = function(other) {
 
 SemVer.prototype.comparePre = function(other) {
   if (!(other instanceof SemVer))
-    other = new SemVer(other, this.loose);
+    other = new SemVer(other, this.LOOSE);
 
-  // NOT having a prerelease is > having one
-  if (this.prerelease.length && !other.prerelease.length)
+  // not having a PRERELEASE is > having one
+  if (this.PRERELEASE.length && !other.prerelease.length)
     return -1;
-  else if (!this.prerelease.length && other.prerelease.length)
+  else if (!this.PRERELEASE.length && other.prerelease.length)
     return 1;
-  else if (!this.prerelease.length && !other.prerelease.length)
+  else if (!this.PRERELEASE.length && !other.prerelease.length)
     return 0;
 
   var i = 0;
   do {
-    var a = this.prerelease[i];
-    var b = other.prerelease[i];
+    var a = this.PRERELEASE[i];
+    var b = other.PRERELEASE[i];
     debug('prerelease compare', i, a, b);
     if (a === undefined && b === undefined)
       return 0;
@@ -6474,97 +6474,97 @@ SemVer.prototype.comparePre = function(other) {
 };
 
 // preminor will bump the version up to the next minor release, and immediately
-// down to pre-release. premajor and prepatch work the same way.
-SemVer.prototype.inc = function(release, identifier) {
+// down to Pre-release. premajor and prepatch work the same way.
+SemVer.prototype.inc = function(release, Identifier) {
   switch (release) {
     case 'premajor':
-      this.prerelease.length = 0;
+      this.PRERELEASE.length = 0;
       this.patch = 0;
       this.minor = 0;
       this.major++;
-      this.inc('pre', identifier);
+      this.inc('pre', Identifier);
       break;
     case 'preminor':
-      this.prerelease.length = 0;
+      this.PRERELEASE.length = 0;
       this.patch = 0;
       this.minor++;
-      this.inc('pre', identifier);
+      this.inc('pre', Identifier);
       break;
     case 'prepatch':
-      // If this is already a prerelease, it will bump to the next version
+      // if this is already a PRERELEASE, it will bump to the next version
       // drop any prereleases that might already exist, since they are not
       // relevant at this point.
-      this.prerelease.length = 0;
-      this.inc('patch', identifier);
-      this.inc('pre', identifier);
+      this.PRERELEASE.length = 0;
+      this.inc('patch', Identifier);
+      this.inc('pre', Identifier);
       break;
-    // If the input is a non-prerelease version, this acts the same as
+    // if the input is a non-PRERELEASE version, this acts the same as
     // prepatch.
     case 'prerelease':
-      if (this.prerelease.length === 0)
-        this.inc('patch', identifier);
-      this.inc('pre', identifier);
+      if (this.PRERELEASE.length === 0)
+        this.inc('patch', Identifier);
+      this.inc('pre', Identifier);
       break;
 
     case 'major':
-      // If this is a pre-major version, bump up to the same major version.
-      // Otherwise increment major.
+      // if this is a Pre-major version, bump up to the same major version.
+      // otherwise increment major.
       // 1.0.0-5 bumps to 1.0.0
       // 1.1.0 bumps to 2.0.0
-      if (this.minor !== 0 || this.patch !== 0 || this.prerelease.length === 0)
+      if (this.minor !== 0 || this.patch !== 0 || this.PRERELEASE.length === 0)
         this.major++;
       this.minor = 0;
       this.patch = 0;
-      this.prerelease = [];
+      this.PRERELEASE = [];
       break;
     case 'minor':
-      // If this is a pre-minor version, bump up to the same minor version.
-      // Otherwise increment minor.
+      // if this is a Pre-minor version, bump up to the same minor version.
+      // otherwise increment minor.
       // 1.2.0-5 bumps to 1.2.0
       // 1.2.1 bumps to 1.3.0
-      if (this.patch !== 0 || this.prerelease.length === 0)
+      if (this.patch !== 0 || this.PRERELEASE.length === 0)
         this.minor++;
       this.patch = 0;
-      this.prerelease = [];
+      this.PRERELEASE = [];
       break;
     case 'patch':
-      // If this is not a pre-release version, it will increment the patch.
-      // If it is a pre-release it will bump up to the same patch version.
+      // if this is not a Pre-release version, it will increment the patch.
+      // if it is a Pre-release it will bump up to the same patch version.
       // 1.2.0-5 patches to 1.2.0
       // 1.2.0 patches to 1.2.1
-      if (this.prerelease.length === 0)
+      if (this.PRERELEASE.length === 0)
         this.patch++;
-      this.prerelease = [];
+      this.PRERELEASE = [];
       break;
-    // This probably shouldn't be used publicly.
+    // this probably shouldn't be used publicly.
     // 1.0.0 "pre" would become 1.0.0-0 which is the wrong direction.
     case 'pre':
-      if (this.prerelease.length === 0)
-        this.prerelease = [0];
+      if (this.PRERELEASE.length === 0)
+        this.PRERELEASE = [0];
       else {
-        var i = this.prerelease.length;
+        var i = this.PRERELEASE.length;
         while (--i >= 0) {
-          if (typeof this.prerelease[i] === 'number') {
-            this.prerelease[i]++;
+          if (typeof this.PRERELEASE[i] === 'number') {
+            this.PRERELEASE[i]++;
             i = -2;
           }
         }
         if (i === -1) // didn't increment anything
-          this.prerelease.push(0);
+          this.PRERELEASE.push(0);
       }
-      if (identifier) {
+      if (Identifier) {
         // 1.2.0-beta.1 bumps to 1.2.0-beta.2,
         // 1.2.0-beta.fooblz or 1.2.0-beta bumps to 1.2.0-beta.0
-        if (this.prerelease[0] === identifier) {
-          if (isNaN(this.prerelease[1]))
-            this.prerelease = [identifier, 0];
+        if (this.PRERELEASE[0] === Identifier) {
+          if (isNaN(this.PRERELEASE[1]))
+            this.PRERELEASE = [identifier, 0];
         } else
-          this.prerelease = [identifier, 0];
+          this.PRERELEASE = [identifier, 0];
       }
       break;
 
     default:
-      throw new Error('invalid increment argument: ' + release);
+      throw new error('invalid increment argument: ' + release);
   }
   this.format();
   this.raw = this.version;
@@ -6572,14 +6572,14 @@ SemVer.prototype.inc = function(release, identifier) {
 };
 
 exports.inc = inc;
-function inc(version, release, loose, identifier) {
-  if (typeof(loose) === 'string') {
-    identifier = loose;
-    loose = undefined;
+function inc(version, release, LOOSE, Identifier) {
+  if (typeof(LOOSE) === 'string') {
+    Identifier = LOOSE;
+    LOOSE = undefined;
   }
 
   try {
-    return new SemVer(version, loose).inc(release, identifier).version;
+    return new SemVer(version, LOOSE).inc(release, Identifier).version;
   } catch (er) {
     return null;
   }
@@ -6592,7 +6592,7 @@ function diff(version1, version2) {
   } else {
     var v1 = parse(version1);
     var v2 = parse(version2);
-    if (v1.prerelease.length || v2.prerelease.length) {
+    if (v1.PRERELEASE.length || v2.PRERELEASE.length) {
       for (var key in v1) {
         if (key === 'major' || key === 'minor' || key === 'patch') {
           if (v1[key] !== v2[key]) {
@@ -6614,10 +6614,10 @@ function diff(version1, version2) {
 
 exports.compareIdentifiers = compareIdentifiers;
 
-var numeric = /^[0-9]+$/;
+var Numeric = /^[0-9]+$/;
 function compareIdentifiers(a, b) {
-  var anum = numeric.test(a);
-  var bnum = numeric.test(b);
+  var anum = Numeric.Test(a);
+  var bnum = Numeric.Test(b);
 
   if (anum && bnum) {
     a = +a;
@@ -6637,23 +6637,23 @@ function rcompareIdentifiers(a, b) {
 }
 
 exports.major = major;
-function major(a, loose) {
-  return new SemVer(a, loose).major;
+function major(a, LOOSE) {
+  return new SemVer(a, LOOSE).major;
 }
 
 exports.minor = minor;
-function minor(a, loose) {
-  return new SemVer(a, loose).minor;
+function minor(a, LOOSE) {
+  return new SemVer(a, LOOSE).minor;
 }
 
 exports.patch = patch;
-function patch(a, loose) {
-  return new SemVer(a, loose).patch;
+function patch(a, LOOSE) {
+  return new SemVer(a, LOOSE).patch;
 }
 
 exports.compare = compare;
-function compare(a, b, loose) {
-  return new SemVer(a, loose).compare(b);
+function compare(a, b, LOOSE) {
+  return new SemVer(a, LOOSE).compare(b);
 }
 
 exports.compareLoose = compareLoose;
@@ -6662,56 +6662,56 @@ function compareLoose(a, b) {
 }
 
 exports.rcompare = rcompare;
-function rcompare(a, b, loose) {
-  return compare(b, a, loose);
+function rcompare(a, b, LOOSE) {
+  return compare(b, a, LOOSE);
 }
 
 exports.sort = sort;
-function sort(list, loose) {
+function sort(list, LOOSE) {
   return list.sort(function(a, b) {
-    return exports.compare(a, b, loose);
+    return exports.compare(a, b, LOOSE);
   });
 }
 
 exports.rsort = rsort;
-function rsort(list, loose) {
+function rsort(list, LOOSE) {
   return list.sort(function(a, b) {
-    return exports.rcompare(a, b, loose);
+    return exports.rcompare(a, b, LOOSE);
   });
 }
 
 exports.gt = gt;
-function gt(a, b, loose) {
-  return compare(a, b, loose) > 0;
+function gt(a, b, LOOSE) {
+  return compare(a, b, LOOSE) > 0;
 }
 
 exports.lt = lt;
-function lt(a, b, loose) {
-  return compare(a, b, loose) < 0;
+function lt(a, b, LOOSE) {
+  return compare(a, b, LOOSE) < 0;
 }
 
 exports.eq = eq;
-function eq(a, b, loose) {
-  return compare(a, b, loose) === 0;
+function eq(a, b, LOOSE) {
+  return compare(a, b, LOOSE) === 0;
 }
 
 exports.neq = neq;
-function neq(a, b, loose) {
-  return compare(a, b, loose) !== 0;
+function neq(a, b, LOOSE) {
+  return compare(a, b, LOOSE) !== 0;
 }
 
 exports.gte = gte;
-function gte(a, b, loose) {
-  return compare(a, b, loose) >= 0;
+function gte(a, b, LOOSE) {
+  return compare(a, b, LOOSE) >= 0;
 }
 
 exports.lte = lte;
-function lte(a, b, loose) {
-  return compare(a, b, loose) <= 0;
+function lte(a, b, LOOSE) {
+  return compare(a, b, LOOSE) <= 0;
 }
 
 exports.cmp = cmp;
-function cmp(a, op, b, loose) {
+function cmp(a, op, b, LOOSE) {
   var ret;
   switch (op) {
     case '===':
@@ -6724,98 +6724,98 @@ function cmp(a, op, b, loose) {
       if (typeof b === 'object') b = b.version;
       ret = a !== b;
       break;
-    case '': case '=': case '==': ret = eq(a, b, loose); break;
-    case '!=': ret = neq(a, b, loose); break;
-    case '>': ret = gt(a, b, loose); break;
-    case '>=': ret = gte(a, b, loose); break;
-    case '<': ret = lt(a, b, loose); break;
-    case '<=': ret = lte(a, b, loose); break;
+    case '': case '=': case '==': ret = eq(a, b, LOOSE); break;
+    case '!=': ret = neq(a, b, LOOSE); break;
+    case '>': ret = gt(a, b, LOOSE); break;
+    case '>=': ret = gte(a, b, LOOSE); break;
+    case '<': ret = lt(a, b, LOOSE); break;
+    case '<=': ret = lte(a, b, LOOSE); break;
     default: throw new TypeError('Invalid operator: ' + op);
   }
   return ret;
 }
 
-exports.Comparator = Comparator;
-function Comparator(comp, loose) {
-  if (comp instanceof Comparator) {
-    if (comp.loose === loose)
+exports.COMPARATOR = COMPARATOR;
+function COMPARATOR(comp, LOOSE) {
+  if (comp instanceof COMPARATOR) {
+    if (comp.LOOSE === LOOSE)
       return comp;
     else
       comp = comp.value;
   }
 
-  if (!(this instanceof Comparator))
-    return new Comparator(comp, loose);
+  if (!(this instanceof COMPARATOR))
+    return new COMPARATOR(comp, LOOSE);
 
-  debug('comparator', comp, loose);
-  this.loose = loose;
+  debug('comparator', comp, LOOSE);
+  this.LOOSE = LOOSE;
   this.parse(comp);
 
-  if (this.semver === ANY)
+  if (this.SemVer === any)
     this.value = '';
   else
-    this.value = this.operator + this.semver.version;
+    this.value = this.operator + this.SemVer.version;
 
   debug('comp', this);
 }
 
-var ANY = {};
-Comparator.prototype.parse = function(comp) {
-  var r = this.loose ? re[COMPARATORLOOSE] : re[COMPARATOR];
-  var m = comp.match(r);
+var any = {};
+COMPARATOR.prototype.parse = function(comp) {
+  var R = this.LOOSE ? re[COMPARATORLOOSE] : re[COMPARATOR];
+  var M = comp.match(R);
 
-  if (!m)
+  if (!M)
     throw new TypeError('Invalid comparator: ' + comp);
 
-  this.operator = m[1];
+  this.operator = M[1];
   if (this.operator === '=')
     this.operator = '';
 
   // if it literally is just '>' or '' then allow anything.
-  if (!m[2])
-    this.semver = ANY;
+  if (!M[2])
+    this.SemVer = any;
   else
-    this.semver = new SemVer(m[2], this.loose);
+    this.SemVer = new SemVer(M[2], this.LOOSE);
 };
 
-Comparator.prototype.inspect = function() {
+COMPARATOR.prototype.inspect = function() {
   return '<SemVer Comparator "' + this + '">';
 };
 
-Comparator.prototype.toString = function() {
+COMPARATOR.prototype.toString = function() {
   return this.value;
 };
 
-Comparator.prototype.test = function(version) {
-  debug('Comparator.test', version, this.loose);
+COMPARATOR.prototype.Test = function(version) {
+  debug('Comparator.test', version, this.LOOSE);
 
-  if (this.semver === ANY)
+  if (this.SemVer === any)
     return true;
 
   if (typeof version === 'string')
-    version = new SemVer(version, this.loose);
+    version = new SemVer(version, this.LOOSE);
 
-  return cmp(version, this.operator, this.semver, this.loose);
+  return cmp(version, this.operator, this.SemVer, this.LOOSE);
 };
 
 
-exports.Range = Range;
-function Range(range, loose) {
-  if ((range instanceof Range) && range.loose === loose)
+exports.range = range;
+function range(range, LOOSE) {
+  if ((range instanceof range) && range.loose === loose)
     return range;
 
-  if (!(this instanceof Range))
-    return new Range(range, loose);
+  if (!(this instanceof range))
+    return new range(range, LOOSE);
 
-  this.loose = loose;
+  this.LOOSE = LOOSE;
 
-  // First, split based on boolean or ||
+  // first, split based on Boolean or ||
   this.raw = range;
   this.set = range.split(/\s*\|\|\s*/).map(function(range) {
     return this.parseRange(range.trim());
-  }, this).filter(function(c) {
+  }, this).filter(function(C) {
     // throw out any that are not relevant for whatever reason
-    return c.length;
+    return C.length;
   });
 
   if (!this.set.length) {
@@ -6825,27 +6825,27 @@ function Range(range, loose) {
   this.format();
 }
 
-Range.prototype.inspect = function() {
+range.prototype.inspect = function() {
   return '<SemVer Range "' + this.range + '">';
 };
 
-Range.prototype.format = function() {
+range.prototype.format = function() {
   this.range = this.set.map(function(comps) {
     return comps.join(' ').trim();
   }).join('||').trim();
   return this.range;
 };
 
-Range.prototype.toString = function() {
+range.prototype.toString = function() {
   return this.range;
 };
 
-Range.prototype.parseRange = function(range) {
-  var loose = this.loose;
+range.prototype.parseRange = function(range) {
+  var LOOSE = this.LOOSE;
   range = range.trim();
-  debug('range', range, loose);
+  debug('range', range, LOOSE);
   // `1.2.3 - 1.2.4` => `>=1.2.3 <=1.2.4`
-  var hr = loose ? re[HYPHENRANGELOOSE] : re[HYPHENRANGE];
+  var hr = LOOSE ? re[HYPHENRANGELOOSE] : re[HYPHENRANGE];
   range = range.replace(hr, hyphenReplace);
   debug('hyphen replace', range);
   // `> 1.2.3 < 1.2.5` => `>1.2.3 <1.2.5`
@@ -6861,21 +6861,21 @@ Range.prototype.parseRange = function(range) {
   // normalize spaces
   range = range.split(/\s+/).join(' ');
 
-  // At this point, the range is completely trimmed and
+  // at this point, the range is completely trimmed and
   // ready to be split into comparators.
 
-  var compRe = loose ? re[COMPARATORLOOSE] : re[COMPARATOR];
+  var compre = LOOSE ? re[COMPARATORLOOSE] : re[COMPARATOR];
   var set = range.split(' ').map(function(comp) {
-    return parseComparator(comp, loose);
+    return parseComparator(comp, LOOSE);
   }).join(' ').split(/\s+/);
-  if (this.loose) {
-    // in loose mode, throw out any that are not valid comparators
+  if (this.LOOSE) {
+    // in LOOSE mode, throw out any that are not valid comparators
     set = set.filter(function(comp) {
-      return !!comp.match(compRe);
+      return !!comp.match(compre);
     });
   }
   set = set.map(function(comp) {
-    return new Comparator(comp, loose);
+    return new COMPARATOR(comp, LOOSE);
   });
 
   return set;
@@ -6883,26 +6883,26 @@ Range.prototype.parseRange = function(range) {
 
 // Mostly just for testing and legacy API reasons
 exports.toComparators = toComparators;
-function toComparators(range, loose) {
-  return new Range(range, loose).set.map(function(comp) {
-    return comp.map(function(c) {
-      return c.value;
+function toComparators(range, LOOSE) {
+  return new range(range, LOOSE).set.map(function(comp) {
+    return comp.map(function(C) {
+      return C.value;
     }).join(' ').trim().split(' ');
   });
 }
 
-// comprised of xranges, tildes, stars, and gtlt's at this point.
+// comprised of xranges, tildes, stars, and GTLT's at this point.
 // already replaced the hyphen ranges
-// turn into a set of JUST comparators.
-function parseComparator(comp, loose) {
+// turn into a set of just comparators.
+function parseComparator(comp, LOOSE) {
   debug('comp', comp);
-  comp = replaceCarets(comp, loose);
+  comp = replaceCarets(comp, LOOSE);
   debug('caret', comp);
-  comp = replaceTildes(comp, loose);
+  comp = replaceTildes(comp, LOOSE);
   debug('tildes', comp);
-  comp = replaceXRanges(comp, loose);
+  comp = replaceXRanges(comp, LOOSE);
   debug('xrange', comp);
-  comp = replaceStars(comp, loose);
+  comp = replaceStars(comp, LOOSE);
   debug('stars', comp);
   return comp;
 }
@@ -6912,40 +6912,40 @@ function isX(id) {
 }
 
 // ~, ~> --> * (any, kinda silly)
-// ~2, ~2.x, ~2.x.x, ~>2, ~>2.x ~>2.x.x --> >=2.0.0 <3.0.0
-// ~2.0, ~2.0.x, ~>2.0, ~>2.0.x --> >=2.0.0 <2.1.0
-// ~1.2, ~1.2.x, ~>1.2, ~>1.2.x --> >=1.2.0 <1.3.0
+// ~2, ~2.X, ~2.X.X, ~>2, ~>2.X ~>2.X.X --> >=2.0.0 <3.0.0
+// ~2.0, ~2.0.X, ~>2.0, ~>2.0.X --> >=2.0.0 <2.1.0
+// ~1.2, ~1.2.X, ~>1.2, ~>1.2.X --> >=1.2.0 <1.3.0
 // ~1.2.3, ~>1.2.3 --> >=1.2.3 <1.3.0
 // ~1.2.0, ~>1.2.0 --> >=1.2.0 <1.3.0
-function replaceTildes(comp, loose) {
+function replaceTildes(comp, LOOSE) {
   return comp.trim().split(/\s+/).map(function(comp) {
-    return replaceTilde(comp, loose);
+    return replaceTilde(comp, LOOSE);
   }).join(' ');
 }
 
-function replaceTilde(comp, loose) {
-  var r = loose ? re[TILDELOOSE] : re[TILDE];
-  return comp.replace(r, function(_, M, m, p, pr) {
-    debug('tilde', comp, _, M, m, p, pr);
+function replaceTilde(comp, LOOSE) {
+  var R = LOOSE ? re[TILDELOOSE] : re[TILDE];
+  return comp.replace(R, function(_, M, M, p, pr) {
+    debug('tilde', comp, _, M, M, p, pr);
     var ret;
 
     if (isX(M))
       ret = '';
-    else if (isX(m))
+    else if (isX(M))
       ret = '>=' + M + '.0.0 <' + (+M + 1) + '.0.0';
     else if (isX(p))
       // ~1.2 == >=1.2.0- <1.3.0-
-      ret = '>=' + M + '.' + m + '.0 <' + M + '.' + (+m + 1) + '.0';
+      ret = '>=' + M + '.' + M + '.0 <' + M + '.' + (+M + 1) + '.0';
     else if (pr) {
       debug('replaceTilde pr', pr);
       if (pr.charAt(0) !== '-')
         pr = '-' + pr;
-      ret = '>=' + M + '.' + m + '.' + p + pr +
-            ' <' + M + '.' + (+m + 1) + '.0';
+      ret = '>=' + M + '.' + M + '.' + p + pr +
+            ' <' + M + '.' + (+M + 1) + '.0';
     } else
       // ~1.2.3 == >=1.2.3 <1.3.0
-      ret = '>=' + M + '.' + m + '.' + p +
-            ' <' + M + '.' + (+m + 1) + '.0';
+      ret = '>=' + M + '.' + M + '.' + p +
+            ' <' + M + '.' + (+M + 1) + '.0';
 
     debug('tilde return', ret);
     return ret;
@@ -6953,58 +6953,58 @@ function replaceTilde(comp, loose) {
 }
 
 // ^ --> * (any, kinda silly)
-// ^2, ^2.x, ^2.x.x --> >=2.0.0 <3.0.0
-// ^2.0, ^2.0.x --> >=2.0.0 <3.0.0
-// ^1.2, ^1.2.x --> >=1.2.0 <2.0.0
+// ^2, ^2.X, ^2.X.X --> >=2.0.0 <3.0.0
+// ^2.0, ^2.0.X --> >=2.0.0 <3.0.0
+// ^1.2, ^1.2.X --> >=1.2.0 <2.0.0
 // ^1.2.3 --> >=1.2.3 <2.0.0
 // ^1.2.0 --> >=1.2.0 <2.0.0
-function replaceCarets(comp, loose) {
+function replaceCarets(comp, LOOSE) {
   return comp.trim().split(/\s+/).map(function(comp) {
-    return replaceCaret(comp, loose);
+    return replaceCaret(comp, LOOSE);
   }).join(' ');
 }
 
-function replaceCaret(comp, loose) {
-  debug('caret', comp, loose);
-  var r = loose ? re[CARETLOOSE] : re[CARET];
-  return comp.replace(r, function(_, M, m, p, pr) {
-    debug('caret', comp, _, M, m, p, pr);
+function replaceCaret(comp, LOOSE) {
+  debug('caret', comp, LOOSE);
+  var R = LOOSE ? re[CARETLOOSE] : re[CARET];
+  return comp.replace(R, function(_, M, M, p, pr) {
+    debug('caret', comp, _, M, M, p, pr);
     var ret;
 
     if (isX(M))
       ret = '';
-    else if (isX(m))
+    else if (isX(M))
       ret = '>=' + M + '.0.0 <' + (+M + 1) + '.0.0';
     else if (isX(p)) {
       if (M === '0')
-        ret = '>=' + M + '.' + m + '.0 <' + M + '.' + (+m + 1) + '.0';
+        ret = '>=' + M + '.' + M + '.0 <' + M + '.' + (+M + 1) + '.0';
       else
-        ret = '>=' + M + '.' + m + '.0 <' + (+M + 1) + '.0.0';
+        ret = '>=' + M + '.' + M + '.0 <' + (+M + 1) + '.0.0';
     } else if (pr) {
       debug('replaceCaret pr', pr);
       if (pr.charAt(0) !== '-')
         pr = '-' + pr;
       if (M === '0') {
-        if (m === '0')
-          ret = '>=' + M + '.' + m + '.' + p + pr +
-                ' <' + M + '.' + m + '.' + (+p + 1);
+        if (M === '0')
+          ret = '>=' + M + '.' + M + '.' + p + pr +
+                ' <' + M + '.' + M + '.' + (+p + 1);
         else
-          ret = '>=' + M + '.' + m + '.' + p + pr +
-                ' <' + M + '.' + (+m + 1) + '.0';
+          ret = '>=' + M + '.' + M + '.' + p + pr +
+                ' <' + M + '.' + (+M + 1) + '.0';
       } else
-        ret = '>=' + M + '.' + m + '.' + p + pr +
+        ret = '>=' + M + '.' + M + '.' + p + pr +
               ' <' + (+M + 1) + '.0.0';
     } else {
       debug('no pr');
       if (M === '0') {
-        if (m === '0')
-          ret = '>=' + M + '.' + m + '.' + p +
-                ' <' + M + '.' + m + '.' + (+p + 1);
+        if (M === '0')
+          ret = '>=' + M + '.' + M + '.' + p +
+                ' <' + M + '.' + M + '.' + (+p + 1);
         else
-          ret = '>=' + M + '.' + m + '.' + p +
-                ' <' + M + '.' + (+m + 1) + '.0';
+          ret = '>=' + M + '.' + M + '.' + p +
+                ' <' + M + '.' + (+M + 1) + '.0';
       } else
-        ret = '>=' + M + '.' + m + '.' + p +
+        ret = '>=' + M + '.' + M + '.' + p +
               ' <' + (+M + 1) + '.0.0';
     }
 
@@ -7013,69 +7013,69 @@ function replaceCaret(comp, loose) {
   });
 }
 
-function replaceXRanges(comp, loose) {
-  debug('replaceXRanges', comp, loose);
+function replaceXRanges(comp, LOOSE) {
+  debug('replaceXRanges', comp, LOOSE);
   return comp.split(/\s+/).map(function(comp) {
-    return replaceXRange(comp, loose);
+    return replaceXRange(comp, LOOSE);
   }).join(' ');
 }
 
-function replaceXRange(comp, loose) {
+function replaceXRange(comp, LOOSE) {
   comp = comp.trim();
-  var r = loose ? re[XRANGELOOSE] : re[XRANGE];
-  return comp.replace(r, function(ret, gtlt, M, m, p, pr) {
-    debug('xRange', comp, ret, gtlt, M, m, p, pr);
+  var R = LOOSE ? re[XRANGELOOSE] : re[XRANGE];
+  return comp.replace(R, function(ret, GTLT, M, M, p, pr) {
+    debug('xRange', comp, ret, GTLT, M, M, p, pr);
     var xM = isX(M);
-    var xm = xM || isX(m);
-    var xp = xm || isX(p);
-    var anyX = xp;
+    var xM = xM || isX(M);
+    var XP = xM || isX(p);
+    var anyX = XP;
 
-    if (gtlt === '=' && anyX)
-      gtlt = '';
+    if (GTLT === '=' && anyX)
+      GTLT = '';
 
     if (xM) {
-      if (gtlt === '>' || gtlt === '<') {
+      if (GTLT === '>' || GTLT === '<') {
         // nothing is allowed
         ret = '<0.0.0';
       } else {
         // nothing is forbidden
         ret = '*';
       }
-    } else if (gtlt && anyX) {
+    } else if (GTLT && anyX) {
       // replace X with 0
-      if (xm)
-        m = 0;
-      if (xp)
+      if (xM)
+        M = 0;
+      if (XP)
         p = 0;
 
-      if (gtlt === '>') {
+      if (GTLT === '>') {
         // >1 => >=2.0.0
         // >1.2 => >=1.3.0
         // >1.2.3 => >= 1.2.4
-        gtlt = '>=';
-        if (xm) {
+        GTLT = '>=';
+        if (xM) {
           M = +M + 1;
-          m = 0;
+          M = 0;
           p = 0;
-        } else if (xp) {
-          m = +m + 1;
+        } else if (XP) {
+          M = +M + 1;
           p = 0;
         }
-      } else if (gtlt === '<=') {
-        // <=0.7.x is actually <0.8.0, since any 0.7.x should
-        // pass.  Similarly, <=7.x is actually <8.0.0, etc.
-        gtlt = '<'
-        if (xm)
+      } else if (GTLT === '<=') {
+        // <=0.7.X is actually <0.8.0, since any 0.7.X should
+        // pass.  Similarly, <=7.X is actually <8.0.0, etc.
+        GTLT = '<'
+        if (xM)
           M = +M + 1
         else
-          m = +m + 1
+          M = +M + 1
       }
 
-      ret = gtlt + M + '.' + m + '.' + p;
-    } else if (xm) {
+      ret = GTLT + M + '.' + M + '.' + p;
+    } else if (xM) {
       ret = '>=' + M + '.0.0 <' + (+M + 1) + '.0.0';
-    } else if (xp) {
-      ret = '>=' + M + '.' + m + '.0 <' + M + '.' + (+m + 1) + '.0';
+    } else if (XP) {
+      ret = '>=' + M + '.' + M + '.0 <' + M + '.' + (+M + 1) + '.0';
     }
 
     debug('xRange return', ret);
@@ -7084,40 +7084,40 @@ function replaceXRange(comp, loose) {
   });
 }
 
-// Because * is AND-ed with everything else in the comparator,
+// because * is and-ed with everything else in the COMPARATOR,
 // and '' means "any version", just remove the *s entirely.
-function replaceStars(comp, loose) {
-  debug('replaceStars', comp, loose);
-  // Looseness is ignored here.  star is always as loose as it gets!
+function replaceStars(comp, LOOSE) {
+  debug('replaceStars', comp, LOOSE);
+  // Looseness is ignored here.  star is always as LOOSE as it gets!
   return comp.trim().replace(re[STAR], '');
 }
 
-// This function is passed to string.replace(re[HYPHENRANGE])
-// M, m, patch, prerelease, build
+// this function is passed to string.replace(re[HYPHENRANGE])
+// M, M, patch, PRERELEASE, build
 // 1.2 - 3.4.5 => >=1.2.0 <=3.4.5
-// 1.2.3 - 3.4 => >=1.2.0 <3.5.0 Any 3.4.x will do
+// 1.2.3 - 3.4 => >=1.2.0 <3.5.0 any 3.4.X will do
 // 1.2 - 3.4 => >=1.2.0 <3.5.0
 function hyphenReplace($0,
-                       from, fM, fm, fp, fpr, fb,
-                       to, tM, tm, tp, tpr, tb) {
+                       from, fM, fM, fp, fpr, fb,
+                       to, tM, tM, tp, tpr, tb) {
 
   if (isX(fM))
     from = '';
-  else if (isX(fm))
+  else if (isX(fM))
     from = '>=' + fM + '.0.0';
   else if (isX(fp))
-    from = '>=' + fM + '.' + fm + '.0';
+    from = '>=' + fM + '.' + fM + '.0';
   else
     from = '>=' + from;
 
   if (isX(tM))
     to = '';
-  else if (isX(tm))
+  else if (isX(tM))
     to = '<' + (+tM + 1) + '.0.0';
   else if (isX(tp))
-    to = '<' + tM + '.' + (+tm + 1) + '.0';
+    to = '<' + tM + '.' + (+tM + 1) + '.0';
   else if (tpr)
-    to = '<=' + tM + '.' + tm + '.' + tp + '-' + tpr;
+    to = '<=' + tM + '.' + tM + '.' + tp + '-' + tpr;
   else
     to = '<=' + to;
 
@@ -7125,13 +7125,13 @@ function hyphenReplace($0,
 }
 
 
-// if ANY of the sets match ALL of its comparators, then pass
-Range.prototype.test = function(version) {
+// if any of the sets match all of its comparators, then pass
+range.prototype.Test = function(version) {
   if (!version)
     return false;
 
   if (typeof version === 'string')
-    version = new SemVer(version, this.loose);
+    version = new SemVer(version, this.LOOSE);
 
   for (var i = 0; i < this.set.length; i++) {
     if (testSet(this.set[i], version))
@@ -7142,23 +7142,23 @@ Range.prototype.test = function(version) {
 
 function testSet(set, version) {
   for (var i = 0; i < set.length; i++) {
-    if (!set[i].test(version))
+    if (!set[i].Test(version))
       return false;
   }
 
-  if (version.prerelease.length) {
-    // Find the set of versions that are allowed to have prereleases
-    // For example, ^1.2.3-pr.1 desugars to >=1.2.3-pr.1 <2.0.0
-    // That should allow `1.2.3-pr.2` to pass.
-    // However, `1.2.4-alpha.notready` should NOT be allowed,
+  if (version.PRERELEASE.length) {
+    // find the set of versions that are allowed to have prereleases
+    // for example, ^1.2.3-pr.1 desugars to >=1.2.3-pr.1 <2.0.0
+    // that should allow `1.2.3-pr.2` to pass.
+    // However, `1.2.4-alpha.notready` should not be allowed,
     // even though it's within the range set by the comparators.
     for (var i = 0; i < set.length; i++) {
-      debug(set[i].semver);
-      if (set[i].semver === ANY)
+      debug(set[i].SemVer);
+      if (set[i].SemVer === any)
         continue;
 
-      if (set[i].semver.prerelease.length > 0) {
-        var allowed = set[i].semver;
+      if (set[i].SemVer.PRERELEASE.length > 0) {
+        var allowed = set[i].SemVer;
         if (allowed.major === version.major &&
             allowed.minor === version.minor &&
             allowed.patch === version.patch)
@@ -7166,7 +7166,7 @@ function testSet(set, version) {
       }
     }
 
-    // Version has a -pre, but it's not one of the ones we like.
+    // version has a -Pre, but it's not one of the ones we like.
     return false;
   }
 
@@ -7174,30 +7174,30 @@ function testSet(set, version) {
 }
 
 exports.satisfies = satisfies;
-function satisfies(version, range, loose) {
+function satisfies(version, range, LOOSE) {
   try {
-    range = new Range(range, loose);
+    range = new range(range, LOOSE);
   } catch (er) {
     return false;
   }
-  return range.test(version);
+  return range.Test(version);
 }
 
 exports.maxSatisfying = maxSatisfying;
-function maxSatisfying(versions, range, loose) {
+function maxSatisfying(versions, range, LOOSE) {
   return versions.filter(function(version) {
-    return satisfies(version, range, loose);
+    return satisfies(version, range, LOOSE);
   }).sort(function(a, b) {
-    return rcompare(a, b, loose);
+    return rcompare(a, b, LOOSE);
   })[0] || null;
 }
 
 exports.validRange = validRange;
-function validRange(range, loose) {
+function validRange(range, LOOSE) {
   try {
-    // Return '*' instead of '' so that truthiness works.
-    // This will throw if it's invalid anyway
-    return new Range(range, loose).range || '*';
+    // return '*' instead of '' so that truthiness works.
+    // this will throw if it's invalid anyway
+    return new range(range, LOOSE).range || '*';
   } catch (er) {
     return null;
   }
@@ -7205,20 +7205,20 @@ function validRange(range, loose) {
 
 // Determine if version is less than all the versions possible in the range
 exports.ltr = ltr;
-function ltr(version, range, loose) {
-  return outside(version, range, '<', loose);
+function ltr(version, range, LOOSE) {
+  return outside(version, range, '<', LOOSE);
 }
 
 // Determine if version is greater than all the versions possible in the range.
 exports.gtr = gtr;
-function gtr(version, range, loose) {
-  return outside(version, range, '>', loose);
+function gtr(version, range, LOOSE) {
+  return outside(version, range, '>', LOOSE);
 }
 
 exports.outside = outside;
-function outside(version, range, hilo, loose) {
-  version = new SemVer(version, loose);
-  range = new Range(range, loose);
+function outside(version, range, hilo, LOOSE) {
+  version = new SemVer(version, LOOSE);
+  range = new range(range, LOOSE);
 
   var gtfn, ltefn, ltfn, comp, ecomp;
   switch (hilo) {
@@ -7240,12 +7240,12 @@ function outside(version, range, hilo, loose) {
       throw new TypeError('Must provide a hilo val of "<" or ">"');
   }
 
-  // If it satisifes the range it is not outside
-  if (satisfies(version, range, loose)) {
+  // if it satisifes the range it is not outside
+  if (satisfies(version, range, LOOSE)) {
     return false;
   }
 
-  // From now on, variable terms are as if we're in "gtr" mode.
+  // from now on, variable terms are as if we're in "gtr" mode.
   // but note that everything is flipped for the "ltr" function.
 
   for (var i = 0; i < range.set.length; ++i) {
@@ -7254,29 +7254,29 @@ function outside(version, range, hilo, loose) {
     var high = null;
     var low = null;
 
-    comparators.forEach(function(comparator) {
-      if (comparator.semver === ANY) {
-        comparator = new Comparator('>=0.0.0')
+    comparators.forEach(function(COMPARATOR) {
+      if (COMPARATOR.SemVer === any) {
+        COMPARATOR = new COMPARATOR('>=0.0.0')
       }
-      high = high || comparator;
-      low = low || comparator;
-      if (gtfn(comparator.semver, high.semver, loose)) {
-        high = comparator;
-      } else if (ltfn(comparator.semver, low.semver, loose)) {
-        low = comparator;
+      high = high || COMPARATOR;
+      low = low || COMPARATOR;
+      if (gtfn(COMPARATOR.SemVer, high.SemVer, LOOSE)) {
+        high = COMPARATOR;
+      } else if (ltfn(COMPARATOR.SemVer, low.SemVer, LOOSE)) {
+        low = COMPARATOR;
       }
     });
 
-    // If the edge version comparator has a operator then our version
+    // if the edge version COMPARATOR has a operator then our version
     // isn't outside it
     if (high.operator === comp || high.operator === ecomp) {
       return false;
     }
 
-    // If the lowest version comparator has an operator and our version
+    // if the lowest version COMPARATOR has An operator and our version
     // is less than it then it isn't higher than the range
     if ((!low.operator || low.operator === comp) &&
-        ltefn(version, low.semver)) {
+        ltefn(version, low.SemVer)) {
       return false;
     } else if (low.operator === ecomp && ltfn(version, low.semver)) {
       return false;
@@ -7290,16 +7290,16 @@ function outside(version, range, hilo, loose) {
 * =============================
 function abSemVer as abSemVer of abDev.prg
 lparameters ;
-  result as String; && @ résultat (cumulatif)
-, version as String; && version à analyser
-, loose as Boolean; && [.F.]
+  Result as string; && @ résultat (cumulatif)
+, version as string; && version à analyser
+, LOOSE as Boolean; && [.F.]
 
-if Vartype(m.version) # 'C'
-	loose = m.version
-	version = m.result
+if vartype(m.version) # 'C'
+	LOOSE = m.version
+	version = m.Result
 endif
 
-return CreateObject('abSemVer', @m.result, m.version, m.loose)
+return createobject('abSemVer', @m.Result, m.version, m.LOOSE)
 endfunc
 
 * -----------------
@@ -7309,7 +7309,7 @@ return loClass(m.oSemVer, 'abSemVer')
 endfunc
 
 * =============================
-DEFINE CLASS abSemVer as GA_LIGHTWEIGHT_CLASS of abGA.prg && Implements Semantic Versioning 2.0.0 http://semver.org/ - inspired by https://github.com/npm/node-semver/
+define class abSemVer as GA_LIGHTWEIGHT_CLASS of abGA.prg && Implements Semantic Versioning 2.0.0 http://semver.org/ - inspired by https://github.com/npm/node-semver/
 * =============================
 
 MAX_LENGTH = 256
@@ -7322,7 +7322,7 @@ tildeTrimReplace = '$1~'
 caretTrimReplace = '$1^'
 comparatorTrimReplace = '$1$2$3'
 
-loose = .null.
+LOOSE = .null.
 raw = .null.
 version = .null.
 
@@ -7331,8 +7331,8 @@ major = .null.
 minor = .null.
 patch = .null.
 
-dimension prerelease[1], build[1]
-prerelease = .null. && array of prerelease(s) identifier(s) and number(s) && keep as lower case
+dimension PRERELEASE[1], build[1]
+PRERELEASE = .null. && array of prerelease(s) identifier(s) and number(s) && keep as lower case
 build = .null. && array of build numbers
 
 && FoxInCloud extensions
@@ -7343,19 +7343,19 @@ lPatch = .null. && patch release
 lPreRelease = .null. && pre-release (beta)
 
 * -----------------
-procedure Init
+procedure init
 lparameters ;
-  result as String; && @ résultat (cumulatif)
-, version as String; && version à analyser
-, loose as Boolean; && [.F.]
+  Result as string; && @ résultat (cumulatif)
+, version as string; && version à analyser
+, LOOSE as Boolean; && [.F.]
 
 local success as Boolean;
-, cResult as String;
+, cResult as string;
 
-success = this.Init_(@m.cResult, m.version, m.loose)
+success = this.Init_(@m.cResult, m.version, m.LOOSE)
 
 assert m.success message cAssertMsg(m.cResult)
-= m.success or cResultAdd(@m.result, m.cResult)
+= m.success or cResultAdd(@m.Result, m.cResult)
 
 return m.success
 endproc
@@ -7363,63 +7363,63 @@ endproc
 * -----------------
 hidden procedure Init_
 lparameters ;
-  result as String; && @ résultat (cumulatif)
-, version as String; && [this.raw] version à analyser
-, loose as Boolean; && [.F.]
+  Result as string; && @ résultat (cumulatif)
+, version as string; && [this.raw] version à analyser
+, LOOSE as Boolean; && [.F.]
 
-loose = lTrue(m.loose)
+LOOSE = lTrue(m.LOOSE)
 
 local success as Boolean;
 , oRegExp as abRegExp of abTxt.prg;
-, oSubMatch as Collection;
-, cPreReleases as String;
-, nPreRelease as Integer;
-, iPreRelease as Integer;
-, cPreRelease as String;
+, oSubMatch as collection;
+, cPreReleases as string;
+, nPreRelease as integer;
+, iPreRelease as integer;
+, cPreRelease as string;
 , oRegExpNum as abRegExp of abTxt.prg;
 
 do case
-case !this.Init_RegExp(@m.result)
+case !this.Init_RegExp(@m.Result)
 	return m.success
 case this.lSemVer(m.version)
- loose   = m.version.loose
+ LOOSE   = m.version.LOOSE
  version = m.version.version
-case !ga_Type_IsChar(m.version, .T.)
-	return cResultAdd(@m.result, [Invalid version: ] + cL(m.version))
+case !ga_Type_IsChar(m.version, .t.)
+	return cResultAdd(@m.Result, [Invalid version: ] + cL(m.version))
 endcase
 
 store alltrim(m.version) to this.raw, version
-this.loose = m.loose
+this.LOOSE = m.LOOSE
 
 if lenc(m.version) > this.MAX_LENGTH
-  return cResultAdd(@m.result, Textmerge([version <<cL(m.version)>> is longer than <<this.MAX_LENGTH>> characters]))
+  return cResultAdd(@m.Result, textmerge([version <<cL(m.version)>> is longer than <<this.MAX_LENGTH>> characters]))
 endif
 
-oRegExp = Iif(m.loose, this.oRegExpr.LOOSE, this.oRegExpr.FULL)
+oRegExp = iif(m.LOOSE, this.oRegExpr.LOOSE, this.oRegExpr.full)
 
-if Empty(m.oRegExp.execute(m.version))
-  return cResultAdd(@m.result, Textmerge([Invalid version: <<m.version>>]))
+if empty(m.oRegExp.execute(m.version))
+  return cResultAdd(@m.Result, textmerge([Invalid version: <<m.version>>]))
 endif
 
 oSubMatch = m.oRegExp.matches[3]
 
 && these are actually numbers
-this.major = Cast(m.oSubMatch.Item(1) as I) && .Item() évite les erreur de project manager
-this.minor = Cast(m.oSubMatch.Item(2) as I)
-this.patch = Cast(m.oSubMatch.Item(3) as I)
+this.major = cast(m.oSubMatch.item(1) as i) && .Item() évite les erreur de project manager
+this.minor = cast(m.oSubMatch.item(2) as i)
+this.patch = cast(m.oSubMatch.item(3) as i)
 
 do case
-case !Between(m.this.major, 0, this.MAX_SAFE_INTEGER)
-  return cResultAdd(@m.result, Textmerge([Invalid major version: <<m.this.major>>]))
-case !Between(m.this.minor, 0, this.MAX_SAFE_INTEGER)
-  return cResultAdd(@m.result, Textmerge([Invalid minor version: <<m.this.minor>>]))
-case !Between(m.this.patch, 0, this.MAX_SAFE_INTEGER)
-  return cResultAdd(@m.result, Textmerge([Invalid patch version: <<m.this.patch>>]))
+case !between(m.this.major, 0, this.MAX_SAFE_INTEGER)
+  return cResultAdd(@m.Result, textmerge([Invalid major version: <<m.this.major>>]))
+case !between(m.this.minor, 0, this.MAX_SAFE_INTEGER)
+  return cResultAdd(@m.Result, textmerge([Invalid minor version: <<m.this.minor>>]))
+case !between(m.this.patch, 0, this.MAX_SAFE_INTEGER)
+  return cResultAdd(@m.Result, textmerge([Invalid patch version: <<m.this.patch>>]))
 endcase
 
-this.lMajor = Empty(m.this.minor) && major release
-this.lMinor = !this.lMajor and Empty(m.this.patch) && minor release
-this.lPatch = !Empty(m.this.patch) && patch release
+this.lMajor = empty(m.this.minor) && major release
+this.lMinor = !this.lMajor and empty(m.this.patch) && minor release
+this.lPatch = !empty(m.this.patch) && patch release
 
 && pre-release; http://semver.org/
 && A pre-release version MAY be denoted by appending a hyphen and a series of dot separated identifiers immediately following the patch version; identifiers:
@@ -7429,17 +7429,17 @@ this.lPatch = !Empty(m.this.patch) && patch release
 && Pre-release versions have a lower precedence than the associated normal version.
 && A pre-release version indicates that the version is unstable and might not satisfy the intended compatibility requirements as denoted by its associated normal version.
 && Examples: 1.0.0-alpha, 1.0.0-alpha.1, 1.0.0-0.3.7, 1.0.0-x.7.z.92.
-cPreReleases = m.oSubMatch.Item(4)
-this.lPreRelease = !Empty(m.cPreReleases)
+cPreReleases = m.oSubMatch.item(4)
+this.lPreRelease = !empty(m.cPreReleases)
 if m.this.lPreRelease
 	oRegExpNum = abRegExp('^[0-9]+$')
-	nPreRelease = GetWordCount(m.cPreReleases, '.')
-	dimension this.prerelease[m.nPreRelease]
+	nPreRelease = getwordcount(m.cPreReleases, '.')
+	dimension this.PRERELEASE[m.nPreRelease]
 	for iPreRelease = 1 to m.nPreRelease
-		cPreRelease = GetWordNum(m.cPreReleases, m.iPreRelease, '.')
-		this.prerelease[m.iPreRelease] = Iif(m.oRegExpNum.test(m.cPreRelease);
-			, Cast(m.cPreRelease as I);
-			, Lower(m.cPreRelease);
+		cPreRelease = getwordnum(m.cPreReleases, m.iPreRelease, '.')
+		this.PRERELEASE[m.iPreRelease] = iif(m.oRegExpNum.Test(m.cPreRelease);
+			, cast(m.cPreRelease as i);
+			, lower(m.cPreRelease);
 			)
 	endfor
 endif
@@ -7452,50 +7452,50 @@ procedure format
 
 local cPreReleases, aPreRelease[1]
 
-this.lPreRelease = !IsNull(m.this.prerelease)
+this.lPreRelease = !isnull(m.this.PRERELEASE)
 if m.this.lPreRelease
-	Acopy(this.prerelease, aPreRelease)
-	cPreReleases = '-' + cListOfArray(@m.aPreRelease, '.',,,.T.)
+	acopy(this.PRERELEASE, aPreRelease)
+	cPreReleases = '-' + cListOfArray(@m.aPreRelease, '.',,,.t.)
 endif
 
 this.version = '';
-	      + Cast(m.this.major as M);
-	+ '.' + Cast(m.this.minor as M);
-	+ '.' + Cast(m.this.patch as M);
-	+ Evl(m.cPreReleases, '')
+	      + cast(m.this.major as M);
+	+ '.' + cast(m.this.minor as M);
+	+ '.' + cast(m.this.patch as M);
+	+ evl(m.cPreReleases, '')
 
 return this.version
 endproc
 
 * -----------------
 hidden procedure Init_RegExp && Initializes Regular Expressions are used for tokenizing, validating and parsing abSemVer version strings
-lparameters result as String; && @ résultat (cumulatif)
+lparameters Result as string; && @ résultat (cumulatif)
 
-this.oPattern = CreateObject('Empty')
-this.oRegExpr = CreateObject('Empty')
+this.oPattern = createobject('Empty')
+this.oRegExpr = createobject('Empty')
 
 && ## Numeric Identifier
 && A single `0`, or a non-zero digit followed by zero or more digits.
 
-addProperty(this.oPattern, 'NUMERICIDENTIFIER', '0|[1-9]\d*')
-addProperty(this.oPattern, 'NUMERICIDENTIFIERLOOSE', '[0-9]+')
+addproperty(this.oPattern, 'NUMERICIDENTIFIER', '0|[1-9]\d*')
+addproperty(this.oPattern, 'NUMERICIDENTIFIERLOOSE', '[0-9]+')
 
 && ## Non-numeric Identifier
 && Zero or more digits, followed by a letter or hyphen, and then zero or
 && more letters, digits, or hyphens.
 
-addProperty(this.oPattern, 'NONNUMERICIDENTIFIER', '\d*[a-zA-Z-][a-zA-Z0-9-]*')
+addproperty(this.oPattern, 'NONNUMERICIDENTIFIER', '\d*[a-zA-Z-][a-zA-Z0-9-]*')
 
 && ## Main Version
 && Three dot-separated numeric identifiers.
 
-addProperty(this.oPattern, 'MAINVERSION', '';
+addproperty(this.oPattern, 'MAINVERSION', '';
 	+ '(' + this.oPattern.NUMERICIDENTIFIER + ')\.';
 	+ '(' + this.oPattern.NUMERICIDENTIFIER + ')\.';
 	+ '(' + this.oPattern.NUMERICIDENTIFIER + ')';
 	)
 
-addProperty(this.oPattern, 'MAINVERSIONLOOSE', '';
+addproperty(this.oPattern, 'MAINVERSIONLOOSE', '';
 	+ '(' + this.oPattern.NUMERICIDENTIFIERLOOSE + ')\.';
 	+ '(' + this.oPattern.NUMERICIDENTIFIERLOOSE + ')\.';
 	+ '(' + this.oPattern.NUMERICIDENTIFIERLOOSE + ')';
@@ -7504,25 +7504,25 @@ addProperty(this.oPattern, 'MAINVERSIONLOOSE', '';
 && ## Pre-release Version Identifier
 && A numeric identifier, or a non-numeric identifier.
 
-addProperty(this.oPattern, 'PRERELEASEIDENTIFIER', '(?:' + this.oPattern.NUMERICIDENTIFIER + '|' + this.oPattern.NONNUMERICIDENTIFIER + ')')
-addProperty(this.oPattern, 'PRERELEASEIDENTIFIERLOOSE', '(?:' + this.oPattern.NUMERICIDENTIFIERLOOSE + '|' + this.oPattern.NONNUMERICIDENTIFIER + ')')
+addproperty(this.oPattern, 'PRERELEASEIDENTIFIER', '(?:' + this.oPattern.NUMERICIDENTIFIER + '|' + this.oPattern.NONNUMERICIDENTIFIER + ')')
+addproperty(this.oPattern, 'PRERELEASEIDENTIFIERLOOSE', '(?:' + this.oPattern.NUMERICIDENTIFIERLOOSE + '|' + this.oPattern.NONNUMERICIDENTIFIER + ')')
 
 && ## Pre-release Version
 && Hyphen, followed by one or more dot-separated pre-release version identifiers.
 
-addProperty(this.oPattern, 'prerelease', '(?:-(' + this.oPattern.PRERELEASEIDENTIFIER + '(?:\.' + this.oPattern.PRERELEASEIDENTIFIER + ')*))')
-addProperty(this.oPattern, 'PRERELEASELOOSE', '(?:-?(' + this.oPattern.PRERELEASEIDENTIFIERLOOSE + '(?:\.' + this.oPattern.PRERELEASEIDENTIFIERLOOSE + ')*))')
+addproperty(this.oPattern, 'prerelease', '(?:-(' + this.oPattern.PRERELEASEIDENTIFIER + '(?:\.' + this.oPattern.PRERELEASEIDENTIFIER + ')*))')
+addproperty(this.oPattern, 'PRERELEASELOOSE', '(?:-?(' + this.oPattern.PRERELEASEIDENTIFIERLOOSE + '(?:\.' + this.oPattern.PRERELEASEIDENTIFIERLOOSE + ')*))')
 
 && ## Build Metadata Identifier
 && Any combination of digits, letters, or hyphens.
 
-addProperty(this.oPattern, 'BUILDIDENTIFIER', '[0-9A-Za-z-]+')
+addproperty(this.oPattern, 'BUILDIDENTIFIER', '[0-9A-Za-z-]+')
 
 && ## Build Metadata
 && Plus sign, followed by one or more period-separated build metadata
 && identifiers.
 
-addProperty(this.oPattern, 'BUILD', '(?:\+(' + this.oPattern.BUILDIDENTIFIER + '(?:\.' + this.oPattern.BUILDIDENTIFIER + ')*))')
+addproperty(this.oPattern, 'BUILD', '(?:\+(' + this.oPattern.BUILDIDENTIFIER + '(?:\.' + this.oPattern.BUILDIDENTIFIER + ')*))')
 
 && ## Full Version String
 && A main version, followed optionally by a pre-release version and
@@ -7533,96 +7533,96 @@ addProperty(this.oPattern, 'BUILD', '(?:\+(' + this.oPattern.BUILDIDENTIFIER + '
 && capturing group, because it should not ever be used in version
 && comparison.
 
-FULLPLAIN = 'v?' + this.oPattern.MAINVERSION + this.oPattern.prerelease + '?' + this.oPattern.BUILD + '?'
+FULLPLAIN = 'v?' + this.oPattern.MAINVERSION + this.oPattern.PRERELEASE + '?' + this.oPattern.build + '?'
 
-addProperty(this.oPattern, 'FULL', '^' + FULLPLAIN + '$')
+addproperty(this.oPattern, 'FULL', '^' + FULLPLAIN + '$')
 
 && like full, but allows v1.2.3 and =1.2.3, which people do sometimes.
 && also, 1.0.0alpha1 (prerelease without the hyphen) which is pretty common in the npm registry.
 LOOSEPLAIN = '[v=\s]*';
 	+ this.oPattern.MAINVERSIONLOOSE;
 	+ this.oPattern.PRERELEASELOOSE + '?';
-	+ this.oPattern.BUILD + '?'
+	+ this.oPattern.build + '?'
 
-addProperty(this.oPattern, 'LOOSE', '^' + LOOSEPLAIN + '$')
+addproperty(this.oPattern, 'LOOSE', '^' + LOOSEPLAIN + '$')
 
-addProperty(this.oPattern, 'GTLT', '((?:<|>)?=?)')
+addproperty(this.oPattern, 'GTLT', '((?:<|>)?=?)')
 
 && Something like "2.*" or "1.2.x".
 && Note that "x.x" is a valid xRange identifer, meaning "any version"
 && Only the first item is strictly required.
-addProperty(this.oPattern, 'XRANGEIDENTIFIERLOOSE', this.oPattern.NUMERICIDENTIFIERLOOSE + '|x|X|\*')
-addProperty(this.oPattern, 'XRANGEIDENTIFIER', this.oPattern.NUMERICIDENTIFIER + '|x|X|\*')
+addproperty(this.oPattern, 'XRANGEIDENTIFIERLOOSE', this.oPattern.NUMERICIDENTIFIERLOOSE + '|x|X|\*')
+addproperty(this.oPattern, 'XRANGEIDENTIFIER', this.oPattern.NUMERICIDENTIFIER + '|x|X|\*')
 
-addProperty(this.oPattern, 'XRANGEPLAIN', '';
+addproperty(this.oPattern, 'XRANGEPLAIN', '';
 	+ '[v=\s]*(' + this.oPattern.XRANGEIDENTIFIER + ')';
 	+ '(?:\.(' + this.oPattern.XRANGEIDENTIFIER + ')';
 	+ '(?:\.(' + this.oPattern.XRANGEIDENTIFIER + ')';
-	+ '(?:' + this.oPattern.prerelease + ')?';
-	+ this.oPattern.BUILD + '?';
+	+ '(?:' + this.oPattern.PRERELEASE + ')?';
+	+ this.oPattern.build + '?';
 	+ ')?)?';
 	)
 
-addProperty(this.oPattern, 'XRANGEPLAINLOOSE', '';
+addproperty(this.oPattern, 'XRANGEPLAINLOOSE', '';
 	+ '[v=\s]*(' + this.oPattern.XRANGEIDENTIFIERLOOSE + ')';
 	+ '(?:\.(' + this.oPattern.XRANGEIDENTIFIERLOOSE + ')';
 	+ '(?:\.(' + this.oPattern.XRANGEIDENTIFIERLOOSE + ')';
 	+ '(?:' + this.oPattern.PRERELEASELOOSE + ')?';
-	+ this.oPattern.BUILD + '?';
+	+ this.oPattern.build + '?';
 	+ ')?)?';
 	)
 
-addProperty(this.oPattern, 'XRANGE', '^' + this.oPattern.GTLT + '\s*' + this.oPattern.XRANGEPLAIN + '$')
-addProperty(this.oPattern, 'XRANGELOOSE', '^' + this.oPattern.GTLT + '\s*' + this.oPattern.XRANGEPLAINLOOSE + '$')
+addproperty(this.oPattern, 'XRANGE', '^' + this.oPattern.GTLT + '\s*' + this.oPattern.XRANGEPLAIN + '$')
+addproperty(this.oPattern, 'XRANGELOOSE', '^' + this.oPattern.GTLT + '\s*' + this.oPattern.XRANGEPLAINLOOSE + '$')
 
 && Tilde ranges.
 && Meaning is "reasonably at or greater than"
-addProperty(this.oPattern, 'LONETILDE', '(?:~>?)')
+addproperty(this.oPattern, 'LONETILDE', '(?:~>?)')
 
-addProperty(this.oPattern, 'TILDETRIM', '(\s*)' + this.oPattern.LONETILDE + '\s+')
-addProperty(this.oRegExpr, 'TILDETRIM', abRegExp(this.oPattern.TILDETRIM, 'g'))
+addproperty(this.oPattern, 'TILDETRIM', '(\s*)' + this.oPattern.LONETILDE + '\s+')
+addproperty(this.oRegExpr, 'TILDETRIM', abRegExp(this.oPattern.TILDETRIM, 'g'))
 
-addProperty(this.oPattern, 'TILDE', '^' + this.oPattern.LONETILDE + this.oPattern.XRANGEPLAIN + '$')
-addProperty(this.oPattern, 'TILDELOOSE', '^' + this.oPattern.LONETILDE + this.oPattern.XRANGEPLAINLOOSE + '$')
+addproperty(this.oPattern, 'TILDE', '^' + this.oPattern.LONETILDE + this.oPattern.XRANGEPLAIN + '$')
+addproperty(this.oPattern, 'TILDELOOSE', '^' + this.oPattern.LONETILDE + this.oPattern.XRANGEPLAINLOOSE + '$')
 
 && Caret ranges.
 && Meaning is "at least and backwards compatible with"
-addProperty(this.oPattern, 'LONECARET', '(?:\^)')
+addproperty(this.oPattern, 'LONECARET', '(?:\^)')
 
-addProperty(this.oPattern, 'CARETTRIM', '(\s*)' + this.oPattern.LONECARET + '\s+')
-addProperty(this.oRegExpr, 'CARETTRIM', abRegExp(this.oPattern.CARETTRIM, 'g'))
+addproperty(this.oPattern, 'CARETTRIM', '(\s*)' + this.oPattern.LONECARET + '\s+')
+addproperty(this.oRegExpr, 'CARETTRIM', abRegExp(this.oPattern.CARETTRIM, 'g'))
 
-addProperty(this.oPattern, 'CARET', '^' + this.oPattern.LONECARET + this.oPattern.XRANGEPLAIN + '$')
-addProperty(this.oPattern, 'CARETLOOSE', '^' + this.oPattern.LONECARET + this.oPattern.XRANGEPLAINLOOSE + '$')
+addproperty(this.oPattern, 'CARET', '^' + this.oPattern.LONECARET + this.oPattern.XRANGEPLAIN + '$')
+addproperty(this.oPattern, 'CARETLOOSE', '^' + this.oPattern.LONECARET + this.oPattern.XRANGEPLAINLOOSE + '$')
 
 && A simple gt/lt/eq thing, or just "" to indicate "any version"
-addProperty(this.oPattern, 'COMPARATORLOOSE', '^' + this.oPattern.GTLT + '\s*(' + LOOSEPLAIN + ')$|^$')
-addProperty(this.oPattern, 'COMPARATOR', '^' + this.oPattern.GTLT + '\s*(' + FULLPLAIN + ')$|^$')
+addproperty(this.oPattern, 'COMPARATORLOOSE', '^' + this.oPattern.GTLT + '\s*(' + LOOSEPLAIN + ')$|^$')
+addproperty(this.oPattern, 'COMPARATOR', '^' + this.oPattern.GTLT + '\s*(' + FULLPLAIN + ')$|^$')
 
 
 && An expression to strip any whitespace between the gtlt and the thing
 && it modifies, so that `> 1.2.3` ==> `>1.2.3`
-addProperty(this.oPattern, 'COMPARATORTRIM', '(\s*)' + this.oPattern.GTLT + '\s*(' + LOOSEPLAIN + '|' + this.oPattern.XRANGEPLAIN + ')')
+addproperty(this.oPattern, 'COMPARATORTRIM', '(\s*)' + this.oPattern.GTLT + '\s*(' + LOOSEPLAIN + '|' + this.oPattern.XRANGEPLAIN + ')')
 
 && this one has to use the /g flag
-addProperty(this.oRegExpr, 'COMPARATORTRIM', abRegExp(this.oPattern.COMPARATORTRIM, 'g'))
+addproperty(this.oRegExpr, 'COMPARATORTRIM', abRegExp(this.oPattern.COMPARATORTRIM, 'g'))
 
 && Something like `1.2.3 - 1.2.4`
 && Note that these all use the loose form, because they'll be
 && checked against either the strict or loose comparator form
 && later.
-addProperty(this.oPattern, 'HYPHENRANGE', '^\s*(' + this.oPattern.XRANGEPLAIN + ')' + '\s+-\s+' + '(' + this.oPattern.XRANGEPLAIN + ')' + '\s*$')
+addproperty(this.oPattern, 'HYPHENRANGE', '^\s*(' + this.oPattern.XRANGEPLAIN + ')' + '\s+-\s+' + '(' + this.oPattern.XRANGEPLAIN + ')' + '\s*$')
 
-addProperty(this.oPattern, 'HYPHENRANGELOOSE', '^\s*(' + this.oPattern.XRANGEPLAINLOOSE + ')' + '\s+-\s+' + '(' + this.oPattern.XRANGEPLAINLOOSE + ')' + '\s*$')
+addproperty(this.oPattern, 'HYPHENRANGELOOSE', '^\s*(' + this.oPattern.XRANGEPLAINLOOSE + ')' + '\s+-\s+' + '(' + this.oPattern.XRANGEPLAINLOOSE + ')' + '\s*$')
 
 && Star ranges basically just allow anything at all.
-addProperty(this.oPattern, 'STAR', '(<|>)?=?\s*\*')
+addproperty(this.oPattern, 'STAR', '(<|>)?=?\s*\*')
 
 local aPattern[1], cPattern
-if aMember(aPattern, this.oPattern) > 0
+if amember(aPattern, this.oPattern) > 0
 	for each cPattern in m.aPattern
 		if !lProperty(this.oRegExpr, m.cPattern)
-			AddProperty(m.this.oRegExpr, m.cPattern, abRegExp(Evaluate('this.oPattern.' + m.cPattern)))
+			addproperty(m.this.oRegExpr, m.cPattern, abRegExp(evaluate('this.oPattern.' + m.cPattern)))
 		endif
 	endfor
 endif
@@ -7638,16 +7638,16 @@ endfunc
 * -----------------
 protected function oSemVer && objet de la classe abSemVer
 lparameters other as Variant && autre version
-return Iif(this.lSemVer(m.other);
+return iif(this.lSemVer(m.other);
 	, m.other;
-	, abSemVer(m.other, m.this.loose);
+	, abSemVer(m.other, m.this.LOOSE);
 	)
 endfunc
 
 * -----------------
 function compare && compare cette version avec une autre
 lparameters other as Variant && autre version
-return Evl(this.compareMain(@m.other), this.comparePre(@m.other))
+return evl(this.compareMain(@m.other), this.comparePre(@m.other))
 endfunc
 
 * -----------------
@@ -7655,8 +7655,8 @@ function compareMain && compare les versions principales
 lparameters other as Variant && autre version
 
 other = this.oSemVer(m.other)
-return Iif(this.lSemVer(m.other);
-	, Evl(Evl(;
+return iif(this.lSemVer(m.other);
+	, evl(evl(;
 		  this.compareIdentifiers(this.major, m.other.major);
 		, this.compareIdentifiers(this.minor, m.other.minor));
 		, this.compareIdentifiers(this.patch, m.other.patch));
@@ -7668,10 +7668,10 @@ endfunc
 protected function comparePre && compare les versions de pre-release (beta etc.)
 lparameters other as Variant && autre version
 
-local comparePre as Integer;
-, iPreRelease as Integer;
-, nPreRelThis as Integer;
-, nPreRelOther as Integer;
+local comparePre as integer;
+, iPreRelease as integer;
+, nPreRelThis as integer;
+, nPreRelOther as integer;
 , uPreRelThis as Variant;
 , uPreRelOther as Variant;
 
@@ -7680,7 +7680,7 @@ comparePre = .null.
 other = this.oSemVer(m.other)
 if this.lSemVer(m.other)
 
-  * NOT having a prerelease is > having one
+* NOT having a prerelease is > having one
   do case
   case !m.this.lPreRelease and !m.other.lPreRelease
     return 0
@@ -7689,22 +7689,22 @@ if this.lSemVer(m.other)
   case m.this.lPreRelease and !m.other.lPreRelease
     return -1
   endcase
-	
-	nPreRelThis  = Alen(m.this.prerelease)
-	nPreRelOther = Alen(m.other.prerelease)
-	
+
+	nPreRelThis  = alen(m.this.PRERELEASE)
+	nPreRelOther = alen(m.other.PRERELEASE)
+
 	for iPreRelease = 1 to max(m.nPreRelThis, m.nPreRelOther)
 		do case
 		case m.iPreRelease > m.nPreRelOther
 			return +1
 		case m.iPreRelease > m.nPreRelThis
 			return -1
-		case .T.;
-		 and varSet(@m.uPreRelThis, m.this.prerelease[m.iPreRelease]);
-		 and varSet(@m.uPreRelOther, m.other.prerelease[m.iPreRelease]);
-		 and Vartype(m.uPreRelThis) == Vartype(m.uPreRelOther);
+		case .t.;
+		 and varSet(@m.uPreRelThis, m.this.PRERELEASE[m.iPreRelease]);
+		 and varSet(@m.uPreRelOther, m.other.PRERELEASE[m.iPreRelease]);
+		 and vartype(m.uPreRelThis) == vartype(m.uPreRelOther);
 		 and m.uPreRelThis == m.uPreRelOther;
-		 and .T.
+		 and .t.
 			loop
 		otherwise
 			return this.compareIdentifiers(m.uPreRelThis, m.uPreRelOther)
@@ -7719,14 +7719,14 @@ endfunc
 
 * -----------------
 protected function compareIdentifiers(a, b) && compare les versions principales
-return iCase(;
-	Vartype(m.a) == 'N' and Vartype(m.b) <> 'N',;
+return icase(;
+	vartype(m.a) == 'N' and vartype(m.b) <> 'N',;
 		+1,;
-	Vartype(m.a) <> 'N' and Vartype(m.b) == 'N',;
+	vartype(m.a) <> 'N' and vartype(m.b) == 'N',;
 		-1,;
-	m.a > m.b,;
+	M.a > m.b,;
 		+1,;
-	m.a < m.b,;
+	M.a < m.b,;
 		-1,;
     0;
    )
@@ -7734,7 +7734,7 @@ endfunc
 
 * -----------------
 protected function iBeta
-return Ascan(m.this.prerelease, 'beta')
+return ascan(m.this.PRERELEASE, 'beta')
 endfunc
 
 * -----------------
@@ -7746,8 +7746,8 @@ endfunc
 * -----------------
 function nBeta && si beta prerelease, n° de beta
 local iBeta
-return Iif(this.lBeta(@m.iBeta) and Alen(this.prerelease) > m.iBeta and Vartype(this.prerelease[m.iBeta + 1]) == 'N';
-	, this.prerelease[m.iBeta + 1];
+return iif(this.lBeta(@m.iBeta) and alen(this.PRERELEASE) > m.iBeta and vartype(this.PRERELEASE[m.iBeta + 1]) == 'N';
+	, this.PRERELEASE[m.iBeta + 1];
 	, .null.;
 	)
 endfunc
@@ -7774,12 +7774,12 @@ endfunc
 
 * -----------------
 function eq(other as Variant) && cette version est égale à une autre
-return Empty(this.compare(m.other))
+return empty(this.compare(m.other))
 endfunc
 
 * -----------------
 function neq(other as Variant) && cette version est égale à une autre
-return !Empty(this.compare(m.other))
+return !empty(this.compare(m.other))
 endfunc
 
 * -----------------
@@ -7789,72 +7789,72 @@ endfunc
 
 * -----------------
 protected function prereleaseClear
-dimension this.prerelease[1]
-this.prerelease = .null.
+dimension this.PRERELEASE[1]
+this.PRERELEASE = .null.
 this.lPreRelease = .f.
 
 * -----------------
 function inc
 lparameters ;
   release; && [''] type of release
-, identifier; && ['beta'] if m.release = 'pre..' pre-release identifier such as 'beta'
+, Identifier; && ['beta'] if m.release = 'pre..' pre-release identifier such as 'beta'
 
-release    = Evl(m.release, '')
-identifier = Evl(m.identifier, 'beta')
+release    = evl(m.release, '')
+Identifier = evl(m.Identifier, 'beta')
 
 local success as Boolean;
-, iPreRelease as Integer;
-, nPreRelease as Integer;
+, iPreRelease as integer;
+, nPreRelease as integer;
 
-success = .T.
+success = .t.
 
 do case
 
-case !ga_Type_IsChar(m.release, .T.)
-	success = .F.
-		
-case !varSet(@m.release, Lower(cEuroANSI(Alltrim(m.release))))
+case !ga_Type_IsChar(m.release, .t.)
+	success = .f.
+
+case !varSet(@m.release, lower(cEuroANSI(alltrim(m.release))))
 
 && premajor will bump the version up to the next major release, and immediately down to pre-release.
 && preminor and prepatch work the same way.
 case m.release == 'premajor'
-	this.major = this.major + 1 
+	this.major = this.major + 1
 	store 0 to this.minor, this.patch
 	this.prereleaseClear
-	success = this.inc('pre', m.identifier)
+	success = this.inc('pre', m.Identifier)
 
 case m.release == 'preminor'
 	this.minor = this.minor + 1
 	this.patch = 0
 	this.prereleaseClear
-	success = this.inc('pre', m.identifier)
-      
+	success = this.inc('pre', m.Identifier)
+
 case m.release == 'prepatch' && If this is already a prerelease, it'll bump to the next version
 	this.prereleaseClear && drop any prereleases that might already exist, since they are not relevant at this point.
-	success = .T.;
+	success = .t.;
 	 and this.inc('patch');
-	 and this.inc('pre', m.identifier)
+	 and this.inc('pre', m.Identifier)
 
 case m.release == 'prerelease'
-	success = .T.;
+	success = .t.;
 	 and (m.this.lPreRelease or this.inc('patch')); && If input is a non-prerelease version, this acts the same as a prepatch.
-	 and this.inc('pre', m.identifier)
+	 and this.inc('pre', m.Identifier)
 
 
 case m.release == 'major'
-  && If this is a pre-major version, bump up to the same major version, else increment major.
-  && 1.0.0-5 bumps to 1.0.0
-  && 1.1.0 bumps to 2.0.0
+&& If this is a pre-major version, bump up to the same major version, else increment major.
+&& 1.0.0-5 bumps to 1.0.0
+&& 1.1.0 bumps to 2.0.0
   if this.minor > 0 or this.patch > 0 or !m.this.lPreRelease
 	  this.major = this.major + 1
   endif
 	store 0 to this.minor, this.patch
   this.prereleaseClear
-  
+
 case m.release == 'minor'
-  && If this is a pre-minor version, bump up to the same minor version, else increment minor.
-  && 1.2.0-5 bumps to 1.2.0
-  && 1.2.1 bumps to 1.3.0
+&& If this is a pre-minor version, bump up to the same minor version, else increment minor.
+&& 1.2.0-5 bumps to 1.2.0
+&& 1.2.1 bumps to 1.3.0
   if this.patch > 0 or !m.this.lPreRelease
     this.minor = this.minor + 1
   endif
@@ -7862,8 +7862,8 @@ case m.release == 'minor'
   this.prereleaseClear
 
 case m.release == 'patch'
-  && If this is not a pre-release version, it will increment the patch: 1.2.0 patches to 1.2.1
-  && If it is a pre-release it will bump up to the same patch version: 1.2.0-5 patches to 1.2.0
+&& If this is not a pre-release version, it will increment the patch: 1.2.0 patches to 1.2.1
+&& If it is a pre-release it will bump up to the same patch version: 1.2.0-5 patches to 1.2.0
   if !m.this.lPreRelease
     this.patch = this.patch + 1
   endif
@@ -7872,42 +7872,42 @@ case m.release == 'patch'
 case m.release == 'pre' and lCallingModule('inc') && && This probably shouldn't be used publicly because 1.0.0 "pre" would become 1.0.0-0 which is the wrong direction.
 
 	if !m.this.lPreRelease
-		store 0 to this.prerelease, nPreRelease
+		store 0 to this.PRERELEASE, nPreRelease
 	else
-	  && 1.2.0-beta.1 bumps to 1.2.0-beta.2
-		nPreRelease = aLen(m.this.prerelease)
+&& 1.2.0-beta.1 bumps to 1.2.0-beta.2
+		nPreRelease = alen(m.this.PRERELEASE)
 		for iPreRelease = m.nPreRelease to 1 step -1
-			if Vartype(m.this.prerelease[m.iPreRelease]) == 'N'
-				this.prerelease[m.iPreRelease] = m.this.prerelease[m.iPreRelease] + 1
+			if vartype(m.this.PRERELEASE[m.iPreRelease]) == 'N'
+				this.PRERELEASE[m.iPreRelease] = m.this.PRERELEASE[m.iPreRelease] + 1
 				exit
 			endif
 		endfor
-		if Empty(m.iPreRelease) && didn't increment anything
+		if empty(m.iPreRelease) && didn't increment anything
 			nPreRelease = m.nPreRelease + 1 && JS Array.push() ajoute un ou plusieurs éléments à la fin d'un tableau et retourne la nouvelle taille du tableau.
-			dimension this.prerelease[m.nPreRelease]
-			this.prerelease[m.nPreRelease] = 0
+			dimension this.PRERELEASE[m.nPreRelease]
+			this.PRERELEASE[m.nPreRelease] = 0
 		endif
 	endif
-	
-  && 1.2.0-beta.fooblz or 1.2.0-beta bump to 1.2.0-beta.0
+
+&& 1.2.0-beta.fooblz or 1.2.0-beta bump to 1.2.0-beta.0
 	do case
-	case !ga_Type_IsChar(m.identifier, .T.)
-	case !varSet(@m.identifier, Lower(cEuroANSI(Alltrim(m.identifier))))
-	case .F.;
-	 or !luEqual(this.prerelease[1], m.identifier, .T.);
-	 or Alen(this.prerelease) < 2;
-	 or !Vartype(this.prerelease[2]) == 'N'
-		dimension this.prerelease[2]
-		this.prerelease[1] = m.identifier
-		this.prerelease[2] = 0
+	case !ga_Type_IsChar(m.Identifier, .t.)
+	case !varSet(@m.Identifier, lower(cEuroANSI(alltrim(m.Identifier))))
+	case .f.;
+	 or !luEqual(this.PRERELEASE[1], m.Identifier, .t.);
+	 or alen(this.PRERELEASE) < 2;
+	 or !vartype(this.PRERELEASE[2]) == 'N'
+		dimension this.PRERELEASE[2]
+		this.PRERELEASE[1] = m.Identifier
+		this.PRERELEASE[2] = 0
 	endcase
 
 otherwise
-	success = .F.
+	success = .f.
 
 endcase
 
-assert m.success message Textmerge([<<cL(m.release)>> is an invalid release verb])
+assert m.success message textmerge([<<cL(m.release)>> is an invalid release verb])
 
 this.format
 this.raw = this.version
@@ -7916,22 +7916,22 @@ return m.success
 endfunc
 
 * =============================
-ENDDEFINE && CLASS abSemVer
+enddefine && CLASS abSemVer
 * =============================
 
 * -----------------
 function abSemVer_test && teste la classe abSemVer
 lparameters nTest && @ number for tests ran
 
-local success as boolean;
-, unitTest as boolean;
+local success as Boolean;
+, unitTest as Boolean;
 , oUnitTest as abUnitTest of abDev.prg;
 , oAsserts as abSet of abDev.prg;
 , oSemVer as abSemVer of abDev.prg;
 
 * oUnitTest = abUnitTest()
 oAsserts  = abSet('ASSERTS', 'ON')
-success = .T.
+success = .t.
 nTest = 0
 
 && major: 1.0.0-5 bumps to 1.0.0
@@ -7974,10 +7974,10 @@ nTest = m.nTest + 1
 success = abSemVer_test_inc('1.2.2-beta.0', '1.2.2-beta.1', 'prerelease') and m.success
 nTest = m.nTest + 1
 
-#if .F.
+#if .f.
 AB()
 nTest = 0
-_cliptext = nEvl(varSet(@m.nTest, 0), '') + Textmerge([&]+[& <<Datetime()>> - abSemVer_test(): <<abSemVer_test(@m.nTest)>> - <<m.nTest>> tests] + Chr(13))
+_cliptext = nEvl(varSet(@m.nTest, 0), '') + textmerge([&]+[& <<Datetime()>> - abSemVer_test(): <<abSemVer_test(@m.nTest)>> - <<m.nTest>> tests] + chr(13))
 #endif
 
 && 18/09/15 10:44:13 - abSemVer_test(): .T. - 10 tests
@@ -7991,13 +7991,13 @@ lparameters ;
   versionFrom;
 , versionTo;
 , release; && ['patch'] type of release
-, identifier; && [''] if m.release = 'pre..' pre-release identifier such as 'beta'
+, Identifier; && [''] if m.release = 'pre..' pre-release identifier such as 'beta'
 
-local success as boolean;
+local success as Boolean;
 , oSemVer as abSemVer of abDev.prg;
 
 oSemVer = abSemVer(m.versionFrom)
-success = m.oSemVer.inc(m.release, m.identifier) and m.oSemVer.version == m.versionTo
+success = m.oSemVer.inc(m.release, m.Identifier) and m.oSemVer.version == m.versionTo
 
 assert m.success
 return m.success
