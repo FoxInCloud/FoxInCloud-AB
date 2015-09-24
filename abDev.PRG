@@ -6172,8 +6172,8 @@ major = .null.
 minor = .null.
 patch = .null.
 
-dimension PRERELEASE[1], build[1]
-PRERELEASE = .null. && array of prerelease(s) identifier(s) and number(s) && keep as lower case
+dimension prerelease[1], build[1]
+prerelease = .null. && array of prerelease(s) identifier(s) and number(s) && keep as lower case
 build = .null. && array of build numbers
 
 && FoxInCloud extensions
@@ -6185,7 +6185,7 @@ lPreRelease = .null. && pre-release (beta)
 versionMMP = .null. && version without prerelease(s)
 
 * -----------------
-procedure init
+procedure Init
 lparameters ;
   result as string; && @ résultat (cumulatif)
 , version as string; && version à analyser
@@ -6237,8 +6237,6 @@ if lenc(m.version) > this.MAX_LENGTH
   return cResultAdd(@m.result, textmerge([version <<cL(m.version)>> is longer than <<this.MAX_LENGTH>> characters]))
 endif
 
-version = m.version + Iif(m.loose and empty(Chrtran(m.version, '.0123456789', '')) and Occurs('.', m.version) == 1, '.0', '') && back compat.: allow final versions without a patch number
-
 oRegExp = iif(m.loose, this.oRegExpr.loose, this.oRegExpr.full)
 
 if empty(m.oRegExp.execute(m.version))
@@ -6278,10 +6276,21 @@ this.lPreRelease = !empty(m.cPreReleases)
 if m.this.lPreRelease
 	oRegExpNum = abRegExp('^[0-9]+$')
 	nPreRelease = getwordcount(m.cPreReleases, '.')
-	dimension this.PRERELEASE[m.nPreRelease]
+	if m.loose and m.nPreRelease = 1 and IsDigit(Rightc(m.cPreReleases, 1)) && thn 2015-09-25 back compat.: allow for missing dot between prerelease type and prerelease number
+		iPreRelease = Lenc(m.cPreReleases)
+		do while m.iPreRelease > 0
+			if !IsDigit(Substr(m.cPreReleases, m.iPreRelease))
+				cPreReleases = Leftc(m.cPreReleases, m.iPreRelease) + '.' + Substr(m.cPreReleases, m.iPreRelease + 1)
+				nPreRelease = 2
+				exit
+			endif
+			m.iPreRelease = m.iPreRelease - 1
+		enddo
+	endif
+	dimension this.prerelease[m.nPreRelease]
 	for iPreRelease = 1 to m.nPreRelease
 		cPreRelease = getwordnum(m.cPreReleases, m.iPreRelease, '.')
-		this.PRERELEASE[m.iPreRelease] = iif(m.oRegExpNum.Test(m.cPreRelease);
+		this.prerelease[m.iPreRelease] = iif(m.oRegExpNum.Test(m.cPreRelease);
 			, cast(m.cPreRelease as i);
 			, lower(m.cPreRelease);
 			)
@@ -6296,9 +6305,9 @@ procedure format
 
 local cPreReleases, aPreRelease[1]
 
-this.lPreRelease = !isnull(m.this.PRERELEASE)
+this.lPreRelease = !isnull(m.this.prerelease)
 if m.this.lPreRelease
-	acopy(this.PRERELEASE, aPreRelease)
+	acopy(this.prerelease, aPreRelease)
 	cPreReleases = '-' + cListOfArray(@m.aPreRelease, '.',,,.t.)
 endif
 
@@ -6344,8 +6353,8 @@ addproperty(this.oPattern, 'MAINVERSION', '';
 
 addproperty(this.oPattern, 'MAINVERSIONLOOSE', '';
 	+ '(' + this.oPattern.NUMERICIDENTIFIERLOOSE + ')\.';
-	+ '(' + this.oPattern.NUMERICIDENTIFIERLOOSE + ')\.';
-	+ '(' + this.oPattern.NUMERICIDENTIFIERLOOSE + ')';
+	+ '(' + this.oPattern.NUMERICIDENTIFIERLOOSE + ')(?:\.'; && thn 2015-09-25 back compat.: allow for patch figure missing (eg. '2.20beta')
+	+ '(' + this.oPattern.NUMERICIDENTIFIERLOOSE + '))?';
 	)
 
 && ## Pre-release Version Identifier
@@ -6357,7 +6366,7 @@ addproperty(this.oPattern, 'PRERELEASEIDENTIFIERLOOSE', '(?:' + this.oPattern.NU
 && ## Pre-release Version
 && Hyphen, followed by one or more dot-separated pre-release version identifiers.
 
-addproperty(this.oPattern, 'prerelease', '(?:-(' + this.oPattern.PRERELEASEIDENTIFIER + '(?:\.' + this.oPattern.PRERELEASEIDENTIFIER + ')*))')
+addproperty(this.oPattern, 'PRERELEASE', '(?:-(' + this.oPattern.PRERELEASEIDENTIFIER + '(?:\.' + this.oPattern.PRERELEASEIDENTIFIER + ')*))')
 addproperty(this.oPattern, 'PRERELEASELOOSE', '(?:-?(' + this.oPattern.PRERELEASEIDENTIFIERLOOSE + '(?:\.' + this.oPattern.PRERELEASEIDENTIFIERLOOSE + ')*))')
 
 && ## Build Metadata Identifier
@@ -6389,9 +6398,9 @@ addproperty(this.oPattern, 'FULL', '^' + FULLPLAIN + '$')
 LOOSEPLAIN = '[v=\s]*';
 	+ this.oPattern.MAINVERSIONLOOSE;
 	+ this.oPattern.PRERELEASELOOSE + '?';
-	+ this.oPattern.build + '?'
+	+ this.oPattern.BUILD + '?'
 
-addproperty(this.oPattern, 'loose', '^' + LOOSEPLAIN + '$')
+addproperty(this.oPattern, 'LOOSE', '^' + LOOSEPLAIN + '$')
 
 addproperty(this.oPattern, 'GTLT', '((?:<|>)?=?)')
 
@@ -6549,8 +6558,8 @@ if this.lSemVer(m.other)
     return -1
   endcase
 
-	nPreRelThis  = alen(m.this.PRERELEASE)
-	nPreRelOther = alen(m.other.PRERELEASE)
+	nPreRelThis  = alen(m.this.prerelease)
+	nPreRelOther = alen(m.other.prerelease)
 
 	for iPreRelease = 1 to max(m.nPreRelThis, m.nPreRelOther)
 		do case
@@ -6559,8 +6568,8 @@ if this.lSemVer(m.other)
 		case m.iPreRelease > m.nPreRelThis
 			return -1
 		case .t.;
-		 and varSet(@m.uPreRelThis, m.this.PRERELEASE[m.iPreRelease]);
-		 and varSet(@m.uPreRelOther, m.other.PRERELEASE[m.iPreRelease]);
+		 and varSet(@m.uPreRelThis, m.this.prerelease[m.iPreRelease]);
+		 and varSet(@m.uPreRelOther, m.other.prerelease[m.iPreRelease]);
 		 and vartype(m.uPreRelThis) == vartype(m.uPreRelOther);
 		 and m.uPreRelThis == m.uPreRelOther;
 		 and .t.
@@ -6593,7 +6602,7 @@ endfunc
 
 * -----------------
 protected function iBeta
-return ascan(m.this.PRERELEASE, 'beta')
+return ascan(m.this.prerelease, 'beta')
 endfunc
 
 * -----------------
@@ -6605,8 +6614,8 @@ endfunc
 * -----------------
 function nBeta && si beta prerelease, n° de beta
 local iBeta
-return iif(this.lBeta(@m.iBeta) and alen(this.PRERELEASE) > m.iBeta and vartype(this.PRERELEASE[m.iBeta + 1]) == 'N';
-	, this.PRERELEASE[m.iBeta + 1];
+return iif(this.lBeta(@m.iBeta) and alen(this.prerelease) > m.iBeta and vartype(this.prerelease[m.iBeta + 1]) == 'N';
+	, this.prerelease[m.iBeta + 1];
 	, .null.;
 	)
 endfunc
@@ -6678,8 +6687,8 @@ endfunc
 
 * -----------------
 protected function prereleaseClear
-dimension this.PRERELEASE[1]
-this.PRERELEASE = .null.
+dimension this.prerelease[1]
+this.prerelease = .null.
 this.lPreRelease = .f.
 
 * -----------------
@@ -6761,20 +6770,20 @@ case m.release == 'patch'
 case m.release == 'pre' and lCallingModule('inc') && && This probably shouldn't be used publicly because 1.0.0 "pre" would become 1.0.0-0 which is the wrong direction.
 
 	if !m.this.lPreRelease
-		store 0 to this.PRERELEASE, nPreRelease
+		store 0 to this.prerelease, nPreRelease
 	else
 && 1.2.0-beta.1 bumps to 1.2.0-beta.2
-		nPreRelease = alen(m.this.PRERELEASE)
+		nPreRelease = alen(m.this.prerelease)
 		for iPreRelease = m.nPreRelease to 1 step -1
-			if vartype(m.this.PRERELEASE[m.iPreRelease]) == 'N'
-				this.PRERELEASE[m.iPreRelease] = m.this.PRERELEASE[m.iPreRelease] + 1
+			if vartype(m.this.prerelease[m.iPreRelease]) == 'N'
+				this.prerelease[m.iPreRelease] = m.this.prerelease[m.iPreRelease] + 1
 				exit
 			endif
 		endfor
 		if empty(m.iPreRelease) && didn't increment anything
 			nPreRelease = m.nPreRelease + 1 && JS Array.push() ajoute un ou plusieurs éléments à la fin d'un tableau et retourne la nouvelle taille du tableau.
-			dimension this.PRERELEASE[m.nPreRelease]
-			this.PRERELEASE[m.nPreRelease] = 0
+			dimension this.prerelease[m.nPreRelease]
+			this.prerelease[m.nPreRelease] = 0
 		endif
 	endif
 
@@ -6783,12 +6792,12 @@ case m.release == 'pre' and lCallingModule('inc') && && This probably shouldn't 
 	case !ga_Type_IsChar(m.Identifier, .t.)
 	case !varSet(@m.Identifier, lower(cEuroANSI(alltrim(m.Identifier))))
 	case .f.;
-	 or !luEqual(this.PRERELEASE[1], m.Identifier, .t.);
-	 or alen(this.PRERELEASE) < 2;
-	 or !vartype(this.PRERELEASE[2]) == 'N'
-		dimension this.PRERELEASE[2]
-		this.PRERELEASE[1] = m.Identifier
-		this.PRERELEASE[2] = 0
+	 or !luEqual(this.prerelease[1], m.Identifier, .t.);
+	 or alen(this.prerelease) < 2;
+	 or !vartype(this.prerelease[2]) == 'N'
+		dimension this.prerelease[2]
+		this.prerelease[1] = m.Identifier
+		this.prerelease[2] = 0
 	endcase
 
 otherwise
