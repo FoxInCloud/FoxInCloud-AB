@@ -7651,6 +7651,18 @@ return evl(this.compareMain(@m.other), this.comparePre(@m.other))
 endfunc
 
 * -----------------
+function compareMinor && compare cette version avec une autre jusqu'à la version mineure en ignorant les patches et les pre-release
+lparameters other as Variant && autre version
+other = this.oSemVer(m.other)
+return iif(this.lSemVer(m.other);
+	, evl(;
+		  this.compareIdentifiers(this.major, m.other.major);
+		, this.compareIdentifiers(this.minor, m.other.minor));
+	, .null.;
+	)
+endfunc
+
+* -----------------
 function compareMain && compare les versions principales
 lparameters other as Variant && autre version
 
@@ -7753,33 +7765,63 @@ return iif(this.lBeta(@m.iBeta) and alen(this.PRERELEASE) > m.iBeta and vartype(
 endfunc
 
 * -----------------
-function gt(other as Variant) && cette version est supérieure à une autre
+function GT(other as Variant) && cette version est supérieure à une autre
 return this.compare(m.other) > 0
 endfunc
 
 * -----------------
-function gte(other as Variant) && cette version est supérieure ou égale à une autre
+function GTE(other as Variant) && cette version est supérieure ou égale à une autre
 return this.compare(m.other) >= 0
 endfunc
 
 * -----------------
-function lt(other as Variant) && cette version est inférieure à une autre
+function LT(other as Variant) && cette version est inférieure à une autre
 return this.compare(m.other) < 0
 endfunc
 
 * -----------------
-function lte(other as Variant) && cette version est inférieure ou égale à une autre
+function LTE(other as Variant) && cette version est inférieure ou égale à une autre
 return this.compare(m.other) <= 0
 endfunc
 
 * -----------------
-function eq(other as Variant) && cette version est égale à une autre
+function EQ(other as Variant) && cette version est égale à une autre
 return empty(this.compare(m.other))
 endfunc
 
 * -----------------
-function neq(other as Variant) && cette version est égale à une autre
+function NEQ(other as Variant) && cette version est égale à une autre
 return !empty(this.compare(m.other))
+endfunc
+
+* -----------------
+function minorGT(other as Variant) && cette version est supérieure à une autre
+return this.compareMinor(m.other) > 0
+endfunc
+
+* -----------------
+function minorGTE(other as Variant) && cette version est supérieure ou égale à une autre
+return this.compareMinor(m.other) >= 0
+endfunc
+
+* -----------------
+function minorLT(other as Variant) && cette version est inférieure à une autre
+return this.compareMinor(m.other) < 0
+endfunc
+
+* -----------------
+function minorLTE(other as Variant) && cette version est inférieure ou égale à une autre
+return this.compareMinor(m.other) <= 0
+endfunc
+
+* -----------------
+function minorEQ(other as Variant) && cette version est égale à une autre
+return empty(this.compareMinor(m.other))
+endfunc
+
+* -----------------
+function minorNEQ(other as Variant) && cette version est égale à une autre
+return !empty(this.compareMinor(m.other))
 endfunc
 
 * -----------------
