@@ -6087,7 +6087,10 @@ endfunc
 #endif
 
 * =============================
-function abSemVer as abSemVer of abDev.prg
+function cSemVer_MMP as String && {en} SemVer without prereleases
+
+* =============================
+function abSemVer as abSemVer of abDev.prg && {en} abSemVer object from a version string
 lparameters ;
   Result as string; && @ résultat (cumulatif)
 , version as string; && version à analyser
@@ -6140,6 +6143,7 @@ lMajor = .null. && major release
 lMinor = .null. && minor release
 lPatch = .null. && patch release
 lPreRelease = .null. && pre-release (beta)
+versionMMP = .null. && version without prerelease(s)
 
 * -----------------
 procedure init
@@ -6257,10 +6261,13 @@ if m.this.lPreRelease
 	cPreReleases = '-' + cListOfArray(@m.aPreRelease, '.',,,.t.)
 endif
 
-this.version = '';
+this.versionMMP = '';
 	      + cast(m.this.major as M);
 	+ '.' + cast(m.this.minor as M);
 	+ '.' + cast(m.this.patch as M);
+	+ ''
+
+this.version = this.versionMMP;
 	+ evl(m.cPreReleases, '')
 
 return this.version
