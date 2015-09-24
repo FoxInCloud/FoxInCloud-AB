@@ -1,4 +1,6 @@
 * VFP
+* requires: set path to (home(1)) additive
+* to set all pathes: do ab
 #INCLUDE FoxPro.h
 #INCLUDE ffc\GDIplus.H
 
