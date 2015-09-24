@@ -6237,6 +6237,8 @@ if lenc(m.version) > this.MAX_LENGTH
   return cResultAdd(@m.result, textmerge([version <<cL(m.version)>> is longer than <<this.MAX_LENGTH>> characters]))
 endif
 
+version = m.version + Iif(m.loose and empty(Chrtran(m.version, '.0123456789', '')) and Occurs('.', m.version) == 1, '.0', '') && back compat.: allow final versions without a patch number
+
 oRegExp = iif(m.loose, this.oRegExpr.loose, this.oRegExpr.full)
 
 if empty(m.oRegExp.execute(m.version))
