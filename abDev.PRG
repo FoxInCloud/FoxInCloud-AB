@@ -80,7 +80,7 @@ local lnParms, luTxtLog, luDBFlog, llResult
 lnParms = pcount()
 
 * Determine if Parent object has a reference to a project files collection
-this.alParentPjFiles = type('this.parent.aoPjFiles') == 'O' and not isnull(this.parent.aoPjFiles)
+this.alParentPjFiles = type('this.parent.aoPjFiles') == 'O' and not isNull(this.parent.aoPjFiles)
 
 * Init/Open log files
 luTxtLog = iif(m.lnParms>=1 and vartype(m.tuTxtLog) $ 'CL', m.tuTxtLog, .t.)
@@ -855,7 +855,7 @@ if m.llResult
 				endif
 			endif
 
-			llAllEmpty = m.llAllEmpty and (empty(m.luFieldValue) or isnull(m.luFieldValue))
+			llAllEmpty = m.llAllEmpty and (empty(m.luFieldValue) or isNull(m.luFieldValue))
 		endif
 
 		local (m.lcFieldName)
@@ -911,7 +911,7 @@ if m.this.anCols * m.this.anDataLines > 0
 			luSum = this.aaLog[L_lSUM, m.lnCol]
 
 * Si la colonne contient un total et qu'un bilan est demandé
-			if m.lnSum > 0 and not isnull(m.luSum) && .NULL.: ne rien faire, ni total ni moyenne
+			if m.lnSum > 0 and not isNull(m.luSum) && .NULL.: ne rien faire, ni total ni moyenne
 				this.CellFill(m.lnCol, m.lnSum / iif(m.luSum, 1, m.this.anDataLines))
 				llFooter = .t.
 			else
@@ -1668,7 +1668,7 @@ if m.llResult
 				if loRegExp.Test(justfname(m.loFile.name))
 
 * Changer son inclusion
-					loFile.Exclude = iif(isnull(m.llInclude), not m.loFile.Exclude, m.llInclude)
+					loFile.Exclude = iif(isNull(m.llInclude), not m.loFile.Exclude, m.llInclude)
 					tnResult = m.tnResult + 1
 				endif
 			endfor
@@ -1926,7 +1926,7 @@ lcResult = space(0)
 
 * Si la ligne de code est valide
 tcCodeLine = cCodeLineClean(m.tcCodeLine) && Ligne de code sans caractères parasites
-llResult = not isnull(m.tcCodeLine)
+llResult = not isNull(m.tcCodeLine)
 assert m.llResult message cAssertMsg(textmerge([Line de code invalide : <<m.tcCodeLine>>]))
 if m.llResult
 
@@ -2575,7 +2575,7 @@ for each m.lcSet in m.laSets
 
 * If Setting object can be instanciated
 	loSet = abSet(&lcSet)
-	llSet = vartype(m.loSet) == 'O' and not isnull(m.loSet)
+	llSet = vartype(m.loSet) == 'O' and not isNull(m.loSet)
 	if m.llSet
 
 * Memorize old values
@@ -3470,7 +3470,7 @@ return vartype(m.this.oProject) == 'O'
 * ----------------
 protected procedure destroy
 
-if m.this.lOpened or isnull(m.this.lOpened)
+if m.this.lOpened or isNull(m.this.lOpened)
 	this.oProject.close
 endif
 
@@ -3541,7 +3541,7 @@ if vartype(m.tcPJX) == 'C'
 			try && évite les erreurs à l'ouverture tel que les fichiers non trouvés && en fait non ça n'empêche pas l'erreur
 				modify project (m.tcPJX) save nowait noshow noprojecthook
 				loResult = _vfp.activeproject
-				tlOpened = iif(isnull(m.tlOpened), m.tlOpened, .t.)
+				tlOpened = iif(isNull(m.tlOpened), m.tlOpened, .t.)
 			catch to loException
 				loResult = .null.
 				tcResult = cException(m.loException)
@@ -4607,7 +4607,7 @@ else
 	local lcStatus
 	this.aTest[m.this.nTest, 1] = this.lCoverage && Coverage ON
 	this.aTest[m.this.nTest, 2] = m.lnElapsed && Temps d'exécution (non significatif si COVERAGE)
-	this.aTest[m.this.nTest, 3] = empty(pcount()) or isnull(m.tuExpected) or luEqual(iif(vartype(m.tuExpected ) == 'O', cL(m.tuExpected), m.tuExpected), m.luResult) && Valeur produite = valeur attendue && Empty(m.tuExpected) OR
+	this.aTest[m.this.nTest, 3] = empty(pcount()) or isNull(m.tuExpected) or luEqual(iif(vartype(m.tuExpected ) == 'O', cL(m.tuExpected), m.tuExpected), m.luResult) && Valeur produite = valeur attendue && Empty(m.tuExpected) OR
 	this.aTest[m.this.nTest, 4] = m.tuExpected && Résultat attendu
 	this.aTest[m.this.nTest, 5] = m.luResult && Résultat produit
 	this.aTest[m.this.nTest, 6] = this.lStatus(@m.laStatus1, @m.laStatus2, @m.lcStatus) && Environnement modifié ?
@@ -5697,7 +5697,7 @@ catch
 	success = .null. && IsUserAnAdmin() not supported, we don't know
 endtry
 
-result = iif(isnull(m.success);
+result = iif(isNull(m.success);
 	, textmerge('';
 		+ [<<Proper(Program())>>() ];
 		+ icase(;
@@ -6039,7 +6039,7 @@ endfunc
 * =============================================
 function nNvl && substitute value instead of a not null value
 lparameters value, substitute
-return iif(isnull(m.value), m.value, m.substitute)
+return iif(isNull(m.value), m.value, m.substitute)
 endfunc
 
 * =============================================
@@ -6149,6 +6149,23 @@ lparameters oSemVer as Variant
 return loClass(m.oSemVer, 'abSemVer')
 endfunc
 
+* -----------------
+function iSemVerMMP && ordre de classement de versions SemVer sur majeur-mineur-patch (ignorant les pre-releases)
+lparameters ;
+  result as string; && @ résultat (cumulatif)
+, version as string; && version à analyser
+, loose as Boolean; && [.F.]
+
+local oSemVer as abSemVer
+
+oSemVer = abSemVer(@m.result, m.version, m.loose)
+
+return Iif(labSemVer(m.oSemVer);
+	, m.oSemVer.versionMMPint;
+	, .null.;
+	)
+endfunc
+
 * =============================
 define class abSemVer as GA_LIGHTWEIGHT_CLASS of abGA.prg && Implements Semantic Versioning 2.0.0 http://semver.org/ - inspired by https://github.com/npm/node-semver/
 * =============================
@@ -6182,7 +6199,9 @@ lMajor = .null. && major release
 lMinor = .null. && minor release
 lPatch = .null. && patch release
 lPreRelease = .null. && pre-release (beta)
-versionMMP = .null. && version without prerelease(s)
+versionMMP = .null. && version Major.Minor.Path (without prerelease(s))
+versionMMPint = .null. && version Major.Minor.Path in integer
+versionIS = .null. && version for InstallShield
 
 * -----------------
 procedure Init
@@ -6196,7 +6215,7 @@ local success as Boolean;
 
 success = this.Init_(@m.cResult, m.version, m.loose)
 
-assert m.success message cAssertMsg(m.cResult)
+* assert m.success message cAssertMsg(m.cResult)
 = m.success or cResultAdd(@m.result, m.cResult)
 
 return m.success
@@ -6261,7 +6280,7 @@ endcase
 
 this.lMajor = empty(m.this.minor) && major release
 this.lMinor = !this.lMajor and empty(m.this.patch) && minor release
-this.lPatch = !empty(m.this.patch) && patch release
+this.lPatch = m.this.patch > 0 && patch release
 
 && pre-release; http://semver.org/
 && A pre-release version MAY be denoted by appending a hyphen and a series of dot separated identifiers immediately following the patch version; identifiers:
@@ -6276,6 +6295,7 @@ this.lPreRelease = !empty(m.cPreReleases)
 if m.this.lPreRelease
 	oRegExpNum = abRegExp('^[0-9]+$')
 	nPreRelease = getwordcount(m.cPreReleases, '.')
+	if m.loose and m.nPreRelease = 1 and IsDigit(Rightc(m.cPreReleases, 1)) && 2015-09-25 thn back compat.: allow for missing dot between prerelease type and number
 		iPreRelease = Lenc(m.cPreReleases)
 		do while m.iPreRelease >= 0
 			if !IsDigit(Substr(m.cPreReleases, m.iPreRelease))
@@ -6294,6 +6314,7 @@ if m.this.lPreRelease
 		cPreRelease = getwordnum(m.cPreReleases, m.iPreRelease, '.')
 		this.prerelease[m.iPreRelease] = iif(m.oRegExpNum.Test(m.cPreRelease);
 			, cast(m.cPreRelease as I);
+			, lower(cEuroANSI(m.cPreRelease)); && _cliptext = cl(lower(cEuroANSI('Bêta'))) >> "beta"
 			)
 	endfor
 endif
@@ -6304,22 +6325,26 @@ endproc
 * -----------------
 procedure format
 
-local cPreReleases, aPreRelease[1]
+this.versionMMPint = Int(0;
+	+ m.this.major * 10^6;
+	+ m.this.minor * 10^3;
+	+ m.this.patch;
+	)
 
-this.lPreRelease = !isnull(m.this.prerelease)
-if m.this.lPreRelease
-	acopy(this.prerelease, aPreRelease)
-	cPreReleases = '-' + cListOfArray(@m.aPreRelease, '.',,,.t.)
-endif
-
-this.versionMMP = '';
+store '';
 	      + cast(m.this.major as M);
 	+ '.' + cast(m.this.minor as M);
 	+ '.' + cast(m.this.patch as M);
-	+ ''
+ to this.versionMMP, this.versionIS, this.version
 
-this.version = this.versionMMP;
-	+ evl(m.cPreReleases, '')
+this.lPreRelease = !isNull(m.this.prerelease)
+if m.this.lPreRelease
+
+	local aPreRelease[1]
+	acopy(this.prerelease, aPreRelease)
+	this.version = this.version + '-' + cListOfArray(@m.aPreRelease, '.',,,.t.)
+	this.versionIS = this.versionIS + Iif(m.this.lBeta(), '.' + Cast(m.this.nBeta() as M), '')
+endif
 
 return this.version
 endproc
@@ -6368,7 +6393,7 @@ addproperty(this.oPattern, 'PRERELEASEIDENTIFIERLOOSE', '(?:' + this.oPattern.NU
 && Hyphen, followed by one or more dot-separated pre-release version identifiers.
 
 addproperty(this.oPattern, 'PRERELEASE', '(?:-(' + this.oPattern.PRERELEASEIDENTIFIER + '(?:\.' + this.oPattern.PRERELEASEIDENTIFIER + ')*))')
-addproperty(this.oPattern, 'PRERELEASELOOSE', '(?:[-\.]?(' + this.oPattern.PRERELEASEIDENTIFIERLOOSE + '(?:\.' + this.oPattern.PRERELEASEIDENTIFIERLOOSE + ')*))') && 2015-09-25 thn InstallShield support: prerelease is a number separated by '.' from main version
+addproperty(this.oPattern, 'PRERELEASELOOSE', '(?:[-\. ]?(' + this.oPattern.PRERELEASEIDENTIFIERLOOSE + '(?:\.' + this.oPattern.PRERELEASEIDENTIFIERLOOSE + ')*))') && 2015-09-25 thn InstallShield support: prerelease is a number separated by '.' from main version
 
 && ## Build Metadata Identifier
 && Any combination of digits, letters, or hyphens.
