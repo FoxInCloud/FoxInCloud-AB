@@ -6936,3 +6936,30 @@ success = m.oSemVer.inc(m.release, m.Identifier) and m.oSemVer.version == m.vers
 assert m.success
 return m.success
 endfunc
+
+* -----------------
+procedure UTF8fix1252 && corrige les caractères accentués dans un fichier converti par erreur en UTF8
+lparameters tcSrce
+
+local success as Boolean;
+, result as String;
+, lFile as Boolean;
+
+success = .T.
+
+lFile = File(m.tcSrce)
+result = Iif(m.lFile, FileToStr(m.tcSrce), m.tcSrce)
+
+result = Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(m.result;
+	, 'Ã ', 'à');
+	, 'Ã©', 'é');
+	, 'Ã¨', 'è');
+	, 'Ãª', 'ê');
+	, 'Ã®', 'î');
+	, 'Ã¹', 'û');
+	
+if m.lFile
+	success = StrToFile(m.result, FullPath(m.tcSrce)) > 0
+endif
+
+return m.success
