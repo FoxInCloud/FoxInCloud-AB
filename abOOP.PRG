@@ -152,7 +152,7 @@ if m.llResult
 					 and empty(.listitem[m.liRow, 1]);
 					 and empty(.listitem[m.liRow, .BoundColumn])
 
-&& c'est un élément vide ajouté par VFP quand .Value n'est pas dans .List
+						&& c'est un élément vide ajouté par VFP quand .Value n'est pas dans .List
 					 	lnResult = m.lnResult - 1
 
 					else
@@ -436,7 +436,7 @@ loResult = .null.
 
 if vartype(m.toControl) == 'O'
 
-* Tabuler les parents de l'objet jusqu'au formulaire
+	* Tabuler les parents de l'objet jusqu'au formulaire
 	local array laParents[1]
 	local lnParents, loParent as object
 	lnParents = 0
@@ -453,12 +453,12 @@ if vartype(m.toControl) == 'O'
 		endif
 	enddo
 
-* Si au moins trois parents et l'avant-dernier parent est un pageframe
+	* Si au moins trois parents et l'avant-dernier parent est un pageframe
 	if m.lnParents > 2
 		loParent = laParents[m.lnParents-1]
 		if proper(m.loParent.baseclass) == 'Pageframe'
 
-* La page cherchée est son fils
+			* La page cherchée est son fils
 			loResult = laParents[m.lnParents-2]
 		endif
 	endif
@@ -491,7 +491,7 @@ if m.llResult
 
 		tlTabIndex = lTrue(m.tlTabIndex)
 
-* Pour chaque objet frère
+		* Pour chaque objet frère
 		for m.lnSibling = 1 to nObjectsCont(m.loParent)
 			loSibling = oObjectCont(m.loParent, m.lnSibling)
 
@@ -499,7 +499,7 @@ if m.llResult
 			 and (empty(m.tcClass) or loClass(m.loSibling, m.tcClass));
 			 and (not m.tlTabIndex or lProperty(m.loSibling, 'TabIndex'))
 
-* Ajouter au résultat
+				* Ajouter au résultat
 				lnResult = m.lnResult + 1
 				if m.tlTabIndex
 					dimension taSiblings[m.lnResult, 2]
@@ -610,8 +610,8 @@ if m.llResult
 				, createobject(m.tcClass);
 				)
 *			toClass = NewObject(m.tcClass, m.tcClassLib, 0) && passing 0 to the cInApplication parameter allows you to create an instance of a class without raising initialization code (such as code in the Init, Load, Activate, and BeforeOpenTables events)
-&& THIS FEATURE IS NOT SUPPORTED IN RUNTIME APPLICATIONS
-&& Une page peut être instanciée en dehors d'un pageFrame
+			&& THIS FEATURE IS NOT SUPPORTED IN RUNTIME APPLICATIONS
+			&& Une page peut être instanciée en dehors d'un pageFrame
 		catch to loException when inlist(m.loException.errorno;
 				, 1435; && Object class is invalid for this container (erreur dans la documentation)
 				, 1744; && Object class is invalid for this container
@@ -643,7 +643,7 @@ if m.llResult
 else
 	tcResult = textmerge(icase(;
 		cLangUser() = 'fr', [<<cLitteral(m.tcClass)>> est un nom de classe invalide],; && copy-paste this line to add another language support
-												[<<cLitteral(m.tcClass)>> is an invalid class name];
+												[<<cLitteral(m.tcClass)>> is an invalid class name]; && default: English
 	))
 endif
 
@@ -836,7 +836,7 @@ llResult = loCont(m.toCont) && ASSERT nuisible à la récursion
 if m.llResult
 	tnConts = m.tnConts + 1
 
-* Si tableau
+	* Si tableau
 	llResult = type('taObjects', 1) == 'A'
 	assert m.llResult message cAssertMsg(textmerge([le premier paramètre (<<cLitteral(@m.taObjects)>>) doit être un tableau]))
 	if m.llResult
@@ -849,17 +849,17 @@ if m.llResult
 
 		llClass = vartype(m.tcClasses) == 'C' and not empty(m.tcClasses)
 
-* Pour chaque objet contenu
+		* Pour chaque objet contenu
 		for lnObject = 1 to nObjectsCont(m.toCont)
 			loObject = oObjectCont(m.toCont, m.lnObject)
 
-* Si l'objet est de la classe cherchée, ajouter au résultat
+			* Si l'objet est de la classe cherchée, ajouter au résultat
 			lnResult = iif(!m.llClass or loClass(m.loObject, m.tcClasses);
 				, aoAppend(@m.taObjects, m.loObject, m.tlTabIndex, m.tlEnabled);
 				, m.lnResult;
 				)
 
-* Si l'objet est un conteneur et récursion demandée, récurser dedans
+			* Si l'objet est un conteneur et récursion demandée, récurser dedans
 			lnResult = iif(pcount() < 4 or !vartype(m.tlRecurse) == 'L' or m.tlRecurse;
 				, max(m.lnResult, aoClassCont(@m.taObjects, m.loObject, m.tcClasses, .t., @m.tnConts, m.tlTabIndex, m.tlEnabled, m.tlAdd)); && aoClassCont() ne travaille que si l'objet est un conteneur
 				, m.lnResult;
@@ -1689,14 +1689,14 @@ if m.llResult
  	  	or !inlist(m.toObj.baseclass, 'Dataenvironment', 'Cursoradapter', 'Header');
  	  	or cResultAdd(@m.tcResult, textmerge(icase(;
 				cLangUser() = 'fr',	[La classe de base '<<m.toObj.BaseClass>>' n'est pas supportée],; && copy-paste this line to add another language support
-														[Base Class '<<m.toObj.BaseClass>>' is not supported];
+														[Base Class '<<m.toObj.BaseClass>>' is not supported]; && default: English
 				)));
 			);
 	  and (.f.;
  	  	or nObjectsCont(m.toObj) = 0; && pas un objet contenant ou aucun objet contenu
  	  	or cResultAdd(@m.tcResult, textmerge(icase(;
 				cLangUser() = 'fr',	[Les objets membres de '<<m.toObj.Name>>' ne sont pas supportés pour l'instant],; && copy-paste this line to add another language support
-														[Member objects in '<<m.toObj.Name>>' are not supported for now];
+														[Member objects in '<<m.toObj.Name>>' are not supported for now]; && default: English
 				)));
 			);
 	  and .t.
@@ -1725,7 +1725,7 @@ if m.llResult
 					 	or m.llProp;
 					 	or cResultAdd(@m.tcResult, textmerge(icase(;
 							cLangUser() = 'fr',	[La propriété '<<m.lcProp>>' ne peut être traitée car elle est protégée],; && copy-paste this line to add another language support
-																	[Property '<<m.lcProp>>' can't be processed because it's protected];
+																	[Property '<<m.lcProp>>' can't be processed because it's protected]; && default: English
 							)));
 						)
 
@@ -1757,13 +1757,13 @@ if m.llResult
 					 		 or m.llProp;
 					 		 or cResultAdd(@m.tcResult, textmerge(icase(;
 										cLangUser() = 'fr',	[La propriété '<<m.lcProp>>' ne peut être traitée car c'est un tableau comportant plus de 65.000 éléments],; && copy-paste this line to add another language support
-																				[Property '<<m.lcProp>>' can't be processed because it's an array with more than 65,000 elements];
+																				[Property '<<m.lcProp>>' can't be processed because it's an array with more than 65,000 elements]; && default: English
 									)))
 						 		for liItem = 1 to alen(m.laValue)
 						 			if vartype(m.laValue[m.liItem]) == 'O'
 						 				lcItem = textmerge(icase(;
 												cLangUser() = 'fr',	[Les éléments de tableau de type objet ne sont pas supportés - propriété '<<m.lcProp>>', élément # <<m.liItem>>],; && copy-paste this line to add another language support
-																						[Object array elements are not supported - property '<<m.lcProp>>', element # <<m.liItem>>];
+																						[Object array elements are not supported - property '<<m.lcProp>>', element # <<m.liItem>>]; && default: English
 											))
 						 				assert .f. message cAssertMsg(m.lcItem)
 						 				cResultAdd(@m.tcResult, m.lcItem)
@@ -1798,6 +1798,7 @@ if m.llResult
 				endif
 			endfor
 		endif
+
 		lcResult = m.lcResult + cXMLofObject_colItems(m.toObj, @m.tcResult)
 	endif
 
@@ -1961,7 +1962,7 @@ llResult = .t.;
 = m.llResult or .t.;
 	 and varSet(@m.lcResult, textmerge(icase(;
 			cLangUser() = 'fr',	[Ce XML est invalide, probablement car cXMLofObject() a échoué à le construire : <<m.tcXML>>],; && copy-paste this line to add another language support
-													[This XML is invalid, probably because cXMLofObject() didn't build it successfully: <<m.tcXML>>];
+													[This XML is invalid, probably because cXMLofObject() didn't build it successfully: <<m.tcXML>>]; && default: English
 		)));
 	 and cResultAdd(@m.tcResult, m.lcResult)
 
@@ -2018,7 +2019,7 @@ otherwise
 	llResult = not m.llNested or m.lnNested = occurs('</#o#>', m.tcXML)
 	lcResult = textmerge(icase(;
 		cLangUser() = 'fr',	[Ce XML comporte des balises '<#o#>|</#o#>' dépareillées : <<m.tcXML>>],; && copy-paste this line to add another language support
-												[Mismatched '<#o#>|</#o#>' delimiter(s) in XML: <<m.tcXML>>];
+												[Mismatched '<#o#>|</#o#>' delimiter(s) in XML: <<m.tcXML>>]; && default: English
 		))
 	assert m.llResult message cAssertMsg(m.lcResult)
 	if m.llResult
@@ -2180,7 +2181,7 @@ suspend
 			endfor
 		endif
 
-* Restaurer les propriétés sauvées par cXMLofObject()
+		* Restaurer les propriétés sauvées par cXMLofObject()
 		if 0 < aStrExtract(@m.laProp, m.tcXML, '<#p#>', '</#p#>')
 
 			liNestOpen = 0
@@ -2198,7 +2199,7 @@ suspend
 				 or m.llFIC && en dernier!
 				lcProp = iif(m.llProp, m.lcProp, icase(;
 					cLangUser() = 'fr',	[La propriété '<<m.lcProp>>' ne peut être restaurée car elle est protégée ou en lecture seule],; && copy-paste this line to add another language support
-															[Property '<<m.lcProp>>' can't be restored because it's protected or read-only];
+															[Property '<<m.lcProp>>' can't be restored because it's protected or read-only]; && default: English
 					))
 				= m.llProp or cResultAdd(@m.lcResult, m.lcProp)
 				assert m.llProp message cAssertMsg(m.lcProp)
@@ -2209,7 +2210,7 @@ suspend
 
 				case m.lcType == 'C'
 
-&& la valeur est déjà dans le bon type
+					&& la valeur est déjà dans le bon type
 					addproperty(;
 						  M.toResult;
 						, m.lcProp;
@@ -2248,7 +2249,7 @@ suspend
 					llResult = m.luValue == [#object#]
 					lcResult = textmerge(icase(;
 						cLangUser() = 'fr',	[La propriété de type objet '<<m.lcProp>>' n'a pas pu être restaurée],; && copy-paste this line to add another language support
-																[Object property '<<m.lcProp>>' could not be restored];
+																[Object property '<<m.lcProp>>' could not be restored]; && default: English
 						))
 					assert m.llResult message cAssertMsg(m.lcResult)
 					if m.llResult
@@ -2272,7 +2273,7 @@ suspend
 			endfor
 		endif
 
-* Si Collection, restaurer ses membres
+		* Si Collection, restaurer ses membres
 		if m.llResult;
 		 and loBaseClass(m.toResult, 'Collection');
 		 and '<#item#>' $ m.tcXML
@@ -2286,7 +2287,7 @@ suspend
 			 and m.loRegExpOpen.Execute(m.tcXML) = m.loRegExpClose.Execute(m.tcXML)
 			lcResult = textmerge(icase(;
 				cLangUser() = 'fr',	[Ce XML comporte des balises '<#item#>|</#item#>' dépareillées : <<m.tcXML>>],; && copy-paste this line to add another language support
-														[Mismatched '<#item#>|</#item#>' delimiter(s) in XML: <<m.tcXML>>];
+														[Mismatched '<#item#>|</#item#>' delimiter(s) in XML: <<m.tcXML>>]; && default: English
 				))
 			assert m.llResult message cAssertMsg(m.lcResult)
 			if m.llResult
@@ -2310,7 +2311,7 @@ suspend
 						llResult = m.luValue == [#object#]
 						lcResult = textmerge(icase(;
 							cLangUser() = 'fr',	[Erreur d'encodage XML d'un objet dans la collection '<<m.toResult.Name>>', clé : '<<m.lcKey>>', index : '<<m.liItem>>'],; && copy-paste this line to add another language support
-																	[XML encoding error for an object in collection '<<m.toResult.Name>>', key: '<<m.lcKey>>', index: '<<m.liItem>>'];
+																	[XML encoding error for an object in collection '<<m.toResult.Name>>', key: '<<m.lcKey>>', index: '<<m.liItem>>']; && default: English
 							))
 						assert m.llResult message cAssertMsg(m.lcResult)
 						if m.llResult
@@ -2328,7 +2329,7 @@ suspend
 						)
 					lcResult = textmerge(icase(;
 						cLangUser() = 'fr',	[La valeur <<cLitteral(m.luValue)>> ne peut être ajoutée à la collection '<<m.toResult.Name>>' avec le clé '<<m.lcKey>>'],; && copy-paste this line to add another language support
-																[Could not add <<cLitteral(m.luValue)>> to collection '<<m.toResult.Name>>' with key '<<m.lcKey>>'];
+																[Could not add <<cLitteral(m.luValue)>> to collection '<<m.toResult.Name>>' with key '<<m.lcKey>>']; && default: English
 						))
 					assert m.llResult message cAssertMsg(m.lcResult)
 					if not m.llResult
@@ -2346,6 +2347,15 @@ return iif(m.llResult or vartype(m.toResult) == 'O';
 	, m.toResult;
 	, .null.;
 	)
+
+* ========================================
+function objectOfXML_colItems as object && {en} restores collection items from XML from cXMLofObject() {fr} restaure les éléments d'une collection d'après le XML de cXMLofObject()
+lparameters ;
+	tcXML as string; && {en} XML produced by cXMLofObject() {fr} XML produit par cXMLofObject()
+,	toResult as object; && [NewObject(class, classlib)] {en} Object to populate {fr} Objet à peupler
+, tcResult as string && @ {en} Cumulative result {fr} Résultat (cumulatif)
+
+endfunc
 
 * -----------------------------------------
 procedure objectOfXML_Test && {en} objectOfXML() unit test {fr} test unitaire de objectOfXML()
@@ -2524,7 +2534,6 @@ lparameters	;
   properties; && up to 16 coma-separated properties
 , t01,t02,t03,t04,t05,t06,t07,t08,t09,t10,t11,t12,t13,t14,t15,t15,t16
 
-
 local obj, cParm
 
 cParm = wcParms(pcount() - 1)
@@ -2533,7 +2542,6 @@ return iif(ga_Empty_Object_PropertyList(@m.obj, m.properties, ',' &cParm);
 	, m.obj;
 	, .null.;
 	)
-
 endfunc
 
 * -----------------------------------------

@@ -3500,9 +3500,9 @@ return m.success
 function oProject && Référence à un projet (ouvert ou créé)
 lparameters ;
 	tcPJX,; && Adresse du projet
-	tcResult,; && @ Résultat en cas d'erreur
-	tlOpened && @ Le projet a été ouvert - .NULL. le projet a été créé
-tcResult = space(0)
+	tcResult,; && @ Résultat (cumulatif)
+	tlOpened && @ [.F.] Le projet a été ouvert - .NULL. le projet a été créé
+
 tlOpened = .f.
 
 local loResult as project;
@@ -3520,7 +3520,7 @@ if vartype(m.tcPJX) == 'C'
 	 	if file(m.tcPJX)
 		 	tcPJX = fullpath(m.tcPJX)
 
-* Si le projet n'est pas déjà ouvert
+			* Si le projet n'est pas déjà ouvert
 			llResult = _vfp.projects.count > 0
 			if m.llResult
 				llResult = .f.
@@ -3537,21 +3537,25 @@ if vartype(m.tcPJX) == 'C'
 	 	endif
 		if not m.llResult
 
-* Ouvrir le projet
+			* Ouvrir le projet
 			try && évite les erreurs à l'ouverture tel que les fichiers non trouvés && en fait non ça n'empêche pas l'erreur
 				modify project (m.tcPJX) save nowait noshow noprojecthook
 				loResult = _vfp.activeproject
 				tlOpened = iif(isNull(m.tlOpened), m.tlOpened, .t.)
+			catch to loException when m.loException.ErrorNo = 1705 && File Access is denied
+				cResultAdd(@m.tcResult, cException(m.loException) + ' - ' + ICase(;
+					cLangUser() = 'fr',	[Conseil : fermez toutes les autres instances de VFP où le projet a pu être ouvert],; && copy-paste this line to add another language support
+															[Hint: close all instances of VFP IDE where project can have been open.]; && default: English
+					))
 			catch to loException
-				loResult = .null.
-				tcResult = cException(m.loException)
+				cResultAdd(@m.tcResult, cException(m.loException))
 			endtry
 		endif
 	else
-		tcResult = textmerge([<<Proper(Program())>>() - Invalid project file extension : <<cLitteral(m.tcPJX)>>])
+		cResultAdd(@m.tcResult, textmerge([Invalid project file extension : <<cLitteral(m.tcPJX)>>]))
 	endif
 else
-	tcResult = textmerge([<<Proper(Program())>>() - Invalid project specification : <<cLitteral(m.tcPJX)>>])
+	cResultAdd(@m.tcResult, textmerge([Invalid project specification : <<cLitteral(m.tcPJX)>>]))
 endif
 
 return m.loResult

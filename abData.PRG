@@ -945,7 +945,7 @@ if m.this.lUsed
 	this.lReadonly = isreadonly(m.tuTable)
 endif
 
-local llExclusive, llResult
+local llResult as Boolean, llExclusive as Boolean
 
 this.cAlias = ExclusiveForce(m.tuTable, @m.llExclusive)
 llResult = used(m.this.cAlias)
