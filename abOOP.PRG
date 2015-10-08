@@ -319,7 +319,7 @@ loTest.assert('10_2', trim(m.loList.list[10,2]))
 
 for liRow = 1 to alen(laItem, 1)
 	for liCol = 1 to alen(laItem, 2)
-		laItem[m.liRow, m.liCol] = replicate(laItem[m.liRow, m.liCol], 10) && Replicate() pour tester si la longueur de la chaÃ®ne influence le résultat
+		laItem[m.liRow, m.liCol] = replicate(laItem[m.liRow, m.liCol], 10) && Replicate() pour tester si la longueur de la chaîne influence le résultat
 	endfor
 endfor
 loTest.Test(100, @m.laItem, m.loList) && 100 x 2 x 70 = 2 ms en IDE
@@ -385,11 +385,11 @@ if m.llResult
 		lcBaseClass = proper(.baseclass)
 
 		loResult = icase(;
-			M.lcBaseClass == 'Pageframe',;
+			m.lcBaseClass == 'Pageframe',;
 				.pages(m.tnObject),;
-			M.lcBaseClass == 'Grid',;
+			m.lcBaseClass == 'Grid',;
 				.columns(m.tnObject),;
-			M.lcBaseClass == 'Formset',;
+			m.lcBaseClass == 'Formset',;
 				.forms(m.tnObject),;
 			inlist(m.lcBaseClass, 'Optiongroup', 'Commandgroup'),;
 				.buttons(m.tnObject),;
@@ -1254,7 +1254,7 @@ function lMethod && Un objet est doté d'une Méthode ou un Ã‰vénement
 lparameters ;
 	toObject as form,; && Objet VFP
 	tcMethod as string,; && méthode
-	tcEventMethod as string && [any] 'M'ethod or 'E'vent
+	tcEventMethod as string && [any] 'm'ethod or 'E'vent
 
 return .t.;
 	and vartype(m.toObject) == 'O';
@@ -1486,7 +1486,7 @@ if vartype(m.toObj) == 'O'
 				lnCol = alen(m.toObj.&lcProp, 2)
 				llResult = .t.;
 				 and addproperty(;
-					  M.loResult;
+					  m.loResult;
 					, m.lcProp + textmerge(iif(m.lnCol > 0, '[<<m.lnRow>>, <<m.lnCol>>]', '[<<m.lnRow>>]'));
 					);
 				 and acopy(m.toObj.&lcProp, m.loResult.&lcProp) > 0
@@ -1494,7 +1494,7 @@ if vartype(m.toObj) == 'O'
 			case m.llUserDef or vartype(m.luProp) == 'O'
 
 				llResult = addproperty(;
-					  M.loResult;
+					  m.loResult;
 					, m.lcProp;
 					, iif(vartype(m.luProp) == 'O';
 						, oClone(m.luProp);
@@ -1686,15 +1686,15 @@ if m.llResult
 	 or m.llEmpty;
 	 or .t.;
  	  and (.f.;
- 	  	or !inlist(m.toObj.baseclass, 'Dataenvironment', 'Cursoradapter', 'Header');
- 	  	or cResultAdd(@m.tcResult, textmerge(icase(;
+ 			or !inlist(m.toObj.baseclass, 'Dataenvironment', 'Cursoradapter', 'Header');
+ 			or cResultAdd(@m.tcResult, textmerge(icase(;
 				cLangUser() = 'fr',	[La classe de base '<<m.toObj.BaseClass>>' n'est pas supportée],; && copy-paste this line to add another language support
 														[Base Class '<<m.toObj.BaseClass>>' is not supported]; && default: English
 				)));
 			);
 	  and (.f.;
- 	  	or nObjectsCont(m.toObj) = 0; && pas un objet contenant ou aucun objet contenu
- 	  	or cResultAdd(@m.tcResult, textmerge(icase(;
+ 			or nObjectsCont(m.toObj) = 0; && pas un objet contenant ou aucun objet contenu
+ 			or cResultAdd(@m.tcResult, textmerge(icase(;
 				cLangUser() = 'fr',	[Les objets membres de '<<m.toObj.Name>>' ne sont pas supportés pour l'instant],; && copy-paste this line to add another language support
 														[Member objects in '<<m.toObj.Name>>' are not supported for now]; && default: English
 				)));
@@ -1774,7 +1774,7 @@ if m.llResult
 						 		if .t.;
 						 		 and m.llProp;
 						 		 and varSet(@m.lcType, 'A');
-						 		 and varSet(@m.lcFile, evl(m.lcFile, addbs(sys(2023)) + 'temp' + cast(_vfp.processid as M) + '.mem'));
+						 		 and varSet(@m.lcFile, evl(m.lcFile, addbs(sys(2023)) + 'temp' + cast(_vfp.processid as m) + '.mem'));
 						 		 and varSet(@m.llSafety, set("Safety") == 'ON');
 						 		 and .t.
 							 		if m.llSafety
@@ -1935,13 +1935,13 @@ local liResult, loResult
 loResult = createobject('Empty')
 for liResult = 1 to evl(m.tnProp, 56) && 1800 propriétés (champs) pour le fomulaire vFacturas, mais 56 utiles
 	addproperty(;
-		  M.loResult;
+		  m.loResult;
 		, 'test' + transform(m.liResult);
 		, icase(;
-			M.liResult % 7 = 0, date(),;
-			M.liResult % 5 = 0, 1000,;
-			M.liResult % 3 = 0, .t.,;
-			M.liResult % 2 = 0, replicate('a', 80),;
+			m.liResult % 7 = 0, date(),;
+			m.liResult % 5 = 0, 1000,;
+			m.liResult % 3 = 0, .t.,;
+			m.liResult % 2 = 0, replicate('a', 80),;
 			.null.;
 			);
 		)
@@ -1979,6 +1979,7 @@ tcXML = iif(m.llResult;
 	)
 
 return m.llResult
+endfunc
 
 * ========================================
 function objectOfXML as object && {en} Object from its linearized XML produced by cXMLofObject() {fr} Objet à partir de sa représentation linéarisée en XML par cXMLofObject()
@@ -1986,131 +1987,119 @@ function objectOfXML as object && {en} Object from its linearized XML produced b
 lparameters ;
 	tcXML as string; && {en} XML produced by cXMLofObject() {fr} XML produit par cXMLofObject()
 ,	toResult as object; && [NewObject(class, classlib)] {en} Object to populate {fr} Objet à peupler
-, tcResult as string && @ {en} Cumulative result {fr} Résultat (cumulatif)
+, tcResult as string; && @ {en} Cumulative result {fr} Résultat (cumulatif)
 
 && {en} Support scope: see abOOP.prg!cXMLofObject()
 && {fr} Détails du support : voir abOOP.prg!cXMLofObject()
 
+if empty(m.tcXML)
+	return
+endif
+
 local toResult as object; && object, .null. if error
 , llResult as Boolean;
 , lcResult as string;
-, lcXML as string; && copy required for
-, loRegExpOpen as abRegExp of abTxt.prg;
-, loRegExpClose as abRegExp of abTxt.prg;
-, lnObject as integer, llObjects as Boolean;
-, llNested, lnNested, liNestOpen, liNestOpen_, liNestClose; && objets inclus dans cet objet
-, loNested as collection, aNested[1], nNested;
+, llChild;
+, lnChild;
+, liChild;
+, loChild as collection; && objets enfants éventuels
+, llObject as Boolean; && @ {en} an object was passed {fr} Un objet a été passé
+, llFIC as Boolean; && @ {en} object derives from a FoxinCloud class {fr} L'objet a d'une classe FoxinCloud
+
+liChild = 0
+
+llResult = .T.;
+	;
+	and lXMLofObject(;
+		 @m.tcXML;
+		,@m.lcResult;
+		, .T.; && .T. : ASSERT m.llResult && ôte les balises <#o#> initiale et </#o#> terminale
+		);
+	;
+	and objectOfXML_lChild(;
+		  @m.tcXML;
+		, @m.lcResult;
+		, @m.llChild;
+		, @m.lnChild;
+		, @m.loChild;
+		);
+	;
+	and objectOfXML_object(; && {en} [objectOfXML() private] retrieves or create a clean source object {fr}  [privée de objectOfXML()] retrouve ou nettoie l'objet source
+		  m.tcXML; && {en} XML produced by cXMLofObject() {fr} XML produit par cXMLofObject()
+		,@m.toResult; && [NewObject(class, classlib)] {en} Object to populate {fr} Objet à peupler
+		,@m.lcResult; && @ {en} Cumulative result {fr} Résultat (cumulatif)
+		,@m.llObject; && @ {en} an object was passed {fr} Un objet a été passé
+		,@m.llFIC; && @ {en} object derives from a FoxinCloud class {fr} L'objet a d'une classe FoxinCloud
+		);
+	;
+	and objectOfXML_propSet(; && {en} [objectOfXML() private] restores object properties {fr}  [privée de objectOfXML()] restaure les propriétés de l'objet
+		  m.tcXML; && {en} XML produced by cXMLofObject() {fr} XML produit par cXMLofObject()
+		,	m.toResult; && [NewObject(class, classlib)] {en} Object to populate {fr} Objet à peupler
+		,@m.lcResult; && @ {en} Cumulative result {fr} Résultat (cumulatif)
+		, m.llObject; && {en} an object was passed {fr} Un objet a été passé
+		, m.llFIC; && {en} object derives from a FoxinCloud class {fr} L'objet a d'une classe FoxinCloud
+		, m.llChild; && {en} object has direct child(ren) {fr} L'objet a des objets enfants
+		,@m.liChild; && @ {en} Index of current child object {fr} Index de l'objet enfant courant
+		, m.loChild; && {en} Child objects XML {fr} XML des objets enfants
+		);
+	 ;
+	and objectOfXML_colItems(; && Si Collection, restaure ses membres
+			m.tcXML; && {en} XML produced by cXMLofObject() {fr} XML produit par cXMLofObject()
+		,	m.toResult; && {en} Object to populate {fr} Objet à peupler
+		,@m.lcResult; && @ {en} Cumulative result {fr} Résultat (cumulatif)
+		, m.llChild; && {en} object has direct child(ren) {fr} L'objet a des objets enfants
+		,@m.liChild; && @ {en} Index of current child object {fr} Index de l'objet enfant courant
+		, m.loChild; && {en} Child objects XML {fr} XML des objets enfants
+		)
+	
+assert m.liChild = m.lnChild && tous les enfants éventuels ont bien été restaurés
+
+= m.llResult or cResultAdd(@m.tcResult, m.lcResult)
+
+return iif(m.llResult or vartype(m.toResult) == 'O';
+	, m.toResult;
+	, .null.;
+	)
+endfunc
+
+* ========================================
+procedure objectOfXML_object && {en} [objectOfXML() private] retrieves or create a clean source object {fr}  [privée de objectOfXML()] retrouve ou nettoie l'objet source
+lparameters ;
+  tcXML as string; && {en} XML produced by cXMLofObject() {fr} XML produit par cXMLofObject()
+,	toResult as object; && [NewObject(class, classlib)] {en} Object to populate {fr} Objet à peupler
+, tcResult as string; && @ {en} Cumulative result {fr} Résultat (cumulatif)
+, llObject as Boolean; && @ {en} an object was passed {fr} Un objet a été passé
+, llFIC as Boolean; && @ {en} object derives from a FoxinCloud class {fr} L'objet a d'une classe FoxinCloud
+
+local llResult as Boolean;
+, lcResult as string;
+;
 , lcClass, lcClassLib, loClass;
-, llObject, llEmpty, llFIC;
+, llEmpty;
 , laProp[1], lcProp, llProp, luProp, luProp_;
-, lcType, luValue, laValue[1], lcFile;
-, liItem, lcItem, lcKey
-
-do case
-case empty(m.tcXML)
-	llResult = .t.
-
-case !lXMLofObject(@m.tcXML, @m.lcResult, .t.) && .T. : ASSERT m.llResult
-
-otherwise
-
-	lnNested = occurs('<#o#>', m.tcXML) && au moins une des propriétés de l'objet contient un objet
-	llNested = m.lnNested > 0
-	llResult = not m.llNested or m.lnNested = occurs('</#o#>', m.tcXML)
-	lcResult = textmerge(icase(;
-		cLangUser() = 'fr',	[Ce XML comporte des balises '<#o#>|</#o#>' dépareillées : <<m.tcXML>>],; && copy-paste this line to add another language support
-												[Mismatched '<#o#>|</#o#>' delimiter(s) in XML: <<m.tcXML>>]; && default: English
-		))
-	assert m.llResult message cAssertMsg(m.lcResult)
-	if m.llResult
-
-		if m.llNested
-
-			loRegExpOpen  = abRegExp()
-			loRegExpClose = abRegExp()
-
-			llNested = .t.;
-			 and m.loRegExpOpen.setup ('<#o#>',  .f., .t., .f.);
-			 and m.loRegExpClose.setup('</#o#>', .f., .t., .f.);
-			 and varSet(@m.lnObject, m.loRegExpOpen.Execute(m.tcXML));
-			 and m.lnObject = m.loRegExpClose.Execute(m.tcXML);
-			 and varSet(@m.llObjects, m.lnObject > 1)
-
-			assert m.llNested && should always be OK
-
-			loNested = createobject('Collection')
-			for m.liNestOpen = 1 to m.lnObject
-
-				store m.liNestOpen to liNestClose, liNestOpen_
-				if m.llObjects and m.liNestOpen < m.lnObject
-
-* localiser la balise fermante
-					do while .t.
-						liNestOpen_ = m.liNestOpen_ + 1
-						if m.loRegExpOpen.Matches[m.liNestOpen_, 1] < m.loRegExpClose.Matches[m.liNestClose, 1] && position
-							liNestClose = m.liNestClose + 1
-							if m.liNestClose = m.lnObject
-								exit
-							endif
-						else
-							exit
-						endif
-					enddo
-				endif
-
-				lnNested = 0; && longueur de la chaÃ®ne XML de l'objet
-					+ m.loRegExpClose.Matches[m.liNestClose, 1];
-					+ lenc(m.loRegExpClose.pattern);
-					- m.loRegExpOpen.Matches[m.liNestOpen, 1]
-
-				loNested.add(substrc(m.tcXML;
-					, m.loRegExpOpen.Matches[m.liNestOpen, 1];
-					, m.lnNested;
-					))
-
-* Mémoriser le début et la longueur de la chaÃ®ne représentant l'objet
-				nNested = iif(laEmpty(@m.aNested), 0, alen(m.aNested, 1)) + 1
-				dimension aNested[m.nNested, 2]
-				aNested[m.nNested, 1] = m.loRegExpOpen.Matches[m.liNestOpen, 1]
-				aNested[m.nNested, 2] = m.lnNested
-
-				liNestOpen = m.liNestClose
-			endfor
-
-			if m.nNested > 0
-				for liNestOpen = m.nNested to 1 step -1
-					tcXML = stuffc(m.tcXML;
-						, aNested[m.liNestOpen, 1];
-						, aNested[m.liNestOpen, 2];
-						, [#object#];
-						)
-				endfor
-			endif
-		endif
 
 #if .f.
 o = createobject('empty')
 addproperty(o, 'test')
-? pemstatus(o, 'test', 0) && .T.
-&& Toutes les propriétés d'un objet Empty étant marquées modifiées, cXMLofObject() les a listées
+? pemstatus(o, 'test', 0) && .T. && Toutes les propriétés d'un objet Empty étant marquées modifiées, cXMLofObject() les a toutes listées
 #endif
 
 * Recycler l'objet existant en razant ses propriétés ou créer un nouvel objet
-		lcClass = lower(strextract(m.tcXML, '<#c#>', '</#c#>'))
-		lcClassLib = lower(strextract(m.tcXML, '<#cl#>', '</#cl#>'))
-		llEmpty = empty(m.lcClass)
+lcClass = lower(strextract(m.tcXML, '<#c#>', '</#c#>'))
+lcClassLib = lower(strextract(m.tcXML, '<#cl#>', '</#cl#>'))
+llEmpty = empty(m.lcClass)
 
-		llObject = .t.;
-		 and vartype(m.toResult) == 'O';
-		 and (.f.;
-		  or .t.;
-		   and m.llEmpty;
-		   and type('m.toResult.Class') == 'U';
-		  or .t.;
-		   and type('m.toResult.Class') == 'C';
-		   and lower(m.toResult.class) == m.lcClass;
-		   and lower(m.toResult.classlibrary) == m.lcClassLib;
-		  )
+llObject = .t.;
+ and vartype(m.toResult) == 'O';
+ and (.f.;
+  or .t.;
+   and m.llEmpty;
+   and type('m.toResult.Class') == 'U';
+  or .t.;
+   and type('m.toResult.Class') == 'C';
+   and lower(m.toResult.class) == m.lcClass;
+   and lower(m.toResult.classlibrary) == m.lcClassLib;
+  )
 
 && Voir ce qui est le plus rapide, remettre toutes les propriétés à leur valeur par défaut ou recréer un objet ...
 && 2015-03-19 thn - si l'objet existe il vaut mieux le conserver car le supprimer/recréer exécuterait les méthodes .Destroy() et .Init() qui peuvent parfaitement se planter ...
@@ -2120,23 +2109,25 @@ addproperty(o, 'test')
 &&   . supprimer les propriétés éventuellement ajoutées à l'objet
 &&   . remettre les autres propriétés à la valeur de la classe,
 
-		if m.llObject and !m.llEmpty
-			try
-				loClass = newobject(m.lcClass, m.lcClassLib)
-			catch
-				loClass = newobject(m.lcClass, m.lcClassLib, 0)
-			endtry
-		endif
+if !m.llEmpty
+	try
+		loClass = newobject(m.lcClass, m.lcClassLib)
+	catch
+		loClass = newobject(m.lcClass, m.lcClassLib, 0)
+	endtry
+endif
 
-		toResult = icase(;
-			M.llEmpty,; && objets empty : recréer systématiquement
-				createobject('Empty'),;
-			M.llObject,;
-				M.toResult,;
-				M.loClass;
-			)
+toResult = icase(;
+	m.llEmpty,; && objets empty : recréer systématiquement
+		createobject('Empty'),;
+	m.llObject,;
+		m.toResult,;
+		m.loClass;
+	)
 
-		llFIC = lMethod(m.toResult, 'wPropReset') and lProperty(m.toResult, 'wcPropSave') && FoxInCloud object
+assert Vartype(m.toResult) == 'O'
+
+llFIC = lMethod(m.toResult, 'wPropReset') and lProperty(m.toResult, 'wcPropSave') && FoxInCloud object
 
 #if .f.
 toResult = createobject('relation')
@@ -2149,213 +2140,362 @@ addproperty(m.toResult, m.lcProp, 'test')
 suspend
 #endif
 
-		if m.llObject; && un objet a été passé
-		 and !m.llEmpty;
-		 and amembers(laProp, m.toResult, 0, 'GPH') > 0
+* Si un objet a été passé, remettre ses propriétés à leur valeur par défaut
+if m.llObject;
+ and !m.llEmpty;
+ and amembers(laProp, m.toResult, 0, 'GPH') > 0
 
-			for each lcProp in laProp
-				= .f.;
-				 	or .t.;
-				 		and !pemstatus(m.toResult, m.lcProp, 4); && not user defined
-				 		and ',' + m.lcProp + ',' $ ',BASECLASS,CLASS,CLASSLIBRARY,CONTROLCOUNT,CONTROLS,NAME,OBJECTS,OBJECT,PARENT,PARENTCLASS,';
-				 	or .t.;
-				 		and pemstatus(m.toResult, m.lcProp, 4); && custom property ...
-				 		and !pemstatus(m.toResult, m.lcProp, 6); && ... added to the object (not inherited from the class)
-				 		and removeproperty(m.toResult, m.lcProp);
-				 	or pemstatus(m.toResult, m.lcProp, 1); && Read-only
-				 	or .t.; && and setStepOn(Lower(m.lcProp) == 'keysort')
-					 and pemstatus(m.toResult, m.lcProp, 0); && modified
-					 and varSet(@m.luProp, getpem(m.toResult, m.lcProp));
-					 and varSet(@m.luProp_, getpem(m.loClass, m.lcProp)); && GetPem(m.toResult.Class, m.lcProp)
-					 and !luEqual(m.luProp, m.luProp_); && Propriété changée par rapport à la classe
-					 and iif(pemstatus(m.toResult, m.lcProp, 2); && protected property
-						, iif(m.llFIC;
-							, m.toResult.wPropReset(m.lcProp);
-							, .f.;
-							);
-						, addproperty(m.toResult, m.lcProp, iif(vartype(m.luProp_) == 'O'; && sets property to value in class
-							, oClone(m.luProp_);
-							, m.luProp_;
-							)));
-						)
-			endfor
-		endif
-
-		* Restaurer les propriétés sauvées par cXMLofObject()
-		if 0 < aStrExtract(@m.laProp, m.tcXML, '<#p#>', '</#p#>')
-
-			liNestOpen = 0
-			for each lcProp in laProp
-
-				lcType = strextract(m.lcProp, '<#t#>', '</#t#>')
-				luValue = strextract(m.lcProp, '<#v#>', '</#v#>')
-				lcProp = strextract(m.lcProp, '<#n#>', '</#n#>') && en dernier car m.lcProp est recyclée ...
-				llProp = .f.;
-				 or not lProperty(m.toResult, m.lcProp);
-				 or not (.f.;
-					or pemstatus(m.toResult, m.lcProp, 1); && Read-Only
-					or pemstatus(m.toResult, m.lcProp, 2); && Protected
+	for each lcProp in laProp
+		= .f.;
+		 	or .t.;
+		 		and !pemstatus(m.toResult, m.lcProp, 4); && not user defined
+		 		and ',' + m.lcProp + ',' $ ',BASECLASS,CLASS,CLASSLIBRARY,CONTROLCOUNT,CONTROLS,NAME,OBJECTS,OBJECT,PARENT,PARENTCLASS,';
+		 	or .t.;
+		 		and pemstatus(m.toResult, m.lcProp, 4); && custom property ...
+		 		and !pemstatus(m.toResult, m.lcProp, 6); && ... added to the object (not inherited from the class)
+		 		and removeproperty(m.toResult, m.lcProp);
+		 	or pemstatus(m.toResult, m.lcProp, 1); && Read-only
+		 	or .t.; && and setStepOn(Lower(m.lcProp) == 'keysort')
+			 and pemstatus(m.toResult, m.lcProp, 0); && modified
+			 and varSet(@m.luProp, getpem(m.toResult, m.lcProp));
+			 and varSet(@m.luProp_, getpem(m.loClass, m.lcProp)); && GetPem(m.toResult.Class, m.lcProp)
+			 and !luEqual(m.luProp, m.luProp_); && Propriété changée par rapport à la classe
+			 and iif(pemstatus(m.toResult, m.lcProp, 2); && protected property
+				, iif(m.llFIC;
+					, m.toResult.wPropReset(m.lcProp);
+					, .f.;
 					);
-				 or m.llFIC && en dernier!
-				lcProp = iif(m.llProp, m.lcProp, icase(;
-					cLangUser() = 'fr',	[La propriété '<<m.lcProp>>' ne peut être restaurée car elle est protégée ou en lecture seule],; && copy-paste this line to add another language support
-															[Property '<<m.lcProp>>' can't be restored because it's protected or read-only]; && default: English
-					))
-				= m.llProp or cResultAdd(@m.lcResult, m.lcProp)
-				assert m.llProp message cAssertMsg(m.lcProp)
+				, addproperty(m.toResult, m.lcProp, iif(vartype(m.luProp_) == 'O'; && sets property to value in class
+					, oClone(m.luProp_);
+					, m.luProp_;
+					)));
+				)
+	endfor
+endif
 
-				do case
-
-				case not m.llProp
-
-				case m.lcType == 'C'
-
-					&& la valeur est déjà dans le bon type
-					addproperty(;
-						  M.toResult;
-						, m.lcProp;
-						, m.luValue;
-						)
-
-				case m.lcType == 'A'
-
-			 		llSafety = set("Safety") == 'ON'
-			 		if m.llSafety
-			 			set safety off
-			 		endif
-			 		lcFile = evl(m.lcFile, addbs(sys(2023)) + 'temp' + cast(_vfp.processid as M) + '.mem')
-			 		strtofile(strconv(m.luValue, 14), m.lcFile) && 14: Converts base64 encoded data in cExpression to original unencoded data.
-			 		if m.llSafety
-			 			set safety on
-			 		endif
-			 		aClear(@m.laValue)
-			 		restore from (m.lcFile) additive
-			 		delete file (m.lcFile)
-			 		addproperty(m.toResult, m.lcProp + textmerge(iif(alen(m.laValue, 2) > 0;
-			 				, '[<<Alen(m.laValue, 1)>>, <<Alen(m.laValue, 2)>>]';
-			 				, '[<<Alen(m.laValue)>>]';
-			 				)))
-			 		acopy(m.laValue, m.toResult.&lcProp)
-
-				case m.lcType != 'O'
-					addproperty(;
-						  M.toResult;
-						, m.lcProp;
-						, uValue(m.luValue, m.lcType);
-						)
-
-				otherwise
-
-					llResult = m.luValue == [#object#]
-					lcResult = textmerge(icase(;
-						cLangUser() = 'fr',	[La propriété de type objet '<<m.lcProp>>' n'a pas pu être restaurée],; && copy-paste this line to add another language support
-																[Object property '<<m.lcProp>>' could not be restored]; && default: English
-						))
-					assert m.llResult message cAssertMsg(m.lcResult)
-					if m.llResult
-						liNestOpen = m.liNestOpen + 1
-						luValue = objectOfXML(; && /!\ récursion
-							  m.loNested.item(m.liNestOpen);
-							, iif(m.llObject and lProperty(m.toResult, m.lcProp);
-								, evaluate('m.toResult.' + m.lcProp);
-								, createobject('Empty');
-								);
-							)
-					else
-						exit
-					endif
-					addproperty(;
-						  M.toResult;
-						, m.lcProp;
-						, m.luValue;
-						)
-				endcase
-			endfor
-		endif
-
-		* Si Collection, restaurer ses membres
-		if m.llResult;
-		 and loBaseClass(m.toResult, 'Collection');
-		 and '<#item#>' $ m.tcXML
-
-			loRegExpOpen  = iif(vartype(m.loRegExpOpen)  == 'O', m.loRegExpOpen,  abRegExp())
-			loRegExpClose = iif(vartype(m.loRegExpClose) == 'O', m.loRegExpClose, abRegExp())
-
-			llResult = .t.;
-			 and m.loRegExpOpen.setup('<#item#>', .f., .t., .f.);
-			 and m.loRegExpClose.setup('</#item#>', .f., .t., .f.);
-			 and m.loRegExpOpen.Execute(m.tcXML) = m.loRegExpClose.Execute(m.tcXML)
-			lcResult = textmerge(icase(;
-				cLangUser() = 'fr',	[Ce XML comporte des balises '<#item#>|</#item#>' dépareillées : <<m.tcXML>>],; && copy-paste this line to add another language support
-														[Mismatched '<#item#>|</#item#>' delimiter(s) in XML: <<m.tcXML>>]; && default: English
-				))
-			assert m.llResult message cAssertMsg(m.lcResult)
-			if m.llResult
-
-			 	toResult.remove(-1) && If you pass a value of -1, Visual FoxPro removes all items in the collection.
-			 	liNestOpen = 0
-			 	for liItem = 1 to m.loRegExpOpen.nMatches
-
-			 		lcItem = substrc(m.tcXML;
-						, m.loRegExpOpen.Matches[m.liItem, 1];
-						, 0;
-							+ m.loRegExpClose.Matches[m.liItem, 1];
-							+ lenc(m.loRegExpClose.pattern);
-							- m.loRegExpOpen.Matches[m.liItem, 1];
-						)
-					lcKey = strextract(m.lcItem, '<#key#>', '</#key#>')
-					lcType = strextract(m.lcItem, '<#type#>', '</#type#>')
-					luValue = strextract(m.lcItem, '<#value#>', '</#value#>')
-					if m.lcType == 'O'
-
-						llResult = m.luValue == [#object#]
-						lcResult = textmerge(icase(;
-							cLangUser() = 'fr',	[Erreur d'encodage XML d'un objet dans la collection '<<m.toResult.Name>>', clé : '<<m.lcKey>>', index : '<<m.liItem>>'],; && copy-paste this line to add another language support
-																	[XML encoding error for an object in collection '<<m.toResult.Name>>', key: '<<m.lcKey>>', index: '<<m.liItem>>']; && default: English
-							))
-						assert m.llResult message cAssertMsg(m.lcResult)
-						if m.llResult
-							liNestOpen = m.liNestOpen + 1
-							luValue = objectOfXML(m.loNested.item(m.liNestOpen))
-						else
-							exit
-						endif
-					else
-						luValue = uValue(m.luValue, m.lcType)
-					endif
-					llResult = m.llResult and iif(empty(m.lcKey);
-						, m.toResult.add(m.luValue);
-						, m.toResult.add(m.luValue, m.lcKey);
-						)
-					lcResult = textmerge(icase(;
-						cLangUser() = 'fr',	[La valeur <<cLitteral(m.luValue)>> ne peut être ajoutée à la collection '<<m.toResult.Name>>' avec le clé '<<m.lcKey>>'],; && copy-paste this line to add another language support
-																[Could not add <<cLitteral(m.luValue)>> to collection '<<m.toResult.Name>>' with key '<<m.lcKey>>']; && default: English
-						))
-					assert m.llResult message cAssertMsg(m.lcResult)
-					if not m.llResult
-						exit
-					endif
-			 	endfor
-			endif
-		endif
-	endif
-endcase
-
-= m.llResult or cResultAdd(@m.tcResult, m.lcResult)
-
-return iif(m.llResult or vartype(m.toResult) == 'O';
-	, m.toResult;
-	, .null.;
-	)
+endproc
 
 * ========================================
-function objectOfXML_colItems as object && {en} restores collection items from XML from cXMLofObject() {fr} restaure les éléments d'une collection d'après le XML de cXMLofObject()
+procedure objectOfXML_lChild as Boolean && {en} [objectOfXML() private] {fr}  [privée de objectOfXML()]
+lparameters ;
+  tcXML as string; && @ {en} XML produced by cXMLofObject() {fr} XML produit par cXMLofObject()
+, tcResult as string; && @ {en} Cumulative result {fr} Résultat (cumulatif)
+, llChild as Boolean; && @ [.F.] {en} object has direct child(ren) {fr} L'objet a des objets enfants
+, lnChild as Integer; && @ {en} [0] Number of direct child objects {fr} Nombre d'objets enfants
+, loChild as collection; && @ {en} [.F.] Child objects XML {fr} XML des objets enfants
+
+local llResult as Boolean;
+, lcResult as string;
+, loRegExpOpen as abRegExp of abTxt.prg;
+, loRegExpClose as abRegExp of abTxt.prg;
+;
+, liChildOpen as Integer;
+, liChildOpen_ as Integer;
+, liChildClose as Integer;
+, laChild[1];
+, lnChildXML as integer;
+, lnObject as integer;
+, llObjects as Boolean;
+
+lnChild = occurs('<#o#>', m.tcXML) && au moins une des propriétés de l'objet contient un objet
+llChild = m.lnChild > 0
+llResult = not m.llChild or m.lnChild = occurs('</#o#>', m.tcXML)
+lcResult = textmerge(icase(;
+	cLangUser() = 'fr',	[Ce XML comporte des balises '<#o#>|</#o#>' dépareillées : <<m.tcXML>>],; && copy-paste this line to add another language support
+											[Mismatched '<#o#>|</#o#>' delimiter(s) in XML: <<m.tcXML>>]; && default: English
+	))
+assert m.llResult message cAssertMsg(m.lcResult)
+if m.llResult and m.llChild
+
+	loRegExpOpen  = abRegExp()
+	loRegExpClose = abRegExp()
+
+	llChild = .t.;
+	 and m.loRegExpOpen.setup ('<#o#>',  .f., .t., .f.);
+	 and m.loRegExpClose.setup('</#o#>', .f., .t., .f.);
+	 and varSet(@m.lnObject, m.loRegExpOpen.Execute(m.tcXML));
+	 and m.lnObject = m.loRegExpClose.Execute(m.tcXML);
+	 and varSet(@m.llObjects, m.lnObject > 1)
+
+assert m.llChild && should always be OK
+
+	lnChild = 0
+	loChild = createobject('Collection')
+	for m.liChildOpen = 1 to m.lnObject
+
+		store m.liChildOpen to liChildClose, liChildOpen_
+		if m.llObjects and m.liChildOpen < m.lnObject
+
+			* localiser la balise fermante
+			do while .t.
+				liChildOpen_ = m.liChildOpen_ + 1
+				if m.loRegExpOpen.Matches[m.liChildOpen_, 1] < m.loRegExpClose.Matches[m.liChildClose, 1] && position
+					liChildClose = m.liChildClose + 1
+					if m.liChildClose = m.lnObject
+						exit
+					endif
+				else
+					exit
+				endif
+			enddo
+		endif
+
+		lnChildXML = 0; && longueur de la chaîne XML de l'objet enfant
+			+ m.loRegExpClose.Matches[m.liChildClose, 1];
+			+ lenc(m.loRegExpClose.pattern);
+			- m.loRegExpOpen.Matches[m.liChildOpen, 1]
+
+		* ==============================================
+		loChild.add(substrc(m.tcXML;
+			, m.loRegExpOpen.Matches[m.liChildOpen, 1]; && index début
+			, m.lnChildXML; && longueur
+			))
+		lnChild = m.loChild.count
+		* ==============================================
+
+		* Mémoriser le début et la longueur de la chaîne représentant l'objet
+		dimension laChild[m.lnChild, 2]
+		laChild[m.lnChild, 1] = m.loRegExpOpen.Matches[m.liChildOpen, 1] && index début
+		laChild[m.lnChild, 2] = m.lnChildXML && longueur
+
+		liChildOpen = m.liChildClose
+	endfor
+
+	if m.lnChild > 0
+		for liChildOpen = m.lnChild to 1 step -1
+			tcXML = stuffc(m.tcXML;
+				, laChild[m.liChildOpen, 1]; && index début
+				, laChild[m.liChildOpen, 2]; && longueur
+				, [#object#];
+				)
+		endfor
+	endif
+else
+	llChild = .F.
+	lnChild = 0
+endif
+
+return m.llResult or cResultAdd(@m.tcResult, m.lcResult)
+endproc
+
+* ========================================
+procedure objectOfXML_propSet && {en} [objectOfXML() private] restores object properties {fr}  [privée de objectOfXML()] restaure les propriétés de l'objet
+lparameters ;
+  tcXML as string; && {en} XML produced by cXMLofObject() {fr} XML produit par cXMLofObject()
+,	toResult as object; && [NewObject(class, classlib)] {en} Object to populate {fr} Objet à peupler
+, tcResult as string; && @ {en} Cumulative result {fr} Résultat (cumulatif)
+, llObject as Boolean; && {en} an object was passed {fr} Un objet a été passé
+, llFIC as Boolean; && {en} object derives from a FoxinCloud class {fr} L'objet a d'une classe FoxinCloud
+, llChild as Boolean; && {en} object has direct child(ren) {fr} L'objet a des objets enfants
+, liChild as Integer; && @ {en} Index of current child object {fr} Index de l'objet enfant courant
+, loChild as collection; && {en} Child objects XML {fr} XML des objets enfants
+
+local llResult as Boolean;
+, lcResult as string;
+, laProp[1], lcProp, llProp;
+, lcType, luValue, laValue[1];
+, lcFile;
+, llSafety;
+
+if Empty(aStrExtract(@m.laProp, m.tcXML, '<#p#>', '</#p#>'))
+	return
+endif
+
+llResult = .T.
+for each lcProp in laProp
+
+	lcType = strextract(m.lcProp, '<#t#>', '</#t#>')
+	luValue = strextract(m.lcProp, '<#v#>', '</#v#>')
+	lcProp = strextract(m.lcProp, '<#n#>', '</#n#>') && en dernier car m.lcProp est recyclée ...
+	llProp = .f.;
+	 or not lProperty(m.toResult, m.lcProp);
+	 or not (.f.;
+		or pemstatus(m.toResult, m.lcProp, 1); && Read-Only
+		or pemstatus(m.toResult, m.lcProp, 2); && Protected
+		);
+	 or m.llFIC && en dernier!
+	lcProp = iif(m.llProp, m.lcProp, icase(;
+		cLangUser() = 'fr',	[La propriété '<<m.lcProp>>' ne peut être restaurée car elle est protégée ou en lecture seule],; && copy-paste this line to add another language support
+												[Property '<<m.lcProp>>' can't be restored because it's protected or read-only]; && default: English
+		))
+	= m.llProp or cResultAdd(@m.tcResult, m.lcProp)
+	assert m.llProp message cAssertMsg(m.lcProp)
+
+	do case
+
+	case not m.llProp
+
+	case m.lcType == 'C'
+
+		&& la valeur est déjà dans le bon type
+		addproperty(;
+			  m.toResult;
+			, m.lcProp;
+			, m.luValue;
+			)
+
+	case m.lcType == 'A'
+
+ 		llSafety = set("Safety") == 'ON'
+ 		if m.llSafety
+ 			set safety off
+ 		endif
+ 		lcFile = evl(m.lcFile, addbs(sys(2023)) + 'temp' + cast(_vfp.processid as m) + '.mem')
+ 		strtofile(strconv(m.luValue, 14), m.lcFile) && 14: Converts base64 encoded data in cExpression to original unencoded data.
+ 		if m.llSafety
+ 			set safety on
+ 		endif
+ 		aClear(@m.laValue)
+ 		restore from (m.lcFile) additive
+ 		delete file (m.lcFile)
+ 		addproperty(m.toResult, m.lcProp + textmerge(iif(alen(m.laValue, 2) > 0;
+ 				, '[<<Alen(m.laValue, 1)>>, <<Alen(m.laValue, 2)>>]';
+ 				, '[<<Alen(m.laValue)>>]';
+ 				)))
+ 		acopy(m.laValue, m.toResult.&lcProp)
+
+	case m.lcType != 'O'
+		addproperty(;
+			  m.toResult;
+			, m.lcProp;
+			, uValue(m.luValue, m.lcType);
+			)
+
+	otherwise
+
+		llResult = m.luValue == [#object#] and m.llChild
+		lcResult = textmerge(icase(;
+			cLangUser() = 'fr',	[La propriété de type objet '<<m.lcProp>>' n'a pas pu être restaurée],; && copy-paste this line to add another language support
+													[Object property '<<m.lcProp>>' could not be restored]; && default: English
+			))
+		assert m.llResult message cAssertMsg(m.lcResult)
+		if m.llResult
+			liChild = m.liChild + 1
+			luValue = objectOfXML(; && /!\ récursion
+				  m.loChild.item(m.liChild);
+				, iif(m.llObject and lProperty(m.toResult, m.lcProp) and Type('m.toResult.' + m.lcProp) == 'O';
+					, evaluate('m.toResult.' + m.lcProp);
+					, .F.; && createobject('Empty')
+					);
+				)
+		else
+			cResultAdd(@m.tcResult, m.lcResult)
+			exit
+		endif
+		llResult = (.F.;
+			or addproperty(;
+				  m.toResult;
+				, m.lcProp;
+				, m.luValue;
+				);
+			or cResultAdd(@m.tcResult, Textmerge([could not add property '<<m.lcProp>>' to <<m.toResult>>]));
+			) and m.llResult
+	endcase
+endfor
+
+return m.llResult
+endproc
+
+* ========================================
+procedure objectOfXML_colItems as Boolean && {en} restores collection items from XML from cXMLofObject() {fr} restaure les éléments d'une collection d'après le XML de cXMLofObject()
 lparameters ;
 	tcXML as string; && {en} XML produced by cXMLofObject() {fr} XML produit par cXMLofObject()
-,	toResult as object; && [NewObject(class, classlib)] {en} Object to populate {fr} Objet à peupler
-, tcResult as string && @ {en} Cumulative result {fr} Résultat (cumulatif)
+,	toResult as object; && {en} Object to populate {fr} Objet à peupler
+, tcResult as string; && @ {en} Cumulative result {fr} Résultat (cumulatif)
+, llChild as Boolean; && {en} object has direct child(ren) {fr} L'objet a des objets enfants
+, liChild as Integer; && @ {en} Index of current child object {fr} Index de l'objet enfant courant
+, loChild as collection; && {en} Child objects XML {fr} XML des objets enfants
 
-endfunc
+do case
+case !loBaseClass(m.toResult, 'Collection')
+
+case !'<#item#>' $ m.tcXML
+	m.toResult.remove(-1) && If you pass a value of -1, Visual FoxPro removes all items in the collection.
+
+case Pcount() <= 3;
+ and varSet(@m.liChild, 0);
+ and !objectOfXML_lChild(;
+		@m.tcXML; && @ {en} XML produced by cXMLofObject() {fr} XML produit par cXMLofObject()
+	, @m.tcResult; && @ {en} Cumulative result {fr} Résultat (cumulatif)
+	, @m.llChild; && @ [.F.] {en} object has direct child(ren) {fr} L'objet a des objets enfants
+	, @m.lnChild; && @ {en} [0] Number of direct child objects {fr} Nombre d'objets enfants
+	, @m.loChild; && @ {en} [.F.] Child objects XML {fr} XML des objets enfants
+ )
+ 
+ 	return .F.
+
+otherwise
+
+	local llResult as Boolean;
+	, lcResult as string;
+	, loRegExpOpen as abRegExp of abTxt.prg;
+	, loRegExpClose as abRegExp of abTxt.prg;
+	;
+	, liItem, lcItem, lcKey;
+	, lcType, luValue;
+
+	loRegExpOpen  = iif(vartype(m.loRegExpOpen)  == 'O', m.loRegExpOpen,  abRegExp())
+	loRegExpClose = iif(vartype(m.loRegExpClose) == 'O', m.loRegExpClose, abRegExp())
+
+	llResult = .t.;
+	 and m.loRegExpOpen.setup('<#item#>', .f., .t., .f.);
+	 and m.loRegExpClose.setup('</#item#>', .f., .t., .f.);
+	 and m.loRegExpOpen.Execute(m.tcXML) = m.loRegExpClose.Execute(m.tcXML)
+	lcResult = textmerge(icase(;
+		cLangUser() = 'fr',	[Ce XML comporte des balises '<#item#>|</#item#>' dépareillées : <<m.tcXML>>],; && copy-paste this line to add another language support
+												[Mismatched '<#item#>|</#item#>' delimiter(s) in XML: <<m.tcXML>>]; && default: English
+		))
+	assert m.llResult message cAssertMsg(m.lcResult)
+	if m.llResult
+
+	 	toResult.remove(-1) && If you pass a value of -1, Visual FoxPro removes all items in the collection.
+	 	for liItem = 1 to m.loRegExpOpen.nMatches
+
+			lcItem = substrc(m.tcXML;
+				, m.loRegExpOpen.Matches[m.liItem, 1];
+				, 0;
+					+ m.loRegExpClose.Matches[m.liItem, 1];
+					+ lenc(m.loRegExpClose.pattern);
+					- m.loRegExpOpen.Matches[m.liItem, 1];
+				)
+			lcKey = strextract(m.lcItem, '<#key#>', '</#key#>')
+			lcType = strextract(m.lcItem, '<#type#>', '</#type#>')
+			luValue = strextract(m.lcItem, '<#value#>', '</#value#>')
+			if m.lcType == 'O'
+
+				llResult = m.luValue == [#object#] and m.llChild
+				lcResult = textmerge(icase(;
+					cLangUser() = 'fr',	[Erreur d'encodage XML d'un objet dans la collection '<<m.toResult.Name>>', clé : '<<m.lcKey>>', index : '<<m.liItem>>'],; && copy-paste this line to add another language support
+															[XML encoding error for an object in collection '<<m.toResult.Name>>', key: '<<m.lcKey>>', index: '<<m.liItem>>']; && default: English
+					))
+				assert m.llResult message cAssertMsg(m.lcResult)
+				if m.llResult
+					liChild = m.liChild + 1
+					luValue = objectOfXML(m.loChild.item(m.liChild)) && /!\ récursion
+				else
+					exit
+				endif
+			else
+				luValue = uValue(m.luValue, m.lcType)
+			endif
+			llResult = m.llResult and iif(empty(m.lcKey);
+				, m.toResult.add(m.luValue);
+				, m.toResult.add(m.luValue, m.lcKey);
+				)
+			lcResult = textmerge(icase(;
+				cLangUser() = 'fr',	[La valeur <<cLitteral(m.luValue)>> ne peut être ajoutée à la collection '<<m.toResult.Name>>' avec le clé '<<m.lcKey>>'],; && copy-paste this line to add another language support
+														[Could not add <<cLitteral(m.luValue)>> to collection '<<m.toResult.Name>>' with key '<<m.lcKey>>']; && default: English
+				))
+			assert m.llResult message cAssertMsg(m.lcResult)
+			if not m.llResult
+				exit
+			endif
+		endfor
+	endif
+
+	return m.llResult
+endcase
+endproc
 
 * -----------------------------------------
 procedure objectOfXML_Test && {en} objectOfXML() unit test {fr} test unitaire de objectOfXML()
@@ -2377,7 +2517,7 @@ m.loObj.add('testItem2', 'testItem2')
 addproperty(m.loObj, 'object', createobject('Collection'))
 addproperty(m.loObj.object, 'string', 'testValue')
 m.loObj.object.add('testItem1', 'testItem1')
-m.loObj.object.add('testItem2', 'testItem2')
+m.loObj.object.add(CreateObject('custom'), 'testItem2') && m.loObj.object.add('testItem2', 'testItem2')
 
 addproperty(m.loObj.object, 'object', createobject('Custom'))
 addproperty(m.loObj.object.object, 'string', 'testValue')
@@ -2459,7 +2599,7 @@ tlVertical = iif(lTrue(m.tlVertical), 1, 6)
 
 return evl(m.tnFoxels, 0) * iif(pcount() > 1;
 	, fontmetric(;
-		  M.tlVertical;
+		  m.tlVertical;
 		, evl(m.tcFontName, wfont(1));
 		, evl(m.tnFontSize, wfont(2));
 		, evl(m.tcFontStyle, 'N');
@@ -2480,7 +2620,7 @@ tlVertical = iif(lTrue(m.tlVertical), 1, 6)
 
 return evl(m.tnPixels, 0) / iif(pcount() > 1;
 	, fontmetric(;
-		  M.tlVertical;
+		  m.tlVertical;
 		, evl(m.tcFontName, wfont(1));
 		, evl(m.tnFontSize, wfont(2));
 		, evl(m.tcFontStyle, 'N');
@@ -2651,13 +2791,13 @@ local Result as integer; && Number of methods found
 
 Result = 0
 nMember = amembers(;
-	M.aMethod;
+	m.aMethod;
 	, m.oSrce;
 	, 1; && Array contains the names of the properties of the object or class, as well as the methods and member objects. The resulting array is two-dimensional with the second column specifying what type of member is listed in the first column. The possible values for the second column are Property, Event, Method, or Object.
 	, evl(m.cFlags, '');
 	)
 if m.nMember > 0
-	cTypes = iif(lTrue(m.lEventsNo), 'M', 'EM')
+	cTypes = iif(lTrue(m.lEventsNo), 'm', 'EM')
 	for iMember = m.nMember to 1 step -1
 		if upper(left(m.aMethod[m.iMember, 2], 1)) $ m.cTypes
 			Result = m.Result + 1
@@ -2729,7 +2869,7 @@ if vartype(m.oSrce) == 'O';
 		cPEMcased = icase(; && user-friendly case
 			left(m.cPEM, 5) == 'Mouse',; && Len('Mouse') = 5
 				'Mouse' + proper(substr(m.cPEM, 6)),;
-			M.cPEM == 'Uienable',; && The UIEnable event does not occur for pages when the form is initially activated
+			m.cPEM == 'Uienable',; && The UIEnable event does not occur for pages when the form is initially activated
 				'UIenable',;
 				strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(m.cPEM;
 					, 'Before', 'Before', 1, -1, 1);
