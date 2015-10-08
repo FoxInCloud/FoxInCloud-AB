@@ -6077,13 +6077,15 @@ endfunc
 
 * =============================================
 function lTrue && a value is .T.
-lparameters value
-return vartype(m.value) == 'L' and m.value
+lparameters value && if @, .T./.F.
+value = vartype(m.value) == 'L' and m.value
+return m.value
 endfunc
 * =============================================
 function lFalse && a value is .F.
-lparameters value
-return vartype(m.value) == 'L' and !m.value
+lparameters value && if @, .T./.F.
+value = vartype(m.value) == 'L' and !m.value
+return m.value
 endfunc
 
 #if .f. && https://raw.githubusercontent.com/npm/node-semver/master/semver.js
