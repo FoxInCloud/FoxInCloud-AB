@@ -1999,11 +1999,11 @@ endif
 local toResult as object; && object, .null. if error
 , llResult as Boolean;
 , lcResult as string;
-, llChild;
-, lnChild;
-, liChild;
+, llChild as Boolean;
+, lnChild as Integer;
+, liChild as Integer;
 , loChild as collection; && objets enfants éventuels
-, llObject as Boolean; && @ {en} an object was passed {fr} Un objet a été passé
+, llObject as Boolean; && @ {en} an object was passed in toResult {fr} Un objet a été passé dans toResult
 , llFIC as Boolean; && @ {en} object derives from a FoxinCloud class {fr} L'objet a d'une classe FoxinCloud
 
 liChild = 0
@@ -2016,7 +2016,7 @@ llResult = .T.;
 		, .T.; && .T. : ASSERT m.llResult && ôte les balises <#o#> initiale et </#o#> terminale
 		);
 	;
-	and objectOfXML_lChild(;
+	and objectOfXML_lChild(; && {en} identifies child object patterns in XML [objectOfXML() private] {fr} repère les objets enfants dans le XML [privée de objectOfXML()] 
 		  @m.tcXML;
 		, @m.lcResult;
 		, @m.llChild;
@@ -2052,7 +2052,7 @@ llResult = .T.;
 		, m.loChild; && {en} Child objects XML {fr} XML des objets enfants
 		)
 	
-assert m.liChild = m.lnChild && tous les enfants éventuels ont bien été restaurés
+assert m.liChild = m.lnChild && tous les objets enfants éventuels ont bien été restaurés
 
 = m.llResult or cResultAdd(@m.tcResult, m.lcResult)
 
@@ -2172,11 +2172,10 @@ if m.llObject;
 				)
 	endfor
 endif
-
 endproc
 
 * ========================================
-procedure objectOfXML_lChild as Boolean && {en} [objectOfXML() private] {fr}  [privée de objectOfXML()]
+procedure objectOfXML_lChild as Boolean && {en} identifies child object patterns in XML [objectOfXML() private] {fr} repère les objets enfants dans le XML [privée de objectOfXML()] 
 lparameters ;
   tcXML as string; && @ {en} XML produced by cXMLofObject() {fr} XML produit par cXMLofObject()
 , tcResult as string; && @ {en} Cumulative result {fr} Résultat (cumulatif)
@@ -2402,9 +2401,11 @@ lparameters ;
 	tcXML as string; && {en} XML produced by cXMLofObject() {fr} XML produit par cXMLofObject()
 ,	toResult as object; && {en} Object to populate {fr} Objet à peupler
 , tcResult as string; && @ {en} Cumulative result {fr} Résultat (cumulatif)
-, llChild as Boolean; && {en} object has direct child(ren) {fr} L'objet a des objets enfants
-, liChild as Integer; && @ {en} Index of current child object {fr} Index de l'objet enfant courant
-, loChild as collection; && {en} Child objects XML {fr} XML des objets enfants
+, llChild as Boolean; && [compute] {en} object has direct child(ren) {fr} L'objet a des objets enfants
+, liChild as Integer; && @ [compute] {en} Index of current child object {fr} Index de l'objet enfant courant
+, loChild as collection; && [compute] {en} Child objects XML {fr} XML des objets enfants
+
+local llChild_ as boolean, lnChild as Integer
 
 do case
 case !loBaseClass(m.toResult, 'Collection')
@@ -2412,15 +2413,16 @@ case !loBaseClass(m.toResult, 'Collection')
 case !'<#item#>' $ m.tcXML
 	m.toResult.remove(-1) && If you pass a value of -1, Visual FoxPro removes all items in the collection.
 
-case Pcount() <= 3;
+case varSet(@m.llChild_, Pcount() <= 3);
+ and m.llChild_;
  and varSet(@m.liChild, 0);
  and !objectOfXML_lChild(;
 		@m.tcXML; && @ {en} XML produced by cXMLofObject() {fr} XML produit par cXMLofObject()
 	, @m.tcResult; && @ {en} Cumulative result {fr} Résultat (cumulatif)
 	, @m.llChild; && @ [.F.] {en} object has direct child(ren) {fr} L'objet a des objets enfants
-	, @m.lnChild; && @ {en} [0] Number of direct child objects {fr} Nombre d'objets enfants
+	, @m.lnChild; && @m.lnChild && @ {en} [0] Number of direct child objects {fr} Nombre d'objets enfants
 	, @m.loChild; && @ {en} [.F.] Child objects XML {fr} XML des objets enfants
- )
+	)
  
  	return .F.
 
@@ -2493,6 +2495,8 @@ otherwise
 		endfor
 	endif
 
+	assert !m.llChild_ or m.lnChild = m.liChild
+	
 	return m.llResult
 endcase
 endproc
