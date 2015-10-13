@@ -7113,7 +7113,7 @@ loTest.Test(' ORDER BY NAME, CITY', m.lcSQLSelect, 'ORDER  BY')
 return loTest.Result()
 
 * =================================
-function aSQLparm as string && paramètres d'une instruction Select-SQL normalisée par _ga_StringParseBits_Class_.maskStrings()
+function aSQLparm as string && {en} parameters from a Select-SQL command string {fr} paramètres d'une instruction Select-SQL normalisée par _ga_StringParseBits_Class_.maskStrings()
 && créée pour faciliter les tests
 && see: modify class awfrm of aw.vcx method wViewSetup
 lparameters ;
