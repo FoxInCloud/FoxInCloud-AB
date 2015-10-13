@@ -54,7 +54,8 @@ acLine = space(0) && Contenu de la ligne courante
 anLine = 0 && N° de la ligne courante
 anDataLines = 0 && Nombre de lignes contenant des données
 
-acWarnings = space(0) && Avertissements déjà émis
+acWarnings = '' && Avertissements déjà émis
+anWarnings = 0  && Avertissements déjà émis
 
 * Adresses des fichiers
 acTxtLogAddr = space(0)
@@ -169,17 +170,19 @@ _screen.fontsize = this.anScreenFontSize
 
 if m.this.alConsole
 
-* Si l'utilisateur souhaite voir les avertissements
-	if not empty(m.this.acWarnings) ;
+	* Si l'utilisateur souhaite voir les avertissements
+	local lcS, lcBe
+	lcS = Iif(m.this.anWarnings > 1, 's', '')
+	if not empty(m.this.acWarnings);
 	 and 6 = messagebox(;
-				icase(;
-					cLangUser() = 'fr',	"Voulez-vous voir les avertissements ?",; && copy-paste this line to add another language support
-															"Some warning occurred, do you want them displayed?";
-				);
+				Textmerge([<<m.this.anWarnings>> ] + ICase(;
+					cLangUser() = 'fr',	[avertissement<<m.lcS>> <<Iif(m.this.anWarnings > 1, 'ont', 'a')>> été enregistré<<m.lcS>>] + CRLF2 + "Voulez-vous le<<m.lcS>> voir ?",; && copy-paste this line to add another language support
+															[warning<<m.lcS>> <<Iif(m.this.anWarnings > 1, 'were', 'was')>>  recorded] + CRLF2 + "Do you want to see <<Iif(m.this.anWarnings > 1, 'them', 'it')>>?"; && default: English
+				));
 			, 4+32;
 			, icase(;
 					cLangUser() = 'fr',	"Fin de traitement",; && copy-paste this line to add another language support
-															"End of processing";
+															"End of processing"; && default: English
 				);
 			, 5000;
 			)
@@ -701,8 +704,9 @@ this.acLine = space(0)
 * -------------------------------------------------
 procedure Warning && Affiche un avertissement dans une fenêtre "WAIT WINDOW", ajoute au compte-rendu des avertissements si nouveau
 lparameters ;
-	tcWarning,; && Avertissement, vide pour nouvelle ligne
-	tlAppendNot && [.F.] Ne pas ajouter l'avertissement au compte-rendu
+  tcWarning; && Avertissement, vide pour nouvelle ligne
+, lAppendNot; && [.F.] Ne pas ajouter l'avertissement au compte-rendu
+, lCallingAddNot as Boolean; && [.F.] {en} do not add calling program name as header {fr} ne pas ajouter le nom du programme appelant en-tête
 
 local llWarnNew, lcWarning, lcCallingModule, llResult
 
@@ -713,32 +717,32 @@ if .t.;
 
 	tcWarning = alltrim(m.tcWarning)
 
-* Si nouvel avertissement
+	* Si nouvel avertissement
 	lcCallingModule = cTronc(lower(cCallingModule()), 20)
-	lcWarning = padr(m.lcCallingModule, 20) + m.tcWarning
+	lcWarning = Iif(lTrue(m.lCallingAddNot), '', padr(m.lcCallingModule, 20) ) + m.tcWarning
 	llWarnNew = not upper(m.lcWarning) $ upper(m.this.acWarnings)
 	if m.llWarnNew
 
-* Display warning
+	* Display warning
 		wait window cTronc('Module ' + m.lcCallingModule + ' : ' + m.tcWarning, 254) nowait
-*			?? Chr(7)
+	*			?? Chr(7)
 	endif
 
 else && blank line
 
-* Clear warning
+	* Clear warning
 	wait clear
 	llWarnNew = .t.
 	lcWarning = space(0)
 
 endif
 
-* Append Warning to Log if requested
-if m.llWarnNew;
- and not (lTrue(m.tlAppendNot))
+* If requested, Append Warning to Log
+if m.llWarnNew and not (lTrue(m.lAppendNot))
 
 	lcWarning = CRLF + m.lcWarning
 	this.acWarnings = m.this.acWarnings + m.lcWarning
+	this.anWarnings = m.this.anWarnings + 1
 	llResult = strtofile(m.lcWarning, m.this.acWarnTxtLogAddr, .t.) > 0
 else
 	llResult = .t.
@@ -917,10 +921,10 @@ if m.this.anCols * m.this.anDataLines > 0
 			else
 				if not m.llTitle
 					llTitle = this.CellFill(;
-							M.lnCol;
+							m.lnCol;
 						, textmerge(icase(;
 								cLangUser() = 'fr',	[Totaux / moyennes des <<m.this.anDataLines>> lignes],; && copy-paste this line to add another language support
-																		[Total / averages of <<m.this.anDataLines>> lines];
+																		[Total / averages of <<m.this.anDataLines>> lines]; && default: English
 							));
 						, .t.;
 						)
@@ -1009,22 +1013,22 @@ if m.llResult and not upper(left(m.tcSys16, 2)) == 'ON' && ON ...
  	if m.llResult
 
 	 	return icase(;
-	 		M.tcInfo == 'N',; && Procedure name (with object name if method)
+	 		m.tcInfo == 'N',; && Procedure name (with object name if method)
 		 		iif(m.llMethod;
 		 			, laMembers[m.lnMembers-1] + iif(empty(laMembers[m.lnMembers-1]) or empty(laMembers[m.lnMembers]), '', '.') + laMembers[m.lnMembers];
 		 			, m.lcProc;
 		 			),;
-		 	M.tcInfo == 'A',; && Procedure file address
+		 	m.tcInfo == 'A',; && Procedure file address
 		 		m.lcAddr,;
-		 	M.tcInfo == 'P',; && Procedure file path
+		 	m.tcInfo == 'P',; && Procedure file path
 		 		addbs(justpath(m.lcAddr)),;
-		 	M.tcInfo == 'S',; && Procedure file address
+		 	m.tcInfo == 'S',; && Procedure file address
 		 		m.tcSys16,;
-		 	M.tcInfo == 'O',; && Object name
+		 	m.tcInfo == 'O',; && Object name
 		 		laMembers[m.lnMembers-1],;
-		 	M.tcInfo == 'L',; && Lignée des objets
+		 	m.tcInfo == 'L',; && Lignée des objets
 		 		leftc(m.lcProc, ratc('.', m.lcProc)-1),;
-		 	M.tcInfo == 'F',; && Lignée complète de la méthode
+		 	m.tcInfo == 'F',; && Lignée complète de la méthode
 		 		m.lcProc,;
 		 		'';
 		 	)
@@ -1183,13 +1187,13 @@ if vartype(m.tcModule) == 'C' and not empty(m.tcModule)
 			lcLevel = program(m.liLevel)
 
 			if m.tcModule == icase(;
-				M.llMethod,;
+				m.llMethod,;
 					'.' + justext(m.lcLevel),;
-				M.llClassMethod,;
-					M.lcLevel,;
+				m.llClassMethod,;
+					m.lcLevel,;
 				'.' $ m.lcLevel,;
 					justext(m.lcLevel),;
-					 M.lcLevel;
+					 m.lcLevel;
 				)
 				llResult = .t.
 				exit
@@ -2328,7 +2332,7 @@ case m.lcSetting == 'PROC'
 
 otherwise
 	llResult = this.Set_(;
-		  M.tcSetting;
+		  m.tcSetting;
 		, m.tvValueNew;
 		)
 
@@ -2843,7 +2847,7 @@ if m.success
 			, m.lcProp;
 			, left(m.lcProp, 4);
 			);
-		+ iif(empty(m.tnSetting), '', cast(m.tnSetting as M))
+		+ iif(empty(m.tnSetting), '', cast(m.tnSetting as m))
 
 	loExact = .null.
 
@@ -2867,7 +2871,7 @@ this.lInit = m.this.lInit and m.success
 
 assert m.success message cAssertMsg(textmerge(icase(;
 	cLangUser() = 'fr',	[Le réglage de SET <<m.tcSetting>> à la valeur <<cL(m.tvValueNew)>> a échoué.],; && copy-paste this line to add another language support
-											[Setting <<m.tcSetting>> to value <<cL(m.tvValueNew)>> failed.];
+											[Setting <<m.tcSetting>> to value <<cL(m.tvValueNew)>> failed.]; && default: English
 	)))
 
 return m.success
@@ -3036,7 +3040,7 @@ protected procedure uset
 lparameters lcSet, lnSet
 
 return icase(;
-		M.lcSet == 'DEFAULT',;
+		m.lcSet == 'DEFAULT',;
 			set(m.lcSet) + curdir(),;
 		empty(m.lnSet),;
 			set(m.lcSet),;
@@ -3185,14 +3189,14 @@ if vartype(m.toException) == 'O' and type('m.toException.BaseClass') == 'C' and 
 		lcResult = iif(_vfp.startmode = 0;
 			, textmerge(icase(;
 					cLangUser() = 'fr',	[ (<<Iif('...' $ .LineContents, 'code source N/D', m.lcResult)>>)],; && copy-paste this line to add another language support
-															[ (<<Iif('...' $ .LineContents, 'source code N/A', m.lcResult)>>)];
+															[ (<<Iif('...' $ .LineContents, 'source code N/A', m.lcResult)>>)]; && default: English
 				));
 			, space(0);
 			)
 		luUserValue = iif(vartype(.uservalue) == 'O' and proper(.uservalue.baseclass) == 'Exception', cException(.uservalue), .uservalue)
 		lcResult = textmerge(icase(;
 			cLangUser() = 'fr',	[Méthode ou procédure <<.Procedure>>() : erreur n° <<.ErrorNo>> ("<<c2Words(.Message,' - ', m.luUserValue)>>") à la ligne n° <<.LineNo>><<m.lcResult>>],; && copy-paste this line to add another language support
-													[Method or procedure <<.Procedure>>(): error #<<.ErrorNo>> ("<<c2Words(.Message,' - ', m.luUserValue)>>") at code line #<<.LineNo>><<m.lcResult>>];
+													[Method or procedure <<.Procedure>>(): error #<<.ErrorNo>> ("<<c2Words(.Message,' - ', m.luUserValue)>>") at code line #<<.LineNo>><<m.lcResult>>]; && default: English
 			))
 	endwith
 endif
@@ -3804,11 +3808,11 @@ if m.llResult
 					assert occurs(m.lcPoint, m.tuValue) <= 1 message cAssertMsg(textmerge([Plus d'un séparateur décimal dans le nombre <<m.tuValue>>]))
 				endif
 				luResult = icase(;
-					M.lcTypeDest == 'N', val(m.tuValue),;
-					M.lcTypeDest == 'Y', ntom(val(m.tuValue)),;
-					M.lcTypeDest == 'I', int(val(m.tuValue)),;
-					M.lcTypeDest == 'L', icase(inlist(m.tuValue, 'T', '.T.', 'VRAI', 'TRUE'), .t., empty(m.tuValue) or inlist(m.tuValue, 'F', '.F.', 'FAUX', 'FALSE'), .f., evaluate(m.tuValue)),;
-					M.lcTypeDest $ 'DT', iif(left(m.tuValue, 1) = '{', evaluate(m.tuValue), uValue_TD(m.tuValue, m.lcTypeDest)),;
+					m.lcTypeDest == 'N', val(m.tuValue),;
+					m.lcTypeDest == 'Y', ntom(val(m.tuValue)),;
+					m.lcTypeDest == 'I', int(val(m.tuValue)),;
+					m.lcTypeDest == 'L', icase(inlist(m.tuValue, 'T', '.T.', 'VRAI', 'TRUE'), .t., empty(m.tuValue) or inlist(m.tuValue, 'F', '.F.', 'FAUX', 'FALSE'), .f., evaluate(m.tuValue)),;
+					m.lcTypeDest $ 'DT', iif(left(m.tuValue, 1) = '{', evaluate(m.tuValue), uValue_TD(m.tuValue, m.lcTypeDest)),;
 					.null.)
 				if m.lcTypeDest $ 'DT' && Ctod() et Ctot() peuvent produire un résultat invalide
 					try
@@ -3820,31 +3824,31 @@ if m.llResult
 
 			case m.lcTypeSrce == 'N'
 				luResult = icase(;
-					M.lcTypeDest == 'C', transform(m.tuValue),;
-					M.lcTypeDest == 'I', int(m.tuValue),;
-					M.lcTypeDest == 'Y', ntom(m.tuValue),;
-					M.lcTypeDest == 'L', m.tuValue != 0,;
+					m.lcTypeDest == 'C', transform(m.tuValue),;
+					m.lcTypeDest == 'I', int(m.tuValue),;
+					m.lcTypeDest == 'Y', ntom(m.tuValue),;
+					m.lcTypeDest == 'L', m.tuValue != 0,;
 					.null.)
 
 			case m.lcTypeSrce $ 'DT'
 				luResult = icase(;
-					M.lcTypeDest == 'C', cLitteral(m.tuValue),; && mieux que Cast()
+					m.lcTypeDest == 'C', cLitteral(m.tuValue),; && mieux que Cast()
 					m.lcTypeDest == 'D', ttod(m.tuValue),;
-					M.lcTypeDest == 'T', dtot(m.tuValue),;
+					m.lcTypeDest == 'T', dtot(m.tuValue),;
 					.null.)
 
 			case m.lcTypeSrce == 'L'
 				luResult = icase(;
-					M.lcTypeDest == 'C', cLitteral(m.tuValue),;
-					M.lcTypeDest $ 'NI', iif(m.tuValue, 1, 0),;
+					m.lcTypeDest == 'C', cLitteral(m.tuValue),;
+					m.lcTypeDest $ 'NI', iif(m.tuValue, 1, 0),;
 					.null.)
 
 			case m.lcTypeSrce == 'Y'
 				luResult = icase(;
-					M.lcTypeDest == 'C', transform(m.tuValue),;
-					M.lcTypeDest == 'N', mton(m.tuValue),;
-					M.lcTypeDest == 'I', int(mton(m.tuValue)),;
-					M.lcTypeDest == 'L', not m.tuValue = ntom(0),;
+					m.lcTypeDest == 'C', transform(m.tuValue),;
+					m.lcTypeDest == 'N', mton(m.tuValue),;
+					m.lcTypeDest == 'I', int(mton(m.tuValue)),;
+					m.lcTypeDest == 'L', not m.tuValue = ntom(0),;
 					.null.)
 
 			case m.lcTypeSrce == 'X'
@@ -3967,10 +3971,10 @@ tu2 = iif(m.lcType2 == 'C' and m.tlCaseIgnore, lower(m.tu2), m.tu2)
 return m.lcType1 == m.lcType2;
 	and	(m.lcType1 == 'X';
 			or icase(;
-				M.lcType1 == 'O', luEqual_Object(m.tu1, m.tu2),;
-				M.lcType1 == 'A', laEqual(@m.tu1, @m.tu2),;
-				M.lcType1 == 'C' and not m.tlStrict, trim(m.tu1) == trim(m.tu2),;
-			 	M.tu1 == m.tu2;
+				m.lcType1 == 'O', luEqual_Object(m.tu1, m.tu2),;
+				m.lcType1 == 'A', laEqual(@m.tu1, @m.tu2),;
+				m.lcType1 == 'C' and not m.tlStrict, trim(m.tu1) == trim(m.tu2),;
+			 	m.tu1 == m.tu2;
 			 	);
 		 	)
 
@@ -4092,31 +4096,31 @@ tcLang = cLangUser(m.tcLang)
 
 return iif(lTrue(m.tlHotKey), '\<', '');
 	+	icase(;
-			M.tiType = 1, 'OK',;
-			M.tiType = 2, icase(;
-        M.tcLang = 'fr',	'Annuler',; && copy-paste this line to add another language support
+			m.tiType = 1, 'OK',;
+			m.tiType = 2, icase(;
+        m.tcLang = 'fr',	'Annuler',; && copy-paste this line to add another language support
         m.tcLang = 'es',	'Cancelar',; && copy-paste this line to add another language support
-                          'Cancel'),;
-			M.tiType = 3, icase(;
-        M.tcLang = 'fr',	'Abandonner',; && copy-paste this line to add another language support
+                          'Cancel'),; && default: English
+			m.tiType = 3, icase(;
+        m.tcLang = 'fr',	'Abandonner',; && copy-paste this line to add another language support
         m.tcLang = 'es',	'Abortar',; && copy-paste this line to add another language support
-                          'Abort'),;
-			M.tiType = 4, icase(;
-        M.tcLang = 'fr',	'Réessayer',; && copy-paste this line to add another language support
+                          'Abort'),; && default: English
+			m.tiType = 4, icase(;
+        m.tcLang = 'fr',	'Réessayer',; && copy-paste this line to add another language support
         m.tcLang = 'es',	'Reintentar',; && copy-paste this line to add another language support
-                         	'Retry'),;
-			M.tiType = 5, icase(;
-        M.tcLang = 'fr',	'Ignorer',; && copy-paste this line to add another language support
+                         	'Retry'),; && default: English
+			m.tiType = 5, icase(;
+        m.tcLang = 'fr',	'Ignorer',; && copy-paste this line to add another language support
         m.tcLang = 'es',	'Ignorar',; && copy-paste this line to add another language support
-                          'Ignore'),;
-			M.tiType = 6, icase(;
-        M.tcLang = 'fr',	'Oui',; && copy-paste this line to add another language support
+                          'Ignore'),; && default: English
+			m.tiType = 6, icase(;
+        m.tcLang = 'fr',	'Oui',; && copy-paste this line to add another language support
         m.tcLang = 'es',	'Sí',; && copy-paste this line to add another language support
-                          'Yes'),;
-			M.tiType = 7, icase(;
-        M.tcLang = 'fr',	'Non',; && copy-paste this line to add another language support
+                          'Yes'),; && default: English
+			m.tiType = 7, icase(;
+        m.tcLang = 'fr',	'Non',; && copy-paste this line to add another language support
         m.tcLang = 'es',	'No',; && copy-paste this line to add another language support
-                          'No'),;
+                          'No'),; && default: English
 			'??';
 		)
 
@@ -4241,11 +4245,11 @@ liLangUser = at_c('{' + m.tcLangUser + '}', m.tcString)
 liEN = at_c('{en}', m.tcString)
 
 result = icase(;
-	M.liLangUser > 0,;
+	m.liLangUser > 0,;
 		substrc(m.tcString, m.liLangUser + 4),;
-	M.liEN > 0,;
+	m.liEN > 0,;
 		substrc(m.tcString, m.liEN + 4),;
-		M.tcString;
+		m.tcString;
 	)
 
 return alltrim(iif(m.liEN + m.liLangUser > 0;
@@ -5621,7 +5625,7 @@ tcResult = iif(vartype(m.tcResult) == 'C', m.tcResult, '')
 tuItem = iif(vartype(m.tuItem) == 'N' and m.tuItem > 0;
 	, icase(;
 		cLangUser() = 'fr',	[terminé en],; && copy-paste this line to add another language support
-												[completed in];
+												[completed in]; && default: English
 		) + ' ' + cSeconds(@m.tuItem);
 	, m.tuItem;
 	)
@@ -5679,7 +5683,7 @@ return '';
 		+ [() - ]
 
 * =============================================
-function lUserAnAdmin as Variant && Current User is an administrator
+function lUserAnAdmin as Variant && Current user is a member of the Administrators group
 lparameters result as string && @
 
 local success as Variant
@@ -5698,7 +5702,7 @@ try
 
 	success = IsUserAnAdmin() # 0
 catch
-	success = .null. && IsUserAnAdmin() not supported, we don't know
+	success = .null. && IsUserAnAdmin() is not supported, we don't know
 endtry
 
 result = iif(isNull(m.success);
@@ -5959,28 +5963,28 @@ for i = 1 to 256
 endfor
 
 J = 0
-m.nLongClef = len(M.cClef)
+m.nLongClef = len(m.cClef)
 for i = 1 to 256
-    J = bitand(J + aInt(i) + asc(substr(M.cClef, mod(i-1,M.nLongClef)+1, 1)), 255)
+    J = bitand(J + aInt(i) + asc(substr(m.cClef, mod(i-1,m.nLongClef)+1, 1)), 255)
     m.nInt = aInt(i)
     aInt(i) = aInt(J+1)
-    aInt(J+1) = M.nInt
+    aInt(J+1) = m.nInt
 endfor
 
 i = 1
 J = 0
 m.cResult = ''
-for K = 1 to len(M.cTexte)
+for K = 1 to len(m.cTexte)
     i = bitand(i, 255) + 1
     J = bitand(J + aInt(i), 255)
     m.nInt = aInt(i)
     aInt(i) = aInt(J+1)
-    aInt(J+1) = M.nInt
-    m.cResult = M.cResult + chr(bitxor(asc(substr(M.cTexte, K, 1)), ;
-                                       aInt(bitand(aInt(i) + M.nInt, 255)+1)))
+    aInt(J+1) = m.nInt
+    m.cResult = m.cResult + chr(bitxor(asc(substr(m.cTexte, K, 1)), ;
+                                       aInt(bitand(aInt(i) + m.nInt, 255)+1)))
 endfor
 
-return M.cResult
+return m.cResult
 endfunc
 
 * =============================================
@@ -6033,10 +6037,10 @@ endfunc
 function nEvl(uValue, notEmpty, typeForce) && substitute value instead of not empty value
 return icase(;
 	!empty(m.uValue),;
-		M.notEmpty,;
+		m.notEmpty,;
 	lTrue(m.typeForce),;
 		uEmpty(vartype(m.notEmpty)),;
-		M.uValue;
+		m.uValue;
 	)
 endfunc
 
@@ -6234,8 +6238,6 @@ lparameters ;
 , version as string; && [this.raw] version à analyser
 , loose as Boolean; && [.F.]
 
-loose = lTrue(m.loose)
-
 local success as Boolean;
 , oRegExp as abRegExp of abTxt.prg;
 , oSubMatch as collection;
@@ -6255,8 +6257,8 @@ case !ga_Type_IsChar(m.version, .t.)
 	return cResultAdd(@m.result, [Invalid version: ] + cL(m.version))
 endcase
 
-store alltrim(m.version) to this.raw, version
-this.loose = m.loose
+store lTrue(m.loose) to loose, this.loose
+store alltrim(Iif(m.loose, cEuroANSI(m.version), m.version)) to this.raw, version
 
 if lenc(m.version) > this.MAX_LENGTH
   return cResultAdd(@m.result, textmerge([version <<cL(m.version)>> is longer than <<this.MAX_LENGTH>> characters]))
@@ -6308,7 +6310,7 @@ if m.this.lPreRelease
 				cPreReleases = '';
 					+ Evl(Leftc(m.cPreReleases, m.iPreRelease), 'beta'); && 2015-09-25 thn InstallShield support: prerelease must be a number
 					+ '.';
-					+ Cast(Cast(Substr(m.cPreReleases, m.iPreRelease + 1) as I) as  M) && removes leading 0 if any
+					+ Cast(Cast(Substr(m.cPreReleases, m.iPreRelease + 1) as I) as  m) && removes leading 0 if any
 				nPreRelease = 2
 				exit
 			endif
@@ -6338,9 +6340,9 @@ this.versionMMPint = Int(0;
 	)
 
 store '';
-	      + cast(m.this.major as M);
-	+ '.' + cast(m.this.minor as M);
-	+ '.' + cast(m.this.patch as M);
+	      + cast(m.this.major as m);
+	+ '.' + cast(m.this.minor as m);
+	+ '.' + cast(m.this.patch as m);
  to this.versionMMP, this.versionIS, this.version
 
 this.lPreRelease = !isNull(m.this.prerelease)
@@ -6349,7 +6351,7 @@ if m.this.lPreRelease
 	local aPreRelease[1]
 	acopy(this.prerelease, aPreRelease)
 	this.version = this.version + '-' + cListOfArray(@m.aPreRelease, '.',,,.t.)
-	this.versionIS = this.versionIS + Iif(m.this.lBeta(), '.' + Cast(m.this.nBeta() as M), '')
+	this.versionIS = this.versionIS + Iif(m.this.lBeta(), '.' + Cast(m.this.nBeta() as m), '')
 endif
 
 return this.version
@@ -6624,9 +6626,9 @@ return icase(;
 		+1,;
 	vartype(m.a) <> 'N' and vartype(m.b) == 'N',;
 		-1,;
-	M.a > m.b,;
+	m.a > m.b,;
 		+1,;
-	M.a < m.b,;
+	m.a < m.b,;
 		-1,;
     0;
    )
@@ -6868,8 +6870,16 @@ nTest = 0
 success = cSemVer('2.20.0.1', .T.) == '2.20.0-beta.1' and m.success
 nTest = m.nTest + 1
 
-&& back compta.: allow for missing dot between prerelease type and number
+&& back compat.: allow for missing dot between prerelease type and number
 success = cSemVer('2.20beta1', .T.) == '2.20.0-beta.1' and m.success
+nTest = m.nTest + 1
+
+&& back compat.: allow for missing dot between prerelease type and number
+success = cSemVer('2.20 beta1', .T.) == '2.20.0-beta.1' and m.success
+nTest = m.nTest + 1
+
+&& back compat.: allow for accented characters
+success = cSemVer('2.20 bêta1', .T.) == '2.20.0-beta.1' and m.success
 nTest = m.nTest + 1
 
 && major: 1.0.0-5 bumps to 1.0.0
@@ -6921,6 +6931,8 @@ _cliptext = nEvl(varSet(@m.nTest, 0), '') + textmerge([&]+[& <<Datetime()>> - ab
 && 18/09/15 10:44:13 - abSemVer_test(): .T. - 10 tests
 && 24/09/15 15:53:59 - abSemVer_test(): .T. - 11 tests
 && 24/09/15 15:57:42 - abSemVer_test(): .T. - 12 tests
+&& 13/10/15 18:23:42 - abSemVer_test(): .T. - 13 tests
+&& 13/10/15 18:28:56 - abSemVer_test(): .T. - 14 tests
 
 return m.success
 endfunc
