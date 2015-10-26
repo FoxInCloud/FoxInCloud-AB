@@ -648,6 +648,7 @@ else
 endif
 
 return m.llResult
+endfunc
 
 * ========================================
 function cClasses && Classes d'un objet depuis sa classe de base (uppercase)
@@ -1713,8 +1714,10 @@ if m.llResult
 
 				if .t.;
 				 and varSet(@m.lcProp, lower(m.laProp[m.liProp])); && Lower(m.lcProp)
-				 and (m.llEmpty or pemstatus(m.toObj, m.lcProp, 0)); && property has changed compared to its parent class && OK pour les propriétés protégées
-				 and cXMLofObject_lPropSave(m.toObj, m.lcProp, m.llFIC);
+				 and (m.llEmpty or .T.;
+				  and pemstatus(m.toObj, m.lcProp, 0); && property has changed compared to its parent class && OK pour les propriétés protégées
+				  and cXMLofObject_lPropSave(m.toObj, m.lcProp, m.llFIC);
+				  );
 
 					if .t.;
 					 and varSet(@m.llPH, ascan(m.laPropPH, m.lcProp) > 0);
@@ -2117,7 +2120,7 @@ if !m.llEmpty
 	endtry
 endif
 
-toResult = icase(;
+toResult = iCase(;
 	m.llEmpty,; && objets empty : recréer systématiquement
 		createobject('Empty'),;
 	m.llObject,;
@@ -2188,7 +2191,7 @@ local llResult as Boolean;
 , loRegExpOpen as abRegExp of abTxt.prg;
 , loRegExpClose as abRegExp of abTxt.prg;
 ;
-, liChildOpen as Integer;
+, liChildOpen  as Integer;
 , liChildOpen_ as Integer;
 , liChildClose as Integer;
 , laChild[1];

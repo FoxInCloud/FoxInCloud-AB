@@ -6978,6 +6978,9 @@ result = Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(m.result;
 	
 if m.lFile
 	success = StrToFile(m.result, FullPath(m.tcSrce)) > 0
+else
+	tcSrce = m.result
 endif
 
 return m.success
+endproc

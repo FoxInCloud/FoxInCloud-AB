@@ -371,9 +371,13 @@ endif
 function lDir && Un dossier existe
 lparameters tcDir, tlStrict && Adresse du dossier ; supporte wildcard
 local array laTemp[1]
-return vartype(m.tcDir) == 'C';
+return .T.;
+ and vartype(m.tcDir) == 'C';
  and not empty(m.tcDir);
- and (not m.tlStrict and directory(m.tcDir) or adir(laTemp, addbs(m.tcDir), 'DHS') >= 1) && Directory, Hidden, System
+ and Iif(lTrue(m.tlStrict);
+	 , adir(laTemp, addbs(m.tcDir), 'DHS') >= 1; && Directory, Hidden, System
+	 , directory(m.tcDir);
+	 )
 
 * ========================================
 function lDirEmpty && Un dossier existe et est vide

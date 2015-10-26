@@ -6639,11 +6639,12 @@ return createobject('abRowBufferSave', m.tcAlias, @m.tcError)
 * ========================================
 define class abRowBufferSave as GA_LIGHTWEIGHT_CLASS && {en} Saves and restores an Alias' buffer {fr} Sauve et rétablit le tampon d'un Alias
 
-hidden cAlias;
-, cFldState;
-, aBuffer[1];
-, lAppended;
-, lDeleted;
+cAlias = .null.
+cFldState = .null.
+lAppended = .null.
+lDeleted = .null.
+
+dimension aBuffer[1]
 
 * -------------------------------
 hidden procedure init
@@ -6656,13 +6657,12 @@ local success as Boolean;
 , cFldState as string;
 , iField as integer;
 
-success = .t.;
+if .t.;
  and varSet(@m.oSelect, abSelect(evl(m.tcAlias, alias())));
  and (used() or cResultAdd(textmerge([Table or Alias <<cL(m.tcAlias)>> can't be found])));
  and (inlist(cursorgetprop("Buffering"), 2, 3) or cResultAdd(textmerge([Alias '<<Alias()>>' should be row buffered])));
  and varSet(@m.cFldState, getfldstate(-1));
  and !empty(chrtran(m.cFldState, '1', ''))
-if m.success
 
 	this.cAlias = alias()
 	this.cFldState = m.cFldState
@@ -6677,16 +6677,16 @@ if m.success
 	this.lAppended = '3' $ m.cFldState or '4' $ m.cFldState
 	this.lDeleted = left(m.cFldState, 1) == iif(m.this.lAppended, '4', '2')
 
-* {en} save the buffer {fr} sauve le buffer
+	* {en} save the buffer {fr} sauve le buffer
 	dimension this.aBuffer[Fcount()]
 	for iField = 1 to fcount()
 		this.aBuffer[m.iField] = evaluate(field(m.iField))
 	endfor
 
-	tablerevert()
-
-	cursorsetprop("Buffering", 5)
-	this.reset
+	success = .T.;
+	 and tablerevert() > 0;
+	 and cursorsetprop("Buffering", 5);
+	 and this.reset()
 endif
 
 return m.success
@@ -6699,6 +6699,7 @@ if m.this.lAppended
 	append blank
 endif
 
+local iField as Integer
 for iField = 1 to fcount()
 	if substr(m.this.cFldState, m.iField + 1, 1) == iif(m.this.lAppended, '4', '2')
 		replace (field(m.iField)) with this.aBuffer[m.iField]
@@ -6714,8 +6715,6 @@ hidden procedure destroy
 
 local success as Boolean;
 , oSelect as abSelect or abData.prg;
-, cFldState as string;
-, iField as integer;
 
 if used(m.this.cAlias)
 
