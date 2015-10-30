@@ -1862,7 +1862,7 @@ endif
 return m.llResult
 
 * ===================================================================
-function cVFPNameSubStr && Nom VFP commenÃ§ant à partir d'une position donnée dans une chaîne
+function cVFPNameSubStr && Nom VFP commençant à partir d'une position donnée dans une chaîne
 lparameters ;
 	tcChain,; && Chaine de caractère
 	tnPos && Position du nom dans la chaîne; Si @, devient la position immédiatement après le nom trouvé
@@ -2632,12 +2632,12 @@ for .nPattern = 1 to alen(.aPattern) && FOR EACH .Pattern IN .aPattern produit u
 
 	.pattern = .aPattern[.nPattern] && see this.Pattern_assign()
 
-* Si des occurrences sont trouvées
+	* Si des occurrences sont trouvées
 	if .Execute_Pattern(@m.tcIn, m.tlDebug) > 0
 
 		lnResult = m.lnResult + .nMatches
 
-* Ajouter les occurrences au résultat final
+		* Ajouter les occurrences au résultat final
 		dimension laMatches[Alen(.Matches, 1), Alen(.Matches, 2)]
 		acopy(.Matches, laMatches)
 		aAppend(@m.laResult, @m.laMatches)
@@ -2654,6 +2654,7 @@ endif
 .lPatterns = .t. && pour reuse, .Pattern = le remet à .F.
 
 return m.lnResult
+endproc
 
 * -----------------------------------------------------------------
 protected procedure Execute_Pattern && Exécute un pattern unique
@@ -2672,17 +2673,17 @@ if not empty(.pattern)
 	loResults = .oRegExp.Execute(@m.tcIn)
 	if m.loResults.count > 0
 
-* Tabuler les résultats
+		* Tabuler les résultats
 		dimension .Matches[m.loResults.Count, 4] && [index, valeur, submatches, length]
 		for each loResult in m.loResults && GA ne met pas la clause 'foxobject'
 
-* Objectifier les sub-matches
+			* Objectifier les sub-matches
 			loSubMatches = createobject('collection')
 			for each loSubMatch in loResult.SubMatches
 				loSubMatches.add(m.loSubMatch)
 			endfor
 
-* Tabuler les résultats
+			* Tabuler les résultats
 			.nMatches = .nMatches + 1
 			.Matches[.nMatches, 1] = m.loResult.firstIndex + 1 && fox strings are 1-based
 			.Matches[.nMatches, 2] = m.loResult.value
@@ -2762,7 +2763,7 @@ this.DebugDisplay(m.lcResult)
 procedure replace && Remplace
 lparameters ;
 	tcIn,; && Chaîne oû chercher
-	tcTo && [''] Chaîne remplaÃ§ante
+	tcTo && [''] Chaîne remplaçante
 
 tcTo = iif(vartype(m.tcTo) == 'C', m.tcTo, '')
 
@@ -2804,7 +2805,7 @@ enddefine && CLASS abRegExp
 function cCRto && chaîne oû les sauts de ligne sont remplacés par ...
 lparameters ;
 	tcChain,; && Chaîne
-	tcReplace && Chaîne remplaÃ§ant les sauts de ligne
+	tcReplace && Chaîne remplaçant les sauts de ligne
 
 return strtran(strtran(strtran(strtran(m.tcChain;
 	, CRLF, m.tcReplace); && modify file abtxt.h
@@ -2816,7 +2817,7 @@ return strtran(strtran(strtran(strtran(m.tcChain;
 function cCR2to && chaîne oû les sauts de ligne doubles sont remplacés par ...
 lparameters ;
 	tcChain,; && Chaîne
-	tcReplace && Chaîne remplaÃ§ant les sauts de ligne
+	tcReplace && Chaîne remplaçant les sauts de ligne
 
 return strtran(strtran(strtran(strtran(m.tcChain;
 	, CRLF2, m.tcReplace); && modify file abtxt.h
@@ -3238,29 +3239,29 @@ function abLocalized && {en} text where localized comments are removed except th
 lparameters ;
   cTxt; && {en} Text to localize (source code in general) {fr} Texte à localiser (code source en général)
 , cLangUser; && [cLangUser()] {en} user's preferred language as ISO 639-1 code {fr} langue préférée de l'utilisateur selon code ISO 639-1
-, cCommentStrings; && ['*|&&|note'] {en} strings beginning a comment line in code source {fr} chaîne de caractère commenÃ§ant une ligne de commentaires dans le code source
+, cCommentStrings; && ['*|&&|note'] {en} strings beginning a comment line in code source {fr} chaîne de caractère commençant une ligne de commentaires dans le code source
 
 cLangUser = evl(evl(m.cLangUser, cLangUser()), 'en')
 cLangUser = lower(left(alltrim(m.cLangUser), 2))
 cLangUser = iif('{' + m.cLangUser + '}' $ m.cTxt, m.cLangUser, 'en')
 
 with newobject('abRegExp', 'abTxt.prg') as abRegExp of abTxt.prg
+
 	.setup(;
 		  abLocalized_cPattern1(m.cLangUser);
-		, .t.;
-		, .t.;
-		, .t.;
+		, 'gmi';
 		)
 
-	cTxt = cRepCharDel(strtran(.replace(m.cTxt), '{' + m.cLangUser + '}'))
+	cTxt = .replace(m.cTxt, ' ') && supprime les mentions des autres langues
+
+	cLangUser = '{' + m.cLangUser + '}'
+	cTxt = strtran(strtran(m.cTxt, m.cLangUser + ' '), m.cLangUser) && supprime les balises de la langue demandée
 
 	.setup(;
 		  abLocalized_cPattern2(m.cCommentStrings);
-		, .t.;
-		, .t.;
-		, .t.;
+		, 'gmi';
 		)
-	cTxt = .replace(m.cTxt)
+	cTxt = .replace(m.cTxt) && supprime les commentaires vides
 endwith
 
 do while replicate(CRLF, 3) $ m.cTxt
@@ -3277,17 +3278,17 @@ lparameters cLangUser && [cLangUser()] {en} user's preferred language as ISO 639
 && modify command c:\test\test\regexp_clanguser.prg
 
 && '{' non suivi de la langue de l'utilisateur
-&& puis 2 caractères de mot
+&& puis 2 caractères alphabétiques
 && puis '}'
 && puis toute suite de caractères suivie de : '{\w\w}' ou '<' ou la fin de ligne
 
-return '{(?!' + m.cLangUser + ')\w\w}[^\u002A\r\n]+?(?=(?:{\w\w})|<|\u002A|$)'
+return '\s*{(?!' + m.cLangUser + ')\w\w}[^\u002A\r\n]+?(?=(?:{\w\w})|<|\u002A|$)'
 endfunc
 
 * --------------------------
 function abLocalized_cPattern2 && {en} empty comment lines {fr} lignes de commentaire vide
-lparameters cCommentStrings && ['*|&&|note'] {en} strings beginning a comment line in code source {fr} chaîne de caractère commenÃ§ant une ligne de commentaires dans le code source
-return '^\s*?(?:' + strtran(evl(m.cCommentStrings, '*|&'+'&|note'), '*', '\u002A') + ')\s*?$\r?\n?'
+lparameters cCommentStrings && ['*|&&|note'] {en} strings beginning a comment line in code source {fr} chaîne de caractère commençant une ligne de commentaires dans le code source
+return '^\s*?(?:' + strtran(strtran(evl(m.cCommentStrings, '*|&'+'&|note'), '*', '\u002A'), '/', '\/') + ')\s*?$\r?\n?'
 endfunc
 
 * --------------------------
@@ -3317,10 +3318,12 @@ m.loTest.Test(m.lcExpected, m.lcTest, 'fr')
 * test 2 ----
 text to lcTest noshow
 function srceCodeWindow() { /* {en} displays source code from current HTML element into a child window {fr} affiche le HTML de l'élément courant dans une fenêtre fille */
+	// {en} displays source code from current HTML element into a child window {fr} affiche le HTML de l'élément courant dans une fenêtre fille
 ENDTEXT
 
 text to lcExpected noshow
 function srceCodeWindow() { /* displays source code from current HTML element into a child window */
+	// displays source code from current HTML element into a child window
 ENDTEXT
 
 m.loTest.Test(m.lcExpected, m.lcTest, 'en', '//')
@@ -3340,11 +3343,36 @@ IF m.THISFORM.wlHTMLgen && Adaptation Automatique FoxInCloud
 	RETURN .T. && Traiter l'événement sur le serveur
 ENDIF
 Rand(-1)
-this.Parent.SetAll('Value', '', 'ficTxt') &&
-this.Parent.Refresh &&
+this.Parent.SetAll('Value', '', 'ficTxt') && 
+this.Parent.Refresh && 
 ENDTEXT
 
 m.loTest.Test(m.lcExpected, m.lcTest, 'fr')
+
+* test 4 ----
+text to lcTest noshow
+  // {fr} - modifier ce code source,
+  // {fr} - communiquer ce code à un tiers sans notre accord explicite préalable : ni en totalité ni en partie,
+  // {fr}   ni au format source ni au format compilé, par tout moyen de communication, oral, écrit ou électronique.
+  // {fr} Vous devez prendre toutes les mesures de protection évitant la divulgation, 
+  // {fr}   accidentelle ou volontaire, de ce code à des tiers
+  // --------------------------------------------------------------------------------------------------------------
+  // {en} This software is distributed under FoxInCloud license, as is, without any warranty.
+  // {en} You may:
+  // {en} - read this source code,
+  // {en} - learn and inspire from it,
+ENDTEXT
+
+text to lcExpected noshow
+  // - modifier ce code source,
+  // - communiquer ce code à un tiers sans notre accord explicite préalable : ni en totalité ni en partie,
+  //   ni au format source ni au format compilé, par tout moyen de communication, oral, écrit ou électronique.
+  // Vous devez prendre toutes les mesures de protection évitant la divulgation, 
+  //   accidentelle ou volontaire, de ce code à des tiers
+  // --------------------------------------------------------------------------------------------------------------
+endtext
+
+m.loTest.Test(m.lcExpected + CR, m.lcTest, 'fr', '//')
 
 return loTest.Result()
 endproc

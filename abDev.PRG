@@ -4862,17 +4862,17 @@ if .t.;
  and vartype(this.cModule) == 'C' ;
  and not empty(this.cModule)
 
-* Si des tests ont été réalisés sur le module
+	* Si des tests ont été réalisés sur le module
 	if m.this.nTest > 0
 
-* Pour chaque test réalisé
+		* Pour chaque test réalisé
 		local lnCoverage, lnElapsed, lnElapsedMin, lnElapsedMax, lnElapsedAvg, lnSuccess
 		lnElapsedMin = 10^10
 		store 0 to m.lnCoverage, m.lnElapsedMax, m.lnElapsedAvg, m.lnSuccess
 		local lnTest
 		for lnTest = 1 to this.nTest
 
-* Synthétiser les résultats
+			* Synthétiser les résultats
 			if this.aTest[m.lnTest, 1] && les temps d'exécution avec COVERAGE ON ne sont pas significatifs
 				lnCoverage = m.lnCoverage + 1
 			else
@@ -4885,14 +4885,14 @@ if .t.;
 				iif(this.aTest[m.lnTest, 3] and this.aTest[m.lnTest, 6], 1, 0)
 		endfor
 
-* Rectifier le temps moyen en cas de coverage sur certains tests
+		* Rectifier le temps moyen en cas de coverage sur certains tests
 		local lnCoverageLess
 		lnCoverageLess = this.nTest - m.lnCoverage
 		if m.lnCoverageLess > 0
 			lnElapsedAvg = m.lnElapsedAvg / m.lnCoverageLess
 		endif
 
-* Compter les échecs
+		* Compter les échecs
 		local lnFailure
 		lnFailure = this.nTest - m.lnSuccess
 
@@ -4905,7 +4905,7 @@ Résultats de <<m.this.nTest>> test<<Iif(this.nTest = 1, Space(0), 's')>> dont <<
 
 		ENDTEXT
 
-* Si au moins un test a réussi
+		* Si au moins un test a réussi
 		if m.lnSuccess > 0
 
 			text TO m.lcResult ADDITIVE TEXTMERGE NOSHOW FLAGS 1
@@ -4915,7 +4915,7 @@ Résultats de <<m.this.nTest>> test<<Iif(this.nTest = 1, Space(0), 's')>> dont <<
 			ENDTEXT
 		endif
 
-* Si au moins un test a échoué
+		* Si au moins un test a échoué
 		this.lResult = m.lnFailure = 0
 		if not this.lResult
 			text TO m.lcResult ADDITIVE TEXTMERGE NOSHOW FLAGS 1
@@ -4925,16 +4925,16 @@ Résultats de <<m.this.nTest>> test<<Iif(this.nTest = 1, Space(0), 's')>> dont <<
 			ENDTEXT
 
 			local lnParms, liParm, lcParms;
-			, llString, lnString, liString, lcString
+			, llString, liString, lcString
 
-* Pour chaque test échoué
+			* Pour chaque test échoué
 			for lnTest = 1 to this.nTest
 				do case
 
-* Cas où l'échec est dû à un mauvais résultat
+				* Cas où l'échec est dû à un mauvais résultat
 				case not m.this.aTest[m.lnTest, 3]
 
-* S'il y en a des paramètres, lister leurs valeurs sous forme de constantes
+					* S'il y en a des paramètres, lister leurs valeurs sous forme de constantes
 					lnParms = this.aTest[m.lnTest, NCOLSFIXES]
 					lcParms = space(0)
 					if m.lnParms > 0
@@ -4945,19 +4945,16 @@ Résultats de <<m.this.nTest>> test<<Iif(this.nTest = 1, Space(0), 's')>> dont <<
 					endif
 
 					llString = vartype(this.aTest[m.lnTest, 4]) == 'C'
-					lcString = space(0)
-					lnString = iif(m.llString, lenc(this.aTest[m.lnTest, 4]), 0)
-					if m.lnString > 0
-						for liString = 1 to m.lnString
-							lcString = substrc(m.this.aTest[m.lnTest, 4], m.liString, 1)
-							if not m.lcString == substrc(m.this.aTest[m.lnTest, 5], m.liString, 1)
-								lcString = textmerge([Différence au caractère <<m.liString>> ('<<m.lcString>>') du résultat attendu]) + CRLF
-								exit
-							endif
-						endfor
-					endif
+					lcString = ''
+					for liString = 1 to iif(m.llString, lenc(this.aTest[m.lnTest, 4]), 0)
+						lcString = substrc(m.this.aTest[m.lnTest, 4], m.liString, 1)
+						if not m.lcString == substrc(m.this.aTest[m.lnTest, 5], m.liString, 1)
+							lcString = textmerge([Différence au caractère <<m.liString>> (<<cL(m.lcString)>>) du résultat attendu]) + CRLF
+							exit
+						endif
+					endfor
 
-* écrire le n° de test, les résultats attendus et obtenus, les paramètres
+					* écrire le n° de test, les résultats attendus et obtenus, les paramètres
 					local lcType
 					lcType = vartype(this.aTest[m.lnTest, 5])
 					text TO m.lcResult ADDITIVE TEXTMERGE NOSHOW FLAGS 1
@@ -4969,10 +4966,10 @@ Résultats de <<m.this.nTest>> test<<Iif(this.nTest = 1, Space(0), 's')>> dont <<
 
 					ENDTEXT
 
-* Case où l'échec est dû à une modification d'environnement
+				* Cas où l'échec est dû à une modification d'environnement
 				case not this.aTest[m.lnTest, 6]
 
-* écrire la variable d'environnement modifiée
+					* écrire la variable d'environnement modifiée
 					text TO m.lcResult ADDITIVE TEXTMERGE NOSHOW
 - Test n° <<m.lnTest>>
 	L'environnement VFP a changé comme suit :
@@ -5016,7 +5013,7 @@ for lnStatus = 1 to m.lnResult
 	lcStatus = m.taStatus[m.lnStatus, 1]
 	if not lCommentLine(m.lcStatus)
 
-* Évaluer
+		* Évaluer
 		try
 			taStatus[m.lnStatus, 2] = evaluate(m.lcStatus)
 		catch
@@ -6968,13 +6965,16 @@ success = .T.
 lFile = File(m.tcSrce)
 result = Iif(m.lFile, FileToStr(m.tcSrce), m.tcSrce)
 
-result = Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(m.result;
+result = Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(m.result;
 	, 'Ã ', 'à');
 	, 'Ã©', 'é');
+	, 'Ã‰', 'É');
 	, 'Ã¨', 'è');
 	, 'Ãª', 'ê');
 	, 'Ã®', 'î');
+	, 'Ã»', 'ù');
 	, 'Ã¹', 'û');
+	, 'Ã§', 'ç');
 	
 if m.lFile
 	success = StrToFile(m.result, FullPath(m.tcSrce)) > 0
@@ -6984,3 +6984,10 @@ endif
 
 return m.success
 endproc
+
+#if .F.
+; {en} To be properly visible in the browser, this file is encoded in UTF8
+; {en} Please use an UTF8-aware text editor such as notePad++, subime text or PSPad
+; {fr} Pour être visible dans le navigateur, ce fichier est encodé en UTF8
+; {fr} Veuillez l'éditer avec un logiciel sensible à l'UTF8 comme notePad++, subime text ou PSPad
+#endif

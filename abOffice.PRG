@@ -787,7 +787,7 @@ case vartype(m.tuXLWB)=='C' ;
 
 * Si l'adresse du classeur est valide
 		local llResult
-		llResult = lDir(justpath(m.tuXLWB))
+		llResult = lDir(justpath(m.tuXLWB), .T.)
 		assert m.llResult message program() + " - Invalid Excel Workbook specification : " + cLitteral(m.tuXLWB)
 		if m.llResult
 
