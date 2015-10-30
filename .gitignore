@@ -72,4 +72,5 @@ graphics/**/
 
 # FoxInCloud-specific
 /aw*.*
+!/aw.vc2
 awPublic_override_ab.h
