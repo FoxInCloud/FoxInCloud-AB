@@ -1017,7 +1017,7 @@ if file(m.tcFile)
 	if m.llResult
 
 		llResult = m.tnFile < VFP_VAR_SIZE_MAX
-		assert m.llResult message cAssertMsg(textmerge([<<Proper(Program())>>() - ] + icase(;
+		assert m.llResult message cAssertMsg(Textmerge(icase(;
 			cLangUser() = 'fr',	[La taille du fichier '<<JustFname(m.tcFile)>>' excède la limite VFP de 16 Mo],; && copy-paste this line to add another language support
 													[Size of file '<<JustFname(m.tcFile)>>' exceeds the VFP 16 Mb limitation];
 		)))
@@ -1035,14 +1035,14 @@ if file(m.tcFile)
 				if m.llResult
 
 					llResult = m.lnFile < VFP_VAR_SIZE_MAX
-					assert m.llResult message cAssertMsg(textmerge([<<Proper(Program())>>() - ] + icase(;
+					assert m.llResult message cAssertMsg(Textmerge(icase(;
 						cLangUser() = 'fr',	[La taille du fichier '<<JustFname(m.lcFile)>>' dépasse la limite VFP de 16 Mo],; && copy-paste this line to add another language support
 																[Size of file '<<JustFname(m.lcFile)>>' exceeds the VFP 16 Mb limitation];
 					)))
 					if m.llResult
 
 						llResult = m.tnFile + m.lnFile < VFP_VAR_SIZE_MAX
-						assert m.llResult message cAssertMsg(textmerge([<<Proper(Program())>>() - ] + icase(;
+						assert m.llResult message cAssertMsg(Textmerge(icase(;
 							cLangUser() = 'fr',	[La taille des fichiers '<<JustFname(m.tcFile)>>' et '<<JustFname(m.lcFile)>>' dépasse la limite VFP de 16 Mo],; && copy-paste this line to add another language support
 																	[Size of files '<<JustFname(m.tcFile)>>' and '<<JustFname(m.lcFile)>>' exceeds the VFP 16 Mb limitation];
 						)))

@@ -711,9 +711,9 @@ if m.llResult
 	if vartype(m.tnColBef) == 'N'
 		llResult = between(m.tnColBef, 0, m.lnCol)
 		assert m.llResult message cAssertMsg(textmerge(icase(;
-	cLangUser() = 'fr',	"<<Proper(Program())>>() - le n° de colonne <<m.tnColBef>> est hors des limites du tableau.",; && copy-paste this line to add another language support
-						"<<Proper(Program())>>() - index of column <<m.tnColBef>> outside the length of array."; && Default: English
-	)))
+			cLangUser() = 'fr',	"le n° de colonne <<m.tnColBef>> est hors des limites du tableau.",; && copy-paste this line to add another language support
+								"index of column <<m.tnColBef>> outside the length of array."; && Default: English
+			)))
 	else
 		tnColBef = m.lnCol && {fr} après la dernière colonne {en} after the last column
 	endif
@@ -838,8 +838,8 @@ local llParms, lnElt1, lnElt2, lnCol1, lnCol2, liElt, luElt1, luElt2, llElt;
 * Si deux tableaux ont bien été passés
 llParms = type('ta1', 1) == 'A' and type('ta2', 1) == 'A'
 assert m.llParms message cAssertMsg(textmerge(icase(;
-	cLangUser() = 'fr',	[<<Proper(Program())>>() - Deux tableaux attendus: <<ta1>> | <<ta2>>],; && copy-paste this line to add another language support
-						[<<Proper(Program())>>() - Two arrays expected: <<ta1>> | <<ta2>>]; && Default: English
+	cLangUser() = 'fr',	[Deux tableaux attendus: <<ta1>> | <<ta2>>],; && copy-paste this line to add another language support
+						[Two arrays expected: <<ta1>> | <<ta2>>]; && Default: English
 	)))
 
 if m.llParms
@@ -926,8 +926,8 @@ local llResult; && {fr} La ligne existe {en} The line exists
 * Si des tableaux ont bien été passés
 llResult = type('ta1', 1) == 'A'  and type('ta2', 1) = 'A'
 assert m.llResult message cAssertMsg(textmerge(icase(;
-	cLangUser() = 'fr',	[<<Proper(Program())>>() - paramètre(s) invalides],; && copy-paste this line to add another language support
-						[<<Proper(Program())>>() - Invalid parameters]; && Default: English
+	cLangUser() = 'fr',	[paramètre(s) invalides],; && copy-paste this line to add another language support
+						[Invalid parameters]; && Default: English
 	)))
 if m.llResult
 
@@ -935,8 +935,8 @@ if m.llResult
 	lnCol = alen(ta2, 2)
 	llResult = m.lnCol > 0 and alen(ta1) = m.lnCol
 	assert m.llResult message cAssertMsg(textmerge(icase(;
-	cLangUser() = 'fr',	[<<Proper(Program())>>() - Les deux tableaux doivent avoir le même nombre de colonnes],; && copy-paste this line to add another language support
-						[<<Proper(Program())>>() - each array must have the same number of columns]; && Default: English
+	cLangUser() = 'fr',	[Les deux tableaux doivent avoir le même nombre de colonnes],; && copy-paste this line to add another language support
+						[each array must have the same number of columns]; && Default: English
 	)))
 	if m.llResult
 
@@ -975,8 +975,8 @@ lnResult = 0
 * Si tableau
 llResult = type('taResult', 1) == 'A'
 assert m.llResult message cAssertMsg(textmerge(icase(;
-	cLangUser() = 'fr',	[<<Proper(Program())>>() - Tableau attendu au lieu de <<cLitteral(taResult)>>],; && copy-paste this line to add another language support
-						[<<Proper(Program())>>() - Array expected instead of <<cLitteral(taResult)>>]; && Default: English
+	cLangUser() = 'fr',	[Tableau attendu au lieu de <<cLitteral(taResult)>>],; && copy-paste this line to add another language support
+						[Array expected instead of <<cLitteral(taResult)>>]; && Default: English
 	)))
 if m.llResult
 
@@ -1110,8 +1110,8 @@ llResult = type('taSrce', 1) == 'A';
  and vartype(m.tnCol) == 'N';
  and between(m.tnCol, 1, alen(taSrce, 2))
 assert m.llResult message cAssertMsg(textmerge(icase(;
-	cLangUser() = 'fr',	"<<Proper(Program())>>() - Au moins un paramètre invalide",; && copy-paste this line to add another language support
-						"<<Proper(Program())>>() - At least one parameter is not conform"; && Default: English
+	cLangUser() = 'fr',	"Au moins un paramètre invalide",; && copy-paste this line to add another language support
+						"At least one parameter is not conform"; && Default: English
 	)))
 if m.llResult
 

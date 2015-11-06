@@ -3390,7 +3390,7 @@ if m.llResult
 		?? chr(7)
 	endtry
 
-	tcResult = iif(empty(m.tcResult), '', textmerge([[<<Proper(Program())>>() - <<m.tcResult>>]))
+	tcResult = iif(empty(m.tcResult), '', textmerge([<<Proper(Program())>>() - <<m.tcResult>>]))
 	debugout m.tcResult
 endif
 
@@ -5455,7 +5455,7 @@ return _vfp.startmode = 0;
 
 * ===================================================================
 function cAssertMsg && MESSAGE pour ASSERT limité à 120 caractères sous les IDE non-US
-lparameters tcMsg
+lparameters tcMsg && @ {fr} message - si @, retour enrichi
 tcMsg = ltrim(evl(nvl(m.tcMsg, ''), 'empty message?'))
 
 local lcProgram
@@ -5464,7 +5464,7 @@ lcProgram = proper(program(program(-1)-1)) && back compat.
 
 ?? chr(7) && ding && ?? pour ne pas ajouter une ligne à la fenêtre qui a le focus
 
-return cTronc('';
+tcMsg = cTronc('';
     + iif(lower(left(m.tcMsg, len(m.lcProgram))) == lower(m.lcProgram);
 			, '';
 			, cResultHeader(-2);
@@ -5476,6 +5476,9 @@ return cTronc('';
 		);
 	, .t.; && split on a word end
 	)
+
+return m.tcMsg
+endfunc
 
 * =============================================
 define class abVoid as custom

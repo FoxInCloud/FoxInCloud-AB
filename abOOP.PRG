@@ -113,18 +113,33 @@ lparameters toObject && Objet VFP
 return not isnull(oFormIn(m.toObject))
 
 * ========================================
+function cListItems as String && Listbox|Combobox.List[] > liste délimitée
+lparameters toList as listbox && Objet Listbox ou ComboBox
+
+local aa[1] as String
+
+return Iif(aListItems(@m.aa, m.toList) > 0;
+	, cListOfArray(@m.aa, '|', -1,.T.,.T.,,,,.T.);
+	, '';
+	)
+endfunc
+
+* ========================================
 function aListItems && Listbox|Combobox.List[] > array
 lparameters ;
-	taItems,; && @ Ã‰léments de .List[]
+	taItems,; && @ Éléments de .List[]
 	toList as listbox && Objet Listbox ou ComboBox
 external array taItems
 
-local lnCol, liCol, liRow;
-, llResult, lnResult && nombre d'éléments
+local lnResult as Integer; && nombre d'éléments
+, llResult;
+, lnCol;
+, liCol;
+, liRow;
 
 && modify command c:\test\test\Listbox_combobox.list.prg
 && pour supporter .Sorted, soit sauver dans l'ordre de .itemID, soit sauver les ID
-&& .Sorted is only available if the RowSourceType property is set to 0 (None) or 1 (Value).
+&& ".Sorted is only available if .RowSourceType is set to 0 (None) or 1 (Value)."
 
 lnResult = .null.
 
@@ -209,7 +224,7 @@ return loTest.Result()
 * ========================================
 function aItemsList && array > Listbox|Combobox.List[]
 lparameters ;
-	taItems,; && @ Ã‰léments de .List[]
+	taItems,; && @ Éléments de .List[]
 	toList as listbox && Objet Listbox ou ComboBox
 external array taItems
 
@@ -1251,7 +1266,7 @@ return .t.;
 	and ascan(laProp, alltrim(m.tcProp), 1, -1, 1, 7) > 0
 
 * ========================================
-function lMethod && Un objet est doté d'une Méthode ou un Ã‰vénement
+function lMethod && Un objet est doté d'une Méthode ou un Événement
 lparameters ;
 	toObject as form,; && Objet VFP
 	tcMethod as string,; && méthode
@@ -1263,7 +1278,7 @@ return .t.;
 	and not empty(m.tcMethod);
 	and lProperty(m.toObject, 'BaseClass'); && C'est un objet VFP
 	and	pemstatus(m.toObject, m.tcMethod, 5); && tcMethod existe dans toObject
- 	and	upper(left(pemstatus(m.toObject, m.tcMethod, 3), 1)) $ evl(left(upper(alltrim(evl(m.tcEventMethod, ''))), 1), 'EM'); && tcMethod est un Ã‰vénement ou une Méthode
+ 	and	upper(left(pemstatus(m.toObject, m.tcMethod, 3), 1)) $ evl(left(upper(alltrim(evl(m.tcEventMethod, ''))), 1), 'EM'); && tcMethod est un Événement ou une Méthode
  	and .t.
 
 endfunc
@@ -1287,7 +1302,7 @@ endif
 return loTest.Result()
 
 * ========================================
-function lEvent && Un objet est doté d'un Ã‰vénement
+function lEvent && Un objet est doté d'un Événement
 lparameters toObject as form, tcEvent && Objet VFP && méthode
 
 return lMethod(m.toObject, m.tcEvent, 'E')
@@ -1327,7 +1342,7 @@ endif
 return loTest.Result()
 
 * ========================================
-function lMethodImplemented && Une Méthode ou un Ã‰vénement est implémenté(e) dans un objet /!\ SUPPORTE SEULEMENT LES CLASSES VISUELLES
+function lMethodImplemented && Une Méthode ou un Événement est implémenté(e) dans un objet /!\ SUPPORTE SEULEMENT LES CLASSES VISUELLES
 lparameters ;
   toObject as object; && Objet VFP
 , tcMethod as string && méthode

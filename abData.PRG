@@ -3984,7 +3984,7 @@ if m.llResult
 
 	if m.llResult and m.llTags
 
-		assert not m.llZap message cAssertMsg(textmerge([<<Proper(Program())>> va zapper '<<m.lcAlias>>'...<<CRLF>>Presser 'Cancel' pour arrêter le programme<<CRLF>>Presser 'Ignore' pour continuer]))
+		assert not m.llZap message cAssertMsg(textmerge([on va zapper '<<m.lcAlias>>'...<<CRLF>>Presser 'Cancel' pour arrêter le programme<<CRLF>>Presser 'Ignore' pour continuer]))
 		if m.llZap
 			zap && SELECT plus haut ou CREATE TABLE a sélectionné la table
 		endif
@@ -4324,7 +4324,7 @@ if m.lnResult > 0
 *!*			aLinesCols(@m.laVersion, Upper(cEuroANSI(m.lcVersion)), TABUL, 'ICCCCCC')
 *!*			liVersion = Evl(Ascan(m.laVersion, Cast(Version(3) as I), 1, -1, 1, 8), 1)
 *!*				llResult = NOT Empty(m.lcTag)
-*!*				ASSERT m.llResult MESSAGE Proper(Program()) + ' - ' + Textmerge(ICase(;
+*!*				ASSERT m.llResult MESSAGE Textmerge(ICase(;
 *!*					cLangUser() = 'fr', "Le type d'index '<<taResult[m.liTag, 2]>>' n'est pas supporté",; && copy-paste this line to add another language support
 *!*															"Index type '<<taResult[m.liTag, 2]>>' is not supported"))
 *!*				IF m.llResult
@@ -4435,13 +4435,13 @@ lnResult = 0
 
 * Si la spécification de champs est valide
 llResult = vartype(m.tcFieldsExp) == 'C' and not empty(m.tcFieldsExp)
-assert m.llResult message cAssertMsg(textmerge([<<Proper(Program())>> - Expression de description de structure invalide : <<cLitteral(m.tcFieldsExp)>>]))
+assert m.llResult message cAssertMsg(textmerge([Expression de description de structure invalide : <<cLitteral(m.tcFieldsExp)>>]))
 if m.llResult
 
 	* Tabuler les spécifications de champs
 	lnField = aFieldsExp(@m.laFieldExps, m.tcFieldsExp)
 	llResult = m.lnField > 0
-	assert m.llResult message cAssertMsg(textmerge([<<Proper(Program())>> - Expression de description de structure invalide : <<cLitteral(m.tcFieldsExp)>>]))
+	assert m.llResult message cAssertMsg(textmerge([Expression de description de structure invalide : <<cLitteral(m.tcFieldsExp)>>]))
 	if m.llResult
 
 		* Dimensionner le tableau résultat selon format de aFields()
