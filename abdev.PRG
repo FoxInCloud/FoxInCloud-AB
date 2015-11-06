@@ -123,7 +123,7 @@ lcLogAddr = this.cLogPathStem(m.tuTxtLog)
 llResultTXT = !empty(m.lcLogAddr)
 if m.llResultTXT
 
-* Ouvrir ou créer les fichiers de log
+	* Ouvrir ou créer les fichiers de log
 	this.acTxtLogAddr = lower(forceext(m.lcLogAddr, EXT_LOG))
 	this.acWarnTxtLogAddr = lower(forceext(m.lcLogAddr , EXT_LOG_WARN))
 	this.LogCheck(m.this.acTxtLogAddr)
@@ -187,14 +187,14 @@ if m.this.alConsole
 			, 5000;
 			)
 
-* Copier les avertissements dans un fichier texte temporaire
+	 	* Copier les avertissements dans un fichier texte temporaire
 	 	local lcFile, loSafety
 	 	lcFile = forcepath(m.this.acWarnTxtLogAddr, sys(2023))
 	 	loSafety = abSet('SAFETY', 'OFF')
 	 	strtofile(m.this.acWarnings, m.lcFile)
 	 	release loSafety
 
-* Afficher dans une fenêtre d'édition
+	 	* Afficher dans une fenêtre d'édition
 	 	modify file (m.lcFile) nowait
 	 	activate window (justfname(m.lcFile))
 	endif
@@ -206,7 +206,7 @@ lparameters tcLogAddr && Adresse du fichier de compte-rendu
 
 if file(m.tcLogAddr)
 
-* Ajouter le fichier au projet
+	* Ajouter le fichier au projet
 	if this.alParentPjFiles
 		ProjectFileAdd(m.tcLogAddr, this.parent.aoPjFiles)
 	endif
@@ -308,10 +308,10 @@ if m.this.anLine = 0 && possible only if no line was displayed yet
 	this.aaLog[L_lSUM, m.lnResult] = iif(vartype(m.tlSum) $ 'LX', m.tlSum, .f.)
 	this.aaLog[L_cFORMAT, m.lnResult] = evl(m.tcFormat, '')
 
-* Si affichage à l'écran (console)
+	* Si affichage à l'écran (console)
 	if m.this.alConsole
 
-* Calculer la largeur totale du tableau en caractères
+		* Calculer la largeur totale du tableau en caractères
 		local lnCol, lnTableWidth
 		lnTableWidth = 0
 		for m.lnCol = 1 to m.lnResult
@@ -319,7 +319,7 @@ if m.this.anLine = 0 && possible only if no line was displayed yet
 		endfor
 		lnTableWidth = m.lnTableWidth + 1 && right border
 
-* Tant que le tableau est plus large que l'écran, réduire la police de l'écran
+		* Tant que le tableau est plus large que l'écran, réduire la police de l'écran
 		do while m.lnTableWidth * fontmetric(6, _screen.fontname, _screen.fontsize) > _screen.viewportwidth ;
 				and _screen.fontsize > 5
 			_screen.fontsize = _screen.fontsize - 1
@@ -414,28 +414,28 @@ if m.llResult
 
 	local luContent, llExpand, llNoDisplay, lcFormat, lcContent, lnColWidth
 
-* Donner leur valeur par défaut aux paramètres optionnels
+	* Donner leur valeur par défaut aux paramètres optionnels
 	luContent = iif(pcount() >= 2, m.tuContent, space(0))
  	llExpand = lTrue(m.tlExpand)
 	llNoDisplay = lTrue(m.tlNoDisplay)
 	lcFormat = iif(pcount() >= 5 and vartype(m.tcFormat) == 'C', m.tcFormat, space(0))
 	lcFormat = evl(m.lcFormat, this.aaLog[L_cFORMAT, m.lnCol])
 
-* Si la colonne a une largeur positive
+ 		* Si la colonne a une largeur positive
  		lnColWidth = this.aaLog[L_nWIDTH, m.lnCol]
  		llResult = m.lnColWidth > 0
  	if m.llResult
 
-* Charger la données originale dans la cellule
+ 		* Charger la données originale dans la cellule
  		this.aaLog[L_uVALUE, m.lnCol] = m.luContent
  		this.aaLog[L_cTYPE, m.lnCol] = vartype(m.luContent)
 
-* Si la donnée est numérique, cumuler
+ 		* Si la donnée est numérique, cumuler
  		if this.aaLog[L_cTYPE, m.lnCol] == 'N'
  			this.aaLog[L_nSUM, m.lnCol] = this.aaLog[L_nSUM, m.lnCol] + m.luContent
  		endif
 
-* Si la colonne peut déborder
+		* Si la colonne peut déborder
 		lcContent = transform(m.luContent, m.lcFormat)
 	 	if m.llExpand and m.lnCol < m.lnCols
 
@@ -447,7 +447,7 @@ if m.llResult
 	 		lnColWidth = min(len(m.lcContent), m.lnColWidthX)
 	 	endif
 
-* Charger l'affichage dans la cellule
+ 		* Charger l'affichage dans la cellule
  		this.aaLog[L_cDISPLAY, m.lnCol] = ;
  				this.cCellContent(m.tuContent, m.lnColWidth, m.llExpand, m.lcFormat)
 
@@ -474,7 +474,7 @@ tcFormat = evl(m.tcFormat, '')
 
  	lcResult = transform(m.tuContent, m.tcFormat)
 
-* Manage position in column, trim if necessary
+ 	* Manage position in column, trim if necessary
  	do case
 
  	case m.lcType $ 'NY'
@@ -490,7 +490,7 @@ tcFormat = evl(m.tcFormat, '')
 				)
 
  	otherwise
-* Aligner à gauche en tentant de préserver les espaces en tête
+		* Aligner à gauche en tentant de préserver les espaces en tête
 		lcResult = this.cColJustified(m.lcResult, m.tnColWidth)
 	endcase
 
@@ -820,17 +820,17 @@ lnCols = alen(this.aaLog, 2)
 llResult = m.lnCols > 0 and used(this.acDBFlogAlias)
 if m.llResult
 
-* Tabuler les champs de la table de log
+	* Tabuler les champs de la table de log
 	local array laFields[1]
 	afields(laFields, this.acDBFlogAlias)
 
-* Pour chaque colonne
+	* Pour chaque colonne
 	local llAllEmpty, lnCol, lcFieldName, luFieldValue, lcFieldType, lnFieldLength, lcFieldExp, lnField, lcAlter
 	llAllEmpty = .t.
 	lcAlter = space(0)
 	for lnCol = 1 to m.lnCols
 
-* Déterminer les caractéristiques du champ pouvant contenir la donnée
+		* Déterminer les caractéristiques du champ pouvant contenir la donnée
 		lcFieldName = cVFPname(this.aaLog[L_cID, m.lnCol], 10)
 		luFieldValue = this.aaLog[L_uVALUE, m.lnCol]
 		lcFieldType = this.aaLog[L_cTYPE, m.lnCol]
@@ -842,15 +842,15 @@ if m.llResult
 			lcFieldExp = cFieldExp(m.lcFieldName, m.lcFieldType, m.lnFieldLength,,.t.)
 			lnField = ascan(laFields, m.lcFieldName, 1, -1, 1, 1+2+4+8)
 
-* Si le champ n'existe pas
+			* Si le champ n'existe pas
 			if m.lnField = 0
 
 				lcAlter = lcAlter + ' ADD COLUMN ' + m.lcFieldExp
 
-* Sinon (le champ existe)
+			* Sinon (le champ existe)
 			else
 
-* Si le champ n'est pas de le bonne taille ou type
+				* Si le champ n'est pas de le bonne taille ou type
 				if not m.lcFieldType $ VFP7_FIELD_TYPES_FIXED_LEN ;
 				 and laFields[m.lnField, 3] < m.lnFieldLength ;
 				 or not laFields[m.lnField, 2] == m.lcFieldType
@@ -866,7 +866,7 @@ if m.llResult
 		store m.luFieldValue to (m.lcFieldName) && pour GATHER MEMVAR plus loin
 	endfor
 
-* S'il faut changer la structure de la table
+	* S'il faut changer la structure de la table
 	if not empty(m.lcAlter)
 		llResult = used(ExclusiveForce(this.acDBFlogAlias))
 		if m.llResult
@@ -899,22 +899,22 @@ endif
 * Si au moins une ligne de données
 if m.this.anCols * m.this.anDataLines > 0
 
-* Tracer une ligne pour fermer le tableau
+	* Tracer une ligne pour fermer le tableau
 	this.acLine = this.cSepLine()
 	this.lineShow()
 
-* Si un pied de tableau a été demandé
+	* Si un pied de tableau a été demandé
 	if m.this.alFooter
 		this.LineFeed()
 
 		local lnCol, lnSum, luSum, llFooter, llTitle
 
-* Pour chaque colonne
+		* Pour chaque colonne
 		for m.lnCol = 1 to this.anCols
 			lnSum = this.aaLog[L_nSUM, m.lnCol]
 			luSum = this.aaLog[L_lSUM, m.lnCol]
 
-* Si la colonne contient un total et qu'un bilan est demandé
+			* Si la colonne contient un total et qu'un bilan est demandé
 			if m.lnSum > 0 and not isNull(m.luSum) && .NULL.: ne rien faire, ni total ni moyenne
 				this.CellFill(m.lnCol, m.lnSum / iif(m.luSum, 1, m.this.anDataLines))
 				llFooter = .t.
@@ -932,7 +932,7 @@ if m.this.anCols * m.this.anDataLines > 0
 			endif
 		endfor
 
-* Si le pied d'état a été créé, le sortir
+		* Si le pied d'état a été créé, le sortir
 		if m.llFooter
 			this.LineFeed(.t.)
 		endif
@@ -995,7 +995,7 @@ llResult = vartype(m.tcSys16) = 'C'
 assert m.llResult message cAssertMsg(textmerge([Invalid Sys(16) Information : <<cLitteral(m.tcSys16)>>]))
 if m.llResult and not upper(left(m.tcSys16, 2)) == 'ON' && ON ...
 
-* Repérer le nom de la procédure et l'adresse du fichier dans la chaine sys(16)
+ 	* Repérer le nom de la procédure et l'adresse du fichier dans la chaine sys(16)
  	llProc = left(upper(m.tcSys16), lenc('PROCEDURE ')) == 'PROCEDURE '
  	lcAddr = iif(m.llProc;
  		, substr(m.tcSys16, atc(' ', m.tcSys16, 2) + 1); && GetWordNum() ne fonctionne pas si l'adresse contient des espaces
@@ -1174,7 +1174,7 @@ local llResult as Boolean;
 
 if vartype(m.tcModule) == 'C' and not empty(m.tcModule)
 
-* Si ce module est appelé par un module appelé
+	* Si ce module est appelé par un module appelé
 	liLevelHere = program(-1) && current program level
 	liLevelBase = 2 + iif(lTrue(m.tlModules), 1, 0)
 	if m.liLevelHere > m.liLevelBase
@@ -1334,11 +1334,11 @@ luResult = .null.
 * Si deux paramètres ont été passés
 if pcount() = 2
 
-* Si la valeur par défaut est supportée
+	* Si la valeur par défaut est supportée
 	lcType = vartype(m.tuDefault)
 	if not (m.lcType == 'L' and m.tuDefault)
 
-* Si le paramètre est du type de la valeur par défaut, le retourner, sinon retourner la valeur par défaut
+		* Si le paramètre est du type de la valeur par défaut, le retourner, sinon retourner la valeur par défaut
 		luResult = iif(vartype(m.tuParm) == m.lcType, m.tuParm, m.tuDefault)
 	else
 		assert .f. message cAssertMsg(textmerge([<<Proper(Program())>> ne supporte pas la valeur par défaut .T. comme second paramètre]))
@@ -1648,30 +1648,30 @@ loProject = _vfp.activeproject
 llResult = vartype(m.loProject) == 'O'
 if m.llResult
 
-* Si le projet contient des fichiers
+	* Si le projet contient des fichiers
 	loProjectFiles = m.loProject.files
 	llResult = m.loProjectFiles.count > 0
 	if m.llResult
 
-* Créer un objet 'Regular Expression'
+		* Créer un objet 'Regular Expression'
 		loRegExp = createobject('abRegExp')
 		llResult = vartype(m.loRegExp) == 'O'
 		if m.llResult
 
-* Donner leur valeur par défaut aux paramètres
+			* Donner leur valeur par défaut aux paramètres
 			local lcCarsNot, lcFileMask, llInclude, loFile as file
 			lcCarsNot = CAR_INT_DS_NOM_FICH
 			lcFileMask = alltrim(uDefault(m.tcFileMask, textmerge('[^<<m.lcCarsNot>>]+\.[^<<m.lcCarsNot>>]+')))
 			llInclude = iif(pcount() >=2 and vartype(m.tlInclude) $ 'LX', m.tlInclude, .t.)
 
-* Pour chaque fichier
+			* Pour chaque fichier
 			loRegExp.setup(m.lcFileMask, .t.)
 			for each loFile in m.loProjectFiles
 
-* Si le nom du fichier correspond au masque
+				* Si le nom du fichier correspond au masque
 				if loRegExp.Test(justfname(m.loFile.name))
 
-* Changer son inclusion
+					* Changer son inclusion
 					loFile.Exclude = iif(isNull(m.llInclude), not m.loFile.Exclude, m.llInclude)
 					tnResult = m.tnResult + 1
 				endif
@@ -1696,30 +1696,30 @@ loProject = _vfp.activeproject
 llResult = vartype(m.loProject) == 'O'
 if m.llResult
 
-* Si le projet contient des fichiers
+	* Si le projet contient des fichiers
 	loProjectFiles = m.loProject.files
 	llResult = m.loProjectFiles.count > 0
 	if m.llResult
 
-* Créer un objet 'Regular Expression'
+		* Créer un objet 'Regular Expression'
 		loRegExp = createobject('abRegExp')
 		llResult = vartype(m.loRegExp) == 'O'
 		if m.llResult
 
-* Donner leur valeur par défaut aux paramètres
+			* Donner leur valeur par défaut aux paramètres
 			local lcCarsNot, lcFileMask, llInclude, loFile as file
 			lcCarsNot = CAR_INT_DS_NOM_FICH
 			lcFileMask = alltrim(uDefault(m.tcFileMask, textmerge('[^<<m.lcCarsNot>>]+\.[^<<m.lcCarsNot>>]+')))
 			llInclude = iif(pcount() >=2 and vartype(m.tlInclude) $ 'LX', m.tlInclude, .t.)
 
-* Pour chaque fichier
+			* Pour chaque fichier
 			loRegExp.setup(m.lcFileMask, .t.)
 			for each loFile in m.loProjectFiles
 
-* Si le nom du fichier correspond au masque
+				* Si le nom du fichier correspond au masque
 				if loRegExp.Test(justfname(m.loFile.name))
 
-* öter le fichier
+					* öter le fichier
 					loFile.remove
 					tnResult = m.tnResult + 1
 				endif
@@ -1742,14 +1742,14 @@ lcResult = space(0)
 if vartype(m.tcVFPname) = 'C' ;
  and not empty(m.tcVFPname)
 
-* Remove accents
+	* Remove accents
 	local lcVFPname
 	lcVFPname = cEuroANSI(alltrim(m.tcVFPname))
 
-* Start with '_' if first is a digit
+	* Start with '_' if first is a digit
 	lcVFPname = iif(isdigit(m.lcVFPname), '_', space(0)) + m.lcVFPname
 
-* Turn characters neither digit or letter to '_'
+	* Turn characters neither digit or letter to '_'
 	local lnCar, lcCar
 	for m.lnCar = 1 to len(m.lcVFPname)
 		lcCar = substrc(m.lcVFPname, m.lnCar, 1)
@@ -1757,11 +1757,11 @@ if vartype(m.tcVFPname) = 'C' ;
 		lcResult = m.lcResult + upper(m.lcCar)
 	endfor
 
-* Remove duplicate underscores
+	* Remove duplicate underscores
 	lcResult = cRepCharDel(m.lcResult, '_')
 	lcResult = iif(m.lcResult == '_', space(0), m.lcResult)
 
-* Trim right is required
+	* Trim right is required
 	if vartype(m.tnLength) = 'N' ;
 	 and m.tnLength > 0
 		lcResult = leftc(m.lcResult, m.tnLength)
@@ -1895,15 +1895,15 @@ llResult = vartype(m.tcCodeLine) == 'C'
 assert m.llResult message cAssertMsg(textmerge([Invalid parameter type]))
 if m.llResult
 
-* si c'est une ligne de commentaire
+	* si c'est une ligne de commentaire
 	llResult = lCommentLine(m.tcCodeLine)
 	if m.llResult
 
-* Si la ligne n'est pas vide
+		* Si la ligne n'est pas vide
 		llResult = empty(m.tcCodeLine)
 		if not m.llResult
 
-* Si la ligne ne comporte aucune lettre ou chiffre
+			* Si la ligne ne comporte aucune lettre ou chiffre
 			local lnCar, lcCar
 			for m.lnCar = 1 to lenc(m.tcCodeLine)
 				lcCar = substrc(m.tcCodeLine, m.lnCar, 1)
@@ -1934,7 +1934,7 @@ llResult = not isNull(m.tcCodeLine)
 assert m.llResult message cAssertMsg(textmerge([Line de code invalide : <<m.tcCodeLine>>]))
 if m.llResult
 
-* Si la ligne comporte un commentaire
+	* Si la ligne comporte un commentaire
 	lnAt = at_c('*', m.tcCodeLine)
 	if m.lnAt > 0
 		lnAt1 = m.lnAt + 1
@@ -1946,7 +1946,7 @@ if m.llResult
 	endif
 	if m.lnAt > 0
 
-* Extraire le commentaire et le supprimer
+		* Extraire le commentaire et le supprimer
 		lcResult = m.tcCodeLine
 		lcResult = alltrim(substrc(m.lcResult, m.lnAt1))
 		lcResult = upper(substrc(m.lcResult, 1, 1)) + substrc(m.lcResult, 2) && capitalise le premier caractère
@@ -2234,7 +2234,7 @@ if m.success
 		this.nSetting = iif(m.lnSetting, m.tnSetting, .null.)
 		this.cParm2 = iif(m.lnSetting, ',' + transform(m.tnSetting), '')
 
-* If setting is OK
+		* If setting is OK
 		success = .t.;
 			and (.f.;
 				or lTrue(m.tlSupported);
@@ -2244,7 +2244,7 @@ if m.success
 			and this.get(@m.lvValueCur, m.tcSetting, m.this.cParm2) && current value can be read
 		if m.success
 
-* If required value is valid
+			* If required value is valid
 			lcTypeCur = vartype(m.lvValueCur)
 			lcTypeNew = vartype(m.tvValueNew)
 			llToggle = m.lcTypeNew == 'L' and m.tvValueNew
@@ -2252,10 +2252,10 @@ if m.success
 			assert m.success message cAssertMsg(textmerge([For setting '<<m.tcSetting>>', value <<cLitteral(m.tvValueNew)>> should be of type '<<m.lcTypeCur>>']))
 			if m.success
 
-* Adjust value when appropriate
+				* Adjust value when appropriate
 				tvValueNew = iif(m.tcSetting == 'DEFAULT', addbs(fullpath(m.tvValueNew)), m.tvValueNew)
 
-* If setting must be changed
+				* If setting must be changed
 				if .f.;
 				 or m.llToggle;
 				 or lTrue(m.tlChangeAlways);
@@ -2263,17 +2263,17 @@ if m.success
 
 					this.lOnOff = m.lcTypeCur == 'C' and (m.lvValueCur == 'ON' or m.lvValueCur == 'OFF')
 
-* Toggle value if asked and appropriate
+					* Toggle value if asked and appropriate
 					if m.llToggle and m.this.lOnOff
 						tvValueNew = iif(m.lvValueCur = 'ON', 'OFF', 'ON')
 					endif
 
-* If new setting can be performed
+					* If new setting can be performed
 					success = this.set(m.tcSetting, m.tvValueNew)
 				endif
 				if m.success
 
-* Persist current values to properties
+					* Persist current values to properties
 					this.cSetting = m.tcSetting
 					this.vValueOld = m.lvValueCur
 					this.vValueNew = m.tvValueNew
@@ -2413,40 +2413,38 @@ local llResult as Boolean;
 
 &&	Reprocess && strange options
 
-text TO m.lcUnsupported NOSHOW FLAGS 1 PRETEXT 3 && Unsupported (or ill-tested) sets
-	Century, , 3
-	Clock, , 1 && does not restore properly
-	Color && Included for backward compatibility
-	Date, , 1
-	Echo && Included for backward compatibility
-	Fields, , 1
-	Order && unable to restore
-	Printer, , 2
-	Printer, , 3
-	Skip
-	Status Bar && Problem with space between 'Status' and 'Bar' ...
-	Topic, .T., 1 && unable to restore
-	View && unable to restore
-ENDTEXT
-text TO m.lcUntested NOSHOW FLAGS 1 PRETEXT 3 && Untested sets
-	Help, , 1
-	Help, , 2
-	Help, , 3
-	Key, , 1
-	Key, , 2
-	Textmerge, , 4
-	Topic, , 1
-	Step
-	Display && Included for backward compatibility
-	Filter
-	Helpfilter
-	Pdsetup
-	Relation
-ENDTEXT
+lcUnsupported = ''; && 2015-11-04 thn TEXT ... ENDTEXT removed (should have been done much earlier)
++ [Century, , 3] + CRLF;
++ [Clock, , 1] + CRLF; && does not restore properly
++ [Color] + CRLF; && Included for backward compatibility
++ [Date, , 1] + CRLF;
++ [Echo] + CRLF; && Included for backward compatibility
++ [Fields, , 1] + CRLF;
++ [Order] + CRLF; && unable to restore
++ [Printer, , 2] + CRLF;
++ [Printer, , 3] + CRLF;
++ [Skip] + CRLF;
++ [Status Bar] + CRLF; && Problem with space between 'Status' and 'Bar' ...
++ [Topic, .T., 1] + CRLF; && unable to restore
++ [View] + CRLF; && unable to restore
 
-#if .f.
-	textmerge, , 1 && unable to restore - set textmerge delimiters to ...
-#endif
+
+lcUntested  = ''; && Untested sets && 2015-11-04 thn TEXT ... ENDTEXT removed (should have been done much earlier)
++ [Help, , 1] + CRLF;
++ [Help, , 2] + CRLF;
++ [Help, , 3] + CRLF;
++ [Key, , 1] + CRLF;
++ [Key, , 2] + CRLF;
++ [Textmerge, , 4] + CRLF;
++ [Topic, , 1] + CRLF;
++ [Step] + CRLF;
++ [Display] + CRLF; && Included for backward compatibility
++ [Filter] + CRLF;
++ [Helpfilter] + CRLF;
++ [Pdsetup] + CRLF;
++ [Relation] + CRLF;
+
+&&	textmerge, , 1 && unable to restore - set textmerge delimiters to ...
 
 try && aLinesCols() may not be in scope
 
@@ -2577,12 +2575,12 @@ for each m.lcSet in m.laSets
 
 	lcSet = cInLineCommentStripped(m.lcSet)
 
-* If Setting object can be instanciated
+	* If Setting object can be instanciated
 	loSet = abSet(&lcSet)
 	llSet = vartype(m.loSet) == 'O' and not isNull(m.loSet)
 	if m.llSet
 
-* Memorize old values
+		* Memorize old values
 		lcSetting = m.loSet.cSetting
 		lvValueOld = m.loSet.vValueOld
 		lcParm2 = m.loSet.cParm2
@@ -2590,12 +2588,13 @@ for each m.lcSet in m.laSets
 		store space(0) to m.lcSetting, m.lvValueOld, m.lcParm2
 	endif
 
+
 * Check new value was correctly SET
 
-* Release Setting object to restore original setting
+	* Release Setting object to restore original setting
 	loSet = .null.
 
-* Check old value was correctly restored
+	* Check old value was correctly restored
 	if m.llSet
 		lvValueNew = evaluate('Set("' + m.lcSetting + '"' + m.lcParm2 + ')')
 		lvValueNew = iif(upper(m.lcSetting) == 'DEFAULT', m.lvValueNew + curdir(), m.lvValueNew)
@@ -2606,7 +2605,7 @@ for each m.lcSet in m.laSets
 
 	clear
 
-* Save any Error
+	* Save any Error
 	if not m.llSet
 		lnFailed = m.lnFailed + 1
 		lcResult = m.lcResult + CRLF + '- ' + ;
@@ -2893,7 +2892,8 @@ loResult = newobject('abSetsMaintain', 'abDev.prg')
 
 *loUnitTest.coverageSet(.T.)
 loUnitTest.Test(.null.) && 1 ms
-*loUnitTest.coverageSet(.F.)
+
+* loUnitTest.coverageSet(.F.)
 
 return m.loUnitTest.result()
 
@@ -3244,7 +3244,7 @@ if m.llResult
 	local lcFolderAddr, loProc, loClass, lnFile, lcFile, lnFilesFailed, laFilesFailed[1]
 	lcFolderAddr = addbs(justpath(m.tcFilesSkeleton))
 
-* Sauver les set car COMPILE ferme automatiquement les fichiers
+	* Sauver les set car COMPILE ferme automatiquement les fichiers
 	loProc = abSet('PROCEDURE', set("Procedure"),,, .t.)
 	loClass = abSet('CLASSLIB', set("ClassLib"),,, .t.)
 
@@ -3252,18 +3252,18 @@ if m.llResult
 	debugout replicate('=', 50)
 	debugout "Compiling", transform(m.lnFiles), 'files in', m.lcFolderAddr
 
-* Pour chaque fichier
+	* Pour chaque fichier
 	lnFilesFailed = 0
 	for lnFile = 1 to m.lnFiles
 		lcFile = laFiles[m.lnFile, 1]
 
-* Compiler le fichier
+		* Compiler le fichier
 		llResult = FileCompile(m.lcFolderAddr + m.lcFile)
 
-* Si succès, compter
+		* Si succès, compter
 		if m.llResult
 			lnResult = m.lnResult + 1
-* Sinon, tabuler
+		* Sinon, tabuler
 		else
 			lnFilesFailed = lnFilesFailed + 1
 			dimension laFilesFailed[m.lnFilesFailed]
@@ -3276,7 +3276,7 @@ if m.llResult
 	debugout transform(m.lnResult), "files compiled out of", transform(m.lnFiles)
 	debugout replicate('=', 50)
 
-* Si échec(s), lister les fichiers
+	* Si échec(s), lister les fichiers
 	if m.lnFilesFailed > 0
 		tcFilesFailed = cListOfArray(@m.laFilesFailed)
 	endif
@@ -3309,7 +3309,7 @@ if m.llResult
 	loLogErrors = abSet('LOGERRORS', 'ON')
 	loNotify = abSet('NOTIFY', 'OFF') && supprime le thermomètre d'avancement
 
-* Tenter la compilation
+	* Tenter la compilation
 	tcFileAddr = fullpath(m.tcFileAddr)
 	lcExt = justext(m.tcFileAddr)
 	try
@@ -3504,7 +3504,7 @@ return m.success
 function oProject && Référence à un projet (ouvert ou créé)
 lparameters ;
 	tcPJX,; && Adresse du projet
-	tcResult,; && @ Résultat (cumulatif)
+	result,; && @ Résultat (cumulatif)
 	tlOpened && @ [.F.] Le projet a été ouvert - .NULL. le projet a été créé
 
 tlOpened = .f.
@@ -3512,7 +3512,7 @@ tlOpened = .f.
 local loResult as project;
 , loProject as project;
 , llResult as Boolean;
-, loException as exception
+, loException as exception;
 
 loResult = .null.
 
@@ -3542,27 +3542,48 @@ if vartype(m.tcPJX) == 'C'
 		if not m.llResult
 
 			* Ouvrir le projet
-			try && évite les erreurs à l'ouverture tel que les fichiers non trouvés && en fait non ça n'empêche pas l'erreur
+			try
+				ignoreAll() && modify command abDev
 				modify project (m.tcPJX) save nowait noshow noprojecthook
 				loResult = _vfp.activeproject
 				tlOpened = iif(isNull(m.tlOpened), m.tlOpened, .t.)
 			catch to loException when m.loException.ErrorNo = 1705 && File Access is denied
-				cResultAdd(@m.tcResult, cException(m.loException) + ' - ' + ICase(;
+				cResultAdd(@m.result, cException(m.loException) + ' - ' + ICase(;
 					cLangUser() = 'fr',	[Conseil : fermez toutes les autres instances de VFP où le projet a pu être ouvert],; && copy-paste this line to add another language support
 															[Hint: close all instances of VFP IDE where project can have been open.]; && default: English
 					))
 			catch to loException
-				cResultAdd(@m.tcResult, cException(m.loException))
+				cResultAdd(@m.result, cException(m.loException))
 			endtry
 		endif
 	else
-		cResultAdd(@m.tcResult, textmerge([Invalid project file extension : <<cLitteral(m.tcPJX)>>]))
+		cResultAdd(@m.result, textmerge([Invalid project file extension : <<cLitteral(m.tcPJX)>>]))
 	endif
 else
-	cResultAdd(@m.tcResult, textmerge([Invalid project specification : <<cLitteral(m.tcPJX)>>]))
+	cResultAdd(@m.result, textmerge([Invalid project specification : <<cLitteral(m.tcPJX)>>]))
 endif
 
 return m.loResult
+
+* ========================================
+procedure IgnoreAll && sélectionne automatiquement l'option 'tout' dans un dialogue tel que ASSERT
+&& contribution by Bob Pierce during FoxInCloud training '15 at Phoenix AZ
+
+local lcVersion3 as String
+
+lcVersion3 = Version(3)
+
+keyboard '';
+	+ '{alt+';
+	+ ICase(;
+		m.lcVersion3 == '33',	't',; && French - 'tout'
+		m.lcVersion3 == '34',	't',; && Spanish - 'todas'
+		m.lcVersion3 == '49',	'a',; && German - 'alle'
+			'a'; && Default: English - 'all'
+		);
+		+ '}'
+
+endproc
 
 * ========================================
 procedure ProjectClose && Ferme un projet
@@ -3575,15 +3596,15 @@ llResult = vartype(m.tcProject) == 'C' and not empty(m.tcProject)
 assert m.llResult message cAssertMsg(textmerge([Invalid project specification : <<cLitteral(m.tcProject)>>]))
 if m.llResult and _vfp.projects.count > 0
 
-* Pour chaque projet ouvert
+	* Pour chaque projet ouvert
 	tcProject = upper(alltrim(m.tcProject))
 	for each m.loProject in _vfp.projects
 		lcProject = m.loProject.name
 
-* si c'est le projet cherché
+		* si c'est le projet cherché
 		if upper(juststem(m.lcProject)) == m.tcProject
 
-* Fermer
+			* Fermer
 			loProject.close
 			lcResult = m.lcProject
 			exit
@@ -3722,7 +3743,8 @@ lISX = file('ISX.fxp')
 * ------------------------------------
 procedure init && Désactive ISX
 
-*	return .F.
+
+* return .F.
 
 if m.this.lISX and lDevMode() && lDevMode() par sécurité, évite un WAIT en unattended server mode
 	this.cISX = fullpath('ISX.fxp')
@@ -3796,7 +3818,7 @@ if m.llResult
 				tuValue = upper(alltrim(m.tuValue))
 				if m.lcTypeDest $ 'YNI'
 
-* Normaliser le point décimal éventuel, supprimer les séparateurs de milliers
+					* Normaliser le point décimal éventuel, supprimer les séparateurs de milliers
 					local lcPoint, lcSeparator, lcChars
 					lcPoint = set("Point")
 					lcSeparator = set("Separator")
@@ -4341,22 +4363,22 @@ if m.lnProc > 0
 
 	asort(m.laProc, 1, -1, 0, 1)
 
-* Pour chaque élément
+	* Pour chaque élément
 	store 0 to m.lnProcPrinc, m.lnProcTest
 	for m.liProc = 1 to m.lnProc
 
-* Si l'élément est une procédure
+		* Si l'élément est une procédure
 		if upper(laProc[m.liProc, 3]) = 'PROCEDURE'
 			lcProc = laProc[m.liProc, 1]
 			lcProcU = upper(m.lcProc)
 
-* Si procédure principale, lister
+			* Si procédure principale, lister
 			if not '_' $ m.lcProc
 				lnProcPrinc = m.lnProcPrinc + 1
 				strtofile(str(m.lnProcPrinc, 2) + '-' + m.lcProc + CRLF, m.lcProcs, 1)
 			endif
 
-* Si procédure de test, exécuter
+			* Si procédure de test, exécuter
 			if .t.;
 			 and rightc(m.lcProcU, lenc('_TEST')) == '_TEST' ;
 			 and not m.lcProcU == m.lcProcName && this procedure
@@ -4431,7 +4453,7 @@ if m.llResult
 
 	llResult = this.ModuleSet(m.lcModule, m.lcAddress)
 
-* Si le module est exécutable, régler la session de données
+	* Si le module est exécutable, régler la session de données
 	if m.llResult
 		set memowidth to wcols(wontop()) && Fenêtre résultats du test
 	endif
@@ -4439,7 +4461,7 @@ endif
 
 if directory(DOS_AB)
 
-* S'il existe des fichiers de test ou de coverage à l'ancienne adresse, déplacer à la nouvelle
+	* S'il existe des fichiers de test ou de coverage à l'ancienne adresse, déplacer à la nouvelle
 	local laFiles[1], lcFile
 	if aFiles(@m.laFiles, DOS_AB + '*.tst') > 0
 		for each lcFile in laFiles
@@ -4479,7 +4501,7 @@ llResult = not empty(m.lcModule) and file(m.lcAddress)
 assert m.llResult message cAssertMsg(textmerge([le nom et/ou l'adresse de module est incorrect]))
 if m.llResult
 
-* Si le module existe
+	* Si le module existe
 	local lnError, lcError, loAsserts
 	lnError = 0
 	lcError = on('ERROR')
@@ -4492,11 +4514,11 @@ if m.llResult
 	assert m.llResult message cAssertMsg(textmerge([le module " + m.lcModule + " ne peut être exécuté.]))
 	if m.llResult
 
-* Mémoriser le nom du module
+		* Mémoriser le nom du module
 		this.cAddress = m.lcAddress
 		this.cModule  = m.lcModule
 
-* Définir l'adresse de son fichier résultats
+		* Définir l'adresse de son fichier résultats
 		this.cResultAddr = cABmoduleTestAddr(m.lcModule)
 		this.cCoverageAddr = forceext(this.cResultAddr, 'cov.log')
 	else
@@ -4566,13 +4588,13 @@ if empty(this.cModule)
 	return .f.
 else
 
-* Bâtir la chaine des paramètres à passer au module
+	* Bâtir la chaine des paramètres à passer au module
 	lnParm = max(pcount() - 1, 0)
 	lcParms = this.Test_cParms(m.lnParm) && liste des paramètres à passert au module testé
 
 	#define NCOLSFIXES 8 && /!\ utilisé par this.Test_aTestsDim()
 
-* Ajuster le tableau de résultats de tests
+	* Ajuster le tableau de résultats de tests
 	this.nTest = this.nTest + 1
 	this.Test_aTestsDim(m.lnParm)
 	this.aTest[m.this.nTest, NCOLSFIXES] = m.lnParm && Nombre de paramètres passés (peut varier d'un test à l'autre)
@@ -4611,7 +4633,7 @@ else
 		)
 * ===========================
 
-* Tabuler le résultat du test
+	* Tabuler le résultat du test
 	local lcStatus
 	this.aTest[m.this.nTest, 1] = this.lCoverage && Coverage ON
 	this.aTest[m.this.nTest, 2] = m.lnElapsed && Temps d'exécution (non significatif si COVERAGE)
@@ -4668,14 +4690,14 @@ lcResult = space(0)
 
 if m.tnParms > 0
 
-* Pour chaque paramètre passé
+	* Pour chaque paramètre passé
 	local liParm, lcParm
 	for liParm = 1 to m.tnParms
 
-* Reconstituer le nom du paramètre
+		* Reconstituer le nom du paramètre
 		lcParm = '@' + this.Test_cParm(m.liParm)
 
-* Ajouter au résultat en passant par référence
+		* Ajouter au résultat en passant par référence
 		lcResult = c2Words(m.lcResult, ',', m.lcParm)
 	endfor
 endif
@@ -4721,13 +4743,13 @@ endfor
 lnAttempt = 1
 do while .t.
 
-* Si c'est le premier test
+	* Si c'est le premier test
 	if m.lnAttempt = 1
 
-* Mémoriser l'environnement VFP AVANT l'exécution
+		* Mémoriser l'environnement VFP AVANT l'exécution
 		this.aStatus(@m.taStatus1)
 
-* Si le coverage a été demandé, le démarrer
+		* Si le coverage a été demandé, le démarrer
 		if m.this.lCoverage
 			local lcCoverage
 			lcCoverage = set('COVERAGE', 1)
@@ -4738,7 +4760,7 @@ do while .t.
 	tnElapsed = 0
 	for liAttempt = 1 to m.lnAttempt
 
-* Restaurer les paramètres
+		* Restaurer les paramètres
 		for liParm = 1 to m.lnParm
 			lcParm = this.Test_cParm(m.liParm)
 			lcParm_ = m.lcParm + '_'
@@ -4767,19 +4789,19 @@ do while .t.
 		, m.luResult;
 		)
 
-* Si c'est le premier test
+	* Si c'est le premier test
 	if m.lnAttempt = 1
 
-* Si le coverage a été demandé, l'arrêter
+		* Si le coverage a été demandé, l'arrêter
 		if this.lCoverage
 			set coverage to &lcCoverage
 		endif
 
-* Mémoriser l'environnement VFP après l'exécution
+		* Mémoriser l'environnement VFP après l'exécution
 		this.aStatus(@m.taStatus2)
 	endif
 
-* Si le temps d'exécution est significatif, terminer
+	* Si le temps d'exécution est significatif, terminer
 	if .f.;
 	 or m.this.lCoverage;  && avec Coverage, une seule exécution
 	 or m.this.lSingleTest; && simple test demandé
@@ -4787,7 +4809,7 @@ do while .t.
 
 		exit
 
-* sinon, répéter le test
+	* sinon, répéter le test
 	else
 		lnAttempt = m.lnAttempt * 10
 	endif
@@ -4795,7 +4817,8 @@ enddo
 
 tnElapsed = m.tnElapsed / m.lnAttempt
 
-*this.lSingleTest = .F.
+
+* this.lSingleTest = .F.
 
 return m.luResult
 
@@ -4814,7 +4837,7 @@ local lnColsParms
 lnColsParms = NCOLSFIXES + m.tnParms
 if m.lnColsParms > m.lnCols
 
-* Ajouter le nombre de COLONNES nécessaires au tableau résultat
+	* Ajouter le nombre de COLONNES nécessaires au tableau résultat
 	local array laTests[1]
 	acopy(this.aTest, m.laTests)
 	aColsIns(@m.laTests, m.lnCols, m.lnColsParms - m.lnCols)
@@ -5202,16 +5225,16 @@ local lnStatusCount
 lnStatusCount = alen(m.taStatus1, 1)
 if alen(m.taStatus2, 1) = m.lnStatusCount
 
-* Pour chaque élément d'environnement
+	* Pour chaque élément d'environnement
 	local lnStatus, llStatus
 	llResult = .t.
 	for lnStatus = 1 to m.lnStatusCount
 
-* Si l'élément n'a pas la même valeur dans les 2 tableaux
+		* Si l'élément n'a pas la même valeur dans les 2 tableaux
 		llStatus = m.taStatus1[m.lnStatus, 2] == m.taStatus2[m.lnStatus, 2]
 		if not m.llStatus
 
-* Ajouter la modification au message retourné
+			* Ajouter la modification au message retourné
 			tcModifs = c2Words(m.tcModifs, CRLF, ;
 				taStatus1[m.lnStatus, 1] + ;
 				space(1) + '-' + space(1) + 'avant Test : ' + cLitteral(m.taStatus1[m.lnStatus, 2]) + ;
@@ -5321,11 +5344,11 @@ store space(0) to lcExpr, lcResult
 if alines(laOp, m.tcExpr, 1, '+') > 0
 	for each lcOp in laOp
 
-* Si l'opérande est un Chr()
+		* Si l'opérande est un Chr()
 		lcOpU = chrtran(upper(m.lcOp), space(1), space(0))
 		if left(m.lcOpU, 4) == 'CHR(' or inlist(m.lcOpU, 'CR', 'CRLF')
 
-* Ajouter les opérandes accumulés au résultat
+			* Ajouter les opérandes accumulés au résultat
 			lcResult = cWords('+', m.lcResult, cExprEval_cOp(m.lcExpr), m.lcOp)
 			lcExpr = space(0)
 		else
@@ -5557,7 +5580,7 @@ if .t.;
 
 	lcThisFile = cModuleInfo(sys(16), 'Address')
 
-* Remove unused files
+	* Remove unused files
 	for each lcFile in m.laFilePost
 		try
 			do case
@@ -5583,7 +5606,7 @@ if .t.;
 		endtry
 	endfor
 
-* Add previous files no longer in Set("Classlib") or Set("Procedure")
+	* Add previous files no longer in Set("Classlib") or Set("Procedure")
 	for each lcFile in m.laFileAnte
 		try
 			do case
@@ -5884,6 +5907,7 @@ lparameters ;
 
 * loCoverage = oCoverage([condition]) && {en} Starts log {fr} Commence l'historique
 * 	--<{en} code you want to trace {fr} Code que vous voulez tracer >--
+
 * loCoverage = .null. && {en} Stops log {fr} Arrête l'historique
 
 if .t.;
@@ -6579,7 +6603,7 @@ comparePre = .null.
 other = this.oSemVer(m.other)
 if this.lSemVer(m.other)
 
-* NOT having a prerelease is > having one
+  * NOT having a prerelease is > having one
   do case
   case !m.this.lPreRelease and !m.other.lPreRelease
     return 0

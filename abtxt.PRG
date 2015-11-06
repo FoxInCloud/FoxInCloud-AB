@@ -42,7 +42,7 @@ if m.llResult
 
 	tnTronc = iif(vartype(m.tnTronc) == 'N' and m.tnTronc > 0, m.tnTronc, 50)
 
-* Si la chaîne est plus longue que la troncature
+	* Si la chaîne est plus longue que la troncature
 	lcResult = iif(empty(substr(m.tcChain, m.tnTronc + 1));
 		, leftc(m.tcChain, m.tnTronc);
 		, m.tcChain;
@@ -55,7 +55,7 @@ if m.llResult
 			)
 		lcResult = left(m.lcResult, m.tnTronc - lenc(m.lcEllips))
 
-* Si coupure à la fin d'un mot
+		* Si coupure à la fin d'un mot
 		if lTrue(m.tlWord);
 		 and (.f.;
 			or ' ' $ m.lcResult;
@@ -95,6 +95,7 @@ procedure cTronc_test
 
 local loTest as abUnitTest of abDev.prg, lcDropped
 loTest = newobject('abUnitTest', 'abDev.prg')
+
 
 * _cliptext = Chr(160)
 
@@ -354,7 +355,7 @@ if vartype(m.tcChain) == 'C';
  and m.tcSubChain $ m.tcChain
 	lcResult = m.tcChain
 
-* Delete spaces before and after character chain
+	* Delete spaces before and after character chain
 	do while space(1) + m.tcSubChain $ m.lcResult
 		lcResult = strtran(m.lcResult, space(1)+m.tcSubChain, m.tcSubChain)
 	enddo
@@ -362,7 +363,7 @@ if vartype(m.tcChain) == 'C';
 		lcResult = strtran(m.lcResult, m.tcSubChain+space(1), m.tcSubChain)
 	enddo
 
-* Add the required number of spaces before and after character chain
+	* Add the required number of spaces before and after character chain
 	tnBefore = iif(vartype(m.tnBefore)='N' and m.tnBefore > 0, m.tnBefore, 0)
 	tnAfter = iif(vartype(tnAfter)='N' and m.tnAfter > 0, m.tnAfter, m.tnBefore)
 
@@ -455,7 +456,7 @@ if vartype(m.tcChain) == 'C'
 	lnChain = len(m.lcChain)
 	lcResult = m.lcChain
 
-* Donner leur valeur par défaut aux paramètres optionnels
+	* Donner leur valeur par défaut aux paramètres optionnels
 	local lnFactGroup, lcSep
 	lnFactGroup = ;
 		iif	(vartype(m.tnFactGroup) == 'N' ;
@@ -466,7 +467,7 @@ if vartype(m.tcChain) == 'C'
 
 	if m.lnFactGroup < m.lnChain
 
-* Pour chaque caractère en partant de la fin
+		* Pour chaque caractère en partant de la fin
 		local lnCar, lcCar, lnChiffres, llSepAj
 		lnChiffres = 0
 		lcResult = space(0)
@@ -488,15 +489,14 @@ if vartype(m.tcChain) == 'C'
 
 			case m.lcCar == m.lcSep
 				if m.llSepAj
-* Ce séparateur fait double emploi
-* Avec celui que l'on vient d'ajouter ;
-* Ne pas le garder
+					* Ce séparateur fait double emploi avec celui que l'on vient d'ajouter,
+					* Ne pas le garder
 					loop
 				endif
 
 			otherwise	&& ni chiffre ni séparateur
 
-* Si un séparateur vient d'être ajouté, le supprimer.
+				* Si un séparateur vient d'être ajouté, le supprimer.
 				if m.llSepAj
 					lcResult = substr(m.lcResult, 2)
 				endif
@@ -563,10 +563,10 @@ lcResult = space(0)
 
 if not laEmpty(@m.taWords)
 
-* Déterminer le nombre de colonnes du tableau
+	* Déterminer le nombre de colonnes du tableau
 	lnCols = alen(taWords, 2)
 
-* Donner leur valeur par défaut aux paramètres optionnels
+	* Donner leur valeur par défaut aux paramètres optionnels
 	tcDelim = iif(vartype(m.tcDelim) == 'C' and lenc(m.tcDelim) > 0 , m.tcDelim, ',')
 	tnCol = icase(;
 		M.lnCols = 0,; && tableau à 1 dimension
@@ -590,7 +590,7 @@ if not laEmpty(@m.taWords)
 	tlRtrimNot = lTrue(m.tlRtrimNot)
 	llRtrim = !m.tlRtrimNot
 
-* Si le délimiteur peut entrer en conflit avec le séparateur décimal, changer celui-ci
+	* Si le délimiteur peut entrer en conflit avec le séparateur décimal, changer celui-ci
 	lcPoint = set('POINT')
 	llPoint = m.lcPoint $ m.tcDelim
 	if m.llPoint
@@ -607,13 +607,13 @@ if not laEmpty(@m.taWords)
 *-									'?'),,, .T.)
 	endif
 
-* Pour chaque élément du tableau
+	* Pour chaque élément du tableau
 	for liWord = 1 to iif(m.tnCol <= 0, alen(m.taWords), alen(m.taWords, 1))
 
 		luWord = iif(m.tnCol <= 0, taWords[m.liWord], taWords[m.liWord, m.tnCol])
 		lcVarType = vartype(m.luWord)
 
-* Si la valeur est valide
+		* Si la valeur est valide
 		if .t.;
 		 and m.lcVarType $ 'CNDTLYOX'; && G not supported
 		 and (m.tlKeepNull or not m.lcVarType == 'X');
@@ -633,7 +633,7 @@ if not laEmpty(@m.taWords)
 				, m.tcDelim;
 				)
 
-* Si le mot n'est pas répété
+			* Si le mot n'est pas répété
 			if not (.t.;
 				and m.tlDistinct;
 				and (.f.;
@@ -941,6 +941,7 @@ local lcResult;
 
 lcResult = ''
 
+
 * Class
 
 do case
@@ -1047,6 +1048,7 @@ loTest.Test('$1254.250000', m.luTest) && Y
 	loFoo = createobject('container')
 	loFoo.name = 'cntFoo'
 	loFoo.addobject('lblFoo', 'label')
+
 * loTest.Test('Object of address: cntFoo.LBLFOO', m.loFoo.lblFoo)	&& O
 
 && G ???
@@ -1146,8 +1148,8 @@ case m.lcVarType == 'C'
 * Supprimer les caractères non imprimables
 && /!\ 2/8/07	conserver les sauts de ligne		lcResult = cPrintable(m.lcResult)
 
-* Encadrer la chaîne de délimiteur, échapper si nécessaire
-*		return ["] + Strtran(Strtran(Iif(lTrue(m.tlTrim), Trim(m.tuData), m.tuData), '\', '\\'), ["], [\"]) + ["]
+	* Encadrer la chaîne de délimiteur, échapper si nécessaire
+	* return ["] + Strtran(Strtran(Iif(lTrue(m.tlTrim), Trim(m.tuData), m.tuData), '\', '\\'), ["], [\"]) + ["]
 	return icase(;
 		lTrue(m.tlQuotesNo),;
 		[];
@@ -1227,7 +1229,7 @@ case m.lcVarType == 'A' && Array
 	lcResult = '[' + substr(m.lcResult, 2) + ']'
 
 otherwise
-	assert .f. message cAssertMsg(textmerge([<<Program()>> could not build a JavaScript constant from <<m.tuData>> of type <<m.lcVarType>>]))
+	assert .f. message cAssertMsg(textmerge([could not build a JavaScript constant from <<m.tuData>> of type <<m.lcVarType>>]))
 endcase
 
 return m.lcResult
@@ -1380,14 +1382,14 @@ lcResult = space(0)
 
 * Si le paramètre est de type caractère
 llResult = inlist(vartype(m.tcNum), 'C', 'X')
-assert m.llResult message program() + space(1) + "Paramètre de type caractère ou .NULL. attendu"
+assert m.llResult message cAssertMsg("Paramètre de type caractère ou .NULL. attendu")
 if m.llResult
 
-* Si le paramètre peut représenter un nombre
+	* Si le paramètre peut représenter un nombre
 	llResult = lNumber(m.tcNum)
 	if m.llResult
 
-* Supprimer les espaces et séparateurs de milliers éventuels
+		* Supprimer les espaces et séparateurs de milliers éventuels
 		local lcNum, lcSep, lcPoint
 		lcNum = alltrim(m.tcNum)
 		lcSep = set('Separator')
@@ -1395,11 +1397,11 @@ if m.llResult
 		lcNum = iif(m.lcSep == m.lcPoint, m.lcNum, chrtran(m.lcNum, m.lcSep, space(0)))
 		lcNum = chrtran(m.lcNum, space(1), space(0))
 
-* Lire si séparateur décimal POINT demandé
+		* Lire si séparateur décimal POINT demandé
 		local llPeriod
 		llPeriod = iif(vartype(m.tlPeriod) == 'L', m.tlPeriod, .f.)
 
-* Si la chaine comporte au plus un séparateur décimal
+		* Si la chaine comporte au plus un séparateur décimal
 		local llPoint, lnPoints, lnPeriods
 		llPoint = m.lcPoint == '.'
 		lnPoints = occurs(m.lcPoint, m.lcNum)
@@ -1407,10 +1409,10 @@ if m.llResult
 		llResult = m.lnPoints + m.lnPeriods <= 1
 		if m.llResult
 
-* Si le séparateur courant n'est pas le point
+			* Si le séparateur courant n'est pas le point
 			if not m.llPoint
 
-* Ajuster le séparateur si nécessaire
+				* Ajuster le séparateur si nécessaire
 				do case
 				case m.llPeriod and m.lnPoints = 1
 					lcNum = chrtran(m.lcNum, m.lcPoint, '.')
@@ -1494,14 +1496,14 @@ lcVarType = vartype(m.tuEuropean)
 do case
 case m.lcVarType == 'C' and not empty(m.tuEuropean)
 
-* Si les chaines de traduction ne sont pas en mémoire, les lire
+ 	* Si les chaines de traduction ne sont pas en mémoire, les lire
  	if not vartype(m.EuroAnsi) == 'C'
 		public European, EuroAnsi && pour accélérer les appels répétés
 		external file European.mem
 		restore from (home() + 'european.mem') additive
 	endif
 
-* Désaccentuer la chaine
+	* Désaccentuer la chaine
 	lcResult = sys(15, m.EuroAnsi, m.tuEuropean)
 
 case m.lcVarType == 'L' and m.tuEuropean
@@ -1627,52 +1629,52 @@ llResult = vartype(m.tcChain) == 'C' ;
 assert m.llResult message "Paramètres requis invalides"
 if m.llResult
 
-* Si la chaine comporte plus de caractères que le nombre de chiffres cherché
+	* Si la chaine comporte plus de caractères que le nombre de chiffres cherché
 	local lnChain
 	lnChain = len(m.tcChain)
 	if m.lnChain >= m.tnChiffres
 		local llIgnoreSpace
 		llIgnoreSpace = iif(vartype(m.tlIgnoreSpace) =='L', m.tlIgnoreSpace, .f.)
 
-* Pour chaque position dans la chaine
+		* Pour chaque position dans la chaine
 		local lnStart, lcChiffres, lnSpaces, lnCar, lcCar, llChiffre
 		for m.lnStart = 1 to m.lnChain - m.tnChiffres + 1
 			lcChiffres = space(0)
 			lnSpaces = 0
 
-* Pour chaque caractère dans la limite du nombre de chiffres
+			* Pour chaque caractère dans la limite du nombre de chiffres
 			for m.lnCar = 0 to m.tnChiffres - 1
 				lcCar = substr (m.tcChain, m.lnStart + m.lnCar + m.lnSpaces, 1)
 
-* Si le caractère est invalide, décompter
+				* Si le caractère est invalide, décompter
 				if m.llIgnoreSpace ;
 				 and m.lcCar == space(1) ;
 				 and m.lnCar > 0
 					lnSpaces = m.lnSpaces + 1
 					lnCar = m.lnCar - 1	&& impossible de modifier la borne sup de la boucle
 
-* Sinon (caractère valide)
+				* Sinon (caractère valide)
 				else
 
-* Si le caractère est un chiffre, ajouter à la chaine de chiffres
+					* Si le caractère est un chiffre, ajouter à la chaine de chiffres
 					llChiffre = lNumChar(m.lcCar)
 					if m.llChiffre
 						lcChiffres = m.lcChiffres + m.lcCar
 
-* Sinon, abandonner la recherche
+					* Sinon, abandonner la recherche
 					else
 						exit
 					endif
 				endif
 			endfor
 
-* Si la chaine de chiffres a été trouvée, sortir
+			* Si la chaine de chiffres a été trouvée, sortir
 			if m.llChiffre
 				exit
 			endif
 		endfor
 
-* Si la chaine de chiffres a été trouvée, mémoriser en retour
+		* Si la chaine de chiffres a été trouvée, mémoriser en retour
 		if llChiffre
 			lnResult = m.lnStart
 			tcChiffres = m.lcChiffres
@@ -1736,19 +1738,19 @@ lnResult = 0
 if vartype(m.tcChain) == 'C' ;
  and not empty(m.tcChain)
 
-* Régler les valeurs par défaut des paramètres optionnels
+	* Régler les valeurs par défaut des paramètres optionnels
 	local lcSens, lcSeps, lnOcc
 	lcSens = iif(vartype(m.tcSens) = 'C', upper(left(ltrim(m.tcSens),1)), 'L')
 	lcSens = iif(m.lcSens $ 'LR', m.lcSens, 'L')
 	lcSeps = iif(vartype(m.tcSeps)='C' and ! empty(m.tcSeps), m.tcSeps, DEFAULT_SEP)
 	lnOcc = iif(vartype(m.tnOcc)='N' and m.tnOcc > 0, m.tnOcc, 1)
 
-* Pour chaque séparateur
+	* Pour chaque séparateur
 	local lnSep, lcSep
 	for m.lnSep = 1 to len(m.lcSeps)
 		lcSep = substr(m.lcSeps, m.lnSep, 1)
 
-* Si le séparateurs est dans le chaine, arrêter
+		* Si le séparateurs est dans le chaine, arrêter
 		lnResult = iif(m.lcSens = 'L', ;
 											at (m.lcSep, m.tcChain, m.lnOcc), ;
 											rat (m.lcSep, m.tcChain, m.lnOcc))
@@ -1772,24 +1774,24 @@ lcResult = space(0)
 if vartype(m.tcChain)='C' ;
  and not empty(m.tcChain)
 
-* Calculer la longueur de la chaine
+	* Calculer la longueur de la chaine
 	local lcChain, lnChain
 	lcChain = alltrim(m.tcChain)
 	lnChain = len(m.lcChain)
 
-* Déterminer le sens de recherche
+	* Déterminer le sens de recherche
 	local llRight, lnStart, lnEnd, lnStep
 	llRight = iif(vartype(m.tlRight)=='L', m.tlRight, .f.)
 	lnStart = iif(m.llRight, m.lnChain, 1)
 	lnEnd = iif(m.llRight, 1, m.lnChain)
 	lnStep = iif(m.llRight, -1, 1)
 
-* Pour chaque caractère dans l'ordre demandé
+	* Pour chaque caractère dans l'ordre demandé
 	local lnCar, lcCar
 	for m.lnCar = m.lnStart to m.lnEnd step m.lnStep
 		lcCar = substr(m.lcChain, m.lnCar, 1)
 
-* Si le caractère est un chiffre, ajouter au résultat
+		* Si le caractère est un chiffre, ajouter au résultat
 		if isdigit(m.lcCar)
 			lcResult = iif(m.llRight, m.lcCar + m.lcResult, m.lcResult + m.lcCar)
 		endif
@@ -1839,7 +1841,7 @@ llResult = not empty(m.tcEmailAddr)
 if m.llResult
 	lceMailAddr = upper(alltrim(m.tcEmailAddr))
 
-* Si l'adresse ne comporte que des caractères autorisés
+	* Si l'adresse ne comporte que des caractères autorisés
 	for m.lnCar = 1 to lenc(m.lceMailAddr)
 		llResult = substr(m.lceMailAddr, m.lnCar, 1) $ "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ@.-_"
 		if not m.llResult
@@ -1848,11 +1850,11 @@ if m.llResult
 	endfor
 	if m.llResult
 
-* Si l'adresse comporter un "@" un un seul
+		* Si l'adresse comporter un "@" un un seul
 		llResult = occurs("@", m.lceMailAddr) = 1
 		if m.llResult
 
-* Si l'adresse comporte au moins un point à droite de "@" (pour le nom de domaine)
+			* Si l'adresse comporte au moins un point à droite de "@" (pour le nom de domaine)
 			lnCar = atc("@", m.lceMailAddr)
 			llResult = occurs('.', substr(m.lceMailAddr, m.lnCar + 1)) > 0
 		endif
@@ -2046,32 +2048,32 @@ if m.llResult
 	tcSep = iif(vartype(m.tcSep) == 'C' and lenc(m.tcSep) == 1, m.tcSep, ',')
 	tlCase = lTrue(m.tlCase)
 
-* Si des éléments sont spécifiés
+	* Si des éléments sont spécifiés
 	local array laElts[1]
 *-			ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([Au moins un élément devrait être spécifié]))
 	if alines(laElts, m.tcElts, 1+4, m.tcSep) > 0
 
 		local lnItems, laItems[1], lnFlags, lcElt, lnElt, llElt
 
-* Tabuler la liste existante
+		* Tabuler la liste existante
 		lnItems = alines(laItems, m.tcList, 1+4, m.tcSep)
 
-* Pour chaque élément
+		* Pour chaque élément
 		lnFlags = iif(m.tlCase, 0, 1) + 2 + 4
 		for each lcElt in laElts
 
-* Voir si l'élément est dans la liste
+			* Voir si l'élément est dans la liste
 			lnElt = ascan(laItems, m.lcElt, 1, -1, 1, m.lnFlags)
 			llElt = m.lnElt > 0
 
-* Si suppression et existe, supprimer
+			* Si suppression et existe, supprimer
 			if m.tlRemove
 				if m.llElt
 					adel(laItems, m.lnElt)
 					lnItems = m.lnItems - 1
 				endif
 
-* Sinon (ajout)
+			* Sinon (ajout)
 			else
 				if not m.llElt
 					lnItems = m.lnItems + 1
@@ -2081,7 +2083,7 @@ if m.llResult
 			endif
 		endfor
 
-* Reconstituer la liste
+		* Reconstituer la liste
 		if m.lnItems > 0
 			lcResult = cListOfArray(@m.laItems)
 		endif
@@ -2116,7 +2118,7 @@ tlOr = lTrue(m.tlOr)
 local laWord[1], lcWord, llWord, llResult
 
 llResult = vartype(m.tcWords) == 'C' and alines(laWord, m.tcWords, 7, ',', ';') > 0
-assert m.llResult message cAssertMsg(textmerge("<<Program()>> received invalid parameters"))
+assert m.llResult message cAssertMsg(textmerge("received invalid parameters"))
 if m.llResult
 
 	llResult = not m.tlOr
@@ -2155,13 +2157,13 @@ llResult = vartype(m.tcChain) == 'C';
  and not (empty(m.tcChain) or empty(m.tcWord));
  and (lTrue(m.tlAnyWord);
  		 or chrtran(m.tcWord, VFPOPSEPCARS, space(0)) == m.tcWord)
-assert m.llResult message cAssertMsg(textmerge("<<Program()>> received invalid parameters"))
+assert m.llResult message cAssertMsg(textmerge("received invalid parameters"))
 if m.llResult
 
 	tlCaseIgnore = lTrue(m.tlCaseIgnore)
 	tnAtc = iif(vartype(m.tnAtc) == 'N' and m.tnAtc > 0, m.tnAtc, 1)
 
-* Si le mot est présent dans la chaîne à partir de la position de départ
+	* Si le mot est présent dans la chaîne à partir de la position de départ
 	local lcWord, lnWord, lcChain, lnAt, lcCarAnte, lcCarPost
 	lcWord = iif(m.tlCaseIgnore, upper(m.tcWord), m.tcWord)
 	lnWord = len(m.lcWord)
@@ -2175,7 +2177,7 @@ if m.llResult
 
 			tnAtc = m.tnAtc + m.lnAt
 
-* Si le mot trouvé est encadré par un séparateur ou un opérateur
+			* Si le mot trouvé est encadré par un séparateur ou un opérateur
 			lcCarAnte = substr(m.lcChain, m.lnAt - 1, 1)
 			lcCarPost = substr(m.lcChain, m.lnAt + len(m.tcWord), 1)
 
@@ -2297,7 +2299,7 @@ lparameters ;
 * Si les paramètres sont valides
 if type('taOps', 1) == 'A' and vartype(m.tcExp) == 'C'
 
-* Tabuler les opérandes
+	* Tabuler les opérandes
 	local lcVFPOpSepCars
 	lcVFPOpSepCars = VFPOPSEPCARSLIST && pour macro-substitution
 	return alines(taOps, m.tcExp, 1+4, &lcVFPOpSepCars)
@@ -3425,11 +3427,11 @@ if !empty(m.lcResult)
 
 	do while .t.
 
-* Si balise cherchée ouvrante,
+		* Si balise cherchée ouvrante,
 		lnTagBeg = atcc('<' + m.tcTag, m.lcResult)
 		if m.lnTagBeg > 0
 
-* Trouver la position de la balise fermante correspondante
+			* Trouver la position de la balise fermante correspondante
 			lcTag = substrc(m.lcResult, m.lnTagBeg)
 			lnOcc = 1
 			do while .t. && /!\ bug boucle infinie
@@ -3442,17 +3444,17 @@ if !empty(m.lcResult)
 				endif
 			enddo
 
-* Supprimer la balise
+			* Supprimer la balise
 			lcTag = substrc(m.lcTag, 1, m.lnTagEnd)
 			lcResult = strtran(m.lcResult, m.lcTag, '', 1, 1, 1)
 
-* Si balise fermante
+			* Si balise fermante
 			lcTag = '</' + m.tcTag + '>'
 			if atcc(m.lcTag, m.lcResult) > 0
 				lcResult = strtran(m.lcResult, m.lcTag, '', 1, 1, 1)
 			endif
 
-* Sinon, terminé
+		* Sinon, terminé
 		else
 			exit
 		endif

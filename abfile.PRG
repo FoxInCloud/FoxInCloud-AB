@@ -232,7 +232,7 @@ if m.llResult
 			, evaluate(m.tcFileDest); && support des expressions pour FilesCopy()
 			)
 *? m.lcFileDest
-* Si le chemin destination existe ou peut être créé
+		* Si le chemin destination existe ou peut être créé
 		llResult = PathCreate(m.lcFileDest, @m.lcResult, @m.tcMessage)
 		if m.llResult
 
@@ -1363,7 +1363,7 @@ return loTest.result()
 		tcFile,;
 		tuParm
 
-* Afficher l'adresse du fichier et le paramètre
+	* Afficher l'adresse du fichier et le paramètre
 	? cFileCased(m.tcFile), ' -- paramètre :', transform(m.tuParm)
 
 * ========================================
@@ -1420,15 +1420,15 @@ assert m.llResult message cAssertMsg(textmerge([<<Program()>> - Le premier param
 if m.llResult
 
 	llResult = lDir(m.tcFolder, .t.)
-*		ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([<<Program()>> - Le dossier '<<m.tcFolder>>' est introuvable]))
+	* ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([<<Program()>> - Le dossier '<<m.tcFolder>>' est introuvable]))
 	if m.llResult
 
-* Si première récursion && optimisation
+		* Si première récursion && optimisation
 		if vartype(m.pnFoldersExcl) == 'U'
 
 			tcFolder = cFileCased(m.tcFolder)
 			aClear(@taSubFolders) && Vide le résultat
-* Tabuler les dossiers à exclure et/ou les masques de fichiers à trouver dans les dossiers
+			* Tabuler les dossiers à exclure et/ou les masques de fichiers à trouver dans les dossiers
 			private pnFoldersExcl, paFoldersExcl, pnFileSkel, paFileSkel, pnRecurse
 			dimension paFoldersExcl[1], paFileSkel[1]
 			pnFoldersExcl = alines(paFoldersExcl, m.tcFoldersExcl, 1+4, [,], [;])
@@ -1456,7 +1456,7 @@ if m.llResult
 			pnRecurse = m.pnRecurse + 1
 		endif
 
-* Pour chaque sous-dossier
+		* Pour chaque sous-dossier
 		lcDefault = sys(5) + curdir()
 		set default to (m.tcFolder)
 		lnResult = adir(laFolders, space(0), 'D', 1) && space(0) makes aDir() return Folders
@@ -1468,13 +1468,13 @@ if m.llResult
 			lcFolder = laFolders[m.lnFolder, 1]
 			lcPath = m.tcFolder + addbs(m.lcFolder)
 
-* Si bidon ou exclus, supprimer
+			* Si bidon ou exclus, supprimer
 			llFolder = not (inlist(m.lcFolder, '.', '..'); && bidon
 				 or m.pnFoldersExcl > 0 and ascan(paFoldersExcl, m.lcFolder, 1, -1, 1, 1+2+4) > 0; && exclus
 				)
 			if m.llFolder
 
-* Si récursion demandée, compter les sous-dossiers
+				* Si récursion demandée, compter les sous-dossiers
 				lnSubFolders = m.lnSubFolders + iif(m.llRecurse;
 					, aSubFolders(@taSubFolders, m.lcPath, m.tcFoldersExcl, m.tvRecurse, m.tlAddrOnly);
 					, 0)
@@ -1487,7 +1487,7 @@ if m.llResult
 				endif
 			endif
 
-* Si le dossier est OK, ajouter à la liste sinon supprimer
+			* Si le dossier est OK, ajouter à la liste sinon supprimer
 			if m.llFolder
 				laFolders[m.lnFolder, 1] = m.lcPath
 			else
@@ -1496,17 +1496,17 @@ if m.llResult
 			endif
 		endfor
 
-* Si des dossiers ont été trouvés
+		* Si des dossiers ont été trouvés
 		if m.lnResult > 0
 			dimension laFolders[m.lnResult, Alen(laFolders, 2)]
 
-* Si demandé, supprimer les colonnes superflues
+			* Si demandé, supprimer les colonnes superflues
 			if lTrue(m.tlAddrOnly)
 				aColsDel(@m.laFolders, 2)
 				dimension laFolders[Alen(m.laFolders)]
 			endif
 
-* Ajouter les dossiers au résultat
+			* Ajouter les dossiers au résultat
 			aAppend(@taSubFolders, @m.laFolders,, .t.) && bottom up
 		endif
 
@@ -1565,7 +1565,7 @@ if lFileAddrSkeleton(m.tcSkeleton)
 	adir(laFiles, m.tcSkeleton, '', 1)
 	lcResult = cListOfArray(@m.laFiles, m.tcSep, 1)
 
-* Si dossiers contenus
+	* Si dossiers contenus
 	if lTrue(m.tlRecurse);
 	 and aClear(@m.laFiles);
 	 and aSubFolders(@m.laFiles, justpath(m.tcSkeleton), '', .t., .t.) > 0
@@ -1597,7 +1597,7 @@ if vartype(m.tcFileAddr) == 'C'
 			lcStem = juststem(m.lcResult)
 			lcExt = justext(m.lcResult)
 
-* Ajouter un suffixe au Stem si le fichier existe déjà
+			* Ajouter un suffixe au Stem si le fichier existe déjà
 			lnTrial = 0
 			do while file(m.lcResult)
 				lnTrial = lnTrial + 1
@@ -1621,7 +1621,8 @@ lparameters tcFileName && nom de fichier à analyser
 return .t.;
  and vartype(m.tcFileName) = 'C';
  and !empty(juststem(m.tcFileName));
- and chrtran(m.tcFileName, CAR_INT_DS_NOM_FICH, space(0)) == m.tcFileName
+ and Lenc(m.tcFileName) <= 255; && "Individual components of a filename (i.e. each subdirectory along the path, and the final filename) are limited to 255 characters" && http://stackoverflow.com/questions/265769/maximum-filename-length-in-ntfs-windows-xp-and-windows-vista
+ and chrtran(m.tcFileName, CAR_INT_DS_NOM_FICH, '') == m.tcFileName
 
 * ========================================
 function lFileSkeleton && Squelette de nom de fichier valide
@@ -1681,7 +1682,7 @@ if vartype(m.tcFile) == 'C' and (file(m.tcFile) or directory(m.tcFile))
 	lcResult = iif(left(m.lcFile, 2) == '\\', '\\', space(0)); && network drive
 	 	+ upper(getwordnum(m.lcFile, 1, '\'))
 
-* Pour chaque dossier dans le chemin, et le fichier
+	* Pour chaque dossier dans le chemin, et le fichier
 	for lnWord = 2 to getwordcount(m.lcFile, '\')
 
 		lcResult = m.lcResult + '\'
@@ -1807,7 +1808,7 @@ if vartype(m.tcPath) == 'C'
 	endif
 	if m.llPath
 
-* Lire l'adresse courte
+		* Lire l'adresse courte
 		declare integer GetShortPathName in Win32API;
 		  string @lpszLongPath,	;
 		  string @lpszShortPath,;
@@ -1842,7 +1843,7 @@ if vartype(m.tcFileAddrSkel)='C' ;
 	lcPath = addbs(justpath(tcFileAddrSkel))
 	if empty(m.lcPath) or lDir(m.lcPath, .T.)
 
-* Lire la racine du nom sans le nÂ° de version éventuel
+		* Lire la racine du nom sans le nÂ° de version éventuel
 		local lcStem, lcExt
 		lcStem = upper(juststem(m.tcFileAddrSkel))
 		lcExt = upper(justext(m.tcFileAddrSkel))
@@ -1850,45 +1851,45 @@ if vartype(m.tcFileAddrSkel)='C' ;
 			lcStem = left(m.lcStem, len(m.lcStem)-1)
 		enddo
 
-* Si au moins un fichier a la même racine de nom
+		* Si au moins un fichier a la même racine de nom
 		local lcSkel, lnFiles
 		local array laFiles[1]
 		lcSkel = m.lcStem + iif (right (m.lcStem, 1) = '*', space(0), '*') + '.' + m.lcExt
 		lnFiles = adir(laFiles, m.lcPath + m.lcSkel)
 		if m.lnFiles > 0
 
-* Pour chaque fichier trouvé,
+			* Pour chaque fichier trouvé,
 			local lnFile, lcSuffixe
 			for lnFile = m.lnFiles to 1 step -1
 
-* Lire le suffixe du stem du fichier
+				* Lire le suffixe du stem du fichier
 				lcSuffixe = strtran(upper(juststem(laFiles[lnFile, 1])), m.lcStem, space(0))	&&	élimine la 'racine'
 				lcSuffixe = chrtran(m.lcSuffixe, ' _-', space(0))	&&	élimine d'éventuels caractères de séparation
 
-* Si le suffixe n'est composé que de chiffres ou est vide (fichier original)
+				* Si le suffixe n'est composé que de chiffres ou est vide (fichier original)
 				if lDigits(m.lcSuffixe) ;
 				 or empty(m.lcSuffixe)
 
-* Stocker le numéro de version dans la deuxième colonne du tableau (à la place de la taille)
+					* Stocker le numéro de version dans la deuxième colonne du tableau (à la place de la taille)
 					laFiles[lnFile, 2] = val(m.lcSuffixe)
 
-* Sinon, supprimer le fichier de la liste
+				* Sinon, supprimer le fichier de la liste
 				else
 					adel(laFiles, m.lnFile)
 					lnFiles = m.lnFiles - 1
 				endif
 			endfor
 
-* Si au moins un fichier est valide
+			* Si au moins un fichier est valide
 			if m.lnFiles > 0
 
-* Ignoer les fichiers invalides
+				* Ignoer les fichiers invalides
 				dimension laFiles[m.lnFiles, Alen(laFiles, 2)]
 
-* Trier les fichiers valides par nÂ° de version croissant
+				* Trier les fichiers valides par nÂ° de version croissant
 				asort(laFiles, 2)	&&	Trie sur la deuxième colonne
 
-* Le dernier fichier est celui cherché
+				* Le dernier fichier est celui cherché
 				lcResult = m.lcPath + laFiles[m.lnFiles, 1]
 				tnVersion = laFiles[m.lnFiles, 2]
 			endif
@@ -1937,14 +1938,14 @@ llResult = vartype(m.tcFileAddr) = 'C' and lFile(m.tcFileAddr)
 assert m.llResult message program() + CRLF + "Adresse de fichier invalide : " + transform(m.tcFileAddr)
 if m.llResult
 
-* Si un projet et sa collection de fichiers peuvent être trouvés
+	* Si un projet et sa collection de fichiers peuvent être trouvés
 	local loFiles
 	loFiles = oProjectFiles(m.toProject)
 	llResult = not isnull(m.loFiles)
 	assert m.llResult message program() + CRLF + "Aucun projet courant ou spec de projet invalide : " + transform(m.toProject)
 	if m.llResult
 
-* Si le fichier n'est pas déjà dans le projet
+		* Si le fichier n'est pas déjà dans le projet
 		local lcFileAddr, loFile, llFile
 		lcFileAddr = c83Address(m.tcFileAddr)
 		for each loFile in m.loFiles
@@ -1986,13 +1987,13 @@ if m.llResult
 				endif
 			endif
 
-* Ajouter le fichier au projet
+			* Ajouter le fichier au projet
 			local llInclude, loFile
 			llInclude = uDefault(m.tlInclude, .f.)
 			loFile = m.loFiles.add(m.tcFileAddr)
 			loFile.Exclude = not m.llInclude
 
-* Si le ficher est une table ouverte, rouvrir comme précédemment
+			* Si le ficher est une table ouverte, rouvrir comme précédemment
 			if m.llUsed
 				use (m.tcFileAddr) in 0 alias(m.lcAlias) &lcExclusive &lcOrder
 			endif
