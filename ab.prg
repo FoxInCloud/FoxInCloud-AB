@@ -200,10 +200,18 @@ RETURN Iif(aClear(@m.taSrce);
 			+	', Graphics\arrows-gray-black.png';
 			+	', Graphics\arrowdoubleleft.png';
 			+	', Graphics\arrowdoubleright.png';
+			+	', Graphics\refreshblue32.png';
+			+	', Graphics\prefirst.png';
+			+	', Graphics\prelast.png';
+			+	', Graphics\preprev.png';
+			+	', Graphics\prenext.png';
 		, 1, ',');
 	, 0)
 
-#IF .F. && copier coller dans awOOP.prg::awAdapter::Adapt_abSrceCopy()
+
+
+
+#IF .F. && copier coller dans modify command awOOP.prg > awAdapter.Adapt_abSrceCopy()
 
 EXTERNAL FILE; && pour avoir le code source même si l'app est encrypté
 			ab.h;
@@ -242,6 +250,11 @@ EXTERNAL FILE; && pour avoir le code source même si l'app est encrypté
 		, Graphics\arrows-gray-black.png;
 		, Graphics\arrowdoubleleft.png;
 		, Graphics\arrowdoubleright.png;
+		, Graphics\refreshblue32.png;
+		, Graphics\prefirst.png;
+		, Graphics\prelast.png;
+		, Graphics\preprev.png;
+		, Graphics\prenext.png;
 
 #ENDIF
 * ========================================
