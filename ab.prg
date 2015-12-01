@@ -1,7 +1,7 @@
 * ab.prg
 * =====================================================
 * (c) Abaque SARL, 66 rue Michel Ange - 75016 Paris - France
-* contact@FoxInCloud.com - http://www.FoxInCloud.com/ - +33 9 53 41 90 90
+* contact@FoxInCloud.com - http://foxincloud.com/ - +33 9 53 41 90 90
 * -----------------------------------------------------
 * Ce logiciel est distribué sous GNU General Public License, tel quel, sans aucune garantie
 * Il peut être utilisé et/ou redistribué sans restriction

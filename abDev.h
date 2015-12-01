@@ -25,7 +25,7 @@
 #DEFINE DOS_FFC			Home(1) + 'FFC\'
 
 * Dossiers à exclure des traitements batch
-#DEFINE FOLDERS_EXCLUDE	'ancien,_ancien,anciens,_anciens,old,sauve,_sauve,save,_save,bak,back,tmp,temp,_temp';
+#DEFINE FOLDERS_EXCLUDE	'save,_save,old,_old,bak,back,_back,tmp,_tmp,temp,_temp,ancien,_ancien,anciens,_anciens,sauve,_sauve';
 	 + ',source,_source,script,scripts,image,images,screenshots,doc,docs,test'
 
 *!*	declare integer ShellExecute IN Shell32.dll; && If the function succeeds, it returns a value greater than 32

@@ -1,7 +1,7 @@
 * abDev.prg
 * =====================================================
 * (c) Abaque SARL, 66 rue Michel Ange - 75016 Paris - France
-* contact@FoxInCloud.com - http://www.FoxInCloud.com/ - +33 9 53 41 90 90
+* contact@FoxInCloud.com - http://foxincloud.com/ - +33 9 53 41 90 90
 * -----------------------------------------------------
 * Ce logiciel est distribué sous GNU General Public License, tel quel, sans aucune garantie
 * Il peut être utilisé et/ou redistribué sans restriction
@@ -50,7 +50,7 @@ dimension aaLog[;
 
 anCols = 0
 
-acLine = space(0) && Contenu de la ligne courante
+acLine = '' && Contenu de la ligne courante
 anLine = 0 && N° de la ligne courante
 anDataLines = 0 && Nombre de lignes contenant des données
 
@@ -58,10 +58,10 @@ acWarnings = '' && Avertissements déjà émis
 anWarnings = 0  && Avertissements déjà émis
 
 * Adresses des fichiers
-acTxtLogAddr = space(0)
-acWarnTxtLogAddr = space(0)
-acDBFlogAddr = space(0)
-acDBFlogAlias = space(0)
+acTxtLogAddr = ''
+acWarnTxtLogAddr = ''
+acDBFlogAddr = ''
+acDBFlogAlias = ''
 
 alParentPjFiles = .f. && Parent object has a reference to project files collection
 alDocumentView = .f.
@@ -245,7 +245,7 @@ lparameters tuLog && [.T.] Nom ou adresse du fichier de compte-rendu texte, .T. 
 
 local lcSys16, lcResult
 
-lcResult = space(0)
+lcResult = ''
 lcSys16 = sys(16,0)
 if not empty(m.lcSys16)
 
@@ -253,7 +253,7 @@ if not empty(m.lcSys16)
 
 	lcLogPathAuto = addbs(cModuleInfo(m.lcSys16, 'Path'))
 	lcLogStemAuto = cModuleInfo(m.lcSys16, 'Name')
-	store space(0) to m.lcLogPath, m.lcLogStem
+	store '' to m.lcLogPath, m.lcLogStem
 
 	do case
 
@@ -294,7 +294,7 @@ if m.this.anLine = 0 && possible only if no line was displayed yet
  	lnResult = this.aColAdd()
 
  	local lcHeader, lnColWidth
- 	lcHeader = uDefault(m.tcHeader, space(0))
+ 	lcHeader = uDefault(m.tcHeader, '')
  	lnColWidth = uDefault(m.tnColWidth, max(10, len(m.lcHeader)))
 
 	this.aaLog[L_cHEADER, m.lnResult] = m.lcHeader
@@ -415,10 +415,10 @@ if m.llResult
 	local luContent, llExpand, llNoDisplay, lcFormat, lcContent, lnColWidth
 
 	* Donner leur valeur par défaut aux paramètres optionnels
-	luContent = iif(pcount() >= 2, m.tuContent, space(0))
+	luContent = iif(pcount() >= 2, m.tuContent, '')
  	llExpand = lTrue(m.tlExpand)
 	llNoDisplay = lTrue(m.tlNoDisplay)
-	lcFormat = iif(pcount() >= 5 and vartype(m.tcFormat) == 'C', m.tcFormat, space(0))
+	lcFormat = iif(pcount() >= 5 and vartype(m.tcFormat) == 'C', m.tcFormat, '')
 	lcFormat = evl(m.lcFormat, this.aaLog[L_cFORMAT, m.lnCol])
 
  		* Si la colonne a une largeur positive
@@ -496,7 +496,7 @@ tcFormat = evl(m.tcFormat, '')
 
 	lcResult = padr(m.lcResult, m.tnColWidth, space(1))
 else
- 	lcResult = space(0)
+ 	lcResult = ''
 endif
 
  	return m.lcResult
@@ -581,7 +581,7 @@ local lcLineOut, lnDisplayWidth;
 
 
 * Pour chaque colonne
-lcLineOut = space(0)
+lcLineOut = ''
 store 0 to m.lnDisplayWidth, m.lnColsWidth
 for m.lnCol = 1 to alen(this.aaLog, 2)
 
@@ -613,7 +613,7 @@ for m.lnCol = 1 to alen(this.aaLog, 2)
 endfor
 
 if m.llResult
-	this.acLine = m.lcLineOut + iif(m.llLeftBar, '|', space(0))
+	this.acLine = m.lcLineOut + iif(m.llLeftBar, '|', '')
 	this.lineShow(m.tlHeader)
 endif
 
@@ -626,7 +626,7 @@ lparameters tlHeader && [.F.] Afficher l'en-tête
 if m.this.alConsole
 
 	activate screen
-*!*			?? Space(0) AT 0 && bug de TEXT TO m.lcResult TEXTMERGE NOSHOW
+*!*			?? '' AT 0 && bug de TEXT TO m.lcResult TEXTMERGE NOSHOW
 	?? space(1) at 0 && bug de TEXT TO m.lcResult TEXTMERGE NOSHOW
 
 	if lTrue(m.tlHeader)
@@ -699,7 +699,7 @@ for m.lnCol = 1 to alen(this.aaLog, 2)
 	this.aaLog[L_uVALUE, m.lnCol] = .null.
 endfor
 
-this.acLine = space(0)
+this.acLine = ''
 
 * -------------------------------------------------
 procedure Warning && Affiche un avertissement dans une fenêtre "WAIT WINDOW", ajoute au compte-rendu des avertissements si nouveau
@@ -733,7 +733,7 @@ else && blank line
 	* Clear warning
 	wait clear
 	llWarnNew = .t.
-	lcWarning = space(0)
+	lcWarning = ''
 
 endif
 
@@ -756,7 +756,7 @@ lparameters tlLeftBars && [.F.] Tracer une barre verticale au début de la nouvel
 
 local lnCol, lnColWidth, llLeftBar, lcResult
 
-lcResult = space(0)
+lcResult = ''
 for m.lnCol = 1 to alen(this.aaLog, 2)
 
 	llLeftBar = m.tlLeftBars and this.aaLog[L_lBORDER, m.lnCol]
@@ -772,7 +772,7 @@ for m.lnCol = 1 to alen(this.aaLog, 2)
 	endif
 endfor
 
-return iif(m.llResult, m.lcResult + iif(m.llLeftBar, '|', '-'), space(0))
+return iif(m.llResult, m.lcResult + iif(m.llLeftBar, '|', '-'), '')
 
 * -------------------------------------------------
 procedure DBFlogCreate && Crée la table de compte-rendu
@@ -783,7 +783,7 @@ local lcFields, lnCol;
 
 if m.this.anCols > 0
 
-	lcFields = space(0)
+	lcFields = ''
 	for m.lnCol = 1 to this.anCols
 		lcFieldName = cVFPname (this.aaLog[L_cHEADER, m.lnCol], 10)
 		lcFieldType = uDefault(alltrim(this.aaLog[L_cTYPE, m.lnCol]), 'C')
@@ -827,7 +827,7 @@ if m.llResult
 	* Pour chaque colonne
 	local llAllEmpty, lnCol, lcFieldName, luFieldValue, lcFieldType, lnFieldLength, lcFieldExp, lnField, lcAlter
 	llAllEmpty = .t.
-	lcAlter = space(0)
+	lcAlter = ''
 	for lnCol = 1 to m.lnCols
 
 		* Déterminer les caractéristiques du champ pouvant contenir la donnée
@@ -988,7 +988,7 @@ tlCase = lTrue(m.tlCase)
 local llProc, lcAddr, lcProc, laMembers[1], lnMembers, llMethod;
 , llResult, lcResult
 
-lcResult = space(0)
+lcResult = ''
 
 * Si le paramètre requis est valide
 llResult = vartype(m.tcSys16) = 'C'
@@ -1072,7 +1072,7 @@ lparameters ;
 
 local lnLevelHere, lcSys16, lcResult
 
-lcResult = space(0)
+lcResult = ''
 
 * Si ce module est appelé par un module appelé
 lnLevelHere = program(-1) && current program level
@@ -1145,7 +1145,7 @@ lparameters ;
 tlCurrent = lTrue(m.tlCurrent)
 
 local lnLevelHere, lnLevel, lcResult
-lcResult = space(0)
+lcResult = ''
 
 * Si cCallingModules est appelé par un module appelé
 lnLevelHere = program(-1) && current program level
@@ -1374,7 +1374,7 @@ nAppAddrMax = 0
 nProcessorMask = 0
 nProcessors = 0
 nProcessorType = 0
-cProcessorName = space(0)
+cProcessorName = ''
 nAllocationGranularity = 0
 nReserved = 0
 
@@ -1394,28 +1394,28 @@ nAvailability = 0
 nCpuStatus = 0
 nCurrentClockSpeed = 0
 nDataWidth = 0
-cDescription = space(0)
-cDeviceID = space(0)
+cDescription = ''
+cDeviceID = ''
 nExtClock = 0
 nFamily = 0
 nL2CacheSize = 0
 nL2CacheSpeed = 0
 nLevel = 0
 nLoadPercentage = 0
-cManufacturer = space(0)
+cManufacturer = ''
 nMaxClockSpeed = 0
-cProcessorFullName = space(0)
-cPNPDeviceID = space(0)
-cProcessorID = space(0)
+cProcessorFullName = ''
+cPNPDeviceID = ''
+cProcessorID = ''
 nProcessorType = 0
 nRevision = 0
-cRole = space(0)
-cSocketDesignation = space(0)
+cRole = ''
+cSocketDesignation = ''
 nStatusInfo = 0
-cStepping = space(0)
-cUniqueId = space(0)
+cStepping = ''
+cUniqueId = ''
 nUpgradeMethod = 0
-cVersion = space(0)
+cVersion = ''
 nVoltageCaps = 0
 
 * ------------------------------------
@@ -1592,7 +1592,7 @@ lnSeconds = seconds() - m.lnSeconds
 
  local i, lnLongVal, lcResult
 
- lcResult = space(0)
+ lcResult = ''
  lnLongVal = m.tnLongVal
  for i = 24 to 0 step -8
     lcResult = chr(int(m.lnLongVal/(2^m.i))) + m.lcResult
@@ -1630,7 +1630,7 @@ if vartype(m.tnSeconds) == 'N' and m.tnSeconds >= 0
  		+ " ms"
 else
 
-	return space(0)
+	return ''
 endif
 
 * ------------------------------------
@@ -1737,7 +1737,7 @@ lparameters ;
 	tcVFPname, ; && Nom VFP à valider
 	tnLength && [len(tcVFPname)] Longueur maximale du nom (par ex. 10 pour un nom de champ de table libre)
 local lcResult
-lcResult = space(0)
+lcResult = ''
 
 if vartype(m.tcVFPname) = 'C' ;
  and not empty(m.tcVFPname)
@@ -1747,7 +1747,7 @@ if vartype(m.tcVFPname) = 'C' ;
 	lcVFPname = cEuroANSI(alltrim(m.tcVFPname))
 
 	* Start with '_' if first is a digit
-	lcVFPname = iif(isdigit(m.lcVFPname), '_', space(0)) + m.lcVFPname
+	lcVFPname = iif(isdigit(m.lcVFPname), '_', '') + m.lcVFPname
 
 	* Turn characters neither digit or letter to '_'
 	local lnCar, lcCar
@@ -1759,7 +1759,7 @@ if vartype(m.tcVFPname) = 'C' ;
 
 	* Remove duplicate underscores
 	lcResult = cRepCharDel(m.lcResult, '_')
-	lcResult = iif(m.lcResult == '_', space(0), m.lcResult)
+	lcResult = iif(m.lcResult == '_', '', m.lcResult)
 
 	* Trim right is required
 	if vartype(m.tnLength) = 'N' ;
@@ -1834,7 +1834,7 @@ lparameters tcCodeLine && Ligne de code VFP
 
 local lcCodeLine, lnProc, lnFunc, llParm, lcResult && 'P' ou 'F' ou vide si impossible de le définir
 
-lcResult = space(0)
+lcResult = ''
 llParm = vartype(m.tcCodeLine) == 'C'
 assert m.llParm message cAssertMsg(textmerge([Invalid parameter type]))
 if m.llParm and lProcLine(m.tcCodeLine)
@@ -1926,7 +1926,7 @@ local lcResult; && Commentaire dans la ligne de code
 , llResult;
 , lnAt, lnAt1;
 
-lcResult = space(0)
+lcResult = ''
 
 * Si la ligne de code est valide
 tcCodeLine = cCodeLineClean(m.tcCodeLine) && Ligne de code sans caractères parasites
@@ -1997,7 +1997,7 @@ lparameters ;
 local laInst[1], lcInst, lcInst_, llCRLF;
 , llResult, lcResult
 
-lcResult = space(0)
+lcResult = ''
 
 llResult = vartype(m.tcInsts) == 'C'
 assert m.llResult message cAssertMsg(textmerge([Invalid code block: <<m.tcInsts>>]))
@@ -2010,7 +2010,7 @@ if m.llResult
 
 			lcInst_ = ltrim(m.lcInst, space(1), chr(9))
 			lcResult = m.lcResult + iif(left(m.lcInst_, 1) == '*' or left(m.lcInst_, 2) == '&'+'&' or upper(left(m.lcInst_, 5)) == 'NOTE ';
-				, space(0);
+				, '';
 				, iif(m.tlInLineCommentKeep, m.lcInst, cInLineCommentStripped(m.lcInst)) + CRLF;
 				)
 		endfor
@@ -2130,7 +2130,7 @@ return createobject('abON', m.tcSetting, m.tvValueNew)
 define class abON as GA_LIGHTWEIGHT_CLASS of abGA.prg && Saves and restores ON ...
 * =================================================
 
-cSetting = space(0)
+cSetting = ''
 vValueOld = .null.
 
 * ------------------------------------
@@ -2455,7 +2455,7 @@ try && aLinesCols() may not be in scope
 	else
 		lnResult = aLinesCols(; && very long ! - to be optimized
 			  @m.laResult;
-			, upper(chrtran(cInLineCommentStripped(m.lcUnsupported + CRLF + m.lcUntested), space(1), space(0)));
+			, upper(chrtran(cInLineCommentStripped(m.lcUnsupported + CRLF + m.lcUntested), space(1), ''));
 			, ',';
 			, 'CLC';
 			)
@@ -2585,7 +2585,7 @@ for each m.lcSet in m.laSets
 		lvValueOld = m.loSet.vValueOld
 		lcParm2 = m.loSet.cParm2
 	else
-		store space(0) to m.lcSetting, m.lvValueOld, m.lcParm2
+		store '' to m.lcSetting, m.lvValueOld, m.lcParm2
 	endif
 
 
@@ -2598,7 +2598,7 @@ for each m.lcSet in m.laSets
 	if m.llSet
 		lvValueNew = evaluate('Set("' + m.lcSetting + '"' + m.lcParm2 + ')')
 		lvValueNew = iif(upper(m.lcSetting) == 'DEFAULT', m.lvValueNew + curdir(), m.lvValueNew)
-		lvValueNew = iif(upper(m.lcSetting) == 'PATH', chrtran(m.lvValueNew, ['"], space(0)), m.lvValueNew)
+		lvValueNew = iif(upper(m.lcSetting) == 'PATH', chrtran(m.lvValueNew, ['"], ''), m.lvValueNew)
 		llRestore = m.lvValueOld == m.lvValueNew
 		llSet = m.llRestore
 	endif
@@ -2775,8 +2775,8 @@ lnVersion = version(5)
 
 lcSets = '';
 	+ m.lcSetsVFP7;
-	+ iif(m.lnVersion >= 800, CRLF + m.lcSetsVFP8, space(0));
-	+ iif(m.lnVersion >= 900, CRLF + m.lcSetsVFP9, space(0))
+	+ iif(m.lnVersion >= 800, CRLF + m.lcSetsVFP8, '');
+	+ iif(m.lnVersion >= 900, CRLF + m.lcSetsVFP9, '')
 lcSets = strtran(m.lcSets, CRLF2, CRLF)
 
 lnResult = alines(m.taSets, m.lcSets)
@@ -3142,7 +3142,7 @@ lparameters ;
 	tcFuncCall,; && Chaîne contenant un appel de fonction
 	tcParm && Chaîne à ajouter comme paramètre (ex. '@MonParm') /!\ non vérifié
 local llResult, lcResult
-lcResult = space(0)
+lcResult = ''
 
 llResult = vartype(m.tcFuncCall) == 'C'
 if m.llResult
@@ -3155,7 +3155,7 @@ if m.llResult
 
 			local lcParm
 			lcParm = alltrim(m.tcParm)
-			lcParm = iif(left(m.lcParm, 1) == ',', space(0), ',') + m.lcParm
+			lcParm = iif(left(m.lcParm, 1) == ',', '', ',') + m.lcParm
 			lcResult = left(m.lcResult, len(m.lcResult) - 1) + m.lcParm + ')'
 		endif
 	endif
@@ -3191,7 +3191,7 @@ if vartype(m.toException) == 'O' and type('m.toException.BaseClass') == 'C' and 
 					cLangUser() = 'fr',	[ (<<Iif('...' $ .LineContents, 'code source N/D', m.lcResult)>>)],; && copy-paste this line to add another language support
 															[ (<<Iif('...' $ .LineContents, 'source code N/A', m.lcResult)>>)]; && default: English
 				));
-			, space(0);
+			, '';
 			)
 		luUserValue = iif(vartype(.uservalue) == 'O' and proper(.uservalue.baseclass) == 'Exception', cException(.uservalue), .uservalue)
 		lcResult = textmerge(icase(;
@@ -3230,7 +3230,7 @@ procedure FilesCompile && Compile des fichiers d'après un squelette
 lparameters ;
 	tcFilesSkeleton,; && Squelette d'adresse de fichiers
 	tcFilesFailed && @ [''] Fichiers dont la compilation a échoué
-tcFilesFailed = space(0)
+tcFilesFailed = ''
 
 local lnFiles, laFiles[1], llResult, lnResult && Nombre de fichiers compilés avec succès
 lnResult = 0
@@ -3292,7 +3292,7 @@ lparameters ;
 	tcClause,; && [''] Clauses de compilation (pour *.prg)
 	tnResult && [0] @ nombre d'erreurs de compilation
 tcResult = ''
-tcClause = evl(m.tcClause, space(0))
+tcClause = evl(m.tcClause, '')
 tnResult = 0
 
 local llResult;
@@ -3385,7 +3385,7 @@ if m.llResult
 					cLangUser() = 'fr',	[Fichier '<<JustFname(m.tcFileAddr)>>'],; && copy-paste this line to add another language support
 															[File '<<JustFname(m.tcFileAddr)>>']; && default: English
 				));
-			+ iif(empty(m.tcClause), space(0), ' - ' + m.tcClause)
+			+ iif(empty(m.tcClause), '', ' - ' + m.tcClause)
 
 		?? chr(7)
 	endtry
@@ -3591,7 +3591,7 @@ lparameters tcProject && Nom du projet tel qu'il apparaît dans sa barre de titre
 
 local loProject as project, lcProject, llResult, lcResult && Adresse du projet pour le réouvrir ultérieurement
 
-lcResult = space(0)
+lcResult = ''
 llResult = vartype(m.tcProject) == 'C' and not empty(m.tcProject)
 assert m.llResult message cAssertMsg(textmerge([Invalid project specification : <<cLitteral(m.tcProject)>>]))
 if m.llResult and _vfp.projects.count > 0
@@ -4353,7 +4353,7 @@ lcSys16 = sys(16, program(-1) -1) && calling procedure
 lcProcFile = cModuleInfo(m.lcSys16, 'Address', .t.)
 lcProcName = cModuleInfo(m.lcSys16, 'Name', .t.)
 lcProcs = forceext(m.lcProcFile, 'txt')
-strtofile(space(0), m.lcProcs) && vide la liste
+strtofile('', m.lcProcs) && vide la liste
 
 * Tabuler les éléments contenus dans le fichier source
 lnProc = aprocinfo(laProc, forceext(m.lcProcFile, 'PRG')) && 0 (default) - Populates the array with all document information.
@@ -4522,7 +4522,7 @@ if m.llResult
 		this.cResultAddr = cABmoduleTestAddr(m.lcModule)
 		this.cCoverageAddr = forceext(this.cResultAddr, 'cov.log')
 	else
-		store space(0) to this.cModule, this.cResultAddr, this.cCoverageAddr
+		store '' to this.cModule, this.cResultAddr, this.cCoverageAddr
 	endif
 endif
 
@@ -4540,7 +4540,7 @@ hidden function cModuleDefault && Nom du module à tester d'après le nom du modul
 lparameters tcCallingModule && Se termine normalement par '_Test'
 
 local lcTest, lnTest, lcResult
-lcResult = space(0)
+lcResult = ''
 
 if vartype(m.tcCallingModule) == 'C'
 
@@ -4686,7 +4686,7 @@ lparameters ;
 	tnParms && Nombre de paramètres passés à this.test()
 
 local lcResult && Liste de paramètres
-lcResult = space(0)
+lcResult = ''
 
 if m.tnParms > 0
 
@@ -4878,7 +4878,7 @@ return m.llResult
 hidden function cResult && Résultat de test(s)
 
 local lcResult
-lcResult = space(0)
+lcResult = ''
 
 * Si le module est défini
 if .t.;
@@ -4923,8 +4923,8 @@ if .t.;
 ===========================================
 <<Datetime()>>
 Module : <<DisplayPath(m.this.cAddress, 50)>>!<<this.cModule>>()
-Résultats de <<m.this.nTest>> test<<Iif(this.nTest = 1, Space(0), 's')>> dont <<m.lnCoverage>> avec coverage dans '<<m.this.cCoverageAddr>>'
-<<Iif(m.lnCoverageLess > 0, "Temps d'exécution sans coverage Mini | Moyen | Maxi : " + this.cMS(m.lnElapsedMin) + '|' + this.cMS(m.lnElapsedAvg) + '|' + this.cMS(m.lnElapsedMax), Space(0))>>
+Résultats de <<m.this.nTest>> test<<Iif(this.nTest = 1, '', 's')>> dont <<m.lnCoverage>> avec coverage dans '<<m.this.cCoverageAddr>>'
+<<Iif(m.lnCoverageLess > 0, "Temps d'exécution sans coverage Mini | Moyen | Maxi : " + this.cMS(m.lnElapsedMin) + '|' + this.cMS(m.lnElapsedAvg) + '|' + this.cMS(m.lnElapsedMax), '')>>
 
 		ENDTEXT
 
@@ -4959,7 +4959,7 @@ Résultats de <<m.this.nTest>> test<<Iif(this.nTest = 1, Space(0), 's')>> dont <<
 
 					* S'il y en a des paramètres, lister leurs valeurs sous forme de constantes
 					lnParms = this.aTest[m.lnTest, NCOLSFIXES]
-					lcParms = space(0)
+					lcParms = ''
 					if m.lnParms > 0
 						for liParm = 1 to m.lnParms
 							lcParms = m.lcParms + CRLF;
@@ -5218,7 +5218,7 @@ lparameters ;
 
 local llResult && L'environnement VFP est identique
 llResult = .null.
-tcModifs = space(0)
+tcModifs = ''
 
 * Si le statut a bien été tabulé après test
 local lnStatusCount
@@ -5338,19 +5338,19 @@ function cExprEval && Expression pour évaluer une expression
 lparameters tcExpr && Expression
 
 local laOp[1], lcOp, lcOpU, lcExpr, lcResult
-store space(0) to lcExpr, lcResult
+store '' to lcExpr, lcResult
 
 * Pour chaque opérande de l'expression
 if alines(laOp, m.tcExpr, 1, '+') > 0
 	for each lcOp in laOp
 
 		* Si l'opérande est un Chr()
-		lcOpU = chrtran(upper(m.lcOp), space(1), space(0))
+		lcOpU = chrtran(upper(m.lcOp), space(1), '')
 		if left(m.lcOpU, 4) == 'CHR(' or inlist(m.lcOpU, 'CR', 'CRLF')
 
 			* Ajouter les opérandes accumulés au résultat
 			lcResult = cWords('+', m.lcResult, cExprEval_cOp(m.lcExpr), m.lcOp)
-			lcExpr = space(0)
+			lcExpr = ''
 		else
 			lcExpr = c2Words(m.lcExpr, '+', m.lcOp)
 		endif
@@ -5364,7 +5364,7 @@ return m.lcResult
 function cExprEval_cOp && Adapte un opérande d'une expression
 lparameters tcOp && Opérande
 
-return iif(empty(m.tcOp), space(0), textmerge([cLitteral(Evaluate(<<cLitteral(m.tcOp)>>))]))
+return iif(empty(m.tcOp), '', textmerge([cLitteral(Evaluate(<<cLitteral(m.tcOp)>>))]))
 
 * ==============================
 function uEval && Expression évaluée si possible
@@ -5381,16 +5381,17 @@ endtry
 return m.luResult
 
 * ==============================
-function cIndented && Texte indenté
+function cIndented && {fr} Texte indenté
 lparameters ;
-	tcCode,; && Texte à indenter
-	tcIndent,; && [tab] Caractère(s) d'indentation
-	tlEmptyDel,; && [.F.] Supprimer les lignes vides
-	tcCharEOL && [''] Caractère de fin de ligne
+	tcCode,; && {fr} Texte à indenter
+	tcIndent,; && [tab] {fr} Caractère(s) d'indentation
+	tlEmptyDel,; && [.F.] {fr} Supprimer les lignes vides
+	tcCharEOL && [''] {fr} Caractère de fin de ligne
+
 tcCode = iif(vartype(m.tcCode) == 'C', m.tcCode, '')
 tcIndent = iif(vartype(m.tcIndent) == 'C' and lenc(m.tcIndent) > 0, m.tcIndent, chr(9)) && Evl() ne marche pas sur space() et tab
 tlEmptyDel = lTrue(m.tlEmptyDel)
-tcCharEOL = evl(m.tcCharEOL, space(0))
+tcCharEOL = evl(m.tcCharEOL, '')
 
 return '';
 	+ m.tcIndent;
@@ -5410,6 +5411,7 @@ return '';
 			);
 		, cRepCharDel(m.tcIndent);
 		)
+endfunc
 
 * ==============================
 function cIndentedNo && Texte non indenté && /!\ à modifier pour fonctionner en multi-lignes
@@ -6086,7 +6088,7 @@ return isNullOrEmpty(m.value)
 endfunc
 
 * =============================================
-function envl && substitute value instead of an empty or null value
+function ENvl && substitute for an empty or null value
 lparameters value, substitute
 return iif(isNullOrEmpty(m.value), m.substitute, m.value)
 endfunc
@@ -6315,7 +6317,8 @@ this.lMinor = !this.lMajor and empty(m.this.patch) && minor release
 this.lPatch = m.this.patch > 0 && patch release
 
 && pre-release; http://semver.org/
-&& A pre-release version MAY be denoted by appending a hyphen and a series of dot separated identifiers immediately following the patch version; identifiers:
+&& A pre-release version MAY be denoted by appending a hyphen and a series of dot separated identifiers immediately following the patch version;
+&& pre-release identifiers:
 && - MUST comprise only ASCII alphanumerics and hyphen [0-9A-Za-z-].
 && - MUST NOT be empty.
 && Numeric identifiers MUST NOT include leading zeroes.
@@ -6978,6 +6981,33 @@ success = m.oSemVer.inc(m.release, m.Identifier) and m.oSemVer.version == m.vers
 assert m.success
 return m.success
 endfunc
+
+* -----------------
+function cSemVerInc && Incrémente une version mineure ou patch abSemVer
+lparameters version
+
+version = Evl(m.version, '2.21.1') && , '2.21.0'
+
+return; && copy next line, then execute ? AB(), cSemVerIncExprToXL_fr(), _cliptext, then paste into Excel cell
+Iif(Val(Substr(m.version, At(".", m.version, 2)+1, 10))=0, Left(m.version, At(".", m.version, 1)) + Ltrim(Str(Val(Substr(m.version, At(".", m.version, 1)+1, At(".", m.version, 2)-At(".", m.version, 1)-1))+1, 3)) + ".0", Left(m.version, At(".", m.version, 2)) + Ltrim(Str(Val(Substr(m.version, At(".", m.version, 2)+1, 10))+1, 3)))
+endfunc
+
+* -----------------
+procedure cSemVerIncExprToXL_fr && Formule Excel incrémentant une version abSemVer mineure ou patch
+_cliptext = '=' + Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(_cliptext;
+	, '".", m.version, 2', '".", m.version, At(".", m.version, 1)+1', 1, -1, 1);
+	, ',', ';');
+	, '; 3', '; "###"', 1, -1, 1);
+	, ' + ', '&', 1, -1, 1);
+	, 'Iif', 'si', 1, -1, 1);
+	, 'Empty', 'estvide', 1, -1, 1);
+	, 'Val', 'cNUM', 1, -1, 1);
+	, 'Substr', 'stxt', 1, -1, 1);
+	, 'Str', 'texte', 1, -1, 1);
+	, 'm.version', 'LC(-23)', 1, -1, 1);
+	, 'at', 'cherche', 1, -1, 1);
+	, 'ltrim', 'supprespace', 1, -1, 1);
+	, 'left', 'gauche', 1, -1, 1);
 
 * -----------------
 procedure UTF8fix1252 && corrige les caractères accentués dans un fichier converti par erreur en UTF8

@@ -1,7 +1,7 @@
 * abData.prg
 * =====================================================
 * (c) Abaque SARL, 66 rue Michel Ange - 75016 Paris - France
-* contact@FoxInCloud.com - http://www.FoxInCloud.com/ - +33 9 53 41 90 90
+* contact@FoxInCloud.com - http://foxincloud.com/ - +33 9 53 41 90 90
 * -----------------------------------------------------
 * Ce logiciel est distribué sous GNU General Public License, tel quel, sans aucune garantie
 * Il peut être utilisé et/ou redistribué sans restriction
@@ -448,7 +448,7 @@ do case
 case .f.;
  or !used(m.tcAlias);
  or cursorgetprop("Buffering", m.tcAlias) = 1;
- or !varSet(@m.lnRecCount, reccount(m.tcAlias));
+ or !varSet(@m.lnRecCount, RecCount_(m.tcAlias));
  or empty(m.lnRecCount);
  or !varSet(@m.liRecno, Recno_(m.tcAlias));
  or !varSet(@m.lBufferDirty, m.liRecno < 0); && added record
@@ -1320,7 +1320,7 @@ if m.llResult
 
 		* Construire l'expression de jointure
 		local lnRecs, lnFields, lnField, lcField, lcJoin
-		lnRecs = reccount(m.lcAlias1)
+		lnRecs = RecCount_(m.lcAlias1)
 		lnFields = fcount(m.lcAlias1)
 		lcJoin = ''
 		for m.lnField = 1 to m.lnFields
@@ -1652,7 +1652,7 @@ if m.llResult
 && à implémenter
 
 			* Si la table a des enregistrements
-			llResult = reccount(m.lcAlias) > 0
+			llResult = RecCount_(m.lcAlias) > 0
 			assert m.llResult message cAssertMsg("La table n'a aucun enregistrement !" + CRLF + cLitteral(m.tuTable))
 			if m.llResult
 
@@ -3316,7 +3316,7 @@ if used(m.lcAlias)
 	endif
 
 	* SI LA TABLE EST SUR LE DERNIER ENREGISTREMENT, AJOUTER UN ENREGISTREMENT À LA FIN
-	if m.lnNoEnrCour = reccount ()		&&	la table est sur le dernier enregistrement : nous n'avons qu'à ajouter un enr.
+	if m.lnNoEnrCour = RecCount_()		&&	la table est sur le dernier enregistrement : nous n'avons qu'à ajouter un enr.
 		if m.llCarry
 			append from array laEnrCour
 		else
@@ -5037,7 +5037,7 @@ tcAlias = cAlias(evl(m.tcAlias, alias()), @m.llUsed)
 do case
 case !used(m.tcAlias)
 
-case reccount(m.tcAlias) < 1000
+case RecCount(m.tcAlias) < 1000
 
 	select max(&tcField) from (m.tcAlias) into array laResult && 50 ms pour 14.000 enr.
 	liResult = evl(laResult[1], 0)
@@ -6332,13 +6332,13 @@ assert m.llResult message cAssertMsg(icase(;
 	cLangUser() = 'fr',	[Alias introuvable :],; && copy-paste this line to add another language support
 											[Alias can't be found:]; && Default: English
 	) + cLitteral(m.tcAlias))
-if m.llResult and reccount(m.tcAlias) > 0
+if m.llResult and RecCount_(m.tcAlias) > 0
 
 	lcFilter = filter(m.tcAlias)
 	lcOrder = order(m.tcAlias)
 	if empty(m.lcFilter + m.lcOrder)
 
-		return reccount(m.tcAlias)
+		return RecCount_(m.tcAlias)
 
 	else
 
@@ -6450,7 +6450,7 @@ local lnRecs, llResult, lnResult
 lnResult = 0
 
 llResult = used(m.tcAlias)
-lnRecs = iif(m.llResult, reccount(m.tcAlias), 0)
+lnRecs = iif(m.llResult, RecCount_(m.tcAlias), 0)
 assert m.llResult message cAssertMsg(icase(;
 	cLangUser() = 'fr',	[Alias introuvable :],; && copy-paste this line to add another language support
 											[Alias can't be found:]; && Default: English
@@ -6826,6 +6826,49 @@ define class abRowBufferSave_Test as abUnitTest of abDev.prg
 
 
 * ========================================
+function abMaxRecords(tcAlias, nMaxRecords, result) && {en} Saves and restores an Alias' row buffer {fr} Sauve et rétablit le tampon d'enregistrement d'un Alias
+return createobject('abMaxRecords', m.tcAlias, m.nMaxRecords, @m.result)
+
+* ========================================
+define class abMaxRecords as GA_LIGHTWEIGHT_CLASS
+
+hidden cAlias, nMaxRecords
+* ----------------------------------------
+procedure Init
+lparameters ;
+  tcAlias as String;
+, tnMaxRecords as Integer; && [CursorGetProp("RecordsFetched")]
+, result as String
+
+local success as Boolean;
+, lcAlias as String;
+, lnMaxRecords as Integer;
+
+lcAlias = Alltrim(Iif(ga_Type_IsChar(m.tcAlias, .T.) and Used(m.tcAlias), m.tcAlias, Alias()))
+if .T.;
+ and (Used(m.lcAlias) or cResultAdd(@m.result, Textmerge([<<cL(m.tcAlias)>> is expected as a used Alias])));
+ and (lViewRemote(m.lcAlias) or cResultAdd(@m.result, Textmerge(['<<m.lcAlias>>' is expected as a remote view])));
+ and varSet(@m.lnMaxRecords, Iif(ga_Type_IsNumeric(m.tnMaxRecords), m.tnMaxRecords, CursorGetProp("RecordsFetched", m.lcAlias)));
+ and (ga_Type_IsInteger(m.lnMaxRecords) and m.lnMaxRecords > -1 or cResultAdd(@m.result, Textmerge([<<m.tnMaxRecords>> is expected as a Integer greater or equal to -1])));
+ and .T.
+
+	this.cAlias = m.lcAlias
+	this.nMaxRecords = CursorGetProp("MaxRecords", m.lcAlias)
+
+	success = CursorSetProp("MaxRecords", m.lnMaxRecords, m.lcAlias) or cResultAdd(@m.result, Textmerge([CursorSetProp("MaxRecords", <<m.lnMaxRecords>>, <<cL(m.lcAlias)>>) Failed]))
+endif
+return m.success
+endproc
+* ----------------------------------------
+procedure Destroy
+success = CursorSetProp("MaxRecords", m.this.nMaxRecords, m.this.cAlias)
+assert m.success
+endproc
+
+enddefine && class abMaxRecords
+* ========================================
+
+* ========================================
 function abRecno(tcAlias, tcError) && Sauve et rétablit Recno(<Alias>), USE <Alias> si nécessaire
 return createobject('abRecno', m.tcAlias, @m.tcError)
 
@@ -6871,7 +6914,7 @@ lparameters tcAlias && [Alias()]
 tcAlias = evl(m.tcAlias, alias())
 
 if used(m.tcAlias)
-	return iif(bof(m.tcAlias) or reccount(m.tcAlias) = 0, 0, recno(m.tcAlias))
+	return iif(bof(m.tcAlias) or RecCount_(m.tcAlias) = 0, 0, recno(m.tcAlias))
 else
 	error 13, transform(m.tcAlias)
 	return .null.
@@ -6883,6 +6926,7 @@ lparameters ;
 	tiRecno,; && n° d'enregistrement
 	tcAlias,; && [Alias()]
 	tcResult && @ Résultat (cumulatif)
+
 tcAlias = evl(m.tcAlias, alias())
 
 local llResult as Boolean;
@@ -6903,13 +6947,9 @@ if m.llResult
 && toujours tester si l'alias est dans la position recherchée avant de changer Recno()
 && pour éviter de valider le contenu du tampon
 
-	lnResult = iif(.t.;
-	 and lViewRemote(m.tcAlias);
-	 and cursorgetprop("FetchAsNeeded", m.tcAlias);
-	 and cursorgetprop("FetchSize", m.tcAlias) > 0;
-		, cursorgetprop("RecordsFetched", m.tcAlias);
-		, reccount(m.tcAlias);
-	)
+*	loMaxRecords = abMaxRecords(m.tcAlias) && , loMaxRecords as abMaxRecords of abData.prg
+
+	lnResult = RecCount_(m.tcAlias)
 
 	do case
 
@@ -6950,6 +6990,16 @@ assert m.llResult message cAssertMsg(m.lcResult)
 cResultAdd(@m.tcResult, m.lcResult)
 
 return m.llResult
+
+
+* ========================================
+function RecCount_(tcAlias) && RecCount() avec gestion des vues remote progressive fetch
+tcAlias = Iif(ga_Type_IsChar(m.tcAlias, .T.), m.tcAlias, Alias())
+return Iif(lViewRemote(m.tcAlias) and !CursorGetProp("FetchIsComplete", m.tcAlias);
+		, CursorGetProp("RecordsFetched", m.tcAlias);
+		, RecCount(m.tcAlias);
+		)
+endfunc
 
 * ========================================
 procedure EOFset && place un Alias sur eof()
@@ -7017,7 +7067,7 @@ local lnRec, llRec, lcRec, lcFldState, llResult
 
 tcAlias = iif(vartype(m.tcAlias) == 'C' and used(m.tcAlias), m.tcAlias, alias())
 lnRec = nRecnoAbs(m.tcAlias)
-tnRec = iif(vartype(m.tnRec) == 'N' and between(m.tnRec, 1, reccount(m.tcAlias)), m.tnRec, m.lnRec)
+tnRec = iif(vartype(m.tnRec) == 'N' and between(m.tnRec, 1, RecCount_(m.tcAlias)), m.tnRec, m.lnRec)
 llResult = m.tnRec = m.lnRec or inlist(cursorgetprop("Buffering", m.tcAlias), 4, 5)
 assert m.llResult message cAssertMsg(textmerge([l'alias <<m.tcAlias>> doit être en buffering de table]))
 if m.llResult
@@ -7879,7 +7929,7 @@ define class abDataSyncVFP as custom && Synchronise deux tables ou deux bases de
 		this.lResult = this.oResult.lTableSrce
 		if m.this.lResult
 
-			this.oResult.nRecsSrce = reccount(m.lcAliasSrce)
+			this.oResult.nRecsSrce = RecCount(m.lcAliasSrce)
 
 			* Si le champs de la Table source sont tous dans la Table destination et réciproquement
 			this.lResult = .f.;
@@ -8058,7 +8108,7 @@ define class abDataSyncVFP as custom && Synchronise deux tables ou deux bases de
 		if m.tlReplace
 			tcAliasDest = ExclusiveForce(m.tcAliasDest)
 			this.lResult = used(m.tcAliasDest)
-			if m.this.lResult and reccount(m.tcAliasDest) > 0
+			if m.this.lResult and RecCount(m.tcAliasDest) > 0
 				zap in (m.tcAliasDest)
 			endif
 			this.oResult.lDestExclusive = m.this.lResult
@@ -8435,3 +8485,4 @@ return upper(icase(;
 		'machine';
 	))
 endfunc
+

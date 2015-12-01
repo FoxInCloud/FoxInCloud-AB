@@ -1,7 +1,7 @@
 * abDate.prg
 * =====================================================
 * (c) Abaque SARL, 66 rue Michel Ange - 75016 Paris - France
-* contact@FoxInCloud.com - http://www.FoxInCloud.com/ - +33 9 53 41 90 90
+* contact@FoxInCloud.com - http://foxincloud.com/ - +33 9 53 41 90 90
 * -----------------------------------------------------
 * Ce logiciel est distribué sous GNU General Public License, tel quel, sans aucune garantie
 * Il peut être utilisé et/ou redistribué sans restriction
@@ -1049,7 +1049,9 @@ return m.lnResult
 
 * ================================================
 function cAgo && mention 'il y a'
-lparameters ttd && date or datetime
+lparameters ;
+  ttd; && {en} date or datetime
+, lShort && [.F.] {en} use abbreviations whenever possible
 
 local Result as string;
 , cType as string;
@@ -1060,9 +1062,11 @@ local Result as string;
 , cAgo as string;
 , cLangUser as string;
 
+lShort = lTrue(m.lShort)
 cType = vartype(m.ttd)
 
-if !m.cType $ 'DT'
+
+if !m.cType $ 'DT' or Empty(m.ttd)
 	return .null.
 
 else
@@ -1106,45 +1110,93 @@ else
 		endcase
 		store 0 to nAgo, nAgo_
 
+	case Empty(m.nAgo_)
+		cAgo = Iif(m.lShort;
+		, icase(;
+			m.cLangUser = 'fr',	"à l'inst.",; && copy-paste this line to add another language support
+													'just now'; && default: English
+			);
+		, icase(;
+			m.cLangUser = 'fr',	"à l'instant",; && copy-paste this line to add another language support
+													'just now'; && default: English
+			);
+		)
+
 	case m.nAgo_ < 60
-		cAgo = icase(;
+		cAgo = Iif(m.lShort;
+		, icase(;
+			m.cLangUser = 'fr',	'sec.',; && copy-paste this line to add another language support
+													'sec.'; && default: English
+			);
+		, icase(;
 			m.cLangUser = 'fr',	'seconde',; && copy-paste this line to add another language support
 													'second'; && default: English
-			)
+			);
+		)
 	case m.nAgo_ < (60*60)
 		nAgo_ = round(m.nAgo_ / 60, 0)
-		cAgo = icase(;
+		cAgo = Iif(m.lShort;
+		, icase(;
+			m.cLangUser = 'fr',	'min.',; && copy-paste this line to add another language support
+													'min.'; && default: English
+			);
+		, icase(;
 			m.cLangUser = 'fr',	'minute',; && copy-paste this line to add another language support
 													'minute'; && default: English
-			)
+			);
+		)
 	case m.nAgo_ < (60*60*24)
 		nAgo_ = round(m.nAgo_ / (60*60), 0)
-		cAgo = icase(;
+		cAgo = Iif(m.lShort;
+		, icase(;
+			m.cLangUser = 'fr',	'h.',; && copy-paste this line to add another language support
+													'h.'; && default: English
+			);
+		, icase(;
 			m.cLangUser = 'fr',	'heure',; && copy-paste this line to add another language support
 													'hour'; && default: English
-			)
+			);
+		)
 	case m.nAgo_ < (60*60*24*7)
 		nAgo_ = round(m.nAgo_ / (60*60*24), 0)
-		cAgo = icase(;
+		cAgo = Iif(m.lShort;
+		, icase(;
+			m.cLangUser = 'fr',	'j.',; && copy-paste this line to add another language support
+													'dy'; && default: English
+			);
+		, icase(;
 			m.cLangUser = 'fr',	'jour',; && copy-paste this line to add another language support
 													'day'; && default: English
-			)
+			);
+		)
 	case between(m.ttd, gomonth(date(), -1), gomonth(date(), 1))
 		nAgo_ = round(m.nAgo_ / (60*60*24*7), 0)
-		cAgo = icase(;
+		cAgo = Iif(m.lShort;
+		, icase(;
+			m.cLangUser = 'fr',	'sem.',; && copy-paste this line to add another language support
+													'w.'; && default: English
+			);
+		, icase(;
 			m.cLangUser = 'fr',	'semaine',; && copy-paste this line to add another language support
 													'week'; && default: English
-			)
+			);
+		)
 	otherwise
 		nAgo_ = abs(nMonths(m.ltd, m.ttd))
-		cAgo = icase(;
+		cAgo = Iif(m.lShort;
+		, icase(;
+			m.cLangUser = 'fr',	'm.',; && copy-paste this line to add another language support
+													'm.'; && default: English
+			);
+		, icase(;
 			m.cLangUser = 'fr',	'mois',; && copy-paste this line to add another language support
 													'month'; && default: English
-			)
+			);
+		)
 	endcase
 
 	return '';
-		+ icase(;
+		+ ICase(;
 			empty(m.nAgo),;
 				'',;
 			m.nAgo > 0,; && ttd is past
@@ -1158,11 +1210,11 @@ else
 					);
 			);
 		+ nEvl(evl(m.nAgo, ''), ltrim(str(m.nAgo_))+ ' ');
-		+ iif(m.nAgo_ > 1;
+		+ iif(m.nAgo_ > 1 and !m.lShort;
 			, trim(m.cAgo, 's') + 's';
 			, m.cAgo;
 			);
-		+ icase(;
+		+ ICase(;
 			empty(m.nAgo),;
 				'',;
 			m.nAgo > 0,; && ttd is past
@@ -1193,7 +1245,9 @@ loTest.Test('today', date())
 loTest.Test('yesterday', date()-1)
 loTest.Test('2 seconds ago', datetime()-2)
 loTest.Test('2 minutes ago', datetime()-2*60)
+loTest.Test('2 min. ago', datetime()-2*60, .T.)
 loTest.Test('2 hours ago', datetime()-2*60*60)
+loTest.Test('just now', datetime())
 
 cLangUser('fr')
 loTest.Test('après-demain', date()+2)

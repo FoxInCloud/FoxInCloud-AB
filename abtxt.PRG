@@ -1,7 +1,7 @@
 * abTxt.prg
 * =====================================================
 * (c) Abaque SARL, 66 rue Michel Ange - 75016 Paris - France
-* contact@FoxInCloud.com - http://www.FoxInCloud.com/ - +33 9 53 41 90 90
+* contact@FoxInCloud.com - http://foxincloud.com/ - +33 9 53 41 90 90
 * -----------------------------------------------------
 * Ce logiciel est distribué sous GNU General Public License, tel quel, sans aucune garantie
 * Il peut être utilisé et/ou redistribué sans restriction
@@ -278,7 +278,7 @@ local loTest as abUnitTest of abDev.prg
 loTest = newobject('abUnitTest', 'abDev.prg')
 
 loTest.Test('TOTO EST ENERVE', 'toto est  énervé')
-loTest.Test([CA C EST SUR LE SAVOIR FAIRE D ABAQUE EST IMMENSE], [Ã‡a c'est  sÃ»r, le savoir-faire d'Abaque est immense])
+loTest.Test([CA C EST SUR LE SAVOIR FAIRE D ABAQUE EST IMMENSE], [Ã‡a c'est  sùr, le savoir-faire d'Abaque est immense])
 loTest.Test(space(50), .null., 50)
 
 return loTest.Result()
@@ -546,7 +546,7 @@ lparameters ;
 	tlKeepEmpty,; && [tlLitterals] Include empty words
 	tlKeepNull,; && [tlLitterals] Include .NULL. words
 	tlKeepWeird,; && [.F.] Include words of type G/U
-	tlDistinct,; && [.F.] Ã‰limine les doublons
+	tlDistinct,; && [.F.] Élimine les doublons
 	tlLines,; && [.F.] Séparer les lignes (tableau taWords à 2 dimensions et m.tnCol = -1)
 	tnColFilter,; && [aucune] nÂ° de colonne contenant un filtre des lignes à lister
 	tlRtrimNot && [.F.] Ne pas supprimer les espaces en queue des éléments de type caractère
@@ -1519,8 +1519,8 @@ local loTest as abUnitTest of abDev.prg
 loTest = newobject('abUnitTest', 'abDev.prg')
 release European, EuroAnsi
 loTest.Test('hebete', 'hébété')
-loTest.Test('aaaeeeeioouu', 'àÃ¤Ã¢éèêÃ«ioÃ²ûÃ»')
-loTest.Test('AAAEEEEIOOUU', 'Ã€Ã„Ã‚Ã‰ÃˆÃŠÃ‹IOÃ’Ã™Ã›')
+loTest.Test('aaaeeeeioouu', 'àÃ¤Ã¢éèêÃ«ioÃ²ûù')
+loTest.Test('AAAEEEEIOOUU', 'Ã€Ã„Ã‚ÉÃˆÃŠÃ‹IOÃ’Ã™Ã›')
 loTest.Test(space(0), .t.)
 loTest.Test(space(0), space(0))
 loTest.Test(space(0), null)
@@ -1528,7 +1528,7 @@ loTest.Test(space(0), null)
 return loTest.Result()
 
 * ===================================================================
-function cRandPW && Mot de passe aléatoire sÃ»r selon indications Windows
+function cRandPW && Mot de passe aléatoire sùr selon indications Windows
 lparameters ;
 	tnLength,; && [14] Nombre de caractères
 	tnSep && [0] Espacer par groupe tnSep caractères à partir de la droite
@@ -2032,7 +2032,7 @@ return m.llResult
 function cListEdit && Ajoute ou supprime un élément d'une liste sans doublon
 lparameters ;
 	tcList,; && Liste à éditer
-	tcElts,; && Ã‰lément(s) à ajouter / supprimer
+	tcElts,; && Élément(s) à ajouter / supprimer
 	tlRemove,; && [.F.] Supprimer le ou les élément(s)
 	tcSep,; && [,] Séparateur de liste
 	tlCase && [.F.] Respecter la casse
@@ -2211,7 +2211,7 @@ loTest.Test(.t., 'suis', 'je+suis-décidément le meilleur')
 
 loTest.Test(.f., 'déci', 'je+suis-décidément le meilleur')
 loTest.Test(.f., 'deci', 'je+suis-décidément le meilleur')
-loTest.Test(.f., 'DÃ‰CI', 'je+suis-décidément le meilleur')
+loTest.Test(.f., 'DÉCI', 'je+suis-décidément le meilleur')
 
 loTest.Test(.t., 'nDOW', 'anDOW + cnDOW(nDOW)', .t., .t., @m.lnAtc)
 loTest.assert(15, lnAtc)
@@ -2407,13 +2407,13 @@ return loTest.Result()
 define class abRegExp as GA_LIGHTWEIGHT_CLASS && Expression régulière ; Implements VBScript.RegExp
 * ===================================================================
 
-&& RÃ‰GLAGES - cf. this.init() / this.setup()
+&& RÉGLAGES - cf. this.init() / this.setup()
 pattern = space(0) && Masque d'expression régulière
 IgnoreCase = .f. && Ignorer la casse dans les comparaisons
 global = .f. && Trouver toutes les occurrences ou la première seulement
 Multiline = .f. && Le texte comporte plusieurs lignes && ^ = iif(Multiline, line start, chain start) $ = iif(Multiline, line end, chain end)
 
-&& RÃ‰SULTATS
+&& RÉSULTATS
 nMatches = 0 && Nombre de résultats
 dimension Matches[1] && [index, match, submatches (collection), length]
 && .Matches[?, 1] = index
@@ -2500,7 +2500,7 @@ lparameters tlIgnoreCase && [.F.] Ignorer la casse dans les comparaisons
 if vartype(m.tlIgnoreCase) == 'L'
 	store m.tlIgnoreCase to this.IgnoreCase, this.oRegExp.IgnoreCase
 else
-	this.tag = m.tlIgnoreCase
+	this.tag = Cast(m.tlIgnoreCase as M)
 endif
 
 * -----------------------------------------------------------------
@@ -2510,7 +2510,7 @@ lparameters tlGlobal && [.F.] Trouver toutes les occurrences ou la première seul
 if vartype(m.tlGlobal) == 'L'
 	store m.tlGlobal to this.global, this.oRegExp.global
 else
-	this.tag = m.tlGlobal
+	this.tag = Cast(m.tlGlobal as M)
 endif
 
 * -----------------------------------------------------------------
@@ -2520,7 +2520,7 @@ lparameters tlMultiline && [.F.] Le texte comporte plusieurs lignes
 if vartype(m.tlMultiline) == 'L'
 	store m.tlMultiline to this.Multiline, this.oRegExp.Multiline
 else
-	this.tag = m.tlMultiline
+	this.tag = Cast(m.tlMultiline as M)
 endif
 
 * -----------------------------------------------------------------
@@ -2534,22 +2534,25 @@ this.PatternMatched = ''
 * -----------------------------------------------------------------
 procedure setup && Règle les options de recherche
 lparameters ;
-	tcPattern,; && [''] Expression régulière de recherche
-	tuIgnoreCase,; && [.F.] Ignorer la casse dans les comparaisons
-	tlGlobal,; && [.F.] Trouver toutes les occurrences ou la première seulement
-	tlMultiline && [.F.] Le texte comporte plusieurs lignes
+  tcPattern; && [''] Expression régulière de recherche
+, tuIgnoreCase; && [.F.] Ignorer la casse dans les comparaisons
+, tlGlobal; && [.F.] Trouver toutes les occurrences ou la première seulement
+, tlMultiline; && [.F.] Le texte comporte plusieurs lignes
 
 local lnParms
-lnParms = pcount()
+lnParms = Pcount()
 
-if m.lnParms > 0
+if Empty(m.lnParms)
+	return .f.
+else
 	this.pattern = m.tcPattern
 
 	if m.lnParms > 1
 
-		if vartype(m.tuIgnoreCase) == 'C'
-
-			tuIgnoreCase = lower(alltrim(m.tuIgnoreCase))
+		if vartype(m.tuIgnoreCase) == 'C';
+		 and Lenc(alltrim(m.tuIgnoreCase)) <= 3
+			
+			tuIgnoreCase = lower(m.tuIgnoreCase)
 			this.IgnoreCase = 'i' $ m.tuIgnoreCase
 			this.global = 'g' $ m.tuIgnoreCase
 			this.Multiline = 'm' $ m.tuIgnoreCase
@@ -2567,9 +2570,8 @@ if m.lnParms > 0
 			endif
 		endif
 	endif
-else
-	return .f.
 endif
+endproc
 
 * -----------------------------------------------------------------
 procedure Test && Teste l'expression de recherche
