@@ -411,7 +411,7 @@ nBufferDirty = 0
 
 do case
 case !lBufferDirty(@m.tcAlias)
-case inlist(cursorgetprop("Buffering", m.tcAlias), 2, 3) && Row buffering
+case inlist(CursorGetProp("Buffering", m.tcAlias), 2, 3) && Row buffering
 	nBufferDirty = 1
 otherwise
 
@@ -447,7 +447,7 @@ do case
 
 case .f.;
  or !used(m.tcAlias);
- or cursorgetprop("Buffering", m.tcAlias) = 1;
+ or CursorGetProp("Buffering", m.tcAlias) = 1;
  or !varSet(@m.lnRecCount, RecCount_(m.tcAlias));
  or empty(m.lnRecCount);
  or !varSet(@m.liRecno, Recno_(m.tcAlias));
@@ -457,7 +457,7 @@ case .f.;
  or .f.
 
 case varSet(@m.lcFldState, getfldstate(-1, m.tcAlias));
- and inlist(cursorgetprop("Buffering", m.tcAlias), 2, 3) && Row buffering
+ and inlist(CursorGetProp("Buffering", m.tcAlias), 2, 3) && Row buffering
 
 	lBufferDirty = !empty(chrtran(nvl(m.lcFldState, ''); && .null. if Eof(m.tcAlias)
 		, '1';
@@ -574,13 +574,13 @@ do case
 
 case .f.;
  or !used(m.tcAlias);
- or cursorgetprop("Buffering", m.tcAlias) = 1
+ or CursorGetProp("Buffering", m.tcAlias) = 1
 	return .f.
 
 case recno(m.tcAlias) < 0 && Recno() returns negative numbers for records appended in a table buffer
 	return .t.
 
-case inlist(cursorgetprop("Buffering", m.tcAlias), 2, 3) && row buffering
+case inlist(CursorGetProp("Buffering", m.tcAlias), 2, 3) && row buffering
 	return inlist(cast(left(nvl(getfldstate(-1, m.tcAlias), ''), 1) as I), 3, 4)
 
 otherwise && InList(CursorGetProp("Buffering", m.tcAlias), 4, 5) && table buffering
@@ -648,7 +648,7 @@ if used(m.tcAlias)
 		.cOrder = order()
 		.cSetKey1 = set("Key", 1)
 		.cSetKey2 = set("Key", 2)
-		.iBuffering = cursorgetprop("Buffering")
+		.iBuffering = CursorGetProp("Buffering")
 		.iRecno = Recno_()
 		if aRelationSrce(@m.laRelation) > 0
 			dimension .aRelationSrce[Alen(laRelation, 1), Alen(laRelation, 2)]
@@ -2089,7 +2089,7 @@ tlTagCand = .f. && retour
 	* Si rien de trouvé et clé primaire acceptée, voir si c'est une vue définissant une clé primaire
 	if not m.llResult and llTagPrim
 
-		lcResult = cursorgetprop("KeyFieldList", m.lcAlias) && sans erreur sur une table
+		lcResult = CursorGetProp("KeyFieldList", m.lcAlias) && sans erreur sur une table
 		llResult = not (empty(m.lcResult) or ',' $ m.lcResult)
 		store iif(m.llResult, m.lcResult, '') to lcResult, tcTagExp
 	endif
@@ -2365,7 +2365,7 @@ lparameters ;
 , tlUpdateable; && @ [.NULL.] updateable view ; .NULL.: don't care and feedback
 , tiDS; && [session de données courante] identifiant de la session de données
 , tlCAD; && @ [.NULL.] View should be linked to a CursorAdapter ; .NULL.: don't care and feedback
-, tlRemote; && @ [.NULL.] View is remote ; .NULL.: don't care and feedback
+, tlRemote; && @ [.NULL.] View is remote ; .NULL.: not a view
 
 tcAlias = iif(vartype(m.tcAlias) == 'C' and not empty(m.tcAlias), m.tcAlias, alias())
 
@@ -2411,10 +2411,11 @@ endif
 
 llResult = .t.;
  and used(m.tcAlias);
- and varSet(@m.lnSourceType, cursorgetprop("SourceType", m.tcAlias));
+ and varSet(@m.lnSourceType, CursorGetProp("SourceType", m.tcAlias));
+ and !(InList(m.lnSourceType, 1, 2) and Empty(CursorGetProp("SQL", m.tcAlias))); && SQL pass-through cursors
  and varSet(@m.lnSourceType_, m.lnSourceType%100);
  and inlist(m.lnSourceType_, 1, 2, 4); && 1 - local SQL view ; 2 - remote SQL view ; 3 – table ; 4 - ADO Recordset attached to a CursorAdapter object
- and varSet(@m.llUpdateable, not empty(cursorgetprop("KeyFieldList", m.tcAlias))); && IsReadonly(m.tcAlias)
+ and varSet(@m.llUpdateable, not empty(CursorGetProp("KeyFieldList", m.tcAlias))); && IsReadonly(m.tcAlias)
  and iif(isnull(m.tlUpdateable), varSet(@m.tlUpdateable, m.llUpdateable), m.tlUpdateable = m.llUpdateable);
  and varSet(@m.llCAD, int(m.lnSourceType / 100) > 0);
  and iif(isnull(m.tlCAD), varSet(@m.tlCAD, m.llCAD), m.tlCAD = m.llCAD);
@@ -2450,7 +2451,7 @@ lparameters ;
 external array taView
 tlUpdateable = iif(pcount() < 2 or isnull(m.tlUpdateable), .null.,  lTrue(m.tlUpdateable))
 
-local lnAlias, llResult, lnResult
+local lnResult, llResult, liAlias
 lnResult = 0
 
 llResult = type('taView',1) == 'A'
@@ -2467,12 +2468,11 @@ if m.llResult
 		asort(m.taView, 2) && sort on work areas
 		aColDel(@m.taView, 2) && zones de travail inutiles
 		dimension taView[m.lnResult] && une seule dimension suffit
+		for liAlias = m.lnResult to 1 step -1
 
-		for lnAlias = m.lnResult to 1 step -1
-
-			if not lView(taView[m.lnAlias], m.tlUpdateable, m.tiDS)
+			if not lView(taView[m.liAlias], m.tlUpdateable, m.tiDS)
+				adel(taView, m.liAlias)
 				lnResult = m.lnResult - 1
-				adel(taView, m.lnAlias)
 			endif
 		endfor
 		if m.lnResult = 0
@@ -2484,6 +2484,7 @@ if m.llResult
 endif
 
 return m.lnResult
+endfunc
 
 * ========================================
 function aViewsU && Aliases des vues updateable dans une session de données
@@ -2520,13 +2521,13 @@ endif
 
 llAlias = used(m.tcAlias)
 llReadWrite = m.llAlias and not isreadonly(m.tcAlias)
-lnSourceType = iif(m.llAlias, cursorgetprop("SourceType", m.tcAlias)%100, 0)
+lnSourceType = iif(m.llAlias, CursorGetProp("SourceType", m.tcAlias)%100, 0)
 lcDBF = iif(m.llAlias, dbf(m.tcAlias), '')
 
 llResult = m.llAlias;
 	and;
 	  (m.lnSourceType = 2; && remote SQL view
-		 		and empty(cursorgetprop("SQL", m.tcAlias)); && NO SQL
+		 		and empty(CursorGetProp("SQL", m.tcAlias)); && NO SQL
  		or;
 	 		m.lnSourceType = 3; && Table
 	 			and (not file(m.lcDBF); && No table on disk
@@ -2877,7 +2878,7 @@ return m.lcResult
 * ========================================
 function aFieldsShort && noms de champs courts
 lparameters ;
-  Result; && @ {fr} résultat (cumulatif)
+  result; && @ {fr} résultat (cumulatif)
 , taField; && @ {fr} champs
 , tcDBF;
 
@@ -3809,7 +3810,7 @@ if m.llResult
 
 		loSelect = abSelect(m.tuTable)
 
-		if inlist(cursorgetprop("Buffering"), 2, 3) && tampon d'enregistrement, impossible de parcourir la table ...
+		if inlist(CursorGetProp("Buffering"), 2, 3) && tampon d'enregistrement, impossible de parcourir la table ...
 			rand(-1)
 			lcResult = transform(int(rand()*10E10)) && ... toujours dire que son contenu a changé
 		else
@@ -4117,8 +4118,8 @@ index on Test tag Test binary collate 'general' && invalid collation sequence
 
 					* Vérifier l'absence de doublon
 					lcSelect = iif(empty(m.lcFilter), '', ' WHERE ' + m.lcFilter)
-					tlZap = VFPSelectExecute(textmerge([SELECT <<m.lcKey>> AS CAND, Count(*) AS _COUNT FROM <<m.tcAlias>> <<m.lcSelect>> GROUP BY CAND HAVING _COUNT > 1])) > 0
-					use && Cursor créé par VFPSelectExecute()
+					tlZap = VFPselectExecute(textmerge([SELECT <<m.lcKey>> AS CAND, Count(*) AS _COUNT FROM <<m.tcAlias>> <<m.lcSelect>> GROUP BY CAND HAVING _COUNT > 1])) > 0
+					use && Cursor créé par VFPselectExecute()
 				endif
 			endif
 
@@ -5091,7 +5092,7 @@ tlBuffering = iif(pcount() >= 9 and vartype(m.tlBuffering) == 'L';
 return textmerge([SELECT <<m.tcSELECT>> FROM <<m.tcFROM>><<m.tlBuffering>><<m.tcWHERE>><<m.tcGROUP>><<m.tcHAVING>><<m.tcUNION>><<m.tcORDER>><<m.tcINTO>>])
 
 * ========================================
-function VFPSelectExecute && Exécute un SELECT-SQL VFP dans un tableau, une table ou un curseur dont l'alias est sélectionné au retour
+function VFPselectExecute && Exécute un SELECT-SQL VFP dans un tableau, une table ou un curseur dont l'alias est sélectionné au retour
 lparameters ;
 	tcSELECT,; && Intruction SELECT-SQL
 	tuDest,; && @ Destination : array OU adresse de table OU nom de curseur [INTO CURSOR Sys(2015)]
@@ -6233,7 +6234,7 @@ lcAlias = cAlias(m.tcTable, @m.llAlias)
 if used(m.lcAlias)
 
 	* Si la table appartient à une base de données
-	lcDBC = cursorgetprop("Database", m.lcAlias)
+	lcDBC = CursorGetProp("Database", m.lcAlias)
 	if not empty(m.lcDBC)
 
 		* Ouvrir la base de données le cas échéant
@@ -6345,7 +6346,7 @@ if m.llResult and RecCount_(m.tcAlias) > 0
 		lnSelect = select(0)
 		select (m.tcAlias)
 
-		if inlist(cursorgetprop("Buffering"), 2, 3) && tampon d'enregistrement, on ne peut pas modifier Recno()
+		if inlist(CursorGetProp("Buffering"), 2, 3) && tampon d'enregistrement, on ne peut pas modifier Recno()
 
 			lcFor = iif(empty(m.lcOrder); && Expression de filtre de l'index courant
 				, '';
@@ -6402,7 +6403,7 @@ assert m.llResult message cAssertMsg(icase(;
 	) + cLitteral(m.tcAlias))
 if m.llResult
 
-	lnBuffering = cursorgetprop("Buffering", m.tcAlias)
+	lnBuffering = CursorGetProp("Buffering", m.tcAlias)
 	do case
 	case m.lnBuffering = 1
 	case inlist(m.lnBuffering, 4, 5) && tampon de table
@@ -6503,7 +6504,7 @@ define class nRecnoAbs_Test as abUnitTest of abDev.prg
 	append blank && 1
 
 	procedure DataAdd5
-	if cursorgetprop("Buffering") > 1
+	if CursorGetProp("Buffering") > 1
 		tablerevert(.t.)
 	endif
 	cursorsetprop("Buffering", 5)
@@ -6512,7 +6513,7 @@ define class nRecnoAbs_Test as abUnitTest of abDev.prg
 	skip -1
 
 	procedure DataAdd3
-	if cursorgetprop("Buffering") > 1
+	if CursorGetProp("Buffering") > 1
 		tablerevert(.t.)
 	endif
 	cursorsetprop("Buffering", 3)
@@ -6661,7 +6662,7 @@ local success as Boolean;
 if .t.;
  and varSet(@m.oSelect, abSelect(evl(m.tcAlias, alias())));
  and (used() or cResultAdd(textmerge([Table or Alias <<cL(m.tcAlias)>> can't be found])));
- and (inlist(cursorgetprop("Buffering"), 2, 3) or cResultAdd(textmerge([Alias '<<Alias()>>' should be row buffered])));
+ and (inlist(CursorGetProp("Buffering"), 2, 3) or cResultAdd(textmerge([Alias '<<Alias()>>' should be row buffered])));
  and varSet(@m.cFldState, getfldstate(-1));
  and !empty(chrtran(m.cFldState, '1', ''))
 
@@ -6816,7 +6817,7 @@ define class abRowBufferSave_Test as abUnitTest of abDev.prg
 	function recno
 		return recno('abRowBufferSave_Test')
 	function cFldState
-		return iif(used('abRowBufferSave_Test') and cursorgetprop("Buffering", 'abRowBufferSave_Test') > 1;
+		return iif(used('abRowBufferSave_Test') and CursorGetProp("Buffering", 'abRowBufferSave_Test') > 1;
 			, getfldstate(-1, 'abRowBufferSave_Test');
 			, .null.;
 			)
@@ -6955,7 +6956,7 @@ if m.llResult
 
 	case empty(m.lnResult) && added 04 Feb 2014
 
-	case m.tiRecno < 0 and cursorgetprop("Buffering", m.tcAlias) < 4
+	case m.tiRecno < 0 and CursorGetProp("Buffering", m.tcAlias) < 4
 		lcResult = textmerge(icase(;
 				cLangUser() = 'fr',	[Alias '<<m.tcAlias>>' en tampon d'enregistrement non suppporté],; && copy-paste this line to add another language support
 														[Alias '<<m.tcAlias>>' in buffering mode not supported]; && Default: English
@@ -7025,7 +7026,7 @@ do case
 case !used(evl(m.tcAlias, alias()))
 case bof(m.tcAlias)
 	Result = .t.
-case inlist(cursorgetprop("Buffering", m.tcAlias), 2, 3) and lBufferDirty(m.tcAlias) && tampon d'enregistrement, on ne peut pas modifier Recno()
+case inlist(CursorGetProp("Buffering", m.tcAlias), 2, 3) and lBufferDirty(m.tcAlias) && tampon d'enregistrement, on ne peut pas modifier Recno()
 	Result = .null.
 otherwise
 	oRecno = abRecno(m.tcAlias)
@@ -7047,7 +7048,7 @@ do case
 case !used(evl(m.tcAlias, alias()))
 case eof(m.tcAlias)
 	Result = .t.
-case inlist(cursorgetprop("Buffering", m.tcAlias), 2, 3) and lBufferDirty(m.tcAlias) && tampon d'enregistrement, on ne peut pas modifier Recno()
+case inlist(CursorGetProp("Buffering", m.tcAlias), 2, 3) and lBufferDirty(m.tcAlias) && tampon d'enregistrement, on ne peut pas modifier Recno()
 	Result = .null.
 otherwise
 	oRecno = abRecno(m.tcAlias)
@@ -7068,7 +7069,7 @@ local lnRec, llRec, lcRec, lcFldState, llResult
 tcAlias = iif(vartype(m.tcAlias) == 'C' and used(m.tcAlias), m.tcAlias, alias())
 lnRec = nRecnoAbs(m.tcAlias)
 tnRec = iif(vartype(m.tnRec) == 'N' and between(m.tnRec, 1, RecCount_(m.tcAlias)), m.tnRec, m.lnRec)
-llResult = m.tnRec = m.lnRec or inlist(cursorgetprop("Buffering", m.tcAlias), 4, 5)
+llResult = m.tnRec = m.lnRec or inlist(CursorGetProp("Buffering", m.tcAlias), 4, 5)
 assert m.llResult message cAssertMsg(textmerge([l'alias <<m.tcAlias>> doit être en buffering de table]))
 if m.llResult
 
@@ -8414,7 +8415,7 @@ local Result, cAlias, cDB, lAlias, cTable;
 
 Result = ''
 cAlias = cAlias(m.tuTable, @m.lAlias)
-cDB = cursorgetprop("Database", m.cAlias)
+cDB = CursorGetProp("Database", m.cAlias)
 
 if .t.;
  and used(m.cAlias);
@@ -8423,7 +8424,7 @@ if .t.;
 
 	oSetDB = abSet('DATABASE', m.cDB)
 
-	cTable = proper(cursorgetprop("SourceName", m.cAlias))
+	cTable = proper(CursorGetProp("SourceName", m.cAlias))
 	nField = afields(laField, m.cAlias)
 	asort(laField, 1)
 	for iField = 1 to m.nField

@@ -1053,13 +1053,12 @@ lparameters ;
   ttd; && {en} date or datetime
 , lShort && [.F.] {en} use abbreviations whenever possible
 
-local Result as string;
+local cAgo as string;
 , cType as string;
 , lDate as Boolean;
-, ltd;
+, ltdNow;
 , nAgo as integer;
-, nAgo_ as integer;
-, cAgo as string;
+, nAgoS as integer;
 , cLangUser as string;
 
 lShort = lTrue(m.lShort)
@@ -1072,10 +1071,13 @@ if !m.cType $ 'DT' or Empty(m.ttd)
 else
 
 	lDate = m.cType == 'D'
-	ltd = iif(m.lDate, date(), datetime())
-	nAgo = m.ltd - m.ttd && > 0 if ttd is past
-	nAgo_ = abs(m.nAgo)
-	nAgo_ = m.nAgo_ * iif(m.cType == 'T', 1, 60*60*24)
+	ltdNow = iif(m.lDate, date(), datetime())
+	nAgo = m.ltdNow - m.ttd && > 0 if ttd is past
+	nAgoS = abs(m.nAgo) && seconds
+	nAgoS = m.nAgoS * iif(m.lDate, 60*60*24, 1)
+	nAgoS = Iif(m.nAgoS < 10, 0, m.nAgoS) && moins de 10 secondes : à l'instant
+	nAgo = Iif(Empty(m.nAgoS), 0, m.nAgo)
+
 	cLangUser = cLangUser()
 
 	do case
@@ -1108,9 +1110,9 @@ else
 														[day after tomorrow]; && default: English
 				)
 		endcase
-		store 0 to nAgo, nAgo_
+		store 0 to nAgo, nAgoS
 
-	case Empty(m.nAgo_)
+	case Empty(m.nAgoS)
 		cAgo = Iif(m.lShort;
 		, icase(;
 			m.cLangUser = 'fr',	"à l'inst.",; && copy-paste this line to add another language support
@@ -1122,7 +1124,7 @@ else
 			);
 		)
 
-	case m.nAgo_ < 60
+	case m.nAgoS < 60
 		cAgo = Iif(m.lShort;
 		, icase(;
 			m.cLangUser = 'fr',	'sec.',; && copy-paste this line to add another language support
@@ -1133,8 +1135,8 @@ else
 													'second'; && default: English
 			);
 		)
-	case m.nAgo_ < (60*60)
-		nAgo_ = round(m.nAgo_ / 60, 0)
+	case m.nAgoS < (60*60)
+		nAgoS = round(m.nAgoS / 60, 0)
 		cAgo = Iif(m.lShort;
 		, icase(;
 			m.cLangUser = 'fr',	'min.',; && copy-paste this line to add another language support
@@ -1145,8 +1147,8 @@ else
 													'minute'; && default: English
 			);
 		)
-	case m.nAgo_ < (60*60*24)
-		nAgo_ = round(m.nAgo_ / (60*60), 0)
+	case m.nAgoS < (60*60*24)
+		nAgoS = round(m.nAgoS / (60*60), 0)
 		cAgo = Iif(m.lShort;
 		, icase(;
 			m.cLangUser = 'fr',	'h.',; && copy-paste this line to add another language support
@@ -1157,8 +1159,8 @@ else
 													'hour'; && default: English
 			);
 		)
-	case m.nAgo_ < (60*60*24*7)
-		nAgo_ = round(m.nAgo_ / (60*60*24), 0)
+	case m.nAgoS < (60*60*24*7)
+		nAgoS = round(m.nAgoS / (60*60*24), 0)
 		cAgo = Iif(m.lShort;
 		, icase(;
 			m.cLangUser = 'fr',	'j.',; && copy-paste this line to add another language support
@@ -1170,7 +1172,7 @@ else
 			);
 		)
 	case between(m.ttd, gomonth(date(), -1), gomonth(date(), 1))
-		nAgo_ = round(m.nAgo_ / (60*60*24*7), 0)
+		nAgoS = round(m.nAgoS / (60*60*24*7), 0)
 		cAgo = Iif(m.lShort;
 		, icase(;
 			m.cLangUser = 'fr',	'sem.',; && copy-paste this line to add another language support
@@ -1182,7 +1184,7 @@ else
 			);
 		)
 	otherwise
-		nAgo_ = abs(nMonths(m.ltd, m.ttd))
+		nAgoS = abs(nMonths(m.ltdNow, m.ttd))
 		cAgo = Iif(m.lShort;
 		, icase(;
 			m.cLangUser = 'fr',	'm.',; && copy-paste this line to add another language support
@@ -1197,7 +1199,7 @@ else
 
 	return '';
 		+ ICase(;
-			empty(m.nAgo),;
+			empty(m.nAgoS),;
 				'',;
 			m.nAgo > 0,; && ttd is past
 				icase(;
@@ -1209,13 +1211,13 @@ else
 															'in '; && default: English
 					);
 			);
-		+ nEvl(evl(m.nAgo, ''), ltrim(str(m.nAgo_))+ ' ');
-		+ iif(m.nAgo_ > 1 and !m.lShort;
+		+ nEvl(evl(m.nAgo, ''), ltrim(str(m.nAgoS))+ ' ');
+		+ iif(m.nAgoS > 1 and !m.lShort;
 			, trim(m.cAgo, 's') + 's';
 			, m.cAgo;
 			);
 		+ ICase(;
-			empty(m.nAgo),;
+			empty(m.nAgoS),;
 				'',;
 			m.nAgo > 0,; && ttd is past
 				icase(;
@@ -1233,7 +1235,7 @@ endif
 endfunc
 
 * ---------------------------------------------------------
-procedure cAgo_test && Teste cAgo()
+procedure cAgo_test && cAgo() unit test
 
 local loTest as abUnitTest of abDev.prg, cLangUser
 loTest = newobject('abUnitTest', 'abDev.prg')
@@ -1243,10 +1245,10 @@ cLangUser = cLangUser()
 cLangUser('en')
 loTest.Test('today', date())
 loTest.Test('yesterday', date()-1)
-loTest.Test('2 seconds ago', datetime()-2)
 loTest.Test('2 minutes ago', datetime()-2*60)
 loTest.Test('2 min. ago', datetime()-2*60, .T.)
 loTest.Test('2 hours ago', datetime()-2*60*60)
+loTest.Test('just now', datetime()-2)
 loTest.Test('just now', datetime())
 
 cLangUser('fr')

@@ -1060,7 +1060,7 @@ lparameters ;
 	taSrce,; && @ {fr} Tableau source {en} Array source
 	tuVal,; && {fr} Valeur à trouver {en} Value to find
 	tnColIn,; && {fr} Colonne où chercher {en} Column where is the key
-	tnColOut,; && {fr}Colonne où trouver {en} Column where is the value
+	tnColOut,; && {fr} Colonne où trouver {en} Column where is the value
 	tnFlags && [15] {fr} nFlags selon options de aScan() {en} nFlags as in aScan()
 external array taSrce
 tnFlags = iif(vartype(m.tnFlags) == 'N' and between(m.tnFlags, 0, 15), m.tnFlags, 15)

@@ -720,7 +720,7 @@ if .t.;
 	* Si nouvel avertissement
 	lcCallingModule = cTronc(lower(cCallingModule()), 20)
 	lcWarning = Iif(lTrue(m.lCallingAddNot), '', padr(m.lcCallingModule, 20) ) + m.tcWarning
-	llWarnNew = not upper(m.lcWarning) $ upper(m.this.acWarnings)
+	llWarnNew = not upper(Chrtran(m.lcWarning, '0123456789', '')) $ upper(Chrtran(m.this.acWarnings, '0123456789', '')) && comparer en ignorant les chiffres
 	if m.llWarnNew
 
 	* Display warning
@@ -4260,24 +4260,30 @@ lparameters ;
 local result as string;
 , liLangUser as integer;
 , liEN as integer;
+, lcEN as string;
 
-tcLangUser = iif(ga_Type_IsChar(m.tcLangUser, .t.) and lenc(m.tcLangUser) = 2, m.tcLangUser, cLangUser())
-
-liLangUser = at_c('{' + m.tcLangUser + '}', m.tcString)
-liEN = at_c('{en}', m.tcString)
-
-result = icase(;
-	m.liLangUser > 0,;
-		substrc(m.tcString, m.liLangUser + 4),;
-	m.liEN > 0,;
-		substrc(m.tcString, m.liEN + 4),;
-		m.tcString;
+tcLangUser = iif(ga_Type_IsChar(m.tcLangUser, .t.);
+	 and varSet(@m.tcLangUser, Lower(Alltrim(m.tcLangUser)));
+	 and lenc(m.tcLangUser) = 2;
+	 and IsAlpha(m.tcLangUser);
+	 and IsAlpha(Substr(m.tcLangUser, 2));
+	, m.tcLangUser;
+	, cLangUser();
 	)
 
-return alltrim(iif(m.liEN + m.liLangUser > 0;
-	, leftc(m.result, evl(at_c('{', m.result), lenc(m.result)+1)-1);
-	, m.result;
-	), CR, LF, ' ', chr(9))
+liLangUser = atcc('{' + m.tcLangUser + '}', m.tcString)
+liEN = atcc('{en}', m.tcString)
+lcEN = Iif(m.liEN > 0, substrc(m.tcString, m.liEN + 4), '')
+
+result = Evl(Evl(Iif(m.liLangUser > 0, substrc(m.tcString, m.liLangUser + 4), ''), m.lcEN), m.tcString)
+
+return '';
+	+ Evl(Left(m.tcString, at_c('{', m.tcString)-1), ''); && {en} before the first {localization tag}
+	+ alltrim(iif(m.liEN + m.liLangUser > 0; && {en} at least one language found
+		, leftc(m.result, evl(at_c('{', m.result), lenc(m.result)+1)-1);
+		, m.result;
+		), CR, LF, ' ', chr(9))
+
 endfunc
 
 * ------------------------------------
@@ -4290,7 +4296,7 @@ loUnitTest.Test([formulaire où s'est produit l'événement], [ {en} requested form
 loUnitTest.Test([requested form], [ {en} requested form {fr} formulaire où s'est produit l'événement], 'en')
 
 return m.loUnitTest.result()
-
+endproc
 
 * -----------------------------------
 function cLangUser && Code langue de l'utilisateur courant
@@ -5639,7 +5645,7 @@ return m.success
 function cResultAdd && Ajoute une entrée à un résultat cumulatif
 lparameters ;
   tcResult; && @ résultat cumulatif
-, tuItem; && élément à ajouter au résultat - type 'N': assumes Seconds() for execution time tracking
+, tuItem; && {fr} élément à ajouter au résultat - type 'N': attend Seconds() pour trace temps d'exécution {en} element to be added to result - type 'N': assumes Seconds() for execution time tracking
 , tlLine; && [.F.] Sauter une ligne au lieu de 2
 , tlPrepend; && [.F.] Ajouter au début
 , tnStackMinus; && [0] nombre de niveaux de pile à retrancher - .T.: ne pas ajouter l'en-tête
@@ -5778,10 +5784,16 @@ return m.lnResult
 endproc
 
 * ========================================
+procedure ProcedureRemove && ôte un fichier prg de Set("Procedure") s'il y est
+lparameters tcPrg && fichier prg
+return ProcedureAdd(m.tcPrg, .T.)
+endproc
+
+* ========================================
 procedure ProcedureAdd && Ajoute un fichier prg à Set("Procedure") s'il n'y est déjà
 lparameters ;
-	tcPrg,; && fichier prg
-	tlRemove && [.F.] Ôter de Set("Procedure")
+  tcPrg; && fichier prg
+, tlRemove; && [.F.] Ôter de Set("Procedure")
 
 local llResult && le fichier a été ajouté ou ôté selon la demande
 if vartype(m.tcPrg) == 'C' and file(m.tcPrg) and inlist(upper(justext(m.tcPrg)), 'PRG', 'FXP')
@@ -5803,12 +5815,14 @@ if vartype(m.tcPrg) == 'C' and file(m.tcPrg) and inlist(upper(justext(m.tcPrg)),
 endif
 
 return m.llResult
+endproc
 
 * ========================================
 procedure ClassLibRemove && Ôte un fichier vcx de Set("ClassLib") s'il y est
 lparameters tcVCX && fichier vcx
 
 return ClassLibAdd(m.tcVCX, .t.)
+endproc
 
 * ========================================
 procedure ClassLibAdd && Ajoute un fichier vcx à Set("ClassLib") s'il n'y est déjà
@@ -7022,7 +7036,7 @@ success = .T.
 lFile = File(m.tcSrce)
 result = Iif(m.lFile, FileToStr(m.tcSrce), m.tcSrce)
 
-result = Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(m.result;
+result = Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(m.result;
 	, 'Ã ', 'à');
 	, 'Ã©', 'é');
 	, 'Ã‰', 'É');
@@ -7032,6 +7046,8 @@ result = Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran
 	, 'Ã»', 'ù');
 	, 'Ã¹', 'û');
 	, 'Ã§', 'ç');
+	, 'Ã´', 'ô');
+	, 'Â°', '°');
 	
 if m.lFile
 	success = StrToFile(m.result, FullPath(m.tcSrce)) > 0
@@ -7048,3 +7064,58 @@ endproc
 ; {fr} Pour être visible dans le navigateur, ce fichier est encodé en UTF8
 ; {fr} Veuillez l'éditer avec un logiciel sensible à l'UTF8 comme notePad++, subime text ou PSPad
 #endif
+
+* -----------------
+function caError && version textuelle plus compréhensible de aError()
+lparameters errNum && @ error number
+
+local result as String;
+, nError as Integer;
+, iError as Integer;
+, aa[1];
+
+result = ''
+nError = AError(aa)
+errNum = m.aa[1]
+
+do case
+case Empty(m.nError)
+	errNum = 0
+
+case m.errNum = 1526 && When an ODBC error numbered 1526 occurs, the array contains one or more rows, one row for each ODBC error.
+	for iError = 1 to m.nError
+		text to result textmerge noshow additive flags 1 pretext 3
+			ODBC error # 1526
+			Error message: <<m.aa[m.iError, 2]>>
+			ODBC error message: <<m.aa[m.iError, 3]>>
+			ODBC SQL state: <<m.aa[m.iError, 4]>>
+			Error number from the ODBC data source: <<m.aa[m.iError, 5]>>
+			ODBC connection handle: <<m.aa[m.iError, 6]>>
+
+		endtext
+	endfor
+
+case InList(m.errNum, 1427, 1429) && When OLE errors numbered 1427 or 1429 occur, the array contains one row. The following table describes the contents of each element
+		text to result textmerge noshow flags 1 pretext 3
+			OLE error  #  <<m.errNum>>
+			Visual FoxPro error message: <<m.aa[2]>>
+			OLE error message: <<m.aa[3]>>
+			Application: <<m.aa[4]>>
+			Application's Help file: <<m.aa[5]>>
+			Application's Help context ID: <<m.aa[6]>>
+			OLE 2.0 exception number: <<m.aa[7]>>
+		endtext
+ 
+otherwise
+		text to result textmerge noshow flags 1 pretext 3
+			Error(): <<m.errNum>>
+			Message(): <<m.aa[2]>>
+			Error parameters if any: <<m.aa[3]>>
+			Work area: <<m.aa[4]>>
+			Trigger failed: <<ICase(m.aa[5] = 1, 'Insert', m.aa[5] = 2, 'Update', m.aa[5] = 3, 'Delete', 'N/A')>>
+		endtext
+	
+endcase
+return m.result
+
+endfunc

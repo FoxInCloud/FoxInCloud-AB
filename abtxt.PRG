@@ -747,7 +747,7 @@ return m.loTest.Result()
 function cL && Littéral VFP && Alias de cLitteral()
 lparameters ;
 	tuData, ; && Valeur à convertir en littéral (type supportés : tous soit CDGLNOQTUXY)
-	tlRTrim,;  && [.F.] si type C, Ã´ter les espaces à droite
+	tlRTrim,;  && [.F.] si type C, ôter les espaces à droite
 	tnTronc,; && [aucun] si type C, nombre de caractères de troncature
 	tlXML && [.F.] Encoder pour XML
 
@@ -762,7 +762,7 @@ return cLitteral(;
 function cLitteral && Littéral VFP
 lparameters ;
 	tuData,; && @ Valeur à convertir en littéral (type supportés : tous soit CDGLNOQTUXY)
-	tlRTrim,;  && [.F.] si type C, Ã´ter les espaces à droite
+	tlRTrim,;  && [.F.] si type C, ôter les espaces à droite
 	tnTronc,; && [aucun] si type C, nombre de caractères de troncature
 	tlXML && [.F.] Encoder pour XML
 
@@ -809,7 +809,7 @@ return icase(;
 function cLitteral_C && Littéral VFP de type caractère
 lparameters ;
 	tcData, ; && Valeur à convertir en littéral (type supportés : tous soit CDGLNOQTUXY)
-	tlRTrim,;  && [.F.] si type C, Ã´ter les espaces à droite
+	tlRTrim,;  && [.F.] si type C, ôter les espaces à droite
 	tnTronc,; && [aucun] si type C, nombre de caractères de troncature
 	tlXML && [.F.] Encoder pour support XML
 
@@ -1103,7 +1103,7 @@ return loTest.Result()
 function cLitteralJS_HTML && Littéral Javascript d'après une valeur VFP pour ajout à un attribut HTML
 lparameters ;
   tuData; && @ Valeur à convertir en littéral ; types supportés : cf. cLitteralJS_lSupport()
-, tlTrim; && [.F.] si type C, Ã´ter les espaces à droite
+, tlTrim; && [.F.] si type C, ôter les espaces à droite
 
 return strtran(cLitteralJS(m.tuData, m.tlTrim), '"', '&#34;') && échappe les guillements '"' par '&#34;' pour le HTML
 
@@ -1129,7 +1129,7 @@ return m.loTest.Result()
 function cLitteralJS && Littéral Javascript d'après une valeur VFP
 lparameters ;
   tuData; && @ Valeur à convertir en littéral ; types supportés : cf. cLitteralJS_lSupport()
-, tlTrim; && [.F.] si type C, Ã´ter les espaces à droite
+, tlTrim; && [.F.] si type C, ôter les espaces à droite
 , tlJSON; && [.F.] produire un littéral compatible JSON
 , tlQuotesNo; && [.F.] si type C, ne pas entourer de guillemets (XML)
 
@@ -1239,7 +1239,7 @@ endfunc
 function cLJS && Littéral Javascript d'après une valeur VFP && Alias (simplifié) de cLitteralJS()
 lparameters ;
 	tuData,; && @ Valeur à convertir en littéral ; types supportés : cf. cLitteralJS_lSupport()
-	tlTrim,; && [.F.] si type C, Ã´ter les espaces à droite
+	tlTrim,; && [.F.] si type C, ôter les espaces à droite
 	tlJSON && [.F.] produire un littéral compatible JSON
 
 return cLitteralJS(@m.tuData, m.tlTrim, m.tlJSON)
@@ -2992,6 +2992,7 @@ if vartype(m.tcUA) == 'C' and !empty(m.tcUA)
 	return .f.; && pour placer facilement les plus fréquents en tête && http://www.botsVSbrowsers.com/
 	or	'googlebot' $ m.tcUA;
 	or	'west wind' $ m.tcUA; && West Wind Internet Protocols x,xx
+	or	'/slurp' $ m.tcUA; && "Mozilla/5.0 (compatible; Yahoo! Slurp; http://help.yahoo.com/help/us/ysearch/slurp)" - https://help.yahoo.com/kb/search/SLN22600.html?impressions=true
 	or	'/bot' $ m.tcUA;
 	or	'bot/' $ m.tcUA;
 	or 	' bot ' $ m.tcUA;
@@ -3265,7 +3266,7 @@ with newobject('abRegExp', 'abTxt.prg') as abRegExp of abTxt.prg
 		  abLocalized_cPattern2(m.cCommentStrings);
 		, 'gmi';
 		)
-	cTxt = .replace(m.cTxt) && supprime les commentaires vides
+	cTxt = .replace(m.cTxt) && supprime les lignes de commentaire vides
 endwith
 
 do while replicate(CRLF, 3) $ m.cTxt

@@ -7,7 +7,8 @@
 #DEFINE VFP_VAR_SIZE_MAX	16777184
 
 * Tools Folders
-#DEFINE DOS_AB			Home(1) + 'Tools\AB\'
+#DEFINE DOS_TOOLS			Home(1) + 'Tools\'
+#DEFINE DOS_AB			DOS_TOOLS + 'AB\'
 && Iif(File('ab.prg'), addbs(justpath(fullpath('ab.prg'))), Home(1) + 'Tools\AB\')
 #DEFINE DOS_ABGRAPHICS  DOS_AB + 'Graphics\'
 #DEFINE DOS_AB_TEMP		DOS_AB + '_Temp\'

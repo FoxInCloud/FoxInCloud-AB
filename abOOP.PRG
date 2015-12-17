@@ -222,7 +222,7 @@ loTest.assert(["101","102","103","104"], cListOfArray(@m.laItem,,-1,.t.))
 return loTest.Result()
 
 * ========================================
-function aItemsList && array > Listbox|Combobox.List[]
+function aItemsList && {en} Array from Listbox|Combobox.List[]
 lparameters ;
 	taItems,; && @ Éléments de .List[]
 	toList as listbox && Objet Listbox ou ComboBox
@@ -230,13 +230,13 @@ external array taItems
 
 * modify command c:\test\test\Listbox_combobox.list.prg
 
-local llResult as Boolean;
+local lnResult as integer; && nombre d'éléments
+, llResult as Boolean;
 , loForm as form, liDS as integer, llDS as Boolean;
 , lcAlias as string, lcField as string, llFldState as Boolean, lnFldState as integer, luValue;
 , liCol as integer;
 , liRow as integer;
 , lcElt as string;
-, lnResult as integer && nombre d'éléments
 
 lnResult = .null.
 
@@ -269,6 +269,7 @@ if m.llResult
 				endif
 			endif
 
+*			.rowsource = '' && 2015-12-07 -- thn -- work around Error 1152 (Cannot access the selected table) -- useless and dangerous - breaks .rowsourcetype = 3 && SQL-select
 			.rowsourcetype = 0 && None
 			.clear
 			.columncount = alen(m.taItems, 2) && For a ComboBox or Listbox control, if you set ColumnCount to 0, the first column is displayed based on the RowSource property or on the items added with the AddItem method
@@ -349,7 +350,7 @@ lparameters toCont as container && Objet supposé conteneur
 return .t.;
 	and lMethod(m.toCont, 'AddObject'); && .AddObject() n'existe que dans les conteneurs ...
 	and !pemstatus(m.toCont, 'AddObject', 4); && not user defined, donc native ...
-	and !m.toCont.baseclass == 'Olecontrol' && vu le 23/10/13 avec les contrÃ´les DBItech
+	and !m.toCont.baseclass == 'Olecontrol' && vu le 23/10/13 avec les contrôles DBItech
 
 * ========================================
 function nObjectsCont && Nombre d'objets contenus dans un autre
@@ -382,7 +383,7 @@ endif
 function oObjectCont && Objet contenu dans un autre d'après son index (sauf Grid)
 lparameters ;
 	toCont,; && Objet supposé contenant
-	tnObject && NÂ° d'objet dans la collection
+	tnObject && N° d'objet dans la collection
 
 local llResult, loResult && Objet contenu
 
@@ -397,7 +398,7 @@ if m.llResult
 	with m.toCont
 
 		local lcBaseClass
-		lcBaseClass = proper(.baseclass)
+		lcBaseClass = Proper(.baseclass)
 
 		loResult = icase(;
 			m.lcBaseClass == 'Pageframe',;
@@ -414,6 +415,7 @@ if m.llResult
 endif
 
 return m.loResult
+endfunc
 
 * ========================================
 function cSys1272thisForm && Adresse d'un objet dans thisForm
@@ -597,7 +599,7 @@ lparameters ;
 	tcClass,; && Nom de la classe
 	toClass,; && @ [.NULL.] Classe instanciée en retour
 	tcClassLib,; && [''] Classothèque
-	tiResult,; && @ Si la classe ne peut être instanciée, nÂ° de l'erreur
+	tiResult,; && @ Si la classe ne peut être instanciée, n° de l'erreur
 	tcResult && @ Si la classe ne peut être instanciée, raison de l'échec
 
 toClass = .null.
