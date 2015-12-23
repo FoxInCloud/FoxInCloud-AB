@@ -1943,7 +1943,7 @@ FORMATTING CODES FOR HEADERS AND FOOTERS
 	&P 	Prints the page number.
 	&P+number 	Prints the page number plus the specified number.
 	&P-number 	Prints the page number minus the specified number.
-	&& 	Prints a single ampersand.
+	&& {fr} Prints a single ampersand.
 	& "fontname" 	Prints the characters that follow in the specified font. Be sure to include the double quotation marks.
 	&nn 	Prints the characters that follow in the specified font size. Use a two-digit number to specify a size in points.
 	&N 	Prints the total number of pages in the document.

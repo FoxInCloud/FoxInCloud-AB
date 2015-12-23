@@ -1,19 +1,17 @@
-* abOOP.prg
+* {fr} abOOP.prg
 * =====================================================
 * (c) Abaque SARL, 66 rue Michel Ange - 75016 Paris - France
 * contact@FoxInCloud.com - http://foxincloud.com/ - +33 9 53 41 90 90
-* -----------------------------------------------------
-* Ce logiciel est distribué sous GNU General Public License, tel quel, sans aucune garantie
-* Il peut être utilisé et/ou redistribué sans restriction
-* Toute modification doit être reversée à la communauté
-* La présente mention doit être intégralement reproduite
-&& dans toute copie même partielle
-* -----------------------------------------------------
-* This software is distributed under the terms of GNU General Public License, AS IS, without any warranty
-* It may be used and/or distributed without restriction
-* Any substantial improvement must be given for free to the community
-* This permission notice shall be entirely included in all copies
-&& or substantial portions of the Software
+* {fr} -----------------------------------------------------
+* {fr} Ce logiciel est distribué sous GNU General Public License, tel quel, sans aucune garantie
+* {fr} Il peut être utilisé et/ou redistribué sans restriction
+* {fr} Toute modification doit être reversée à la communauté
+* {fr} La présente mention doit être intégralement reproduite dans toute copie même partielle
+* {en} -----------------------------------------------------
+* {en} This software is distributed under the terms of GNU General Public License, AS IS, without any warranty
+* {en} It can be used and/or distributed without restriction
+* {en} Any modification or improvement must be given for free to the community
+* {en} This permission notice shall be entirely included in all copies or substantial portions of the Software
 * =====================================================
 
 #INCLUDE AB.H
@@ -21,18 +19,18 @@ AB()
 return abUnitTests()
 
 * ========================================
-function lContIn && Un objet se trouve dans un conteneur d'une classe donnée
+function lContIn && {fr} Un objet se trouve dans un conteneur d'une classe donnée
 lparameters ;
-  toObject; && Objet VFP
-, tcContClass; && Classe(s) contenante
-, toCont; && @ Classe(s) contenante
+  toObject; && {fr} Objet VFP
+, tcContClass; && {fr} Classe(s) contenante
+, toCont; && @ {fr} Classe(s) contenante
 
 toCont = oContIn(m.toObject, m.tcContClass)
 
 return !isnull(m.toCont)
 
 * ------------------------------------
-procedure lContIn_Test && test unitaire de lContIn()
+procedure lContIn_Test && {fr} test unitaire de lContIn()
 
 local loTest as abUnitTest of abDev.prg;
 , loCont as container
@@ -50,10 +48,10 @@ m.loTest.Test(.t., m.loCont.oOpg.buttons(2), 'Container')
 return m.loTest.Result()
 
 * ========================================
-function oContIn && Conteneur d'une classe donnée où se trouve un objet
+function oContIn && {fr} Conteneur d'une classe donnée où se trouve un objet
 lparameters ;
-	toObject,; && Objet VFP
-	tcContClass && Classe(s) contenante
+	toObject,; && {fr} Objet VFP
+	tcContClass && {fr} Classe(s) contenante
 
 local loResult as container, loParent as container
 
@@ -70,7 +68,7 @@ if vartype(m.toObject) == 'O' and vartype(m.tcContClass) == 'C'
 
 		else
 
-			if pemstatus(m.loParent, 'Parent', 5) and type('m.loParent.Parent') == 'O' && Vartype(m.loParent.Parent) ne marche pas [Parent n'est pas un objet]
+			if pemstatus(m.loParent, 'Parent', 5) and type('m.loParent.Parent') == 'O' && {fr} Vartype(m.loParent.Parent) ne marche pas [Parent n'est pas un objet]
 				loParent = m.loParent.parent
 			else
 				exit
@@ -82,7 +80,7 @@ endif
 return m.loResult
 
 * ------------------------------------
-procedure oContIn_Test && test unitaire de oContIn()
+procedure oContIn_Test && {fr} test unitaire de oContIn()
 
 local loTest as abUnitTest of abDev.prg;
 , loCont as container
@@ -101,20 +99,20 @@ m.loTest.Test(m.loCont, m.loCont.oOpg.buttons(2), 'Container')
 return m.loTest.Result()
 
 * ========================================
-function oFormIn && Forme où se trouve un objet
-lparameters toObject && Objet VFP
+function oFormIn && {fr} Forme où se trouve un objet
+lparameters toObject && {fr} Objet VFP
 
 return oContIn(m.toObject, 'Form')
 
 * ========================================
-function lFormIn && Un objet est placé dans une forme
-lparameters toObject && Objet VFP
+function lFormIn && {fr} Un objet est placé dans une forme
+lparameters toObject && {fr} Objet VFP
 
 return not isnull(oFormIn(m.toObject))
 
 * ========================================
-function cListItems as String && Listbox|Combobox.List[] > liste délimitée
-lparameters toList as listbox && Objet Listbox ou ComboBox
+function cListItems as String && {fr} Listbox|Combobox.List[] > liste délimitée
+lparameters toList as listbox && {fr} Objet Listbox ou ComboBox
 
 local aa[1] as String
 
@@ -125,20 +123,20 @@ return Iif(aListItems(@m.aa, m.toList) > 0;
 endfunc
 
 * ========================================
-function aListItems && Listbox|Combobox.List[] > array
+function aListItems && {fr} Listbox|Combobox.List[] > array
 lparameters ;
-	taItems,; && @ Éléments de .List[]
-	toList as listbox && Objet Listbox ou ComboBox
+	taItems,; && @ {fr} Éléments de .List[]
+	toList as listbox && {fr} Objet Listbox ou ComboBox
 external array taItems
 
-local lnResult as Integer; && nombre d'éléments
+local lnResult as Integer; && {fr} nombre d'éléments
 , llResult;
 , lnCol;
 , liCol;
 , liRow;
 
 && modify command c:\test\test\Listbox_combobox.list.prg
-&& pour supporter .Sorted, soit sauver dans l'ordre de .itemID, soit sauver les ID
+&& {fr} pour supporter .Sorted, soit sauver dans l'ordre de .itemID, soit sauver les ID
 && ".Sorted is only available if .RowSourceType is set to 0 (None) or 1 (Value)."
 
 lnResult = .null.
@@ -167,7 +165,7 @@ if m.llResult
 					 and empty(.listitem[m.liRow, 1]);
 					 and empty(.listitem[m.liRow, .BoundColumn])
 
-						&& c'est un élément vide ajouté par VFP quand .Value n'est pas dans .List
+						&& {fr} c'est un élément vide ajouté par VFP quand .Value n'est pas dans .List
 					 	lnResult = m.lnResult - 1
 
 					else
@@ -184,7 +182,7 @@ endif
 return m.lnResult
 
 * ------------------------------------
-procedure aListItems_Test && test unitaire de aListItems()
+procedure aListItems_Test && {fr} test unitaire de aListItems()
 
 local loTest as abUnitTest of abDev.prg;
 , loList as listbox;
@@ -203,7 +201,7 @@ with m.loList as listbox
 		.additem(m.lcItem)
 		.list[.NewIndex, 2] = m.lcItem + '_'
 	endfor
-	.value = '' && Valeur en dehors de la liste
+	.value = '' && {fr} Valeur en dehors de la liste
 endwith
 loTest.Test(100, @m.laItem, m.loList) && 100 x 2 = .2 ms
 loTest.assert(100, m.loList.listcount)
@@ -224,13 +222,13 @@ return loTest.Result()
 * ========================================
 function aItemsList && {en} Array from Listbox|Combobox.List[]
 lparameters ;
-	taItems,; && @ Éléments de .List[]
-	toList as listbox && Objet Listbox ou ComboBox
+	taItems,; && @ {fr} Éléments de .List[]
+	toList as listbox && {fr} Objet Listbox ou ComboBox
 external array taItems
 
 * modify command c:\test\test\Listbox_combobox.list.prg
 
-local lnResult as integer; && nombre d'éléments
+local lnResult as integer; && {fr} nombre d'éléments
 , llResult as Boolean;
 , loForm as form, liDS as integer, llDS as Boolean;
 , lcAlias as string, lcField as string, llFldState as Boolean, lnFldState as integer, luValue;
@@ -269,10 +267,10 @@ if m.llResult
 				endif
 			endif
 
-*			.rowsource = '' && 2015-12-07 -- thn -- work around Error 1152 (Cannot access the selected table) -- useless and dangerous - breaks .rowsourcetype = 3 && SQL-select
-			.rowsourcetype = 0 && None
+*			.rowsource = '' && 2015-12-07 -- thn -- work around Error 1152 (Cannot access the selected table) -- useless and dangerous - breaks .rowsourcetype = 3 && {fr} SQL-select
+			.rowsourcetype = 0 && {fr} None
 			.clear
-			.columncount = alen(m.taItems, 2) && For a ComboBox or Listbox control, if you set ColumnCount to 0, the first column is displayed based on the RowSource property or on the items added with the AddItem method
+			.columncount = alen(m.taItems, 2) && {fr} For a ComboBox or Listbox control, if you set ColumnCount to 0, the first column is displayed based on the RowSource property or on the items added with the AddItem method
 
 			do case
 			case laEmpty(@m.taItems)
@@ -280,14 +278,14 @@ if m.llResult
 
 			case .columncount <= 1
 				for each lcElt in m.taItems
-					.additem(transform(m.lcElt)) && par sécurité
+					.additem(transform(m.lcElt)) && {fr} par sécurité
 				endfor
 
 			otherwise
 				for liRow = 1 to alen(m.taItems, 1)
 					.additem(transform(m.taItems[m.liRow, 1]))
 					for liCol = 2 to .columncount
-						.list[.NewIndex, m.liCol] = transform(m.taItems[m.liRow, m.liCol]) && The AddItem method always inserts a new row into a multicolumn ComboBox or Listbox. After a row has been inserted, columns in that row should be populated using the .List(.NewIndex, nColumn) syntax
+						.list[.NewIndex, m.liCol] = transform(m.taItems[m.liRow, m.liCol]) && {fr} The AddItem method always inserts a new row into a multicolumn ComboBox or Listbox. After a row has been inserted, columns in that row should be populated using the .List(.NewIndex, nColumn) syntax
 					endfor
 				endfor
 			endcase
@@ -307,7 +305,7 @@ endif
 return m.lnResult
 
 * ------------------------------------
-procedure aItemsList_Test && test unitaire de aItemsList()
+procedure aItemsList_Test && {fr} test unitaire de aItemsList()
 
 local loTest as abUnitTest of abDev.prg;
 , loList as listbox;
@@ -318,7 +316,7 @@ local loTest as abUnitTest of abDev.prg;
 loTest = newobject('abUnitTest', 'abDev.prg')
 loList = createobject('Listbox')
 with m.loList as listbox
-	.rowsourcetype = 5 && before updating .RowSource, program must reset .RowSourceType to the proper value
+	.rowsourcetype = 5 && {fr} before updating .RowSource, program must reset .RowSourceType to the proper value
 	.columncount = 5
 	.boundcolumn = 2
 endwith
@@ -335,7 +333,7 @@ loTest.assert('10_2', trim(m.loList.list[10,2]))
 
 for liRow = 1 to alen(laItem, 1)
 	for liCol = 1 to alen(laItem, 2)
-		laItem[m.liRow, m.liCol] = replicate(laItem[m.liRow, m.liCol], 10) && Replicate() pour tester si la longueur de la chaîne influence le résultat
+		laItem[m.liRow, m.liCol] = replicate(laItem[m.liRow, m.liCol], 10) && {fr} Replicate() pour tester si la longueur de la chaîne influence le résultat
 	endfor
 endfor
 loTest.Test(100, @m.laItem, m.loList) && 100 x 2 x 70 = 2 ms en IDE
@@ -344,19 +342,19 @@ loTest.assert(100, m.loList.listcount)
 return loTest.Result()
 
 * ========================================
-function loCont && Un objet peut en contenir d'autres
-lparameters toCont as container && Objet supposé conteneur
+function loCont && {fr} Un objet peut en contenir d'autres
+lparameters toCont as container && {fr} Objet supposé conteneur
 
 return .t.;
 	and lMethod(m.toCont, 'AddObject'); && .AddObject() n'existe que dans les conteneurs ...
-	and !pemstatus(m.toCont, 'AddObject', 4); && not user defined, donc native ...
-	and !m.toCont.baseclass == 'Olecontrol' && vu le 23/10/13 avec les contrôles DBItech
+	and !pemstatus(m.toCont, 'AddObject', 4); && {fr} not user defined, donc native ...
+	and !m.toCont.baseclass == 'Olecontrol' && {fr} vu le 23/10/13 avec les contrôles DBItech
 
 * ========================================
-function nObjectsCont && Nombre d'objets contenus dans un autre
-lparameters toCont && Objet supposé contenant
+function nObjectsCont && {fr} Nombre d'objets contenus dans un autre
+lparameters toCont && {fr} Objet supposé contenant
 
-* Si l'objet peut en contenir d'autres,
+* {fr} Si l'objet peut en contenir d'autres,
 if loCont(m.toCont)
 
 	local lnResult
@@ -380,12 +378,12 @@ else
 endif
 
 * ========================================
-function oObjectCont && Objet contenu dans un autre d'après son index (sauf Grid)
+function oObjectCont && {fr} Objet contenu dans un autre d'après son index (sauf Grid)
 lparameters ;
-	toCont,; && Objet supposé contenant
-	tnObject && N° d'objet dans la collection
+	toCont,; && {fr} Objet supposé contenant
+	tnObject && {fr} N° d'objet dans la collection
 
-local llResult, loResult && Objet contenu
+local llResult, loResult && {fr} Objet contenu
 
 loResult = .null.
 llResult = .t.;
@@ -418,8 +416,8 @@ return m.loResult
 endfunc
 
 * ========================================
-function cSys1272thisForm && Adresse d'un objet dans thisForm
-lparameters tuObject && Objet à analyser ou son adresse
+function cSys1272thisForm && {fr} Adresse d'un objet dans thisForm
+lparameters tuObject && {fr} Objet à analyser ou son adresse
 
 local lcType, lnPeriod, lcResult, llResult
 
@@ -445,15 +443,15 @@ endif
 return m.lcResult
 
 * ========================================
-function oPageIn && Page d'un pageFrame où se trouve un objet
+function oPageIn && {fr} Page d'un pageFrame où se trouve un objet
 lparameters ;
 	toControl as control
-local loResult && Page où se trouve un objet
+local loResult && {fr} Page où se trouve un objet
 loResult = .null.
 
 if vartype(m.toControl) == 'O'
 
-	* Tabuler les parents de l'objet jusqu'au formulaire
+	* {fr} Tabuler les parents de l'objet jusqu'au formulaire
 	local array laParents[1]
 	local lnParents, loParent as object
 	lnParents = 0
@@ -470,12 +468,12 @@ if vartype(m.toControl) == 'O'
 		endif
 	enddo
 
-	* Si au moins trois parents et l'avant-dernier parent est un pageframe
+	* {fr} Si au moins trois parents et l'avant-dernier parent est un pageframe
 	if m.lnParents > 2
 		loParent = laParents[m.lnParents-1]
 		if proper(m.loParent.baseclass) == 'Pageframe'
 
-			* La page cherchée est son fils
+			* {fr} La page cherchée est son fils
 			loResult = laParents[m.lnParents-2]
 		endif
 	endif
@@ -484,23 +482,23 @@ endif
 return m.loResult
 
 * ========================================
-function aoSiblings && Frères d'un objet dans un conteneur [basés sur une classe]
+function aoSiblings && {fr} Frères d'un objet dans un conteneur [basés sur une classe]
 lparameters ;
-	taSiblings,; && @ Frères d'un objet dans un conteneur
-	toObject,; && Objet
-	tcClass,; && [toutes] Classe
-	tlTabIndex && [.F.] tabuler seulement les objets ayant la propriété TabIndex, classer par TabIndex croissant
+	taSiblings,; && @ {fr} Frères d'un objet dans un conteneur
+	toObject,; && {fr} Objet
+	tcClass,; && [toutes] {fr} Classe
+	tlTabIndex && [.F.] {fr} tabuler seulement les objets ayant la propriété TabIndex, classer par TabIndex croissant
 external array taSiblings
 
-local loParent, lnSibling, loSibling, llResult, lnResult && Nombre de frères trouvés
+local loParent, lnSibling, loSibling, llResult, lnResult && {fr} Nombre de frères trouvés
 lnResult = 0
 
-* Si les paramètres sont corrects
+* {fr} Si les paramètres sont corrects
 llResult = type('taSiblings', 1) == 'A' and vartype(m.toObject) == 'O'
 assert m.llResult message cAssertMsg(textmerge("At least one parameter is invalid: <<cLitteral(m.taSiblings)>>, <<cLitteral(m.toObject)>>"))
 if m.llResult
 
-* Si l'objet est dans un conteneur
+* {fr} Si l'objet est dans un conteneur
 	loParent = m.toObject.parent
 	llResult = loCont(m.loParent)
 	assert m.llResult message cAssertMsg(textmerge("Object <<cLitteral(m.toObject)>> should be in a containing object such as form, container, etc."))
@@ -508,7 +506,7 @@ if m.llResult
 
 		tlTabIndex = lTrue(m.tlTabIndex)
 
-		* Pour chaque objet frère
+		* {fr} Pour chaque objet frère
 		for m.lnSibling = 1 to nObjectsCont(m.loParent)
 			loSibling = oObjectCont(m.loParent, m.lnSibling)
 
@@ -516,7 +514,7 @@ if m.llResult
 			 and (empty(m.tcClass) or loClass(m.loSibling, m.tcClass));
 			 and (not m.tlTabIndex or lProperty(m.loSibling, 'TabIndex'))
 
-				* Ajouter au résultat
+				* {fr} Ajouter au résultat
 				lnResult = m.lnResult + 1
 				if m.tlTabIndex
 					dimension taSiblings[m.lnResult, 2]
@@ -542,14 +540,14 @@ endif
 return m.lnResult
 
 * ========================================
-function oSibling && Frère d'un objet dans un conteneur selon une classe
+function oSibling && {fr} Frère d'un objet dans un conteneur selon une classe
 lparameters ;
-	toObject,; && Objet
-	tcClass && Classe
+	toObject,; && {fr} Objet
+	tcClass && {fr} Classe
 
 local laSibling[1]
 
-* Si l'objet a un frère et un seul selon la classe
+* {fr} Si l'objet a un frère et un seul selon la classe
 
 return iif(aoSiblings(@m.laSibling, m.toObject, m.tcClass) = 1;
 	, laSibling[1];
@@ -557,10 +555,10 @@ return iif(aoSiblings(@m.laSibling, m.toObject, m.tcClass) = 1;
 	)
 
 * ========================================
-function oSiblingTabIndex && Frère d'un object dans un conteneur selon un différentiel de tabindex
+function oSiblingTabIndex && {fr} Frère d'un object dans un conteneur selon un différentiel de tabindex
 lparameters ;
-	toObject,; && Objet
-	tnTabIndex && Différentiel de TabIndex
+	toObject,; && {fr} Objet
+	tnTabIndex && {fr} Différentiel de TabIndex
 
 if empty(m.tnTabIndex)
 	return m.toObject
@@ -594,17 +592,17 @@ else
 endif
 
 * ========================================
-function lClass && Une définition de classe existe
+function lClass && {fr} Une définition de classe existe
 lparameters ;
-	tcClass,; && Nom de la classe
-	toClass,; && @ [.NULL.] Classe instanciée en retour
-	tcClassLib,; && [''] Classothèque
-	tiResult,; && @ Si la classe ne peut être instanciée, n° de l'erreur
-	tcResult && @ Si la classe ne peut être instanciée, raison de l'échec
+	tcClass,; && {fr} Nom de la classe
+	toClass,; && @ [.NULL.] {fr} Classe instanciée en retour
+	tcClassLib,; && [''] {fr} Classothèque
+	tiResult,; && @ {fr} Si la classe ne peut être instanciée, n° de l'erreur
+	tcResult && @ {fr} Si la classe ne peut être instanciée, raison de l'échec
 
 toClass = .null.
 tcClassLib = evl(m.tcClassLib, space(0))
-tcClassLib = iif(lower(justext(m.tcClassLib)) == 'prg', forceext(m.tcClassLib, 'fxp'), m.tcClassLib) && When possible, specify the compiled program name (.fxp) when a class is stored in a program file (.prg)
+tcClassLib = iif(lower(justext(m.tcClassLib)) == 'prg', forceext(m.tcClassLib, 'fxp'), m.tcClassLib) && {fr} When possible, specify the compiled program name (.fxp) when a class is stored in a program file (.prg)
 tiResult = 0
 
 local llResult as Boolean;
@@ -626,19 +624,19 @@ if m.llResult
 				, newobject(m.tcClass, m.tcClassLib, 0);
 				, createobject(m.tcClass);
 				)
-*			toClass = NewObject(m.tcClass, m.tcClassLib, 0) && passing 0 to the cInApplication parameter allows you to create an instance of a class without raising initialization code (such as code in the Init, Load, Activate, and BeforeOpenTables events)
-			&& THIS FEATURE IS NOT SUPPORTED IN RUNTIME APPLICATIONS
-			&& Une page peut être instanciée en dehors d'un pageFrame
+* {fr} toClass = NewObject(m.tcClass, m.tcClassLib, 0) && {fr} passing 0 to the cInApplication parameter allows you to create an instance of a class without raising initialization code (such as code in the Init, Load, Activate, and BeforeOpenTables events)
+			&& {fr} THIS FEATURE IS NOT SUPPORTED IN RUNTIME APPLICATIONS
+			&& {fr} Une page peut être instanciée en dehors d'un pageFrame
 		catch to loException when inlist(m.loException.errorno;
-				, 1435; && Object class is invalid for this container (erreur dans la documentation)
-				, 1744; && Object class is invalid for this container
-				, 1736; && Erreur d'instanciation
-				, 1938; && Objet non contenu dans un Formulaire
+				, 1435; && {fr} Object class is invalid for this container (erreur dans la documentation)
+				, 1744; && {fr} Object class is invalid for this container
+				, 1736; && {fr} Erreur d'instanciation
+				, 1938; && {fr} Objet non contenu dans un Formulaire
 				)
 			try
 				loForm = createobject('Form')
 				if file(m.tcClassLib)
-					loForm.newobject('lClass', m.tcClass, m.tcClassLib) && dans VFP 10, il faudrait que la Méthode newObject supporte (,,0)
+					loForm.newobject('lClass', m.tcClass, m.tcClassLib) && {fr} dans VFP 10, il faudrait que la Méthode newObject supporte (,,0)
 				else
 					loForm.addobject('lClass', m.tcClass)
 				endif
@@ -647,7 +645,7 @@ if m.llResult
 			catch to loException
 				throw m.loException
 			endtry
-		catch to loException when m.loException.errorno = 1733 && The class definition specified in a CREATEOBJECT( ) function cannot be located.
+		catch to loException when m.loException.errorno = 1733 && {fr} The class definition specified in a CREATEOBJECT( ) function cannot be located.
 			llResult = .f.
 		endtry
 	catch to loException
@@ -668,8 +666,8 @@ return m.llResult
 endfunc
 
 * ========================================
-function cClasses && Classes d'un objet depuis sa classe de base (uppercase)
-lparameters toObject, tcSep && Objet, [' '] séparateur
+function cClasses && {fr} Classes d'un objet depuis sa classe de base (uppercase)
+lparameters toObject, tcSep && {fr} Objet, [' '] séparateur
 
 if vartype(m.toObject) == 'O'
 	local array laClass[1]
@@ -683,22 +681,22 @@ endif
 
 * ========================================
 function loClasses && /!\ 12/02/09 - dépréciée, utiliser loClass()
-lparameters toObject, tcClasses && Objet, Classe(s)
-return loClass(m.toObject, m.tcClasses) && Rétro compatibilité
+lparameters toObject, tcClasses && {fr} Objet, Classe(s)
+return loClass(m.toObject, m.tcClasses) && {fr} Rétro compatibilité
 
 * ========================================
-function loEmpty && Un objet est de la classe Empty
-lparameters toObject && Objet supposé
+function loEmpty && {fr} Un objet est de la classe Empty
+lparameters toObject && {fr} Objet supposé
 return .t.;
 	and vartype(m.toObject) == 'O';
 	and not lProperty(m.toObject, 'BaseClass');
 	and empty(comclassinfo(m.toObject))
 
 * ========================================
-function loClass && Un objet hérite d'au moins une classe dans une liste
+function loClass && {fr} Un objet hérite d'au moins une classe dans une liste
 lparameters ;
-	toObject,; && Objet supposé
-	tcClasses && Classe(s) à satisfaire (ou) ; -class ne doit pas appartenir à cette classe
+	toObject,; && {fr} Objet supposé
+	tcClasses && {fr} Classe(s) à satisfaire (ou) ; -class ne doit pas appartenir à cette classe
 
 local loClass[1], laClass[1], lcClass
 
@@ -728,16 +726,16 @@ local loTest as abUnitTest of abDev.prg
 
 loTest = newobject('abUnitTest', 'abDev.prg')
 
-loTest.Test(.t., newobject('awlst', 'aw' + '.vcx'), 'Listbox') && évite d'embarquer aw.vcx dans un projet ab
-loTest.Test(.t., newobject('awfrm', 'aw' + '.vcx'), 'form') && évite d'embarquer aw.vcx dans un projet ab
+loTest.Test(.t., newobject('awlst', 'aw' + '.vcx'), 'Listbox') && {fr} évite d'embarquer aw.vcx dans un projet ab
+loTest.Test(.t., newobject('awfrm', 'aw' + '.vcx'), 'form') && {fr} évite d'embarquer aw.vcx dans un projet ab
 
 return loTest.Result()
 
 * ====================
-function loBaseClass && Un objet VFP est de la classe de base spécifiée
+function loBaseClass && {fr} Un objet VFP est de la classe de base spécifiée
 lparameters ;
-	toObject,; && Référence à l'objet
-	tcBaseClass && Classe de base
+	toObject,; && {fr} Référence à l'objet
+	tcBaseClass && {fr} Classe de base
 
 return ;
 			vartype(m.toObject) == 'O' ;
@@ -746,12 +744,12 @@ return ;
 	and	lower(m.toObject.baseclass) == lower(alltrim(m.tcBaseClass))
 
 * ====================
-function oClassCont && Premier objet VFP [d'une classe] dans un conteneur
+function oClassCont && {fr} Premier objet VFP [d'une classe] dans un conteneur
 lparameters ;
-	toCont,; && Conteneur
-	tcClasses,; && [toutes] Classe(s) filtrante(s)
-	tlRecurse,; && [.T.] Récurser dans les conteneurs contenus
-	tnConts && @ Nombre de niveaux de conteneurs
+	toCont,; && {fr} Conteneur
+	tcClasses,; && [toutes] {fr} Classe(s) filtrante(s)
+	tlRecurse,; && [.T.] {fr} Récurser dans les conteneurs contenus
+	tnConts && @ {fr} Nombre de niveaux de conteneurs
 
 local array laObject[1]
 
@@ -761,9 +759,9 @@ return iif(aoClassCont(@m.laObject, m.toCont, m.tcClasses, m.tlRecurse, m.tnCont
 	)
 
 * ====================
-function HTMLtabIndex && Collects .TabIndex for HTML
+function HTMLtabIndex && {en} Collects .TabIndex for HTML
 lparameters ;
-  oTabIndex as GA_DICTIONARY_CLASS of abGA.prg; && @ key: Sys(1272, m.oCont) - value : Tabindex
+  oTabIndex as GA_DICTIONARY_CLASS of abGA.prg; && @ {fr} key: Sys(1272, m.oCont) - value : Tabindex
 , toForm as awFrm of aw.vcx
 
 local success as Boolean;
@@ -779,7 +777,7 @@ endif
 return m.success
 
 *----------------------------------------------------
-function HTMLtabIndex_ && Collects .TabIndex for HTML - recursive
+function HTMLtabIndex_ && {en} Collects .TabIndex for HTML - recursive
 lparameters ;
   toCont as awCnt of aw.vcx;
 , oTabIndex as GA_DICTIONARY_CLASS of abGA.prg;
@@ -829,32 +827,32 @@ m.oTest.Test(.t., @m.oTabIndex, m.oForm)
 return m.oTest.Result()
 
 * ====================
-function aoClassCont && Objets VFP [d'une classe] dans un conteneur /!\ récursion descendante
+function aoClassCont && {fr} Objets VFP [d'une classe] dans un conteneur /!\ récursion descendante
 lparameters ;
-	taObjects,; && @ Objets trouvés
-	toCont,; && Conteneur
-	tcClasses,; && [toutes] Classe(s) filtrante(s)
-	tlRecurse,; && [.T.] Récurser dans les conteneurs contenus
-	tnConts,; && @ [0|1] Nombre de niveaux de conteneurs
-	tlTabIndex,; && [.F.] tabuler seulement les objets ayant la propriété TabIndex et TabStop, classer par TabIndex croissant
-	tlEnabled,; && [.F.] tabuler seulement les objets ayant la propriété TabIndex et Enabled
-	tlAdd && Ajouter au tableau existant
+	taObjects,; && @ {fr} Objets trouvés
+	toCont,; && {fr} Conteneur
+	tcClasses,; && [toutes] {fr} Classe(s) filtrante(s)
+	tlRecurse,; && [.T.] {fr} Récurser dans les conteneurs contenus
+	tnConts,; && @ [0|1] {fr} Nombre de niveaux de conteneurs
+	tlTabIndex,; && [.F.] {fr} tabuler seulement les objets ayant la propriété TabIndex et TabStop, classer par TabIndex croissant
+	tlEnabled,; && [.F.] {fr} tabuler seulement les objets ayant la propriété TabIndex et Enabled
+	tlAdd && {fr} Ajouter au tableau existant
 
 external array taObjects
 tnConts = iif(vartype(m.tnConts) == 'N' and m.tnConts > 0, m.tnConts, 0)
 tlTabIndex = lTrue(m.tlTabIndex)
 tlEnabled = lTrue(m.tlEnabled)
 
-local llClass, lnObject, loObject, llResult, lnResult && Nombre d'objets trouvés
+local llClass, lnObject, loObject, llResult, lnResult && {fr} Nombre d'objets trouvés
 
 lnResult = 0
 
-* Si Conteneur
-llResult = loCont(m.toCont) && ASSERT nuisible à la récursion
+* {fr} Si Conteneur
+llResult = loCont(m.toCont) && {fr} ASSERT nuisible à la récursion
 if m.llResult
 	tnConts = m.tnConts + 1
 
-	* Si tableau
+	* {fr} Si tableau
 	llResult = type('taObjects', 1) == 'A'
 	assert m.llResult message cAssertMsg(textmerge([le premier paramètre (<<cLitteral(@m.taObjects)>>) doit être un tableau]))
 	if m.llResult
@@ -867,19 +865,19 @@ if m.llResult
 
 		llClass = vartype(m.tcClasses) == 'C' and not empty(m.tcClasses)
 
-		* Pour chaque objet contenu
+		* {fr} Pour chaque objet contenu
 		for lnObject = 1 to nObjectsCont(m.toCont)
 			loObject = oObjectCont(m.toCont, m.lnObject)
 
-			* Si l'objet est de la classe cherchée, ajouter au résultat
+			* {fr} Si l'objet est de la classe cherchée, ajouter au résultat
 			lnResult = iif(!m.llClass or loClass(m.loObject, m.tcClasses);
 				, aoAppend(@m.taObjects, m.loObject, m.tlTabIndex, m.tlEnabled);
 				, m.lnResult;
 				)
 
-			* Si l'objet est un conteneur et récursion demandée, récurser dedans
+			* {fr} Si l'objet est un conteneur et récursion demandée, récurser dedans
 			lnResult = iif(pcount() < 4 or !vartype(m.tlRecurse) == 'L' or m.tlRecurse;
-				, max(m.lnResult, aoClassCont(@m.taObjects, m.loObject, m.tcClasses, .t., @m.tnConts, m.tlTabIndex, m.tlEnabled, m.tlAdd)); && aoClassCont() ne travaille que si l'objet est un conteneur
+				, max(m.lnResult, aoClassCont(@m.taObjects, m.loObject, m.tcClasses, .t., @m.tnConts, m.tlTabIndex, m.tlEnabled, m.tlAdd)); && {fr} aoClassCont() ne travaille que si l'objet est un conteneur
 				, m.lnResult;
 				)
 		endfor
@@ -901,13 +899,13 @@ loTest = createobject('aoClassContTest')
 
 loTest.formOpen(@m.loForm)
 
-loTest.Test(54, @m.laObject, m.loForm) && toutes les classes
+loTest.Test(54, @m.laObject, m.loForm) && {fr} toutes les classes
 
-* aClear(@m.laObject) && pas de clear car additif
-loTest.lSingleTest = .t. && additif, évite un C0005
-loTest.Test(54+5, @m.laObject, m.loForm, 'CheckBox',,,,,.t.) && filtré, additif
+* {fr} aClear(@m.laObject) && {fr} pas de clear car additif
+loTest.lSingleTest = .t. && {fr} additif, évite un C0005
+loTest.Test(54+5, @m.laObject, m.loForm, 'CheckBox',,,,,.t.) && {fr} filtré, additif
 
-&& garbage collection
+&& {fr} garbage collection
 aClear(@m.laObject)
 m.loForm.release
 
@@ -920,15 +918,15 @@ define class aoClassContTest as abUnitTest of abDev.prg
 	enddefine
 
 * ====================
-function aoAppend && Ajoute un objet à un tableau d'objets
+function aoAppend && {fr} Ajoute un objet à un tableau d'objets
 lparameters ;
-	taObjects,; && @ Objets
-	toObject,; && Objet
-	tlTabIndex,; && [.F.] tabuler seulement les objets ayant la propriété TabIndex et TabStop
-	tlEnabled && [.F.] tabuler seulement les objets ayant la propriété TabIndex et Enabled
+	taObjects,; && @ {fr} Objets
+	toObject,; && {fr} Objet
+	tlTabIndex,; && [.F.] {fr} tabuler seulement les objets ayant la propriété TabIndex et TabStop
+	tlEnabled && [.F.] {fr} tabuler seulement les objets ayant la propriété TabIndex et Enabled
 external array taObjects
 
-local lnResult; && Nombre d'objets
+local lnResult; && {fr} Nombre d'objets
 , llResult;
 , lPage as Boolean;
 , iTabIndex;
@@ -945,10 +943,10 @@ if m.llResult
 	if .f.;
 	 or !m.tlTabIndex;
 	 or .t.;
-		and (m.lPage or lProperty(m.toObject, 'TabIndex')); && Applies To: CheckBox | ComboBox | CommandButton | CommandGroup | Container Object | Control Object | EditBox | Form | Grid | Label | ListBox | OLE Bound Control | OLE Container Control | OptionButton | OptionGroup | PageFrame | _SCREEN | Spinner | TextBox
-		and (m.lPage or lProperty(m.toObject, 'TabStop') and m.toObject.tabstop); && Does not apply to Page ! && Applies To: CheckBox | ComboBox | CommandButton | Container Object | Control Object | EditBox | Form | Grid | ListBox | OLE Bound Control | OLE Container Control | OptionButton | Page | PageFrame | _SCREEN | Spinner | TextBox
-		and (!m.tlEnabled or m.toObject.enabled); && Applies To: CheckBox | Column | ComboBox | CommandButton | CommandGroup | Container | EditBox | Form | Grid | Image (Visual FoxPro) | Label (Visual FoxPro) | Line | ListBox | OLE Bound | OLE Container | OptionButton | OptionGroup | Page | PageFrame | _SCREEN | Shape | Spinner | TextBox | Timer | ToolBar
-		and .t. && !loCont(m.toObject) && and (!lProperty(m.toObject, 'Visible') or m.toObject.Visible)
+		and (m.lPage or lProperty(m.toObject, 'TabIndex')); && {fr} Applies To: CheckBox | ComboBox | CommandButton | CommandGroup | Container Object | Control Object | EditBox | Form | Grid | Label | ListBox | OLE Bound Control | OLE Container Control | OptionButton | OptionGroup | PageFrame | _SCREEN | Spinner | TextBox
+		and (m.lPage or lProperty(m.toObject, 'TabStop') and m.toObject.tabstop); && {fr} Does not apply to Page ! && {fr} Applies To: CheckBox | ComboBox | CommandButton | Container Object | Control Object | EditBox | Form | Grid | ListBox | OLE Bound Control | OLE Container Control | OptionButton | Page | PageFrame | _SCREEN | Spinner | TextBox
+		and (!m.tlEnabled or m.toObject.enabled); && {fr} Applies To: CheckBox | Column | ComboBox | CommandButton | CommandGroup | Container | EditBox | Form | Grid | Image (Visual FoxPro) | Label (Visual FoxPro) | Line | ListBox | OLE Bound | OLE Container | OptionButton | OptionGroup | Page | PageFrame | _SCREEN | Shape | Spinner | TextBox | Timer | ToolBar
+		and .t. && !loCont(m.toObject) && {fr} and (!lProperty(m.toObject, 'Visible') or m.toObject.Visible)
 
 		lnResult = m.lnResult + 1
 
@@ -969,7 +967,7 @@ if m.llResult
 			enddo
 			dimension taObjects[m.lnResult, 2]
 			taObjects[m.lnResult, 1] = m.toObject
-			taObjects[m.lnResult, 2] = m.iTabIndex && Iif(m.lPage, 0, m.toObject.Tabindex)
+			taObjects[m.lnResult, 2] = m.iTabIndex && {fr} Iif(m.lPage, 0, m.toObject.Tabindex)
 		else
 			dimension taObjects[m.lnResult]
 			taObjects[m.lnResult] = m.toObject
@@ -983,7 +981,7 @@ else
 endif
 
 * ========================================
-function cBaseClassOfParent && Classe de base du parent d'un objet s'il n'est pas orphelin
+function cBaseClassOfParent && {fr} Classe de base du parent d'un objet s'il n'est pas orphelin
 lparameters toObj
 
 return iif(vartype(m.toObj) == 'O';
@@ -995,8 +993,8 @@ return iif(vartype(m.toObj) == 'O';
 		)
 
 * ========================================
-function coFontStyle && Style de police d'après les propriétés 'Font...' d'un objet
-lparameters toObject && Objet
+function coFontStyle && {fr} Style de police d'après les propriétés 'Font...' d'un objet
+lparameters toObject && {fr} Objet
 
 local llResult, lcResult
 lcResult = space(0)
@@ -1020,11 +1018,11 @@ endif
 return m.lcResult
 
 * ========================================
-function oFontStyleSet && Règle les propriétés 'Font...' d'un objet d'après style de police
+function oFontStyleSet && {fr} Règle les propriétés 'Font...' d'un objet d'après style de police
 lparameters ;
-	toObject,; && Objet
-	tcFontStyle && Style de police
-local llResult && Mise à jour OK
+	toObject,; && {fr} Objet
+	tcFontStyle && {fr} Style de police
+local llResult && {fr} Mise à jour OK
 
 llResult = vartype(m.toObject) == 'O';
  and pemstatus(m.toObject, 'FontName', 5);
@@ -1045,11 +1043,11 @@ endif
 return m.llResult
 
 * ========================================
-function aoParents && Lignée ascendante d'un objet
+function aoParents && {fr} Lignée ascendante d'un objet
 lparameters ;
-	taParents,; && @ Parent, grand parent, etc.
-	toObject,; && Objet
-	tlDown && [.F.] de l'ancêtre au père
+	taParents,; && @ {fr} Parent, grand parent, etc.
+	toObject,; && {fr} Objet
+	tlDown && [.F.] {fr} de l'ancêtre au père
 external array taParents
 tlDown = lTrue(m.tlDown)
 
@@ -1085,10 +1083,10 @@ endif
 return m.lnResult
 
 * ========================================
-function oParentClass && Premier ascendant d'un objet dérivé d'une classe
+function oParentClass && {fr} Premier ascendant d'un objet dérivé d'une classe
 lparameters ;
-	toObject,; && Objet
-	tcClass && Classe
+	toObject,; && {fr} Objet
+	tcClass && {fr} Classe
 
 local laParents[1], loParent, llResult, loResult
 
@@ -1111,10 +1109,10 @@ endif
 return m.loResult
 
 * ========================================
-function oParentProp && Premier ascendant d'un objet doté d'une certaine propriété
+function oParentProp && {fr} Premier ascendant d'un objet doté d'une certaine propriété
 lparameters ;
-	toObject,; && Objet
-	tcProp && Propriété
+	toObject,; && {fr} Objet
+	tcProp && {fr} Propriété
 
 local laParents[1], loParent, llResult, loResult
 
@@ -1139,24 +1137,24 @@ endif
 return m.loResult
 
 * ========================================
-function locObject && Un objet en contient un autre
+function locObject && {fr} Un objet en contient un autre
 lparameters ;
-	toCont,; && Objet contenant
-	tcObject && Object contenu
+	toCont,; && {fr} Objet contenant
+	tcObject && {fr} Object contenu
 
 return loCont(m.toCont);
  and vartype(m.tcObject) == 'C';
  and not empty(m.tcObject);
  and type('m.toCont.' + m.tcObject) == 'O';
- and type('m.toCont.' + m.tcObject + '.baseClass') == 'C' && Après this.RemoveObject('cObject'), VarType(this.cObject) == 'O' (comportement VFP)
+ and type('m.toCont.' + m.tcObject + '.baseClass') == 'C' && {fr} Après this.RemoveObject('cObject'), VarType(this.cObject) == 'O' (comportement VFP)
 
 
 * ========================================
-function lMember && Un objet est doté d'un ou plusieurs membre(s)
+function lMember && {fr} Un objet est doté d'un ou plusieurs membre(s)
 lparameters ;
-	toObject,; && Objet VFP
-	tcMember,; && membre(s)
-	toMember && @ membre
+	toObject,; && {fr} Objet VFP
+	tcMember,; && {fr} membre(s)
+	toMember && @ {fr} membre
 
 return .t.;
  and vartype(m.toObject) == 'O';
@@ -1171,10 +1169,10 @@ return .t.;
 endfunc
 
 * ========================================
-function lMembers && Un objet est doté d'un ou plusieurs membre(s)
+function lMembers && {fr} Un objet est doté d'un ou plusieurs membre(s)
 lparameters ;
-	toObject,; && Objet VFP
-	tcMember && membre(s)
+	toObject,; && {fr} Objet VFP
+	tcMember && {fr} membre(s)
 
 local llResult, laMember[1], lcMember
 
@@ -1196,7 +1194,7 @@ return m.llResult
 endfunc
 
 * ------------------------------------
-	procedure lMember_Test && test unitaire de lMember()
+	procedure lMember_Test && {fr} test unitaire de lMember()
 
 	local loTest as abUnitTest of abDev.prg;
 	, oFrm as awFrm of aw.vcx;
@@ -1214,10 +1212,10 @@ endfunc
 	endproc
 
 * ========================================
-function lProperty && Un objet est doté d'une ou plusieurs propriété(s)
+function lProperty && {fr} Un objet est doté d'une ou plusieurs propriété(s)
 lparameters ;
-	toObject,; && Objet VFP
-	tcProp && propriété(s)
+	toObject,; && {fr} Objet VFP
+	tcProp && {fr} propriété(s)
 
 return .t.;
  and vartype(m.toObject) == 'O';
@@ -1231,10 +1229,10 @@ return .t.;
 endfunc
 
 * ========================================
-function lProperties && Un objet est doté d'une ou plusieurs propriété(s)
+function lProperties && {fr} Un objet est doté d'une ou plusieurs propriété(s)
 lparameters ;
-	toObject,; && Objet VFP
-	tcProp && propriété(s)
+	toObject,; && {fr} Objet VFP
+	tcProp && {fr} propriété(s)
 
 local llResult, laProp[1], lcProp
 
@@ -1256,10 +1254,10 @@ return m.llResult
 endfunc
 
 * ========================================
-function lPropHidden && Un objet est doté d'un propriété cachée [PemStatus(obj, prop, 2) ne retourne que les propriétés PROTECTED]
+function lPropHidden && {fr} Un objet est doté d'un propriété cachée [PemStatus(obj, prop, 2) ne retourne que les propriétés PROTECTED]
 lparameters ;
-	toObject,; && Objet VFP
-	tcProp && propriété
+	toObject,; && {fr} Objet VFP
+	tcProp && {fr} propriété
 
 local array laProp[1]
 
@@ -1268,25 +1266,25 @@ return .t.;
 	and ascan(laProp, alltrim(m.tcProp), 1, -1, 1, 7) > 0
 
 * ========================================
-function lMethod && Un objet est doté d'une Méthode ou un Événement
+function lMethod && {fr} Un objet est doté d'une Méthode ou un Événement
 lparameters ;
-	toObject as form,; && Objet VFP
-	tcMethod as string,; && méthode
+	toObject as form,; && {fr} Objet VFP
+	tcMethod as string,; && {fr} méthode
 	tcEventMethod as string && [any] 'm'ethod or 'E'vent
 
 return .t.;
 	and vartype(m.toObject) == 'O';
 	and vartype(m.tcMethod) == 'C';
 	and not empty(m.tcMethod);
-	and lProperty(m.toObject, 'BaseClass'); && C'est un objet VFP
-	and	pemstatus(m.toObject, m.tcMethod, 5); && tcMethod existe dans toObject
- 	and	upper(left(pemstatus(m.toObject, m.tcMethod, 3), 1)) $ evl(left(upper(alltrim(evl(m.tcEventMethod, ''))), 1), 'EM'); && tcMethod est un Événement ou une Méthode
+	and lProperty(m.toObject, 'BaseClass'); && {fr} C'est un objet VFP
+	and	pemstatus(m.toObject, m.tcMethod, 5); && {fr} tcMethod existe dans toObject
+ 	and	upper(left(pemstatus(m.toObject, m.tcMethod, 3), 1)) $ evl(left(upper(alltrim(evl(m.tcEventMethod, ''))), 1), 'EM'); && {fr} tcMethod est un Événement ou une Méthode
  	and .t.
 
 endfunc
 
 * ------------------------------------
-procedure lMethod_Test && test unitaire de lMethod()
+procedure lMethod_Test && {fr} test unitaire de lMethod()
 
 local loTest as abUnitTest of abDev.prg, o
 
@@ -1304,17 +1302,17 @@ endif
 return loTest.Result()
 
 * ========================================
-function lEvent && Un objet est doté d'un Événement
-lparameters toObject as form, tcEvent && Objet VFP && méthode
+function lEvent && {fr} Un objet est doté d'un Événement
+lparameters toObject as form, tcEvent && {fr} Objet VFP && {fr} méthode
 
 return lMethod(m.toObject, m.tcEvent, 'E')
 
 endfunc
 
 
-#if .f. && inutile
+#if .f. && {fr} inutile
 	local aa[1], i
- 	and amembers(m.aa, m.toObject, 1, 'N') > 0; && Native members && il faut vérifier que l'utilisateur n'a pas créé une méthode du même nom qu'un événement
+ 	and amembers(m.aa, m.toObject, 1, 'N') > 0; && {fr} Native members && {fr} il faut vérifier que l'utilisateur n'a pas créé une méthode du même nom qu'un événement
  	and varStore(@m.i, ascan(m.aa, m.tcEvent, 1, -1, 1, 15));
  	and m.i > 0;
  	and	upper(left(m.aa[m.i, 2], 1)) == 'E';
@@ -1322,7 +1320,7 @@ endfunc
 #endif
 
 * ------------------------------------
-procedure lEvent_Test && test unitaire de lEvent()
+procedure lEvent_Test && {fr} test unitaire de lEvent()
 
 local loTest as abUnitTest of abDev.prg;
 , cFile;
@@ -1330,7 +1328,7 @@ local loTest as abUnitTest of abDev.prg;
 
 loTest = newobject('abUnitTest', 'abDev.prg')
 
-cFile = "lib\vfxobj.vcx" && avoids build errors
+cFile = "lib\vfxobj.vcx" && {fr} avoids build errors
 
 if .t.;
  and file(m.cFile);
@@ -1344,14 +1342,14 @@ endif
 return loTest.Result()
 
 * ========================================
-function lMethodImplemented && Une Méthode ou un Événement est implémenté(e) dans un objet /!\ SUPPORTE SEULEMENT LES CLASSES VISUELLES
+function lMethodImplemented && {fr} Une Méthode ou un Événement est implémenté(e) dans un objet /!\ SUPPORTE SEULEMENT LES CLASSES VISUELLES
 lparameters ;
-  toObject as object; && Objet VFP
-, tcMethod as string && méthode
+  toObject as object; && {fr} Objet VFP
+, tcMethod as string && {fr} méthode
 
 local llResult
 
-llResult = lMethod(m.toObject, m.tcMethod) && toObject has tcMethod
+llResult = lMethod(m.toObject, m.tcMethod) && {fr} toObject has tcMethod
 if m.llResult
 
 	llResult = .f.;
@@ -1364,32 +1362,32 @@ if m.llResult
 		))
 
 	llResult = iif(m.llResult;
-		, pemstatus(m.toObject, m.tcMethod, 0); && tcMethod contient du code /!\ SUPPORTE SEULEMENT LES CLASSES VISUELLES
-		, .null.; && don't know
+		, pemstatus(m.toObject, m.tcMethod, 0); && {fr} tcMethod contient du code /!\ SUPPORTE SEULEMENT LES CLASSES VISUELLES
+		, .null.; && {fr} don't know
 		)
 endif
 
 return m.llResult
 
 * ------------------------------------
-procedure lMethodImplemented_Test && test unitaire de lMethodImplemented()
+procedure lMethodImplemented_Test && {fr} test unitaire de lMethodImplemented()
 
 local loTest as abUnitTest of abDev.prg
 
 loTest = newobject('abUnitTest', 'abDev.prg')
 
-loTest.Test(.f., newobject('form'), 'init') && PemStatus(,,0) ne marche pas avec une classe programmée PK ?
+loTest.Test(.f., newobject('form'), 'init') && {fr} PemStatus(,,0) ne marche pas avec une classe programmée PK ?
 loTest.Test(.f., newobject('form'), 'foo')
 
-loTest.Test(.t., newobject('awFrm', 'aw'+'.vcx'), 'init') && évite d'embarquer aw.vcx dans le projet
-loTest.Test(.f., newobject('awFrm', 'aw'+'.vcx'), 'wUserAction_Ante') && method exists but not  && évite d'embarquer aw.vcx dans le projet
+loTest.Test(.t., newobject('awFrm', 'aw'+'.vcx'), 'init') && {fr} évite d'embarquer aw.vcx dans le projet
+loTest.Test(.f., newobject('awFrm', 'aw'+'.vcx'), 'wUserAction_Ante') && {fr} method exists but not  && {fr} évite d'embarquer aw.vcx dans le projet
 
 return loTest.Result()
 endproc
 
 * ========================================
-function lBaseClass && Une classe est une classe de base VFP
-lparameters tcClass && Classe de base
+function lBaseClass && {fr} Une classe est une classe de base VFP
+lparameters tcClass && {fr} Classe de base
 
 local laClass[1]
 alanguage(laClass, 3)
@@ -1397,10 +1395,10 @@ alanguage(laClass, 3)
 return ascan(laClass, m.tcClass, 1, -1, 1, 7) > 0
 
 * ========================================
-function lBaseClassVisual && Une classe est une classe de base visuelle VFP
+function lBaseClassVisual && {fr} Une classe est une classe de base visuelle VFP
 lparameters ;
-	tcClass,; && Classe de base
-	tlFormMemberClass && @ Classe non visuelle qui peut être membre d'un formulaire ou d'un conteneur membre d'un formulaire
+	tcClass,; && {fr} Classe de base
+	tlFormMemberClass && @ {fr} Classe non visuelle qui peut être membre d'un formulaire ou d'un conteneur membre d'un formulaire
 
 local lcBaseClass, lcFormMemberClass, llResult
 
@@ -1454,9 +1452,9 @@ return m.llResult
 
 * ========================================
 function oClone && /!\ recursive {en} Clones an object {fr} Clone un objet
-lparameters toObj as collection && or whatever
+lparameters toObj as collection && {fr} or whatever
 
-local loResult as collection; && or whatever
+local loResult as collection; && {fr} or whatever
 , llResult as Boolean;
 , llClass as Boolean;
 , llClassLib as Boolean;
@@ -1486,16 +1484,16 @@ if vartype(m.toObj) == 'O'
 			do case
 
 			case varSet(@m.llUserDef, pemstatus(m.toObj, m.lcProp, 4)) and (.f.;
-			 or pemstatus(m.toObj, m.lcProp, 1); && read-only
-			 or pemstatus(m.toObj, m.lcProp, 2); && protected
+			 or pemstatus(m.toObj, m.lcProp, 1); && {fr} read-only
+			 or pemstatus(m.toObj, m.lcProp, 2); && {fr} protected
 			 or m.llClass and !m.llUserDef and ',' + m.lcProp + ',' $ ',BASECLASS,CLASS,CLASSLIBRARY,CONTROLCOUNT,CONTROLS,NAME,OBJECTS,OBJECT,PARENT,PARENTCLASS,';
 			 )
 
 			case .t.;
-			 and varSet(@m.llUserDef, m.llUserDef and !pemstatus(m.toObj, m.lcProp, 6)); && user defined in object and not in parent class if any
-			 and varSet(@m.llModif, pemstatus(m.toObj, m.lcProp, 0)); && propriété modifiée
+			 and varSet(@m.llUserDef, m.llUserDef and !pemstatus(m.toObj, m.lcProp, 6)); && {fr} user defined in object and not in parent class if any
+			 and varSet(@m.llModif, pemstatus(m.toObj, m.lcProp, 0)); && {fr} propriété modifiée
 			 and varSet(@m.llArray, type('m.toObj.' + m.lcProp, 1) == 'A');
-			 and varSet(@m.luProp, iif(m.llArray, .null., evaluate('m.toObj.' + m.lcProp))); && and setStepOn(Vartype(m.luProp) == 'O')
+			 and varSet(@m.luProp, iif(m.llArray, .null., evaluate('m.toObj.' + m.lcProp))); && {fr} and setStepOn(Vartype(m.luProp) == 'O')
 			 and m.llUserDef;
 			 and m.llArray;
 			 and .t.
@@ -1535,7 +1533,7 @@ if vartype(m.toObj) == 'O'
 			case m.llModif and !(m.llClassLib and luEqual(m.luProp, getpem(m.toObj.class, m.lcProp)))
 				store m.luProp to ('m.loResult.' + m.lcProp)
 
-			case m.llArray && PemStatus() does not detect for changes in specific array elements if the array is passed.
+			case m.llArray && {fr} PemStatus() does not detect for changes in specific array elements if the array is passed.
 				llResult = acopy(m.toObj.&lcProp, m.loResult.&lcProp) > 0
 
 			endcase
@@ -1561,7 +1559,7 @@ endif
 return m.loResult
 
 * -----------------------------------------
-procedure oClone_Test && oClone() unit test
+procedure oClone_Test && {fr} oClone() unit test
 
 local loTest as abUnitTest of abDev.prg, loObj
 loTest = newobject('abUnitTest', 'abDev.prg')
@@ -1574,7 +1572,7 @@ loObj = newobject('Custom')
 oClone_Test_populate(loObj)
 loTest.Test(m.loObj, m.loObj)
 
-loObj = newobject('objectOfXML_Test_towBus', 'abOOP.prg') && As Custom
+loObj = newobject('objectOfXML_Test_towBus', 'abOOP.prg') && {fr} As Custom
 oClone_Test_populate(loObj)
 loTest.Test(m.loObj, m.loObj)
 
@@ -1599,11 +1597,11 @@ return loTest.Result()
 	return m.loObj
 
 * ========================================
-function aClasses && Classes d'un conteneur et de ses objets contenus
+function aClasses && {fr} Classes d'un conteneur et de ses objets contenus
 lparameters ;
-	taClass,; && @ classes
-	toCont as container,; && Classe contenante ou non
-	tlRecurse && [.F.] Récurser dans les conteneurs
+	taClass,; && @ {fr} classes
+	toCont as container,; && {fr} Classe contenante ou non
+	tlRecurse && [.F.] {fr} Récurser dans les conteneurs
 
 external array taClass
 
@@ -1625,8 +1623,8 @@ endif
 return m.lnResult
 
 * ========================================
-function aClassesClear && CLEAR CLASS sur un tableau de classes
-lparameters taClass && @ classes
+function aClassesClear && {fr} CLEAR CLASS sur un tableau de classes
+lparameters taClass && @ {fr} classes
 external array taClass
 
 local lcClass, llResult
@@ -1664,7 +1662,7 @@ lparameters ;
 && {fr} - les propriétés cachées et protégées des objets dérivés des 'classes de base' FoxInCloud (aw.vcx!aw*)
 && {fr} Seul abOOP.prg!objectOfXML() peut reconstituer l'objet à partir du XML produit
 
-local lcResult as string; && XML, .null. if error
+local lcResult as string; && {fr} XML, .null. if error
 , cNullDisplay as string; && 2014-06-17 abSet can't be used because cXMLofObject() can be in a replace command - in a replace , .destroy() raises an error 'record is not locked'
 
 cNullDisplay = set("Nulldisplay")
@@ -1679,18 +1677,18 @@ endif
 return m.lcResult
 
 * ========================================
-function cXMLofObject_ as string && Objet linéarisé en XML - Privée de cXMLofObject()
+function cXMLofObject_ as string && {fr} Objet linéarisé en XML - Privée de cXMLofObject()
 && /!\ récursion à partir de cXMLofObject_uValue()
 lparameters ;
-  toObj as collection; && par exemple
-, tcResult; && @ Résultat (cumulatif)
+  toObj as collection; && {fr} par exemple
+, tcResult; && @ {fr} Résultat (cumulatif)
 
-local lcResult as string; && XML, .null. if error
+local lcResult as string; && {fr} XML, .null. if error
 , llResult as Boolean;
 , llEmpty;
-, llFIC; && FoxInCloud object
+, llFIC; && {fr} FoxInCloud object
 , laProp[1], lnProp, liProp, lcProp, lcProp_, llProp;
-, laPropPH[1]; && hidden and protected properties
+, laPropPH[1]; && {fr} hidden and protected properties
 , llPH, llwProp;
 , luValue, lcType, lcFile, laValue[1], lnCol, llSafety;
 , liItem, lcItem;
@@ -1711,7 +1709,7 @@ if m.llResult
 				)));
 			);
 	  and (.f.;
- 			or nObjectsCont(m.toObj) = 0; && pas un objet contenant ou aucun objet contenu
+ 			or nObjectsCont(m.toObj) = 0; && {fr} pas un objet contenant ou aucun objet contenu
  			or cResultAdd(@m.tcResult, textmerge(icase(;
 				cLangUser() = 'fr',	[Les objets membres de '<<m.toObj.Name>>' ne sont pas supportés pour l'instant],; && copy-paste this line to add another language support
 														[Member objects in '<<m.toObj.Name>>' are not supported for now]; && default: English
@@ -1720,19 +1718,19 @@ if m.llResult
 	  and .t.
 	if m.llResult
 
-		llFIC = lMethod(m.toObj, 'wPropGet') and lProperty(m.toObj, 'wcPropSave') && FoxInCloud object
+		llFIC = lMethod(m.toObj, 'wPropGet') and lProperty(m.toObj, 'wcPropSave') && {fr} FoxInCloud object
 		lcResult = textmerge("<#o#><#c#><<Iif(m.llEmpty, '', m.toObj.Class)>></#c#><#cl#><<Iif(m.llEmpty, '', m.toObj.ClassLibrary)>></#cl#>")
-		lnProp = amembers(laProp, m.toObj, 0, 'GPH') && public, protected and hidden && without ", 0, 'GPH')", AMembers() omits protected and hidden properties
+		lnProp = amembers(laProp, m.toObj, 0, 'GPH') && {fr} public, protected and hidden && {fr} without ", 0, 'GPH')", AMembers() omits protected and hidden properties
 		if m.lnProp > 0
-			amembers(laPropPH, m.toObj, 0, 'PH') && protected and hidden only
+			amembers(laPropPH, m.toObj, 0, 'PH') && {fr} protected and hidden only
 
 			for liProp = 1 to m.lnProp
-*				FOR EACH lcProp IN laProp && exactement le même temps de réponse
+* {fr} FOR EACH lcProp IN laProp && {fr} exactement le même temps de réponse
 
 				if .t.;
-				 and varSet(@m.lcProp, lower(m.laProp[m.liProp])); && Lower(m.lcProp)
+				 and varSet(@m.lcProp, lower(m.laProp[m.liProp])); && {fr} Lower(m.lcProp)
 				 and (m.llEmpty or .T.;
-				  and pemstatus(m.toObj, m.lcProp, 0); && property has changed compared to its parent class && OK pour les propriétés protégées
+				  and pemstatus(m.toObj, m.lcProp, 0); && {fr} property has changed compared to its parent class && {fr} OK pour les propriétés protégées
 				  and cXMLofObject_lPropSave(m.toObj, m.lcProp, m.llFIC);
 				  );
 
@@ -1763,7 +1761,7 @@ if m.llResult
 					 		if m.llwProp
 					 			m.toObj.wPropGet(m.lcProp, @m.laValue)
 					 		else
-					 			lnCol = alen(&lcProp_, 2) && m.toObj.&lcProp
+					 			lnCol = alen(&lcProp_, 2) && {fr} m.toObj.&lcProp
 					 			if m.lnCol > 0
 					 				dimension laValue[Alen(&lcProp_, 1), m.lnCol]
 					 			else
@@ -1800,11 +1798,11 @@ if m.llResult
 							 		if m.llSafety
 							 			set safety off
 							 		endif
-							 		save to (m.lcFile) all like laValue && The SAVE TO command does not support saving arrays exceeding 65,000 elements
+							 		save to (m.lcFile) all like laValue && {fr} The SAVE TO command does not support saving arrays exceeding 65,000 elements
 							 		if m.llSafety
 							 			set safety on
 							 		endif
-							 		luValue = strconv(filetostr(m.lcFile), 13) && convertit laValue (binaire) en base 64
+							 		luValue = strconv(filetostr(m.lcFile), 13) && {fr} convertit laValue (binaire) en base 64
 							 		delete file (m.lcFile)
 						 		endif
 					 		endif
@@ -1833,10 +1831,10 @@ return iif(m.llResult;
 endfunc
 
 * -----------------------------------------
-function cXMLofObject_colItems && XML des items d'une collection
+function cXMLofObject_colItems && {fr} XML des items d'une collection
 lparameters ;
   toObj as collection;
-, tcResult; && @ Résultat (cumulatif)
+, tcResult; && @ {fr} Résultat (cumulatif)
 
 local lcResult as String;
 , liItem as Integer;
@@ -1855,9 +1853,9 @@ return m.lcResult
 endfunc
 
 * -----------------------------------------
-function cXMLofObject_uValue(tuValue, tcType, tcResult) && [privée de cXMLofObject()] Valeur d'un type donné
+function cXMLofObject_uValue(tuValue, tcType, tcResult) && [privée de cXMLofObject()] {fr} Valeur d'un type donné
 
-tcType = vartype(m.tuValue) && Vartype(m.tuValue, .T.)
+tcType = vartype(m.tuValue) && {fr} Vartype(m.tuValue, .T.)
 tcType = iif(m.tcType == 'N' and ga_Type_IsInteger(m.tuValue), 'I', m.tcType)
 
 return iif(m.tcType == 'O';
@@ -1867,18 +1865,18 @@ return iif(m.tcType == 'O';
 endfunc
 
 * -----------------------------------------
-function cXMLofObject_lPropSave(toObj, tcProp, llFIC) && [privée de cXMLofObject()] Propriété modifiable à sauvegarder
+function cXMLofObject_lPropSave(toObj, tcProp, llFIC) && [privée de cXMLofObject()] {fr} Propriété modifiable à sauvegarder
 local lcProp as string
 lcProp = ',' + lower(m.tcProp) + ','
 return .t.;
- and !pemstatus(m.toObj, m.tcProp, 1); && Read-only
+ and !pemstatus(m.toObj, m.tcProp, 1); && {fr} Read-only
  and !m.lcProp $ ',' + chrtran(lower('wcPropSave,_MemberData,Name'), ' ', '') + ','; && ,dataSession,dataSessionID
  and (!m.llFIC or m.lcProp $ ',' + chrtran(nvl(m.toObj.wcPropSave, ''), ' ', '') + ',');
 
 endfunc
 
 * -----------------------------------------
-procedure cXMLofObject_Test && test unitaire de cXMLofObject()
+procedure cXMLofObject_Test && {fr} test unitaire de cXMLofObject()
 
 local loTest as abUnitTest of abDev.prg;
 , loObj as collection, lcResult
@@ -1903,7 +1901,7 @@ addproperty(m.loObj.object.object, 'object', createobject('Grid'))
 addproperty(m.loObj.object.object.object, 'string', 'testValue')
 addproperty(m.loObj.object.object.object, 'array[2]')
 m.loObj.object.object.object.array[1] = 'el1'
-m.loObj.object.object.object.array[2] = newobject('awcst', 'aw' + '.vcx') && évite d'embarquer aw.vcx dans un projet ab
+m.loObj.object.object.object.array[2] = newobject('awcst', 'aw' + '.vcx') && {fr} évite d'embarquer aw.vcx dans un projet ab
 
 lcResult = ''
 loTest.Test(.null., m.loObj, @m.lcResult) && .NULL.
@@ -1915,12 +1913,12 @@ loTest.Test(.null., m.loObj, @m.lcResult) && .NULL.
 ? m.lcResult
 
 
-loObj = newobject('awfrm', 'aw' + '.vcx') && évite d'embarquer aw.vcx dans un projet ab
+loObj = newobject('awfrm', 'aw' + '.vcx') && {fr} évite d'embarquer aw.vcx dans un projet ab
 lcResult = ''
 loTest.Test(.null., m.loObj, @m.lcResult) && .NULL.
 ? m.lcResult
 
-loObj = newobject('awgrd', 'aw' + '.vcx') && évite d'embarquer aw.vcx dans un projet ab
+loObj = newobject('awgrd', 'aw' + '.vcx') && {fr} évite d'embarquer aw.vcx dans un projet ab
 lcResult = ''
 loTest.Test(.null., m.loObj, @m.lcResult) && .NULL.
 ? m.lcResult
@@ -1970,7 +1968,7 @@ endfor
 return m.loResult
 
 * ========================================
-function lXMLofObject(tcXML, tcResult, lAssert) && cXMLofObject() a produit ce XML
+function lXMLofObject(tcXML, tcResult, lAssert) && {fr} cXMLofObject() a produit ce XML
 
 local llResult, lcResult
 
@@ -2016,13 +2014,13 @@ if empty(m.tcXML)
 	return
 endif
 
-local toResult as object; && object, .null. if error
+local toResult as object; && {fr} object, .null. if error
 , llResult as Boolean;
 , lcResult as string;
 , llChild as Boolean;
 , lnChild as Integer;
 , liChild as Integer;
-, loChild as collection; && objets enfants éventuels
+, loChild as collection; && {fr} objets enfants éventuels
 , llObject as Boolean; && @ {en} an object was passed in toResult {fr} Un objet a été passé dans toResult
 , llFIC as Boolean; && @ {en} object derives from a FoxinCloud class {fr} L'objet a d'une classe FoxinCloud
 
@@ -2033,7 +2031,7 @@ llResult = .T.;
 	and lXMLofObject(;
 		 @m.tcXML;
 		,@m.lcResult;
-		, .T.; && .T. : ASSERT m.llResult && ôte les balises <#o#> initiale et </#o#> terminale
+		, .T.; && .T. : ASSERT m.llResult && {fr} ôte les balises <#o#> initiale et </#o#> terminale
 		);
 	;
 	and objectOfXML_lChild(; && {en} identifies child object patterns in XML [objectOfXML() private] {fr} repère les objets enfants dans le XML [privée de objectOfXML()] 
@@ -2063,7 +2061,7 @@ llResult = .T.;
 		, m.loChild; && {en} Child objects XML {fr} XML des objets enfants
 		);
 	 ;
-	and objectOfXML_colItems(; && Si Collection, restaure ses membres
+	and objectOfXML_colItems(; && {fr} Si Collection, restaure ses membres
 			m.tcXML; && {en} XML produced by cXMLofObject() {fr} XML produit par cXMLofObject()
 		,	m.toResult; && {en} Object to populate {fr} Objet à peupler
 		,@m.lcResult; && @ {en} Cumulative result {fr} Résultat (cumulatif)
@@ -2072,7 +2070,7 @@ llResult = .T.;
 		, m.loChild; && {en} Child objects XML {fr} XML des objets enfants
 		)
 	
-assert m.liChild = m.lnChild && tous les objets enfants éventuels ont bien été restaurés
+assert m.liChild = m.lnChild && {fr} tous les objets enfants éventuels ont bien été restaurés
 
 = m.llResult or cResultAdd(@m.tcResult, m.lcResult)
 
@@ -2101,10 +2099,10 @@ local llResult as Boolean;
 #if .f.
 o = createobject('empty')
 addproperty(o, 'test')
-? pemstatus(o, 'test', 0) && .T. && Toutes les propriétés d'un objet Empty étant marquées modifiées, cXMLofObject() les a toutes listées
+? pemstatus(o, 'test', 0) && .T. && {fr} Toutes les propriétés d'un objet Empty étant marquées modifiées, cXMLofObject() les a toutes listées
 #endif
 
-* Recycler l'objet existant en razant ses propriétés ou créer un nouvel objet
+* {fr} Recycler l'objet existant en razant ses propriétés ou créer un nouvel objet
 lcClass = lower(strextract(m.tcXML, '<#c#>', '</#c#>'))
 lcClassLib = lower(strextract(m.tcXML, '<#cl#>', '</#cl#>'))
 llEmpty = empty(m.lcClass)
@@ -2121,7 +2119,7 @@ llObject = .t.;
    and lower(m.toResult.classlibrary) == m.lcClassLib;
   )
 
-&& Voir ce qui est le plus rapide, remettre toutes les propriétés à leur valeur par défaut ou recréer un objet ...
+&& {fr} Voir ce qui est le plus rapide, remettre toutes les propriétés à leur valeur par défaut ou recréer un objet ...
 && 2015-03-19 thn - si l'objet existe il vaut mieux le conserver car le supprimer/recréer exécuterait les méthodes .Destroy() et .Init() qui peuvent parfaitement se planter ...
 && 2014-12-23 thn
 && - objets empty : recréer systématiquement
@@ -2138,7 +2136,7 @@ if !m.llEmpty
 endif
 
 toResult = iCase(;
-	m.llEmpty,; && objets empty : recréer systématiquement
+	m.llEmpty,; && {fr} objets empty : recréer systématiquement
 		createobject('Empty'),;
 	m.llObject,;
 		m.toResult,;
@@ -2147,7 +2145,7 @@ toResult = iCase(;
 
 assert Vartype(m.toResult) == 'O'
 
-llFIC = lMethod(m.toResult, 'wPropReset') and lProperty(m.toResult, 'wcPropSave') && FoxInCloud object
+llFIC = lMethod(m.toResult, 'wPropReset') and lProperty(m.toResult, 'wcPropSave') && {fr} FoxInCloud object
 
 #if .f.
 toResult = createobject('relation')
@@ -2160,7 +2158,7 @@ addproperty(m.toResult, m.lcProp, 'test')
 suspend
 #endif
 
-* Si un objet a été passé, remettre ses propriétés à leur valeur par défaut
+* {fr} Si un objet a été passé, remettre ses propriétés à leur valeur par défaut
 if m.llObject;
  and !m.llEmpty;
  and amembers(laProp, m.toResult, 0, 'GPH') > 0
@@ -2168,24 +2166,24 @@ if m.llObject;
 	for each lcProp in laProp
 		= .f.;
 		 	or .t.;
-		 		and !pemstatus(m.toResult, m.lcProp, 4); && not user defined
+		 		and !pemstatus(m.toResult, m.lcProp, 4); && {fr} not user defined
 		 		and ',' + m.lcProp + ',' $ ',BASECLASS,CLASS,CLASSLIBRARY,CONTROLCOUNT,CONTROLS,NAME,OBJECTS,OBJECT,PARENT,PARENTCLASS,';
 		 	or .t.;
-		 		and pemstatus(m.toResult, m.lcProp, 4); && custom property ...
+		 		and pemstatus(m.toResult, m.lcProp, 4); && {fr} custom property ...
 		 		and !pemstatus(m.toResult, m.lcProp, 6); && ... added to the object (not inherited from the class)
 		 		and removeproperty(m.toResult, m.lcProp);
-		 	or pemstatus(m.toResult, m.lcProp, 1); && Read-only
-		 	or .t.; && and setStepOn(Lower(m.lcProp) == 'keysort')
-			 and pemstatus(m.toResult, m.lcProp, 0); && modified
+		 	or pemstatus(m.toResult, m.lcProp, 1); && {fr} Read-only
+		 	or .t.; && {fr} and setStepOn(Lower(m.lcProp) == 'keysort')
+			 and pemstatus(m.toResult, m.lcProp, 0); && {fr} modified
 			 and varSet(@m.luProp, getpem(m.toResult, m.lcProp));
-			 and varSet(@m.luProp_, getpem(m.loClass, m.lcProp)); && GetPem(m.toResult.Class, m.lcProp)
-			 and !luEqual(m.luProp, m.luProp_); && Propriété changée par rapport à la classe
-			 and iif(pemstatus(m.toResult, m.lcProp, 2); && protected property
+			 and varSet(@m.luProp_, getpem(m.loClass, m.lcProp)); && {fr} GetPem(m.toResult.Class, m.lcProp)
+			 and !luEqual(m.luProp, m.luProp_); && {fr} Propriété changée par rapport à la classe
+			 and iif(pemstatus(m.toResult, m.lcProp, 2); && {fr} protected property
 				, iif(m.llFIC;
 					, m.toResult.wPropReset(m.lcProp);
 					, .f.;
 					);
-				, addproperty(m.toResult, m.lcProp, iif(vartype(m.luProp_) == 'O'; && sets property to value in class
+				, addproperty(m.toResult, m.lcProp, iif(vartype(m.luProp_) == 'O'; && {fr} sets property to value in class
 					, oClone(m.luProp_);
 					, m.luProp_;
 					)));
@@ -2216,7 +2214,7 @@ local llResult as Boolean;
 , lnObject as integer;
 , llObjects as Boolean;
 
-lnChild = occurs('<#o#>', m.tcXML) && au moins une des propriétés de l'objet contient un objet
+lnChild = occurs('<#o#>', m.tcXML) && {fr} au moins une des propriétés de l'objet contient un objet
 llChild = m.lnChild > 0
 llResult = not m.llChild or m.lnChild = occurs('</#o#>', m.tcXML)
 lcResult = textmerge(icase(;
@@ -2236,7 +2234,7 @@ if m.llResult and m.llChild
 	 and m.lnObject = m.loRegExpClose.Execute(m.tcXML);
 	 and varSet(@m.llObjects, m.lnObject > 1)
 
-assert m.llChild && should always be OK
+assert m.llChild && {fr} should always be OK
 
 	lnChild = 0
 	loChild = createobject('Collection')
@@ -2245,10 +2243,10 @@ assert m.llChild && should always be OK
 		store m.liChildOpen to liChildClose, liChildOpen_
 		if m.llObjects and m.liChildOpen < m.lnObject
 
-			* localiser la balise fermante
+			* {fr} localiser la balise fermante
 			do while .t.
 				liChildOpen_ = m.liChildOpen_ + 1
-				if m.loRegExpOpen.Matches[m.liChildOpen_, 1] < m.loRegExpClose.Matches[m.liChildClose, 1] && position
+				if m.loRegExpOpen.Matches[m.liChildOpen_, 1] < m.loRegExpClose.Matches[m.liChildClose, 1] && {fr} position
 					liChildClose = m.liChildClose + 1
 					if m.liChildClose = m.lnObject
 						exit
@@ -2259,23 +2257,23 @@ assert m.llChild && should always be OK
 			enddo
 		endif
 
-		lnChildXML = 0; && longueur de la chaîne XML de l'objet enfant
+		lnChildXML = 0; && {fr} longueur de la chaîne XML de l'objet enfant
 			+ m.loRegExpClose.Matches[m.liChildClose, 1];
 			+ lenc(m.loRegExpClose.pattern);
 			- m.loRegExpOpen.Matches[m.liChildOpen, 1]
 
 		* ==============================================
 		loChild.add(substrc(m.tcXML;
-			, m.loRegExpOpen.Matches[m.liChildOpen, 1]; && index début
-			, m.lnChildXML; && longueur
+			, m.loRegExpOpen.Matches[m.liChildOpen, 1]; && {fr} index début
+			, m.lnChildXML; && {fr} longueur
 			))
 		lnChild = m.loChild.count
 		* ==============================================
 
-		* Mémoriser le début et la longueur de la chaîne représentant l'objet
+		* {fr} Mémoriser le début et la longueur de la chaîne représentant l'objet
 		dimension laChild[m.lnChild, 2]
-		laChild[m.lnChild, 1] = m.loRegExpOpen.Matches[m.liChildOpen, 1] && index début
-		laChild[m.lnChild, 2] = m.lnChildXML && longueur
+		laChild[m.lnChild, 1] = m.loRegExpOpen.Matches[m.liChildOpen, 1] && {fr} index début
+		laChild[m.lnChild, 2] = m.lnChildXML && {fr} longueur
 
 		liChildOpen = m.liChildClose
 	endfor
@@ -2283,8 +2281,8 @@ assert m.llChild && should always be OK
 	if m.lnChild > 0
 		for liChildOpen = m.lnChild to 1 step -1
 			tcXML = stuffc(m.tcXML;
-				, laChild[m.liChildOpen, 1]; && index début
-				, laChild[m.liChildOpen, 2]; && longueur
+				, laChild[m.liChildOpen, 1]; && {fr} index début
+				, laChild[m.liChildOpen, 2]; && {fr} longueur
 				, [#object#];
 				)
 		endfor
@@ -2325,14 +2323,14 @@ for each lcProp in laProp
 
 	lcType = strextract(m.lcProp, '<#t#>', '</#t#>')
 	luValue = strextract(m.lcProp, '<#v#>', '</#v#>')
-	lcProp = strextract(m.lcProp, '<#n#>', '</#n#>') && en dernier car m.lcProp est recyclée ...
+	lcProp = strextract(m.lcProp, '<#n#>', '</#n#>') && {fr} en dernier car m.lcProp est recyclée ...
 	llProp = .f.;
 	 or not lProperty(m.toResult, m.lcProp);
 	 or not (.f.;
-		or pemstatus(m.toResult, m.lcProp, 1); && Read-Only
-		or pemstatus(m.toResult, m.lcProp, 2); && Protected
+		or pemstatus(m.toResult, m.lcProp, 1); && {fr} Read-Only
+		or pemstatus(m.toResult, m.lcProp, 2); && {fr} Protected
 		);
-	 or m.llFIC && en dernier!
+	 or m.llFIC && {fr} en dernier!
 	lcProp = iif(m.llProp, m.lcProp, icase(;
 		cLangUser() = 'fr',	[La propriété '<<m.lcProp>>' ne peut être restaurée car elle est protégée ou en lecture seule],; && copy-paste this line to add another language support
 												[Property '<<m.lcProp>>' can't be restored because it's protected or read-only]; && default: English
@@ -2346,7 +2344,7 @@ for each lcProp in laProp
 
 	case m.lcType == 'C'
 
-		&& la valeur est déjà dans le bon type
+		&& {fr} la valeur est déjà dans le bon type
 		addproperty(;
 			  m.toResult;
 			, m.lcProp;
@@ -2394,7 +2392,7 @@ for each lcProp in laProp
 				  m.loChild.item(m.liChild);
 				, iif(m.llObject and lProperty(m.toResult, m.lcProp) and Type('m.toResult.' + m.lcProp) == 'O';
 					, evaluate('m.toResult.' + m.lcProp);
-					, .F.; && createobject('Empty')
+					, .F.; && {fr} createobject('Empty')
 					);
 				)
 		else
@@ -2431,7 +2429,7 @@ do case
 case !loBaseClass(m.toResult, 'Collection')
 
 case !'<#item#>' $ m.tcXML
-	m.toResult.remove(-1) && If you pass a value of -1, Visual FoxPro removes all items in the collection.
+	m.toResult.remove(-1) && {fr} If you pass a value of -1, Visual FoxPro removes all items in the collection.
 
 case varSet(@m.llChild_, Pcount() <= 3);
  and m.llChild_;
@@ -2470,7 +2468,7 @@ otherwise
 	assert m.llResult message cAssertMsg(m.lcResult)
 	if m.llResult
 
-	 	toResult.remove(-1) && If you pass a value of -1, Visual FoxPro removes all items in the collection.
+	 	toResult.remove(-1) && {fr} If you pass a value of -1, Visual FoxPro removes all items in the collection.
 	 	for liItem = 1 to m.loRegExpOpen.nMatches
 
 			lcItem = substrc(m.tcXML;
@@ -2524,7 +2522,7 @@ endproc
 * -----------------------------------------
 procedure objectOfXML_Test && {en} objectOfXML() unit test {fr} test unitaire de objectOfXML()
 
-*	CLEAR ALL
+* {fr} CLEAR ALL
 
 local loTest as abUnitTest of abDev.prg;
 , loObj as collection;
@@ -2541,7 +2539,7 @@ m.loObj.add('testItem2', 'testItem2')
 addproperty(m.loObj, 'object', createobject('Collection'))
 addproperty(m.loObj.object, 'string', 'testValue')
 m.loObj.object.add('testItem1', 'testItem1')
-m.loObj.object.add(CreateObject('custom'), 'testItem2') && m.loObj.object.add('testItem2', 'testItem2')
+m.loObj.object.add(CreateObject('custom'), 'testItem2') && {fr} m.loObj.object.add('testItem2', 'testItem2')
 
 addproperty(m.loObj.object, 'object', createobject('Custom'))
 addproperty(m.loObj.object.object, 'string', 'testValue')
@@ -2577,7 +2575,7 @@ define class objectOfXML_Test_towBus as custom && 2015-03-19 http://www.west-win
 		nConnectionHandle = 0
 		cDefaultShiftStartTime1 = "08:00AM"
 		cDefaultShiftStartTime2 = "04:00PM"
-		cPathDBC = "data\"	&& Changed this assignment because previous value was invalid - Lott - 03/12/2015
+		cPathDBC = "data\" && {fr} Changed this assignment because previous value was invalid - Lott - 03/12/2015
 	enddefine
 
 * ========================================
@@ -2595,7 +2593,7 @@ if vartype(m.oObj) == 'O' and amembers(aProp, m.oObj, 0, 'G') > 0
 	Result = createobject('Empty')
 	for each cProp in aProp
 		if !(.f.;
-		 or pemstatus(m.oObj, m.cProp, 1); && Read-only
+		 or pemstatus(m.oObj, m.cProp, 1); && {fr} Read-only
 		 or m.cProp == 'NAME';
 		 )
 			success = addproperty(m.Result, m.cProp, evaluate('m.oObj.' + m.cProp))
@@ -2607,14 +2605,14 @@ endif
 return m.Result
 
 * ========================================
-function cObjAddrNorm(tcObjAddr) && Adresse d'objet normalisée
+function cObjAddrNorm(tcObjAddr) && {fr} Adresse d'objet normalisée
 return chrtran(strtran(m.tcObjAddr, '->', '.'), ' ', '')
 
 * ========================================
-function nPixOfFox && Pixels of a Foxels measurement
+function nPixOfFox && {en} Pixels of a Foxels measurement
 lparameter ;
-  tnFoxels; && foxels to convert
-, tlVertical; && [.F.] convert horizontal/vertical coordinates
+  tnFoxels; && {en} foxels to convert
+, tlVertical; && [.F.] {en} convert horizontal/vertical coordinates
 , tcFontName; && [active output window]
 , tnFontSize; && [active output window]
 , tcFontStyle && [normal]
@@ -2632,10 +2630,10 @@ return evl(m.tnFoxels, 0) * iif(pcount() > 1;
 	)
 
 * ========================================
-function nFoxOfPix && Foxels of a Pixels measurement
+function nFoxOfPix && {en} Foxels of a Pixels measurement
 lparameter ;
-  tnPixels; && pixels to convert
-, tlVertical; && [.F.] convert horizontal/vertical coordinates
+  tnPixels; && {en} pixels to convert
+, tlVertical; && [.F.] {en} convert horizontal/vertical coordinates
 , tcFontName; && [active output window]
 , tnFontSize; && [active output window]
 , tcFontStyle && [normal]
@@ -2653,7 +2651,7 @@ return evl(m.tnPixels, 0) / iif(pcount() > 1;
 	)
 
 * ========================================
-function oPropsDefault && règle les propriétés d'un objet aux valeur par défaut définies par un autre objet
+function oPropsDefault && {fr} règle les propriétés d'un objet aux valeur par défaut définies par un autre objet
 lparameters oTrgt, oDefault
 
 local Result as object;
@@ -2674,7 +2672,7 @@ endif
 return m.Result
 
 * -----------------------------------------
-procedure oPropsDefault_Test && test unitaire de oPropsDefault()
+procedure oPropsDefault_Test && {fr} test unitaire de oPropsDefault()
 
 local loTest as abUnitTest of abDev.prg;
 , oTrgt as object;
@@ -2693,9 +2691,9 @@ return m.loTest.Result()
 endproc
 
 * -----------------------------------------
-function ab_Empty_Object_PropertyList as object && ga_Empty_Object_PropertyList() et retourne l'objet créé
+function ab_Empty_Object_PropertyList as object && {fr} ga_Empty_Object_PropertyList() et retourne l'objet créé
 lparameters	;
-  properties; && up to 16 coma-separated properties
+  properties; && {fr} up to 16 coma-separated properties
 , t01,t02,t03,t04,t05,t06,t07,t08,t09,t10,t11,t12,t13,t14,t15,t15,t16
 
 local obj, cParm
@@ -2709,7 +2707,7 @@ return iif(ga_Empty_Object_PropertyList(@m.obj, m.properties, ',' &cParm);
 endfunc
 
 * -----------------------------------------
-procedure ab_Empty_Object_PropertyList_Test && test unitaire de ab_Empty_Object_PropertyList()
+procedure ab_Empty_Object_PropertyList_Test && {fr} test unitaire de ab_Empty_Object_PropertyList()
 
 local loTest as abUnitTest of abDev.prg;
 , oResult as object;
@@ -2725,7 +2723,7 @@ return m.loTest.Result()
 endproc
 
 * -----------------------------------------
-function ab_Collection_ZeroBased_Object as object && ga_Collection_ZeroBased_Object() et retourne l'objet créé
+function ab_Collection_ZeroBased_Object as object && {fr} ga_Collection_ZeroBased_Object() et retourne l'objet créé
 
 local obj
 
@@ -2733,7 +2731,7 @@ return iif(ga_Collection_ZeroBased_Object(@m.obj), m.obj, .null.)
 endfunc
 
 * -----------------------------------------
-function Sys1272(oControl) && sys(1272) with the right object.Name case
+function Sys1272(oControl) && {en} sys(1272) with the right object.Name case
 local Sys1271, Result
 Result = m.oControl.name
 do while type('m.oControl.Parent.Name') == 'C'
@@ -2799,16 +2797,16 @@ return aevents(aa, m.oSrce) > 0;
 endfunc
 
 * -----------------------------------------
-function aMethod as string && Méthodes d'un objet
+function aMethod as string && {fr} Méthodes d'un objet
 lparameters ;
-  aMethod as string; && @ Result Array
-, oSrce as object; && Object to be analyzed
-, lEventsNo as Boolean; && [.F.] Just
+  aMethod as string; && @ {en} Result Array
+, oSrce as object; && {en} Object to be analyzed
+, lEventsNo as Boolean; && [.F.]
 , cFlags as string; && ['']
 
 external array aMethod
 
-local Result as integer; && Number of methods found
+local Result as integer; && {fr} Number of methods found
 , nMember as integer;
 , iMember as integer;
 , cTypes as string;
@@ -2817,7 +2815,7 @@ Result = 0
 nMember = amembers(;
 	m.aMethod;
 	, m.oSrce;
-	, 1; && Array contains the names of the properties of the object or class, as well as the methods and member objects. The resulting array is two-dimensional with the second column specifying what type of member is listed in the first column. The possible values for the second column are Property, Event, Method, or Object.
+	, 1; && {fr} Array contains the names of the properties of the object or class, as well as the methods and member objects. The resulting array is two-dimensional with the second column specifying what type of member is listed in the first column. The possible values for the second column are Property, Event, Method, or Object.
 	, evl(m.cFlags, '');
 	)
 if m.nMember > 0
@@ -2840,7 +2838,7 @@ return m.Result
 endfunc
 
 * -----------------------------------------
-function cPEMcased as string && Nom de Propriété, Evénement ou Méthode avec la casse définie dans _MemberData
+function cPEMcased as string && {fr} Nom de Propriété, Evénement ou Méthode avec la casse définie dans _MemberData
 lparameters ;
   oSrce as awFrm of aw.vcx;
 , cPEM as string;
@@ -2886,14 +2884,14 @@ if vartype(m.oSrce) == 'O';
 
 	case lMethod(m.oSrce, m.cPEM)
 		cPEM = proper(m.cPEM)
-		cPEM = iif(left(m.cPEM, 1) == 'W' and !m.cPEM == 'When'; && FoxInCloud method
+		cPEM = iif(left(m.cPEM, 1) == 'W' and !m.cPEM == 'When'; && {fr} FoxInCloud method
 			, 'w' + substr(m.cPEM, 2);
 			, m.cPEM;
 			)
-		cPEMcased = icase(; && user-friendly case
-			left(m.cPEM, 5) == 'Mouse',; && Len('Mouse') = 5
+		cPEMcased = icase(; && {fr} user-friendly case
+			left(m.cPEM, 5) == 'Mouse',; && {fr} Len('Mouse') = 5
 				'Mouse' + proper(substr(m.cPEM, 6)),;
-			m.cPEM == 'Uienable',; && The UIEnable event does not occur for pages when the form is initially activated
+			m.cPEM == 'Uienable',; && {fr} The UIEnable event does not occur for pages when the form is initially activated
 				'UIenable',;
 				strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(m.cPEM;
 					, 'Before', 'Before', 1, -1, 1);
@@ -2918,7 +2916,7 @@ return m.cPEMcased
 endfunc
 
 * ------------------------------------
-procedure cPEMcased_Test && test unitaire de cPEMcased()
+procedure cPEMcased_Test && {fr} test unitaire de cPEMcased()
 
 local loTest as abUnitTest of abDev.prg;
 , oXMLDOM as MSXML.DOMdocument; && [CreateObject('MSXML.DOMdocument')]
@@ -2927,18 +2925,18 @@ local loTest as abUnitTest of abDev.prg;
 , oDefault as abSet of abDev.prg;
 
 loTest = newobject('abUnitTest', 'abDev.prg')
-oXMLDOM = createobject('MSXML.DOMdocument') && procure un très léger gain d'environ .010 ms
+oXMLDOM = createobject('MSXML.DOMdocument') && {fr} procure un très léger gain d'environ .010 ms
 
-oSrce  = newobject('awFrm', 'aw'+'.vcx') && évite d'embarquer aw.vcx dans le projet
+oSrce  = newobject('awFrm', 'aw'+'.vcx') && {fr} évite d'embarquer aw.vcx dans le projet
 
-loTest.Test('ActiveControl', m.oSrce, 'ActiveControl', m.oXMLDOM) && native property
-loTest.Test('wPropSave', m.oSrce, 'wPropSave', m.oXMLDOM) && custom property
+loTest.Test('ActiveControl', m.oSrce, 'ActiveControl', m.oXMLDOM) && {fr} native property
+loTest.Test('wPropSave', m.oSrce, 'wPropSave', m.oXMLDOM) && {fr} custom property
 
 cX = home(1) + "Tools\AB\AW\Samples\FIC\classe\ficSample.vcx"
 if file(m.cX)
 	set classlib to (m.cX) additive
 	oSrce = newobject('ficFrm', m.cX)
-	loTest.Test('wPropSave', m.oSrce, 'wPropSave', m.oXMLDOM) && inherited property
+	loTest.Test('wPropSave', m.oSrce, 'wPropSave', m.oXMLDOM) && {fr} inherited property
 	loTest.Test('Init_SrceCode', m.oSrce, 'Init_SrceCode', m.oXMLDOM)
 endif
 
@@ -2946,13 +2944,13 @@ oDefault = abSet('default', home(1) + 'Tools\AB\AW\Samples\FIC\fictuto\progs\for
 cX = 'dataUpdate.scx'
 if file(m.cX)
 	do form (m.cX) name oSrce noshow
-	loTest.Test('cursorRefresh', m.oSrce, 'cursorrefresh', m.oXMLDOM) && inherited property
+	loTest.Test('cursorRefresh', m.oSrce, 'cursorrefresh', m.oXMLDOM) && {fr} inherited property
 endif
 
 cX = 'keyPress.scx'
 if file(m.cX)
 	do form (m.cX) name oSrce noshow
-	loTest.Test('showMessage', m.oSrce, 'showmessage', m.oXMLDOM) && inherited property
+	loTest.Test('showMessage', m.oSrce, 'showmessage', m.oXMLDOM) && {fr} inherited property
 endif
 
 return loTest.Result()

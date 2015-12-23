@@ -1,0 +1,40 @@
+ 1-abDataSyncVFP.aTablesIgnore
+ 2-abDataSyncVFP.cResultAdd
+ 3-abDataSyncVFP.cResultFinal
+ 4-abDataSyncVFP.DBCSync
+ 5-abDataSyncVFP.destroy
+ 6-abDataSyncVFP.init
+ 7-abDataSyncVFP.lDBC
+ 8-abDataSyncVFP.lFieldsMatch
+ 9-abDataSyncVFP.oResultFinal
+10-abDataSyncVFP.ResultClear
+11-abDataSyncVFP.TableSync
+12-abExclusive
+13-abExclusive.destroy
+14-abExclusive.init
+15-abFilter
+16-abFilter.destroy
+17-abFilter.init
+18-abMaxRecords
+19-abMaxRecords.Destroy
+20-abMaxRecords.Init
+21-abOrder
+22-abOrder.destroy
+23-abOrder.init
+24-abRecno
+25-abRecno.destroy
+26-abRecno.init
+27-abRelationSrceOff
+28-abRelationSrceOff.destroy
+29-abRelationSrceOff.init
+30-abRowBufferSave
+31-abRowBufferSave.destroy
+32-abRowBufferSave.init
+33-abRowBufferSave.reset
+34-abSelect
+35-abSelect.destroy
+36-abSelect.init
+37-abSQLthermo.destroy
+38-abSQLthermo.init
+39-aCursors
+40-aDBCJoinsChild

@@ -1,19 +1,17 @@
-* abFile.prg
+* {fr} abFile.prg
 * =====================================================
 * (c) Abaque SARL, 66 rue Michel Ange - 75016 Paris - France
 * contact@FoxInCloud.com - http://foxincloud.com/ - +33 9 53 41 90 90
-* -----------------------------------------------------
-* Ce logiciel est distribué sous GNU General Public License, tel quel, sans aucune garantie
-* Il peut être utilisé et/ou redistribué sans restriction
-* Toute modification doit être reversée à la communauté
-* La présente mention doit être intégralement reproduite
-&& dans toute copie même partielle
-* -----------------------------------------------------
-* This software is distributed under the terms of GNU General Public License, AS IS, without any warranty
-* It may be used and/or distributed without restriction
-* Any substantial improvement must be given for free to the community
-* This permission notice shall be entirely included in all copies
-&& or substantial portions of the Software
+* {fr} -----------------------------------------------------
+* {fr} Ce logiciel est distribué sous GNU General Public License, tel quel, sans aucune garantie
+* {fr} Il peut être utilisé et/ou redistribué sans restriction
+* {fr} Toute modification doit être reversée à la communauté
+* {fr} La présente mention doit être intégralement reproduite dans toute copie même partielle
+* {en} -----------------------------------------------------
+* {en} This software is distributed under the terms of GNU General Public License, AS IS, without any warranty
+* {en} It can be used and/or distributed without restriction
+* {en} Any modification or improvement must be given for free to the community
+* {en} This permission notice shall be entirely included in all copies or substantial portions of the Software
 * =====================================================
 
 #INCLUDE AB.H
@@ -21,34 +19,34 @@ AB()
 return abUnitTests()
 
 * ========================================
-procedure ReadOnlyClear	&& Supprime l'attribut 'lecture seule' des fichiers d'un dossier
+procedure ReadOnlyClear && {fr} Supprime l'attribut 'lecture seule' des fichiers d'un dossier
 lparameters ;
-	tcFolder,; && Adresse du dossier
-	tcFileSkel && [*.*] masque de fichiers à traiter
+	tcFolder,; && {fr} Adresse du dossier
+	tcFileSkel && [*.*] {fr} squelette de fichiers à traiter
 
-local lnResult && nombre de fichiers traités
+local lnResult && {fr} nombre de fichiers traités
 lnResult = 0
 
-* Si le dossier existe
+* {fr} Si le dossier existe
 if vartype(m.tcFolder) == 'C' and directory(m.tcFolder)
 
 	local loFiler as filer.FileUtil, loFile, lnAttrib
 
-	* Régler le masque à sa valeur par défaut
+	* {fr} Régler le squelette à sa valeur par défaut
 	tcFileSkel = iif(vartype(m.tcFileSkel) == 'C' and not empty(m.tcFileSkel), m.tcFileSkel, '*.*')
 
-	* Créer un objet "filer" pour la recherche et la modification des attributs
-	loFiler = createobject('Filer.FileUtil') && dans VFP\tools\filer\Filer.dll
+	* {fr} Créer un objet "filer" pour la recherche et la modification des attributs
+	loFiler = createobject('Filer.FileUtil') && {fr} dans VFP\tools\filer\Filer.dll
 
-	* Charger les fichiers répondant au masque
+	* {fr} Charger les fichiers répondant au squelette
 	loFiler.SearchPath = m.tcFolder
 	loFiler.FileExpression = m.tcFileSkel
-	loFiler.find (0) && Charge la collection de fichiers
+	loFiler.find (0) && {fr} Charge la collection de fichiers
 
-	* Supprimer les attributs 'read-only' éventuels
+	* {fr} Supprimer les attributs 'read-only' éventuels
 	for each loFile in m.loFiler.files
 		lnAttrib = m.loFile.attr
-		if mod(m.lnAttrib, 2) > 0 && uneven = read only
+		if mod(m.lnAttrib, 2) > 0 && {fr} uneven = read only
 			loFile.attr = m.lnAttrib - 1
 			lnResult = m.lnResult + 1
 		endif
@@ -58,9 +56,9 @@ endif
 return m.lnResult
 
 * ========================================
-procedure tFileSet && règle la date et heure d'un fichier
+procedure tFileSet && {fr} règle la date et heure d'un fichier
 lparameters ;
-  result as string; && @ result
+  result as string; && @ {fr} result
 , cFile as string;
 , tFile as datetime
 
@@ -103,7 +101,7 @@ release oFile, oFolder, oShell
 return m.success
 
 * -------------------------------
-procedure tFileSet_Test	&& Teste tFileSet()
+procedure tFileSet_Test && {fr} Teste tFileSet()
 
 local loTest as abUnitTest of abDev.prg;
 , lcFile as string;
@@ -121,21 +119,21 @@ loTest.assert(m.ltFile, fdate(m.lcFile, 1))
 return m.loTest.result()
 
 * ========================================
-procedure PathCreate as Boolean && Crée un chemin de dossiers
+procedure PathCreate as Boolean && {fr} Crée un chemin de dossiers
 lparameters ;
-	tcPath,; && Chemin
-	result,; && @ [''] Détails de l'erreur éventuelle
-	tcMessage && @ [''] Message d'erreur éventuel
+	tcPath,; && {fr} Chemin
+	result,; && @ [''] {fr} Détails de l'erreur éventuelle
+	tcMessage && @ [''] {fr} Message d'erreur éventuel
 
 local success as Boolean;
 , lcPath;
 , lnPath;
 , loException as exception
 
-tcPath = iif(empty(justext(m.tcPath)), m.tcPath, justpath(m.tcPath)) && Supprime le nom de fichier éventuel
+tcPath = iif(empty(justext(m.tcPath)), m.tcPath, justpath(m.tcPath)) && {fr} Supprime le nom de fichier éventuel
 
 do case
-case lDir(m.tcPath, .T.) && le dossier existe déjà
+case lDir(m.tcPath, .T.) && {fr} le dossier existe déjà
 	return
 
 case !lFullPath(m.tcPath)
@@ -148,12 +146,12 @@ otherwise
 
 	try
 
-		* Pour chaque dossier dans le chemin
-		lcPath = upper(getwordnum(m.tcPath, 1, '\')) && disk letter
+		* {fr} Pour chaque dossier dans le chemin
+		lcPath = upper(getwordnum(m.tcPath, 1, '\')) && {fr} disk letter
 		for lnPath = 2 to getwordcount(m.tcPath, '\')
 			lcPath = m.lcPath + '\' + getwordnum(m.tcPath, m.lnPath, '\')
 
-			* Si le dossier n'existe pas, créer
+			* {fr} Si le dossier n'existe pas, créer
 			if !lDir(m.lcPath, .T.) && {V1.11} Directory(m.lcPath) ne marche pas pour <user>\appdata\
 				md (m.lcPath)
 			endif
@@ -174,16 +172,16 @@ endcase
 endproc
 
 * ========================================
-procedure FilesCopy && Copie des fichiers d'un dossier [et ses sous-dossiers] dans un autre dossier
+procedure FilesCopy && {fr} Copie des fichiers d'un dossier [et ses sous-dossiers] dans un autre dossier
 lparameters ;
-  tcFileSkels; && Masques de fichiers à traiter
-, tcFolderSrce; && Adresse du dossier oû sont les fichiers
-, tcFolderDest; && Adresse du dossier destination
-, tlSubFolders; && [.F.] Chercher dans les sous-dossiers source
-, tcSubFoldersExcl; && [''] Sous-dossiers source à exclure de la recherche (séparés par ',')
-, tlKeepExisting; && [.F.] Ne pas remplacer si existe déjà - .NULL. ou autre, ignorer
-, tcResult; && [''] @ Détail de l'erreur éventuelle
-, tnResult; && [0] @ Nombre de fichiers copiés
+  tcFileSkels; && {fr} Masques de fichiers à traiter
+, tcFolderSrce; && {fr} Adresse du dossier oû sont les fichiers
+, tcFolderDest; && {fr} Adresse du dossier destination
+, tlSubFolders; && [.F.] {fr} Chercher dans les sous-dossiers source
+, tcSubFoldersExcl; && [''] {fr} Sous-dossiers source à exclure de la recherche (séparés par ',')
+, tlKeepExisting; && [.F.] {fr} Ne pas remplacer si existe déjà - .NULL. ou autre, ignorer
+, tcResult; && @ [''] {fr} Détail de l'erreur éventuelle
+, tnResult; && @ [0] {fr} Nombre de fichiers copiés
 
 local lcResult as string
 
@@ -191,35 +189,35 @@ tcFolderSrce = addbs(cFileCased(m.tcFolderSrce, .t.))
 tcFolderDest = addbs(iif(directory(m.tcFolderDest), cFileCased(m.tcFolderDest, .t.), m.tcFolderDest))
 
 tnResult = FilesProc(;
-	  m.tcFolderSrce; && Adresses des dossiers oû les fichiers sont à chercher
-	, 'FileCopy'; && Procédure à appliquer à chaque fichier trouvé (son premier paramètre est l'adresse du fichier)
-	, m.tcFileSkels; && ['*.*'] Masques de fichiers à traiter (séparés par ',')
-	, m.tlSubFolders; && [.F.] Chercher dans les sous-dossiers
-	, m.tcSubFoldersExcl; && [''] Sous-dossiers à exclure de la recherche (séparés par ',')
-	, textmerge([Stuffc(m.tcFileSrce, 1, Lenc(<<cL(m.tcFolderSrce)>>), <<cL(m.tcFolderDest)>>)]); && Nouvelle adresse (can contain wildcard characters) && @ 2ème paramètre à passer à la procédure (le premier est l'adresse du fichier)
-	, @m.lcResult; && [''] @ Détails de l'erreur éventuelle && @ 3ème paramètre à passer à la procédure
-	, ; && [''] @ Message d'erreur éventuel && @ 4eme paramètre à passer à la procédure
-	, lTrue(m.tlKeepExisting); && [.F.] Ne pas remplacer si existe déjà - .NULL. ou autre, ignorer
+	  m.tcFolderSrce; && {fr} Adresses des dossiers oû les fichiers sont à chercher
+	, 'FileCopy'; && {fr} Procédure à appliquer à chaque fichier trouvé (son premier paramètre est l'adresse du fichier)
+	, m.tcFileSkels; && ['*.*'] {fr} Masques de fichiers à traiter (séparés par ',')
+	, m.tlSubFolders; && [.F.] {fr} Chercher dans les sous-dossiers
+	, m.tcSubFoldersExcl; && [''] {fr} Sous-dossiers à exclure de la recherche (séparés par ',')
+	, textmerge([Stuffc(m.tcFileSrce, 1, Lenc(<<cL(m.tcFolderSrce)>>), <<cL(m.tcFolderDest)>>)]); && {fr} Nouvelle adresse (can contain wildcard characters) && @ 2ème paramètre à passer à la procédure (le premier est l'adresse du fichier)
+	, @m.lcResult; && @ [''] {fr} Détails de l'erreur éventuelle && @ 3ème paramètre à passer à la procédure
+	, ; && @ [''] {fr} Message d'erreur éventuel && @ 4eme paramètre à passer à la procédure
+	, lTrue(m.tlKeepExisting); && [.F.] {fr} Ne pas remplacer si existe déjà - .NULL. ou autre, ignorer
 	)
 
 return empty(m.lcResult) or cResultAdd(@m.tcResult, m.lcResult)
 
 * ========================================
-procedure FileCopy && Copie un fichier en créant le(s) dossier(s) si nécessaire
+procedure FileCopy && {fr} Copie un fichier en créant le(s) dossier(s) si nécessaire
 lparameters ;
-	tcFileSrce,; && Adresse actuelle (can contain wildcard characters)
-	tcFileDest,; && Nouvelle adresse (can contain wildcard characters)
-	tcError,; && [''] @ Détails de l'erreur éventuelle
-	tcMessage,; && [''] @ Message d'erreur éventuel
-	tlKeepExisting && [.F.] Ne pas remplacer si existe déjà - .NULL. ou autre, ignorer
+	tcFileSrce,; && {fr} Adresse actuelle (can contain wildcard characters)
+	tcFileDest,; && {fr} Nouvelle adresse (can contain wildcard characters)
+	tcError,; && @ [''] {fr} Détails de l'erreur éventuelle
+	tcMessage,; && @ [''] {fr} Message d'erreur éventuel
+	tlKeepExisting && [.F.] {fr} Ne pas remplacer si existe déjà - .NULL. ou autre, ignorer
 
-local llResult; && le fichier a été copié
+local llResult; && {fr} le fichier a été copié
 , lcResult as string;
 , lcFileSrce as string;
-, lcFileDest as string; && pour éviter remplacement (FilesProc() passe par référence)
+, lcFileDest as string; && {fr} pour éviter remplacement (FilesProc() passe par référence)
 , loException as exception;
 
-* Si le fichier existe
+* {fr} Si le fichier existe
 lcFileSrce = justfname(m.tcFileSrce)
 llResult = '*' $ m.lcFileSrce or '?' $ m.lcFileSrce or lFile(m.tcFileSrce)
 if m.llResult
@@ -228,10 +226,10 @@ if m.llResult
 
 		lcFileDest = iif(lFullPath(m.tcFileDest,, .t.);
 			, m.tcFileDest;
-			, evaluate(m.tcFileDest); && support des expressions pour FilesCopy()
+			, evaluate(m.tcFileDest); && {fr} support des expressions pour FilesCopy()
 			)
 *? m.lcFileDest
-		* Si le chemin destination existe ou peut être créé
+		* {fr} Si le chemin destination existe ou peut être créé
 		llResult = PathCreate(m.lcFileDest, @m.lcResult, @m.tcMessage)
 		if m.llResult
 
@@ -249,10 +247,10 @@ if m.llResult
 
 				else
 
-					copy file (m.tcFileSrce) to (m.lcFileDest) && changes name to lower case
+					copy file (m.tcFileSrce) to (m.lcFileDest) && {fr} changes name to lower case
 					llResult = .t.
 
-*!*							llResult = Empty(CopyFile(m.tcFileSrce, m.tcFileDest, 0)) && preserves case but ... does not work!
+*!*							llResult = Empty(CopyFile(m.tcFileSrce, m.tcFileDest, 0)) && {fr} preserves case but ... does not work!
 				endif
 
 			else
@@ -263,7 +261,7 @@ if m.llResult
 					)
 			endif
 		else
-&& PathCreate() returns errors
+&& {fr} PathCreate() returns errors
 		endif
 	catch to loException
 		llResult = .f.
@@ -276,7 +274,7 @@ else
 													[Source file '<<m.tcFileSrce>>' can't be found]; && default: English
 		))
 endif
-assert m.llResult message cAssertMsg(textmerge(icase(; && DisplayPath(, 40) does not work with wildcards
+assert m.llResult message cAssertMsg(textmerge(icase(; && {fr} DisplayPath(, 40) does not work with wildcards
 		cLangUser() = 'fr',	[Erreur en copiant '<<m.tcFileSrce>>' dans '<<Evl(m.lcFileDest, m.tcFileDest)>>' :],; && copy-paste this line to add another language support
 												[Error while copying '<<m.tcFileSrce>>' into '<<Evl(m.lcFileDest, m.tcFileDest)>>':]; && default: English
 		)) + [ ] + m.lcResult)
@@ -285,17 +283,17 @@ llResult = m.llResult or cResultAdd(@m.tcError, m.lcResult)
 return m.llResult
 
 * ========================================
-function CopyFile(tcFileName, tcCopyFileName, tnFailIfExists) && http://www.berezniker.com/content/pages/visual-foxpro/copy-move-rename-file-preserving-destination-name-case
+function CopyFile(tcFileName, tcCopyFileName, tnFailIfExists) && {fr} http://www.berezniker.com/content/pages/visual-foxpro/copy-move-rename-file-preserving-destination-name-case
 declare long CopyFile in WIN32API string SourceFileName, string DestFileName, long bFailIfExists
 return CopyFile(m.tcFileName, m.tcCopyFileName, m.tnFailIfExists)
 
 * ========================================
-procedure FileMove && Déplace un ou plusieurs fichier(s) en créant le(s) dossier(s) si nécessaire
+procedure FileMove && {fr} Déplace un ou plusieurs fichier(s) en créant le(s) dossier(s) si nécessaire
 lparameters ;
-	tcFileSrce, ; && Adresse actuelle (can contain wildcard characters)
-	tcFileDest,; && Nouvelle adresse (can contain wildcard characters)
-	tlCopyForce,; && [.F.] Toujours copier (pas de RENAME, donc potentiellement plus lent)
-	tcResult && @ Résultat
+	tcFileSrce, ; && {fr} Adresse actuelle (can contain wildcard characters)
+	tcFileDest,; && {fr} Nouvelle adresse (can contain wildcard characters)
+	tlCopyForce,; && [.F.] {fr} Toujours copier (pas de RENAME, donc potentiellement plus lent)
+	tcResult && @ {fr} Résultat
 tcResult = ''
 
 local loException as exception, llResult
@@ -310,16 +308,16 @@ if m.llResult
 		try
 			if lFiles(m.tcFileDest) or lTrue(m.tlCopyForce)
 
-			 	delete file (m.tcFileDest) && évite que le fichier copié hérite
+			 	delete file (m.tcFileDest) && {fr} évite que le fichier copié hérite
 			 	copy file (m.tcFileSrce) to (m.tcFileDest)
-				if lFiles(m.tcFileDest) && assure que le fichier a été copié avant de supprimer la source
+				if lFiles(m.tcFileDest) && {fr} assure que le fichier a été copié avant de supprimer la source
 					delete file (m.tcFileSrce)
 				endif
 			else
 
-&& When you issue RENAME, FileName2 cannot already exist and FileName1 must exist and cannot be open.
-				rename (m.tcFileSrce) to (m.tcFileDest) && déplace le fichier && If the file extensions are not included, the default extension .dbf is assumed
-&& RENAME moves the file and keeps its security profile
+&& {fr} When you issue RENAME, FileName2 cannot already exist and FileName1 must exist and cannot be open.
+				rename (m.tcFileSrce) to (m.tcFileDest) && {fr} déplace le fichier && {fr} If the file extensions are not included, the default extension .dbf is assumed
+&& {fr} RENAME moves the file and keeps its security profile
 			endif
 
 		catch to loException
@@ -334,14 +332,14 @@ endif
 return m.llResult
 
 * ========================================
-procedure FileStrTran && Remplace une chaîne dans un fichier selon StrTran()
+procedure FileStrTran && {fr} Remplace une chaîne dans un fichier selon StrTran()
 lparameters ;
-	tcFile,; && fichier oû chercher
-	cExpressionSought,; && chaîne à remplacer
-	cReplacement,; && [''] chaîne remplaçante
-	nStartOccurrence,; && [1] première occurrence à traiter
-	nNumberOfOccurrences,; && [-1, all] && nombre d'occurrences à traiter
-	nFlags && [0] réglages selon StrTran()
+	tcFile,; && {fr} fichier oû chercher
+	cExpressionSought,; && {fr} chaîne à remplacer
+	cReplacement,; && [''] {fr} chaîne remplaçante
+	nStartOccurrence,; && [1] {fr} première occurrence à traiter
+	nNumberOfOccurrences,; && [-1, all] && {fr} nombre d'occurrences à traiter
+	nFlags && [0] {fr} réglages selon StrTran()
 
 if file(m.tcFile) and vartype(m.cExpressionSought) == 'C'
 
@@ -367,20 +365,20 @@ else
 endif
 
 * ========================================
-function lDir && Un dossier existe
-lparameters tcDir, tlStrict && Adresse du dossier ; supporte wildcard
+function lDir && {fr} Un dossier existe
+lparameters tcDir, tlStrict && {fr} Adresse du dossier ; supporte wildcard
 local array laTemp[1]
 return .T.;
  and vartype(m.tcDir) == 'C';
  and not empty(m.tcDir);
  and Iif(lTrue(m.tlStrict);
-	 , adir(laTemp, addbs(m.tcDir), 'DHS') >= 1; && Directory, Hidden, System
+	 , adir(laTemp, addbs(m.tcDir), 'DHS') >= 1; && {fr} Directory, Hidden, System
 	 , directory(m.tcDir);
 	 )
 
 * ========================================
-function lDirEmpty && Un dossier existe et est vide
-lparameters tcDir && Adresse du dossier ; supporte wildcard
+function lDirEmpty && {fr} Un dossier existe et est vide
+lparameters tcDir && {fr} Adresse du dossier ; supporte wildcard
 local laTemp[1]
 
 return lDir(m.tcDir, .T.);
@@ -389,16 +387,16 @@ return lDir(m.tcDir, .T.);
  and laTemp[2,1] == '..'
 
 * ========================================
-function lFile && Un fichier existe (plus rapide et précis que File() car ne cherche pas dans le PATH)
+function lFile && {fr} Un fichier existe (plus rapide et précis que File() car ne cherche pas dans le PATH)
 lparameters ;
-	tcFileAddr,; && Adresse du fichier dont il faut vérifier l'existence, complète ou dans Curdir()
-	tnSize,; && @ [0] Taille en octets - .T.: identifier fichiers multiples
-	ttModified,; && @ [Datetime(1900,1,1,0,0,0)] Date et Heure de Dernière modification
-	tcAttribs && @ [''] Attributs
+	tcFileAddr,; && {fr} Adresse du fichier dont il faut vérifier l'existence, complète ou dans Curdir()
+	tnSize,; && @ [0] {fr} Taille en octets - .T.: identifier fichiers multiples
+	ttModified,; && @ [Datetime(1900,1,1,0,0,0)] {fr} Date et Heure de Dernière modification
+	tcAttribs && @ [''] {fr} Attributs
 
 local llResult, laFile[1], lnFile, llFiles
 
-if ga_Type_IsChar(m.tcFileAddr, .t.) && Vartype(m.tcFileAddr) == 'C'
+if ga_Type_IsChar(m.tcFileAddr, .t.) && {fr} Vartype(m.tcFileAddr) == 'C'
 
 	lnFile = adir(laFile, m.tcFileAddr, 'HS') && , 1 inutile && ? ADir(aa, '..\*.prg') fonctionne
 	llFiles = lTrue(m.tnSize)
@@ -420,7 +418,7 @@ endif
 return m.llResult
 
 * -------------------------------
-procedure lFile_Test	&& Teste lFile
+procedure lFile_Test && {fr} Teste lFile
 
 local loTest as abUnitTest
 loTest = newobject('abUnitTest', 'abDev.prg')
@@ -432,20 +430,20 @@ loTest.Test(.t., m.lcFileAddr, @lnSize, @ltModified, @lcAttribs)
 
 
 * ========================================
-function lFiles && Un ou plusieurs fichiers existent selon un masque
-lparameters tcFileAddrSkeleton && Masque de l'adresse des fichiers dont il faut vérifier l'existence
+function lFiles && {fr} Un ou plusieurs fichiers existent selon un squelette
+lparameters tcFileAddrSkeleton && {fr} squelette de l'adresse des fichiers dont il faut vérifier l'existence
 local laFiles[1]
 
 return aFiles(@m.laFiles, m.tcFileAddrSkeleton) > 0
 endfunc
 
 * ========================================
-function aFiles && Fichiers selon un masque d'adresse
+function aFiles && {fr} Fichiers selon un squelette d'adresse
 lparameters ;
-	taFiles,; && @ Noms des Fichiers
-	tcFileAddrSkeleton && Masque de l'adresse des fichiers
+	taFiles,; && @ {fr} Noms des Fichiers
+	tcFileAddrSkeleton && {fr} squelette de l'adresse des fichiers
 
-local llResult, lnResult && Nombre de fichiers trouvés
+local llResult, lnResult && {fr} Nombre de fichiers trouvés
 
 lnResult = 0
 
@@ -456,7 +454,7 @@ if m.llResult
 	lnResult = adir(m.taFiles, m.tcFileAddrSkeleton, '', 1)
 	if m.lnResult > 0
 
-		aColsDel(@taFiles, 2) && retourne les seuls noms des fichiers
+		aColsDel(@taFiles, 2) && {fr} retourne les seuls noms des fichiers
 	endif
 endif
 
@@ -465,13 +463,13 @@ return m.lnResult
 external array taFiles
 
 * ========================================
-function aFiles_ && Fichiers selon un ou plusieurs masque dans un dossier [et ses sous-dossiers]
+function aFiles_ && {fr} Fichiers selon un ou plusieurs squelette dans un dossier [et ses sous-dossiers]
 lparameters ;
-  taFiles; && @ Addresses des Fichiers
-, tcFileSkels; && Masques de fichiers à traiter
-, tcFolder; && Adresse du dossier oû les fichiers sont à chercher
-, tlSubFolders; && [.F.] Chercher dans les sous-dossiers
-, tcSubFoldersExcl && [''] Sous-dossiers à exclure de la recherche (séparés par ',')
+  taFiles; && @ {fr} Addresses des Fichiers
+, tcFileSkels; && {fr} Masques de fichiers à traiter
+, tcFolder; && {fr} Adresse du dossier oû les fichiers sont à chercher
+, tlSubFolders; && [.F.] {fr} Chercher dans les sous-dossiers
+, tcSubFoldersExcl && [''] {fr} Sous-dossiers à exclure de la recherche (séparés par ',')
 
 local lnResult as integer;
 , llResult as Boolean;
@@ -489,12 +487,12 @@ if .t.;
  and aClear(@m.taFiles);
  and alines(m.laFileSkel, m.tcFileSkels, 5, ',', ';') > 0
 
-	if m.tlSubFolders and aSubFolders(; && Sous-dossiers d'un dossier /!\ Récursive
-			  @m.laFolder; && @ taSubFolders Sous-dossiers selon aDir()
-			, m.tcFolder; && tcFolder [dossier courant] Adresse du dossier oû rechercher les sous-dossiers
-			, m.tcSubFoldersExcl; && tcFoldersExcl [''] sous-dossiers à exclure et/ou masque des fichiers attendus dans les dossiers à inclure
-			, .t.; && tvRecurse [.F.] Récurser dans les sous-sous-dossiers etc., si N, nombre de niveaux de récursion
-			, .t.; && tlAddrOnly [.F.] Ne garder que les adresses des dossiers (supprimer date, taille, etc.)
+	if m.tlSubFolders and aSubFolders(; && {fr} Sous-dossiers d'un dossier /!\ Récursive
+			  @m.laFolder; && @ {fr} taSubFolders Sous-dossiers selon aDir()
+			, m.tcFolder; && {fr} tcFolder [dossier courant] Adresse du dossier oû rechercher les sous-dossiers
+			, m.tcSubFoldersExcl; && {fr} tcFoldersExcl [''] sous-dossiers à exclure et/ou squelette des fichiers attendus dans les dossiers à inclure
+			, .t.; && {fr} tvRecurse [.F.] Récurser dans les sous-sous-dossiers etc., si N, nombre de niveaux de récursion
+			, .t.; && {fr} tlAddrOnly [.F.] Ne garder que les adresses des dossiers (supprimer date, taille, etc.)
 			) > 0
 		aPush(@m.laFolder, m.tcFolder)
 	else
@@ -519,8 +517,8 @@ endif
 return m.lnResult
 
 * ========================================
-function lFileAddrSkeleton && Squelette d'adresse de fichier valide
-lparameters tcFileAddrSkeleton && Masque de l'adresse des fichiers à vérifier
+function lFileAddrSkeleton && {fr} Squelette d'adresse de fichier valide
+lparameters tcFileAddrSkeleton && {fr} squelette de l'adresse des fichiers à vérifier
 
 if vartype(m.tcFileAddrSkeleton) == 'C';
  and not empty(m.tcFileAddrSkeleton);
@@ -543,9 +541,9 @@ else
 endif
 
 * ========================================
-function lFileExclusive && Un fichier peut être ouvert en exclusif
+function lFileExclusive && {fr} Un fichier peut être ouvert en exclusif
 lparameters ;
-	tcFileAddr && Adresse du fichier dont il faut vérifier l'accès exclusif
+	tcFileAddr && {fr} Adresse du fichier dont il faut vérifier l'accès exclusif
 local lnHandle, llResult
 
 if vartype(m.tcFileAddr) == 'C' and not empty(m.tcFileAddr)
@@ -566,12 +564,12 @@ endif
 return m.llResult
 
 * ========================================
-function lFileFresher	&& Un fichier est plus récent qu'un autre
+function lFileFresher && {fr} Un fichier est plus récent qu'un autre
 lparameters ;
-	tcFile1Addr,; && Adresse du fichier de base
-	tcFile2Addr && Adresse du fichier à comparer
+	tcFile1Addr,; && {fr} Adresse du fichier de base
+	tcFile2Addr && {fr} Adresse du fichier à comparer
 
-* Si les deux fichiers existent
+* {fr} Si les deux fichiers existent
 return iif(vartype(m.tcFile1Addr)=='C';
 	 and lFile(fullpath(m.tcFile1Addr));
 	 and vartype(m.tcFile2Addr)=='C';
@@ -581,22 +579,22 @@ return iif(vartype(m.tcFile1Addr)=='C';
  )
 
 * ========================================
-procedure FilesDir && Répertorie des fichiers dans un dossier [et ses sous-dossiers]
+procedure FilesDir && {fr} Répertorie des fichiers dans un dossier [et ses sous-dossiers]
 lparameters ;
-	tcFileSkels,; && Masques de fichiers à traiter
-	tcFolders,; && Adresse du dossier oû les fichiers sont à chercher
-	tlSubFolders,; && [.F.] Chercher dans les sous-dossiers
-	tcSubFoldersExcl,; && [''] Sous-dossiers à exclure de la recherche (séparés par ',')
-	tcTable,; && @ Répertoire de fichiers : table ou curseur ; si vide, nouveau curseur ; Alias en retour
-	tcFieldsExtra,; && [aucun] spécifications de champs à ajouter à la table
-	tcTagsExtra && [aucun] spécifications d'index à ajouter à la table (cf. aTagInfo_())
+	tcFileSkels,; && {fr} Masques de fichiers à traiter
+	tcFolders,; && {fr} Adresse du dossier oû les fichiers sont à chercher
+	tlSubFolders,; && [.F.] {fr} Chercher dans les sous-dossiers
+	tcSubFoldersExcl,; && [''] {fr} Sous-dossiers à exclure de la recherche (séparés par ',')
+	tcTable,; && @ {fr} Répertoire de fichiers : table ou curseur ; si vide, nouveau curseur ; Alias en retour
+	tcFieldsExtra,; && [aucun] {fr} spécifications de champs à ajouter à la table
+	tcTagsExtra && [aucun] {fr} spécifications d'index à ajouter à la table (cf. aTagInfo_())
 
-local loDeleted as abSet, lnResult as integer && Nombre de fichers répertoriés, -1 si erreur
+local loDeleted as abSet, lnResult as integer && {fr} Nombre de fichers répertoriés, -1 si erreur
 
 tcTable = FilesDirCursor(m.tcTable, m.tcFieldsExtra)
 
 loDeleted = abSet('DELETED', 'OFF')
-delete all in (m.tcTable) && cf. FileDir()
+delete all in (m.tcTable) && {fr} cf. FileDir()
 
 lnResult = iif(used(m.tcTable);
 	, FilesProc(m.tcFolders, 'FileDir', m.tcFileSkels, m.tlSubFolders, m.tcSubFoldersExcl, m.tcTable);
@@ -605,12 +603,12 @@ lnResult = iif(used(m.tcTable);
 return m.lnResult
 
 * ========================================
-procedure FilesDirCursor && Ouvre ou crée une table ou un curseur d'inventaire de fichiers
+procedure FilesDirCursor && {fr} Ouvre ou crée une table ou un curseur d'inventaire de fichiers
 lparameters ;
-	tcTable,; && @ Table ou curseur pour répertoire de fichiers ; si vide, nouveau curseur
-	tcFieldsExtra,; && [aucun] spécifications de champs à ajouter à la table
-	tcTagsExtra,; && [aucun] spécifications d'index à ajouter à la table (cf. aTagInfo_())
-	tcAlias && @ [JustStem(m.tcTable)] Alias d'ouverture
+	tcTable,; && @ {fr} Table ou curseur pour répertoire de fichiers ; si vide, nouveau curseur
+	tcFieldsExtra,; && [aucun] {fr} spécifications de champs à ajouter à la table
+	tcTagsExtra,; && [aucun] {fr} spécifications d'index à ajouter à la table (cf. aTagInfo_())
+	tcAlias && @ [JustStem(m.tcTable)] {fr} Alias d'ouverture
 
 local llResult as Boolean
 
@@ -626,8 +624,8 @@ assert m.llResult message cAssertMsg(textmerge([<<Program()>> - le curseur ou la
 return iif(m.llResult, m.tcAlias, '')
 
 * ========================================
-function FilesDirCursor_cFields && Champs de la table ou curseur d'inventaire de fichiers
-lparameters tcFieldsExtra && [aucun] spécifications de champs à ajouter à la table
+function FilesDirCursor_cFields && {fr} Champs de la table ou curseur d'inventaire de fichiers
+lparameters tcFieldsExtra && [aucun] {fr} spécifications de champs à ajouter à la table
 
 return c2Words(;
 					[FILEDIR I, cNAME C(106), cSTEM C(100), cEXT C(5), mADDR M, nBYTES I NULL, tMOD T, tDIR T, CHECKSUM C(12) NULL]; && 100 est largement suffisant pour Abaque
@@ -636,11 +634,11 @@ return c2Words(;
 				)
 
 * ========================================
-function FilesDirCursor_cTags && Indexes de la table ou curseur d'inventaire de fichiers
-lparameters tcTagsExtra && [aucun] spécifications d'index à ajouter à la table (cf. aTagInfo_())
+function FilesDirCursor_cTags && {fr} Indexes de la table ou curseur d'inventaire de fichiers
+lparameters tcTagsExtra && [aucun] {fr} spécifications d'index à ajouter à la table (cf. aTagInfo_())
 
 local lcResult
-text TO lcResult TEXTMERGE NOSHOW FLAGS 1 PRETEXT 3 && selon aTagInfo() && && Tag; Type; Key; Filter; Order; Collation
+text TO lcResult TEXTMERGE NOSHOW FLAGS 1 PRETEXT 3 && {fr} selon aTagInfo() && && {fr} Tag; Type; Key; Filter; Order; Collation
 	FILEDIR;CANDIDATE;;;;MACHINE
 	FILECK;CANDIDATE; <<cFilesDirCursorCKexpr('mADDR')>>;;;MACHINE
 	cNAME;;;;;MACHINE
@@ -656,16 +654,16 @@ ENDTEXT
 return m.lcResult
 
 * ========================================
-function cFilesDirCursorCKexpr && Expression de clé candidate sur une table d'inventaire de fichiers
+function cFilesDirCursorCKexpr && {fr} Expression de clé candidate sur une table d'inventaire de fichiers
 lparameters tcAddr
 return textmerge([Padr(Upper(Rtrim(<<m.tcAddr>>)), 200)])
 
 * ========================================
-procedure FileDir && Répertorie un fichier
+procedure FileDir && {fr} Répertorie un fichier
 lparameters ;
-	tcFile,; && Addresse du fichier
-	tcAlias,; && Répertoire de fichiers
-	tcError && @ Erreur en retour (cumulative)
+	tcFile,; && {fr} Addresse du fichier
+	tcAlias,; && {fr} Répertoire de fichiers
+	tcError && @ {fr} Erreur en retour (cumulative)
 tcFile = alltrim(m.tcFile)
 
 local loDeleted as abSet, loException as exception, lnBytes, ltFile, lcCheckSum, llResult
@@ -685,7 +683,7 @@ if m.llResult
 
 			recall in (m.tcAlias)
 
-			if not lower(evaluate(m.tcAlias + '.mAddr')) == lower(m.tcFile) && évite le MEMO bloat
+			if not lower(evaluate(m.tcAlias + '.mAddr')) == lower(m.tcFile) && {fr} évite le MEMO bloat
 				replace in (m.tcAlias);
 					mAddr with m.tcFile
 			endif
@@ -704,7 +702,7 @@ if m.llResult
 
 		else
 
-			insert into (m.tcAlias) (; && After executing the INSERT command, Visual FoxPro sets the record pointer on the new record
+			insert into (m.tcAlias) (; && {fr} After executing the INSERT command, Visual FoxPro sets the record pointer on the new record
 					  FileDir;
 					, cNAME;
 					, cSTEM;
@@ -737,7 +735,7 @@ endif
 return m.llResult
 
 *==============================================
-function FileMemo(tcFile) && Fichier mémo associé à un fichier-table VFP
+function FileMemo(tcFile) && {fr} Fichier mémo associé à un fichier-table VFP
 
 local lcExt
 
@@ -766,7 +764,7 @@ return icase(;
 	)
 
 *==============================================
-function FileIndex(tcFile) && Fichier index associé à un fichier-table VFP
+function FileIndex(tcFile) && {fr} Fichier index associé à un fichier-table VFP
 
 local lcExt
 
@@ -777,15 +775,15 @@ return icase(;
 		lFile(forceext(m.tcFile, 'cdx')), forceext(m.tcFile, 'cdx'),;
 		lFile(forceext(m.tcFile, 'idx')), forceext(m.tcFile, 'idx'),;
 		''),;
-	m.lcExt == 'mnx', forceext(m.tcFile, 'mpr'),; && just a workaround
+	m.lcExt == 'mnx', forceext(m.tcFile, 'mpr'),; && {fr} just a workaround
 	'';
 )
 
 *==============================================
-function tFile && Date et heure de dernière modification d'un fichier et/ou de ses fichiers liés
+function tFile && {fr} Date et heure de dernière modification d'un fichier et/ou de ses fichiers liés
 lparameters ;
-  tcFile; && Fichier
-, tlMemo; && [.F.] Prendre en compte le fichier memo associé éventuel
+  tcFile; && {fr} Fichier
+, tlMemo; && [.F.] {fr} Prendre en compte le fichier memo associé éventuel
 
 local tFile as Datetime
 
@@ -793,7 +791,7 @@ local tFile as Datetime
 *!*	sys2450 = Cast(Sys(2450) as I)
 *!*	Sys(2450, 0)
 
-* tcFile = fullpath(m.tcFile) && {fr} lFile() supporte les chemins relatifs
+* {fr} tcFile = fullpath(m.tcFile) && {fr} lFile() supporte les chemins relatifs
 tlMemo = iif(lTrue(m.tlMemo), FileMemo(m.tcFile), '')
 
 return Iif(File(m.tlMemo);
@@ -804,14 +802,14 @@ return Iif(File(m.tlMemo);
 *!*	Aussi incroyable que ça puisse paraître, fdate() appelé depuis une fonction cherche dans set('path') au lieu d'aller à l'adresse indiquée
 *!*	try
 *!*		tFile = ICase(;
-*!*			!lFile(m.tcFile),; && File() peut répondre .T. et Fdate() ne trouve pas le fichier
+*!*			!lFile(m.tcFile),; && {fr} File() peut répondre .T. et Fdate() ne trouve pas le fichier
 *!*				{/:},;
 *!*			lFile(m.tlMemo),;
 *!*				max(fdate(m.tcFile, 1), fdate(m.tlMemo, 1)),;
 *!*				fdate(m.tcFile, 1); && 1: last modification DateTime
 *!*				)
-*!*	catch && erreur 'file not found' si le fichier est inclus dans l'exe
-*!*		tFile = tFile_(m.tcFile, m.tlMemo) && alternative
+*!*	catch && {fr} erreur 'file not found' si le fichier est inclus dans l'exe
+*!*		tFile = tFile_(m.tcFile, m.tlMemo) && {fr} alternative
 *!*	endtry
 *!*	Sys(2450, m.sys2450)
 *!*	return m.tFile
@@ -819,8 +817,8 @@ return Iif(File(m.tlMemo);
 endfunc
 
 *==============================================
-function tFile_ && Date et heure de dernière modification d'un fichier et/ou de ses fichiers liés /!\ privée de tFile()
-lparameters tcFile && Fichier
+function tFile_ && {fr} Date et heure de dernière modification d'un fichier et/ou de ses fichiers liés /!\ privée de tFile()
+lparameters tcFile && {fr} Fichier
 
 LOCAL laFile[1], ldDate
 
@@ -837,27 +835,27 @@ RETURN EVALUATE('';
 	+ "-";
 	+ TRANSFORM(DAY(m.ldDate));
 	+ " " ;
-	+ m.laFile[4]; && time
+	+ m.laFile[4]; && {fr} time
 	+ "}";
 	)
 endfunc
 
 *==============================================
-function cFileSizeTotal && Taille d'un fichier et de ses fichiers associés
-lparameters tcFile && Fichier
+function cFileSizeTotal && {fr} Taille d'un fichier et de ses fichiers associés
+lparameters tcFile && {fr} Fichier
 
 return cFileSize(;
 	  @m.tcFile;
-	, .t.; && tlMemo Tenir compte du fichier memo associé éventuel
-	, .t.; && tlCDX Tenir compte du fichier CDX associé éventuel
+	, .t.; && {fr} tlMemo Tenir compte du fichier memo associé éventuel
+	, .t.; && {fr} tlCDX Tenir compte du fichier CDX associé éventuel
 	)
 
 *==============================================
-function cFileSize && Taille d'un fichier
+function cFileSize && {fr} Taille d'un fichier
 lparameters ;
-	tcFile,; && Fichier
-	tlMemo,; && [.F.] Tenir compte du fichier memo associé éventuel @ le fichier memo existe
-	tlCDX && [.F.] Tenir compte du fichier CDX associé éventuel @ le fichier CDX existe
+	tcFile,; && {fr} Fichier
+	tlMemo,; && [.F.] {fr} Tenir compte du fichier memo associé éventuel @ le fichier memo existe
+	tlCDX && [.F.] {fr} Tenir compte du fichier CDX associé éventuel @ le fichier CDX existe
 
 local result
 
@@ -876,10 +874,10 @@ return icase(;
 	)
 
 *==============================================
-function cMB && Valeur en Méga Octets
+function cMB && {fr} Valeur en Méga Octets
 lparameters ;
   tnSize;
-, tcLangUser && [cLangUser()] Langue de l'utilisateur
+, tcLangUser && [cLangUser()] {fr} Langue de l'utilisateur
 
 tcLangUser = cLangUser(m.tcLangUser)
 
@@ -892,10 +890,10 @@ return '';
 		)
 
 *==============================================
-function cGB && Valeur en Giga Octets
+function cGB && {fr} Valeur en Giga Octets
 lparameters ;
   tnSize;
-, tcLangUser && [cLangUser()] Langue de l'utilisateur
+, tcLangUser && [cLangUser()] {fr} Langue de l'utilisateur
 
 tcLangUser = cLangUser(m.tcLangUser)
 
@@ -908,32 +906,32 @@ return '';
 		)
 
 *==============================================
-function cFileSizeMB && Taille d'un fichier en Méga Octets
+function cFileSizeMB && {fr} Taille d'un fichier en Méga Octets
 lparameters ;
-	tcFile,; && Fichier
-	tlMemo,; && [.F.] Tenir compte du fichier memo associé éventuel
-	tcLangUser && [cLangUser()] Langue de l'utilisateur
+	tcFile,; && {fr} Fichier
+	tlMemo,; && [.F.] {fr} Tenir compte du fichier memo associé éventuel
+	tcLangUser && [cLangUser()] {fr} Langue de l'utilisateur
 
 return cMB(nFileSize(m.tcFile, m.tlMemo))
 
 *==============================================
-function nFileSizeTotal && Taille d'un fichier et de ses fichiers associés
-lparameters tcFile && Fichier
+function nFileSizeTotal && {fr} Taille d'un fichier et de ses fichiers associés
+lparameters tcFile && {fr} Fichier
 
 return nFileSize(;
 	  @m.tcFile;
-	, .t.; && tlMemo Tenir compte du fichier memo associé éventuel
-	, .t.; && tlCDX Tenir compte du fichier CDX associé éventuel
+	, .t.; && {fr} tlMemo Tenir compte du fichier memo associé éventuel
+	, .t.; && {fr} tlCDX Tenir compte du fichier CDX associé éventuel
 	)
 
 *==============================================
-function nFileSize && Taille d'un fichier en octets
+function nFileSize && {fr} Taille d'un fichier en octets
 lparameters ;
-	tcFile,; && Fichier
-	tlMemo,; && [.F.] @ Ajouter la taille du fichier memo associé éventuel @ le fichier memo existe
-	tlCDX && [.F.] @ Ajouter la taille du fichier CDX associé éventuel @ le fichier CDX existe
+	tcFile,; && {fr} Fichier
+	tlMemo,; && @ [.F.] {fr} Ajouter la taille du fichier memo associé éventuel @ le fichier memo existe
+	tlCDX && @ [.F.] {fr} Ajouter la taille du fichier CDX associé éventuel @ le fichier CDX existe
 
-local lnResult; &&  && Taille du fichier en octets
+local lnResult; &&  && {fr} Taille du fichier en octets
 , lcMemo;
 , lcCDX;
 , llCompatible;
@@ -941,19 +939,19 @@ local lnResult; &&  && Taille du fichier en octets
 , lHandle;
 , llResult
 
-* If file can be found
+* {fr} If file can be found
 llResult = vartype(m.tcFile) == 'C' and file(m.tcFile)
 assert m.llResult message cAssertMsg(textmerge([<<Program()>> - Invalid File Address Specification: <<m.tcFile>>]))
 if m.llResult
 
 	if lTrue(m.tlMemo)
 		lcMemo = FileMemo(m.tcFile)
-		tlMemo = not empty(m.lcMemo) && @ feedback
+		tlMemo = not empty(m.lcMemo) && @ {fr} feedback
 	endif
 
 	if lTrue(m.tlCDX)
 		lcCDX = forceext(m.tcFile, 'cdx')
-		tlCDX = file(m.lcCDX) && @ feedback
+		tlCDX = file(m.lcCDX) && @ {fr} feedback
 	endif
 
 	try
@@ -989,7 +987,7 @@ if m.llResult
 
 		else
 
-&& probably an included file
+&& {fr} probably an included file
 			try
 				lnResult = 0;
 					+ len(filetostr(m.tcFile));
@@ -1013,7 +1011,7 @@ endif
 return iif(m.llResult, m.lnResult, .null.)
 
 *----------------------------------------
-procedure nFileSize_Test && teste nFileSize()
+procedure nFileSize_Test && {fr} teste nFileSize()
 
 local loTest as abUnitTest of abDev.prg;
 , lcFile;
@@ -1027,16 +1025,16 @@ strtofile(replicate('a', m.lnFile), m.lcFile)
 loTest.Test(m.lnFile, m.lcFile)
 erase (m.lcFile)
 
-loTest.Test(.null., cModuleInfo(sys(16), 'Address')) && file can't be accessed
+loTest.Test(.null., cModuleInfo(sys(16), 'Address')) && {fr} file can't be accessed
 
 return loTest.result()
 
 *========================================
-function cFileCheckSum && Checksum du contenu d'un fichier avec, le cas échéant, son fichier lié
+function cFileCheckSum && {fr} Checksum du contenu d'un fichier avec, le cas échéant, son fichier lié
 lparameters ;
-	tcFile,; && Fichier
-	tlMemo,; && [.F.] Inclure le memo associé éventuel
-	tnPadr && [none] Longueur à padder
+	tcFile,; && {fr} Fichier
+	tlMemo,; && [.F.] {fr} Inclure le memo associé éventuel
+	tnPadr && [none] {fr} Longueur à padder
 tcFile = evl(m.tcFile, '')
 tlMemo = lTrue(m.tlMemo)
 
@@ -1047,7 +1045,7 @@ lcResult = .null.
 if file(m.tcFile)
 
 	tnFile = nFileSize(m.tcFile)
-	llResult = not isnull(m.tnFile) && la taille du fichier a pu être calculée
+	llResult = not isnull(m.tnFile) && {fr} la taille du fichier a pu être calculée
 	if m.llResult
 
 		llResult = m.tnFile < VFP_VAR_SIZE_MAX
@@ -1065,7 +1063,7 @@ if file(m.tcFile)
 			if m.llFile
 
 				lnFile = nFileSize(m.lcFile)
-				llResult = not isnull(m.lnFile) && la taille du fichier a pu être calculée
+				llResult = not isnull(m.lnFile) && {fr} la taille du fichier a pu être calculée
 				if m.llResult
 
 					llResult = m.lnFile < VFP_VAR_SIZE_MAX
@@ -1089,8 +1087,8 @@ if file(m.tcFile)
 
 		lcResult = sys(2007;
 			, filetostr(m.tcFile) + iif(m.llFile, filetostr(m.lcFile), '');
-			, -1; && nSeed : Specifies a numeric seed value of 0 that is used to calculate the checksum and is included for backward compatibility. Passing a value of -1 for nSeed uses the default system value of 0. For CRC32 calculations, Visual FoxPro disregards nSeed.
-			, 1; && CRC32 - For CRC32 calculations, Visual FoxPro disregards nSeed
+			, -1; && {fr} nSeed : Specifies a numeric seed value of 0 that is used to calculate the checksum and is included for backward compatibility. Passing a value of -1 for nSeed uses the default system value of 0. For CRC32 calculations, Visual FoxPro disregards nSeed.
+			, 1; && {fr} CRC32 - For CRC32 calculations, Visual FoxPro disregards nSeed
 			)
 	endif
 endif
@@ -1101,23 +1099,23 @@ return iif(m.llResult and vartype(m.tnPadr) == 'N' and m.tnPadr > 0;
 	)
 
 * ========================================
-procedure FilesRename && Renomme des fichiers dans un dossier [et ses sous-dossiers]
+procedure FilesRename && {fr} Renomme des fichiers dans un dossier [et ses sous-dossiers]
 lparameters ;
-	tcFileSkels,; && Masques de fichiers à traiter (séparés par ',')
-	tcFileNew,; && Nouveau nom
-	tcFolders,; && Adresses des dossiers oû les fichiers sont à chercher
-	tlSubFolders,; &&	[.F.] Chercher dans les sous-dossiers
-	tcSubFoldersExcl && [''] Sous-dossiers à exclure de la recherche (séparés par ',')
+	tcFileSkels,; && {fr} Masques de fichiers à traiter (séparés par ',')
+	tcFileNew,; && {fr} Nouveau nom
+	tcFolders,; && {fr} Adresses des dossiers oû les fichiers sont à chercher
+	tlSubFolders,; &&	[.F.] {fr} Chercher dans les sous-dossiers
+	tcSubFoldersExcl && [''] {fr} Sous-dossiers à exclure de la recherche (séparés par ',')
 
 return iif(lFileSkeleton(m.tcFileSkels) and m.tcFileSkels # [*.*];
 	, FilesProc(m.tcFolders, 'FileRename', m.tcFileSkels, m.tlSubFolders, m.tcSubFoldersExcl, m.tcFileNew);
 	, 0)
 
 * ========================================
-procedure FileRename && Renomme un fichier
+procedure FileRename && {fr} Renomme un fichier
 lparameters ;
-	tcFile,; && Addresse du fichier à renommer
-	tcFileNew && Nouveau nom
+	tcFile,; && {fr} Addresse du fichier à renommer
+	tcFileNew && {fr} Nouveau nom
 tcFileNew = forcepath(m.tcFileNew, justpath(m.tcFile))
 
 local llResult
@@ -1131,15 +1129,15 @@ endif
 return m.llResult
 
 * ========================================
-procedure FilesDelete && Alias de FilesDel()
+procedure FilesDelete && {fr} Alias de FilesDel()
 lparameters ;
-	tcFileSkels,; && Masques de fichiers à traiter
-	tcFolders,; && Adresse du dossier oû sont les fichiers
-	tlSubFolders,; && [.F.] Chercher dans les sous-dossiers
-	tcSubFoldersExcl,; && [''] Sous-dossiers à exclure de la recherche (séparés par ',')
-	tlRecycle,; && [.F.] Placer les fichiers supprimés dans la corbeille
-	tlDirsEmptyDel,; && [.F.] Supprimer les dossiers vides
-	tcError && [''] @ Détail de l'erreur éventuelle
+	tcFileSkels,; && {fr} Masques de fichiers à traiter
+	tcFolders,; && {fr} Adresse du dossier oû sont les fichiers
+	tlSubFolders,; && [.F.] {fr} Chercher dans les sous-dossiers
+	tcSubFoldersExcl,; && [''] {fr} Sous-dossiers à exclure de la recherche (séparés par ',')
+	tlRecycle,; && [.F.] {fr} Placer les fichiers supprimés dans la corbeille
+	tlDirsEmptyDel,; && [.F.] {fr} Supprimer les dossiers vides
+	tcError && @ [''] {fr} Détail de l'erreur éventuelle
 
 return FilesDel(;
 		m.tcFileSkels;
@@ -1152,16 +1150,16 @@ return FilesDel(;
 	)
 
 * ========================================
-procedure FilesDel && Supprime des fichiers dans un dossier [et ses sous-dossiers]
+procedure FilesDel && {fr} Supprime des fichiers dans un dossier [et ses sous-dossiers]
 lparameters ;
-	tcFileSkels,; && Masques de fichiers à traiter
-	tcFolders,; && Adresse du dossier oû sont les fichiers
-	tlSubFolders,; && [.F.] Chercher dans les sous-dossiers
-	tcSubFoldersExcl,; && [''] Sous-dossiers à exclure de la recherche (séparés par ',')
-	tlRecycle,; && [.F.] Placer les fichiers supprimés dans la corbeille
-	tlDirsEmptyDel,; && [.F.] Supprimer les dossiers vides
-	tcResult,; && [''] @ Détail de l'erreur éventuelle
-	tnResult; && [0] @ Nombre de fichiers copiés
+	tcFileSkels,; && {fr} Masques de fichiers à traiter
+	tcFolders,; && {fr} Adresse du dossier oû sont les fichiers
+	tlSubFolders,; && [.F.] {fr} Chercher dans les sous-dossiers
+	tcSubFoldersExcl,; && [''] {fr} Sous-dossiers à exclure de la recherche (séparés par ',')
+	tlRecycle,; && [.F.] {fr} Placer les fichiers supprimés dans la corbeille
+	tlDirsEmptyDel,; && [.F.] {fr} Supprimer les dossiers vides
+	tcResult,; && @ [''] {fr} Détail de l'erreur éventuelle
+	tnResult; && @ [0] {fr} Nombre de fichiers copiés
 
 tlRecycle = lTrue(m.tlRecycle)
 
@@ -1181,7 +1179,7 @@ tnResult = FilesProc(;
 
 llResult = empty(m.lcResult) or cResultAdd(@m.tcResult, m.lcResult)
 
-* Supprimer les répertoires vides résiduels
+* {fr} Supprimer les répertoires vides résiduels
 if m.llResult and lTrue(m.tlDirsEmptyDel)
 
 	local laFolders[1], lcFolder, laSubFolders[1], lcSubFolder
@@ -1206,22 +1204,22 @@ endif
 return m.llResult
 
 *!*		* ========================================
-*!*		PROCEDURE FileDelete && Supprime un fichier && alias de FileDel() && abandonné à cause d'un conflit avec FileDelete.exe de web connect
+*!*		PROCEDURE FileDelete && {fr} Supprime un fichier && {fr} alias de FileDel() && {fr} abandonné à cause d'un conflit avec FileDelete.exe de web connect
 *!*		LPARAMETERS ;
-*!*			tcFile,; && Addresse du fichier à supprimer
-*!*			tlRecycle,; && [.F.] Placer les fichiers dans la corbeille
-*!*			tlDirsEmptyDel,; && [.F.] Supprimer les dossiers vides
-*!*			tcError && [''] @ Détail de l'erreur éventuelle
+*!*			tcFile,; && {fr} Addresse du fichier à supprimer
+*!*			tlRecycle,; && [.F.] {fr} Placer les fichiers dans la corbeille
+*!*			tlDirsEmptyDel,; && [.F.] {fr} Supprimer les dossiers vides
+*!*			tcError && @ [''] {fr} Détail de l'erreur éventuelle
 *!*
 *!*		RETURN FileDel(m.tcFile, m.tlRecycle, m.tlDirsEmptyDel, @m.tcError)
 
 * ========================================
-procedure FileDel && Supprime un fichier
+procedure FileDel && {fr} Supprime un fichier
 lparameters ;
-	tcFile,; && Addresse du fichier à supprimer
-	tlRecycle,; && [.F.] Placer les fichiers dans la corbeille
-	tlDirsEmptyDel,; && [.F.] Supprimer les dossiers vides
-	tcResult && [''] @ Détail de l'erreur éventuelle, cumulative
+	tcFile,; && {fr} Addresse du fichier à supprimer
+	tlRecycle,; && [.F.] {fr} Placer les fichiers dans la corbeille
+	tlDirsEmptyDel,; && [.F.] {fr} Supprimer les dossiers vides
+	tcResult && @ [''] {fr} Détail de l'erreur éventuelle, cumulative
 
 local lcRecycle;
 , lcPath;
@@ -1257,13 +1255,13 @@ return m.llResult
 
 
 * ========================================
-procedure FilesProc && Applique une procédure à tous les fichiers d'un dossier [et de ses sous-dossiers] - jusqu'à 5 paramètres peuvent être passés à la procédure
+procedure FilesProc && {fr} Applique une procédure à tous les fichiers d'un dossier [et de ses sous-dossiers] - jusqu'à 5 paramètres peuvent être passés à la procédure
 lparameters ;
-	tcFolders,; && Adresses des dossiers oû les fichiers sont à chercher
-	tcProc,; && Procédure à appliquer à chaque fichier trouvé (son premier paramètre est l'adresse du fichier)
-	tcFileSkels,; && ['*.*'] Masques de fichiers à traiter (séparés par ',')
-	tlSubFolders,; &&	[.F.] Chercher dans les sous-dossiers
-	tcSubFoldersExcl,; && [''] Sous-dossiers à exclure de la recherche (séparés par ',')
+	tcFolders,; && {fr} Adresses des dossiers oû les fichiers sont à chercher
+	tcProc,; && {fr} Procédure à appliquer à chaque fichier trouvé (son premier paramètre est l'adresse du fichier)
+	tcFileSkels,; && ['*.*'] {fr} Masques de fichiers à traiter (séparés par ',')
+	tlSubFolders,; &&	[.F.] {fr} Chercher dans les sous-dossiers
+	tcSubFoldersExcl,; && [''] {fr} Sous-dossiers à exclure de la recherche (séparés par ',')
 	tuProcParm02,; && @ 2ème paramètre à passer à la procédure (le premier est l'adresse du fichier)
 	tuProcParm03,; && @ 3ème paramètre à passer à la procédure
 	tuProcParm04,; && @ 4eme paramètre à passer à la procédure
@@ -1272,40 +1270,40 @@ lparameters ;
 	tuProcParm07,; && @ 7ème paramètre à passer à la procédure
 	tuProcParm08,; && @ 8ème paramètre à passer à la procédure
 	tuProcParm09,; && @ 9ème paramètre à passer à la procédure
-	tuProcParm10,; && @ xème paramètre à passer à la procédure
-	tuProcParm11,; && @ xème paramètre à passer à la procédure
-	tuProcParm12,; && @ xème paramètre à passer à la procédure
-	tuProcParm13,; && @ xème paramètre à passer à la procédure
-	tuProcParm14,; && @ xème paramètre à passer à la procédure
-	tuProcParm15,; && @ xème paramètre à passer à la procédure
-	tuProcParm16,; && @ xème paramètre à passer à la procédure
-	tuProcParm17,; && @ xème paramètre à passer à la procédure
-	tuProcParm18,; && @ xème paramètre à passer à la procédure
-	tuProcParm19   && @ xème paramètre à passer à la procédure
-&& on pourrait passer jusqu'à 19 paramètres à la procédure ...
+	tuProcParm10,; && @ {fr} xème paramètre à passer à la procédure
+	tuProcParm11,; && @ {fr} xème paramètre à passer à la procédure
+	tuProcParm12,; && @ {fr} xème paramètre à passer à la procédure
+	tuProcParm13,; && @ {fr} xème paramètre à passer à la procédure
+	tuProcParm14,; && @ {fr} xème paramètre à passer à la procédure
+	tuProcParm15,; && @ {fr} xème paramètre à passer à la procédure
+	tuProcParm16,; && @ {fr} xème paramètre à passer à la procédure
+	tuProcParm17,; && @ {fr} xème paramètre à passer à la procédure
+	tuProcParm18,; && @ {fr} xème paramètre à passer à la procédure
+	tuProcParm19   && @ {fr} xème paramètre à passer à la procédure
+&& {fr} on pourrait passer jusqu'à 19 paramètres à la procédure ...
 
 tcFileSkels = iif(vartype(m.tcFileSkels) == 'C', alltrim(m.tcFileSkels), [*.*])
 tlSubFolders = lTrue(m.tlSubFolders)
 tcSubFoldersExcl = iif(m.tlSubFolders and vartype(m.tcSubFoldersExcl)=='C', upper(m.tcSubFoldersExcl), '')
 
-local llResult, lnResult && Nombre de fichiers traités
+local llResult, lnResult && {fr} Nombre de fichiers traités
 lnResult = 0
 
-* Si les paramètres requis sont valides
+* {fr} Si les paramètres requis sont valides
 llResult = vartype(m.tcFolders)=='C' and not empty(m.tcFolders);
-			 and vartype(m.tcProc) == 'C' and not empty(m.tcProc) && comment vérifier que la procédure est accessible ?
+			 and vartype(m.tcProc) == 'C' and not empty(m.tcProc) && {fr} comment vérifier que la procédure est accessible ?
 assert m.llResult message cAssertMsg(textmerge([<<Program()>> - Les dossiers <<cLitteral(@tcFolders)>> ou la procédure <<cLitteral(@tcProc)>> est invalide]))
 if m.llResult
 
 	local laSkels[1], lnSkels, lcSkel, lnDocs, laDocs[1], laDocsSkel[1], laSubFolders[1], lnSubFolders, lnSubFolder
 	lnSkels = alines(laSkels, m.tcFileSkels, .t., ',')
 
-	* Pour chaque dossier
+	* {fr} Pour chaque dossier
 	local laFolders[1], lcFolder
 	alines(laFolders, m.tcFolders, 1, [,], [;])
 	for each lcFolder in laFolders
 
-	* Si le dossier existe
+	* {fr} Si le dossier existe
 		llResult = lDir(m.lcFolder, .T.)
 		assert m.llResult message cAssertMsg(textmerge([<<Program()>> - le dossier '<<m.lcFolder>>' n'existe pas]))
 		if m.llResult
@@ -1313,39 +1311,39 @@ if m.llResult
 			aClear(@m.laDocs)
 			lnDocs = 0
 
-			* Tabuler les fichiers situés dans le dossier et répondant au(x) masque(s)
+			* {fr} Tabuler les fichiers situés dans le dossier et répondant au(x) squelette(s)
 			for each lcSkel in laSkels
-				if adir(laDocsSkel,  m.lcFolder + m.lcSkel, '', 1) > 0 && pas de dossier && capitalization on disk
+				if adir(laDocsSkel,  m.lcFolder + m.lcSkel, '', 1) > 0 && {fr} pas de dossier && {fr} capitalization on disk
 					lnDocs = aAppend(@m.laDocs, @m.laDocsSkel)
 				endif
 			endfor
-			asort(laDocs, 1, -1, 0, 1) && ascending, case insensitive
+			asort(laDocs, 1, -1, 0, 1) && {fr} ascending, case insensitive
 
-			* Si recherche dans les sous-dossiers demandée,
+			* {fr} Si recherche dans les sous-dossiers demandée,
 			if m.tlSubFolders
 
-				* Si sous-dossier(s) dans le dossier
+				* {fr} Si sous-dossier(s) dans le dossier
 				lnSubFolders = aSubFolders(@m.laSubFolders, m.lcFolder, m.tcSubFoldersExcl)
 				if m.lnSubFolders > 0
 
-					* Supprimer l'adresse du dossier de départ && par cohérence avec le aDir() ci-dessus
+					* {fr} Supprimer l'adresse du dossier de départ && {fr} par cohérence avec le aDir() ci-dessus
 					for lnSubFolder = 1 to m.lnSubFolders
 						laSubFolders[m.lnSubFolder, 1] = strtran(laSubFolders[m.lnSubFolder, 1], m.lcFolder, '', 1, -1, 1)
 					endfor
-					asort(laSubFolders, 1, -1, 0, 1) && ascending, case insensitive
+					asort(laSubFolders, 1, -1, 0, 1) && {fr} ascending, case insensitive
 
-					* Ajouter les sous-dossiers AVANT les documents
+					* {fr} Ajouter les sous-dossiers AVANT les documents
 					lnDocs = aAppend(@m.laDocs, @m.laSubFolders,, .t.)
 				endif
 			endif
 
-			* Si le dossier comporte des documents
+			* {fr} Si le dossier comporte des documents
 			if m.lnDocs > 0
 
-				* Préparer la chaine de paramètres à passer à la procédure
+				* {fr} Préparer la chaine de paramètres à passer à la procédure
 				local lcProcParms, lnProcParms, lnProcParm
-				lnProcParms = pcount() - 5; && les paramètres commencent en 6è position
-																+ 1 && les nÂ° de paramètres commencent à 2
+				lnProcParms = pcount() - 5; && {fr} les paramètres commencent en 6è position
+																+ 1 && {fr} les n° de paramètres commencent à 2
 				lcProcParms = ''
 				if m.lnProcParms >= 2
 					for lnProcParm = 2 to m.lnProcParms
@@ -1353,21 +1351,21 @@ if m.llResult
 					endfor
 				endif
 
-				* Pour chaque "document" (fichier ou sous-dossier)
+				* {fr} Pour chaque "document" (fichier ou sous-dossier)
 				local lnDoc, lcDoc, lcDocAddr, llDoc
 				for lnDoc = 1 to m.lnDocs
 					lcDoc = laDocs[m.lnDoc, 1]
 					lcDocAddr = m.lcFolder + m.lcDoc
 
-					* Si dossier exploitable, récurser le cas échéant
+					* {fr} Si dossier exploitable, récurser le cas échéant
 					if 'D' $ upper(laDocs[m.lnDoc, 5])
 
 						if m.tlSubFolders and not inlist(m.lcDoc, '.', '..')
-						 	lnResult = m.lnResult + ; && récursion
+						 	lnResult = m.lnResult + ; && {fr} récursion
 						 		evaluate('FilesProc(m.lcDocAddr, m.tcProc, m.tcFileSkels, m.tlSubFolders, m.tcSubFoldersExcl' + m.lcProcParms + ')')
 						endif
 
-					* Sinon (fichier), appliquer la procédure indiquée
+					* {fr} Sinon (fichier), appliquer la procédure indiquée
 					else
 
 						llDoc = evaluate(textmerge([<<m.tcProc>>(m.lcDocAddr <<m.lcProcParms>>)]))
@@ -1382,7 +1380,7 @@ endif
 return m.lnResult
 
 * -------------------------------
-procedure FilesProc_Test && Teste FilesProc()
+procedure FilesProc_Test && {fr} Teste FilesProc()
 
 local loTest as abUnitTest
 loTest = newobject('abUnitTest', 'abDev.prg')
@@ -1392,20 +1390,20 @@ loTest.Test(, getdir(curdir(),'',"Oû sont les fichiers Excel à traiter ?", 16), 
 return loTest.result()
 
 * ------------------------------------
-	procedure FilesProc_Test_Proc	&& Procédure appelée par FilesProc_Test()
+	procedure FilesProc_Test_Proc && {fr} Procédure appelée par FilesProc_Test()
 	lparameters ;
 		tcFile,;
 		tuParm
 
-	* Afficher l'adresse du fichier et le paramètre
+	* {fr} Afficher l'adresse du fichier et le paramètre
 	? cFileCased(m.tcFile), ' -- paramètre :', transform(m.tuParm)
 
 * ========================================
-function cFileSubFolders && Fichier dans un dossier ou un des ses sous-dossiers
+function cFileSubFolders && {fr} Fichier dans un dossier ou un des ses sous-dossiers
 lparameters ;
-	tcFile,; && Adresse du fichier
-	tcFoldersExcl,; && [''] sous-dossiers à exclure et/ou masque des fichiers attendus dans les dossiers à inclure
-	tvRecurse && [.F.] Récurser dans les sous-sous-dossiers etc., si N, nombre de niveaux de récursion
+	tcFile,; && {fr} Adresse du fichier
+	tcFoldersExcl,; && [''] {fr} sous-dossiers à exclure et/ou squelette des fichiers attendus dans les dossiers à inclure
+	tvRecurse && [.F.] {fr} Récurser dans les sous-sous-dossiers etc., si N, nombre de niveaux de récursion
 
 local laFolders[1], lcFolder, lcFile, llResult, lcResult
 
@@ -1429,21 +1427,22 @@ endif
 return m.lcResult
 
 * ========================================
-function aSubFolders && Sous-dossiers d'un dossier /!\ Récursive
+function aSubFolders && {fr} Sous-dossiers d'un dossier /!\ Récursive
 lparameters ;
-	taSubFolders,; && @ Sous-dossiers selon aDir()
-	tcFolder,; && [dossier courant] Adresse du dossier oû rechercher les sous-dossiers
-	tcFoldersExcl,; && [''] sous-dossiers à exclure et/ou masque des fichiers attendus dans les dossiers à inclure
-	tvRecurse,; && [.F.] Récurser dans les sous-sous-dossiers etc., si N, nombre de niveaux de récursion
-	tlAddrOnly && [.F.] Ne garder que les adresses des dossiers (supprimer date, taille, etc.)
+	taSubFolders,; && @ {fr} Sous-dossiers selon aDir()
+	tcFolder,; && [dossier courant] {fr} Adresse du dossier oû rechercher les sous-dossiers
+	tcFoldersExcl,; && [''] {fr} sous-dossiers à exclure et/ou squelette des fichiers attendus dans les dossiers à inclure
+	tvRecurse,; && [.F.] {fr} Récurser dans les sous-sous-dossiers etc., si N, nombre de niveaux de récursion
+	tlAddrOnly && [.F.] {fr} Ne garder que les adresses des dossiers (supprimer date, taille, etc.)
 
-external array taSubFolders && pour le gestionnaire de projet
+external array taSubFolders && {fr} pour le gestionnaire de projet
 tcFolder = addbs(fullpath(evl(m.tcFolder, '')))
 tcFoldersExcl = iif(vartype(m.tcFoldersExcl) == 'C', Lower(m.tcFoldersExcl), '')
 
-local lcTypeRecurse, llRecurse, llFirst, lcDefault;
+local lnResult; && {fr} Nombre de sous-dossiers trouvés
+, llResult;
+, lcTypeRecurse, llRecurse, llFirst, lcDefault;
 , laFolders[1], lnFolder, lcFolder, llFolder, lcPath, lnSubFolders, lnFileSkel;
-, llResult, lnResult && Nombre de sous-dossiers trouvés
 
 lcTypeRecurse = vartype(m.tvRecurse)
 tvRecurse = iif(m.lcTypeRecurse == 'N' and m.tvRecurse > 0;
@@ -1452,21 +1451,21 @@ tvRecurse = iif(m.lcTypeRecurse == 'N' and m.tvRecurse > 0;
 	)
 lnResult = 0
 
-* Si les paramètres requis sont valides
-llResult = type('taSubFolders', 1) == 'A' && aClear() est fait plus loin à la première récursion
+* {fr} Si les paramètres requis sont valides
+llResult = type('taSubFolders', 1) == 'A' && {fr} aClear() est fait plus loin à la première récursion
 assert m.llResult message cAssertMsg(textmerge([<<Program()>> - Le premier paramètre <<cLitteral(taSubFolders)>> doit être un tableau]))
 if m.llResult
 
 	llResult = lDir(m.tcFolder, .t.)
-	* ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([<<Program()>> - Le dossier '<<m.tcFolder>>' est introuvable]))
+	* {fr} ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([<<Program()>> - Le dossier '<<m.tcFolder>>' est introuvable]))
 	if m.llResult
 
-		* Si première récursion && optimisation
+		* {fr} Si première récursion && {fr} optimisation
 		if vartype(m.pnFoldersExcl) == 'U'
 
 			tcFolder = cFileCased(m.tcFolder)
-			aClear(@taSubFolders) && Vide le résultat
-			* Tabuler les dossiers à exclure et/ou les masques de fichiers à trouver dans les dossiers
+			aClear(@taSubFolders) && {fr} Vide le résultat
+			* {fr} Tabuler les dossiers à exclure et/ou les masques de fichiers à trouver dans les dossiers
 			private pnFoldersExcl, paFoldersExcl, pnFileSkel, paFileSkel, pnRecurse
 			dimension paFoldersExcl[1], paFileSkel[1]
 			pnFoldersExcl = alines(paFoldersExcl, m.tcFoldersExcl, 1+4, [,], [;])
@@ -1494,7 +1493,7 @@ if m.llResult
 			pnRecurse = m.pnRecurse + 1
 		endif
 
-		* Pour chaque sous-dossier
+		* {fr} Pour chaque sous-dossier
 		lcDefault = sys(5) + curdir()
 		set default to (m.tcFolder)
 		lnResult = adir(laFolders, '', 'D', 1) && '' makes aDir() return Folders
@@ -1506,14 +1505,14 @@ if m.llResult
 			lcFolder = laFolders[m.lnFolder, 1]
 			lcPath = m.tcFolder + addbs(m.lcFolder)
 
-			* Si bidon ou exclus, supprimer
+			* {fr} Si bidon ou exclus, supprimer
 			llFolder = not (.F.;
-				 or inlist(m.lcFolder, '.', '..'); && bidon
-				 or m.pnFoldersExcl > 0 and aSubFolders_lExcluded(@m.paFoldersExcl, m.lcFolder); && exclus
+				 or inlist(m.lcFolder, '.', '..'); && {fr} bidon
+				 or m.pnFoldersExcl > 0 and aSubFolders_lExcluded(@m.paFoldersExcl, m.lcFolder); && {fr} exclus
 				)
 			if m.llFolder
 
-				* Si récursion demandée, compter les sous-dossiers
+				* {fr} Si récursion demandée, compter les sous-dossiers
 				lnSubFolders = m.lnSubFolders + iif(m.llRecurse;
 					, aSubFolders(@taSubFolders, m.lcPath, m.tcFoldersExcl, m.tvRecurse, m.tlAddrOnly);
 					, 0)
@@ -1526,7 +1525,7 @@ if m.llResult
 				endif
 			endif
 
-			* Si le dossier est OK, ajouter à la liste sinon supprimer
+			* {fr} Si le dossier est OK, ajouter à la liste sinon supprimer
 			if m.llFolder
 				laFolders[m.lnFolder, 1] = m.lcPath
 			else
@@ -1535,18 +1534,18 @@ if m.llResult
 			endif
 		endfor
 
-		* Si des dossiers ont été trouvés
+		* {fr} Si des dossiers ont été trouvés
 		if m.lnResult > 0
 			dimension laFolders[m.lnResult, Alen(laFolders, 2)]
 
-			* Si demandé, supprimer les colonnes superflues
+			* {fr} Si demandé, supprimer les colonnes superflues
 			if lTrue(m.tlAddrOnly)
 				aColsDel(@m.laFolders, 2)
 				dimension laFolders[Alen(m.laFolders)]
 			endif
 
-			* Ajouter les dossiers au résultat
-			aAppend(@taSubFolders, @m.laFolders,, .t.) && bottom up
+			* {fr} Ajouter les dossiers au résultat
+			aAppend(@taSubFolders, @m.laFolders,, .t.) && {fr} bottom up
 		endif
 
 		lnResult = m.lnResult + m.lnSubFolders
@@ -1560,14 +1559,14 @@ endif
 return m.lnResult
 
 * ========================================
-function aSubFolders_lExcluded && Un sous-dossiers répond à un des masques d'exclusion /!\ privée de aSubFolders()
+function aSubFolders_lExcluded && {fr} Un sous-dossiers répond à un des masques d'exclusion /!\ privée de aSubFolders()
 lparameters ;
-  aFoldersExcl; && @ Sous-dossiers selon aDir()
-, lcFolder; && [dossier courant] Adresse du dossier oû rechercher les sous-dossiers
+  aFoldersExcl; && @ {fr} Sous-dossiers selon aDir()
+, lcFolder; && [dossier courant] {fr} Adresse du dossier oû rechercher les sous-dossiers
 
 external array aFoldersExcl
 local cFoldersExcl
-lcFolder = Lower(Alltrim(m.lcFolder)) && aFoldersExcl[] is lower case
+lcFolder = Lower(Alltrim(m.lcFolder)) && {fr} aFoldersExcl[] is lower case
 for each cFoldersExcl in m.aFoldersExcl
 	if Like(m.cFoldersExcl, m.lcFolder)
 		return .T.
@@ -1577,8 +1576,8 @@ return .F.
 endfunc
 
 * ========================================
-function cFolder && Dossier d'une addresse
-lparameters tcAddress && adresse
+function cFolder && {fr} Dossier d'une addresse
+lparameters tcAddress && {fr} adresse
 
 local lcPath, lcResult
 
@@ -1592,8 +1591,8 @@ return m.lcResult
 endfunc
 
 * ========================================
-function cFolders && Dossiers d'une liste d'addresses
-lparameters tcAddresses && Adresses
+function cFolders && {fr} Dossiers d'une liste d'addresses
+lparameters tcAddresses && {fr} Adresses
 
 local laAddress[1], lnAddress, lcResult
 
@@ -1609,11 +1608,11 @@ endif
 return m.lcResult
 
 * ========================================
-function cFiles && Fichiers selon un masque
+function cFiles && {fr} Fichiers selon un squelette
 lparameters ;
-	tcSkeleton,; && masque de fichiers
-	tcSep,; && [,] séparateur de liste
-	tlRecurse && [.F.] Explorer les sous-dossiers éventuels
+	tcSkeleton,; && {fr} squelette de fichiers
+	tcSep,; && [,] {fr} séparateur de liste
+	tlRecurse && [.F.] {fr} Explorer les sous-dossiers éventuels
 tcSep = evl(m.tcSep, [,])
 local laFiles[1], lcFolder, lcResult
 lcResult = ''
@@ -1622,7 +1621,7 @@ if lFileAddrSkeleton(m.tcSkeleton)
 	adir(laFiles, m.tcSkeleton, '', 1)
 	lcResult = cListOfArray(@m.laFiles, m.tcSep, 1)
 
-	* Si dossiers contenus
+	* {fr} Si dossiers contenus
 	if lTrue(m.tlRecurse);
 	 and aClear(@m.laFiles);
 	 and aSubFolders(@m.laFiles, justpath(m.tcSkeleton), '', .t., .t.) > 0
@@ -1636,8 +1635,8 @@ endif
 return m.lcResult
 
 * ========================================
-function cFileAddressOK	&& Adresse de fichier possible dans un dossier (ajoute un suffixe au stem du fichier si nécessaire)
-lparameters tcFileAddr	&& Adresse de fichier à vérifier
+function cFileAddressOK && {fr} Adresse de fichier possible dans un dossier (ajoute un suffixe au stem du fichier si nécessaire)
+lparameters tcFileAddr && {fr} Adresse de fichier à vérifier
 
 local lcPath, lcStem, lcExt, lcStemNew, lnTrial, lcResult
 
@@ -1654,15 +1653,15 @@ if vartype(m.tcFileAddr) == 'C'
 			lcStem = juststem(m.lcResult)
 			lcExt = justext(m.lcResult)
 
-			* Ajouter un suffixe au Stem si le fichier existe déjà
+			* {fr} Ajouter un suffixe au Stem si le fichier existe déjà
 			lnTrial = 0
 			do while file(m.lcResult)
 				lnTrial = lnTrial + 1
-				if lnTrial > 26	&& les 26 lettres sont déjà utilisées
+				if lnTrial > 26 && {fr} les 26 lettres sont déjà utilisées
 					lcResult = ''
 					exit
 				endif
-				lcStemNew = m.lcStem + chr(96 + m.lnTrial)	&& a, b, c, etc.
+				lcStemNew = m.lcStem + chr(96 + m.lnTrial) && {fr} a, b, c, etc.
 				lcResult = m.lcPath + m.lcStemNew + '.' + m.lcExt
 			enddo
 		endif
@@ -1672,18 +1671,18 @@ endif
 return m.lcResult
 
 * ========================================
-function lFileName && Une chaîne de caractère peut être admise comme nom de fichier
-lparameters tcFileName && nom de fichier à analyser
+function lFileName && {fr} Une chaîne de caractère peut être admise comme nom de fichier
+lparameters tcFileName && {fr} nom de fichier à analyser
 
 return .t.;
  and vartype(m.tcFileName) = 'C';
  and !empty(juststem(m.tcFileName));
- and Lenc(m.tcFileName) <= 255; && "Individual components of a filename (i.e. each subdirectory along the path, and the final filename) are limited to 255 characters" && http://stackoverflow.com/questions/265769/maximum-filename-length-in-ntfs-windows-xp-and-windows-vista
+ and Lenc(m.tcFileName) <= 255; && "Individual components of a filename (i.e. each subdirectory along the path, and the final filename) are limited to 255 characters" && {fr} http://stackoverflow.com/questions/265769/maximum-filename-length-in-ntfs-windows-xp-and-windows-vista
  and chrtran(m.tcFileName, CAR_INT_DS_NOM_FICH, '') == m.tcFileName
 
 * ========================================
-function lFileSkeleton && Squelette de nom de fichier valide
-lparameters tcFileSqueleton && Squelette de nom de fichier
+function lFileSkeleton && {fr} Squelette de nom de fichier valide
+lparameters tcFileSqueleton && {fr} Squelette de nom de fichier
 
 return vartype(m.tcFileSqueleton) = 'C';
  and !empty(m.tcFileSqueleton);
@@ -1693,8 +1692,8 @@ return vartype(m.tcFileSqueleton) = 'C';
 endfunc
 
 * ========================================
-function cFileName && Chaîne de caractère admissible comme nom de fichier
-lparameters tcFileName && nom de fichier à analyser
+function cFileName && {fr} Chaîne de caractère admissible comme nom de fichier
+lparameters tcFileName && {fr} nom de fichier à analyser
 
 local lnPeriod, lcStem, lcExt, lcResult
 
@@ -1715,7 +1714,7 @@ endif
 return m.lcResult
 
 * ========================================
-procedure cFileName_Test	&& Teste cFileName()
+procedure cFileName_Test && {fr} Teste cFileName()
 
 local loTest as abUnitTest of abDev.prg
 loTest = newobject('abUnitTest', 'abDev.prg')
@@ -1725,10 +1724,10 @@ loTest.Test( "20070529 12_30_02 Maint.csv", "20070529 12:30:02 Maint.csv")
 return loTest.result()
 
 * ========================================
-function cFileCased && Adresse d'un fichier || dossier avec sa casse originale && Tracy Pearson / http://fox.wikis.com/wc.dll?Wiki~MixedCaseFilePath~VFP
+function cFileCased && {fr} Adresse d'un fichier || dossier avec sa casse originale && {fr} Tracy Pearson / http://fox.wikis.com/wc.dll?Wiki~MixedCaseFilePath~VFP
 lparameters ;
-	tcFile,; && Adresse du fichier
-	tlFullPath && [.F.] Donner l'adresse complète
+	tcFile,; && {fr} Adresse du fichier
+	tlFullPath && [.F.] {fr} Donner l'adresse complète
 
 local lnWord, llBS, lcFile, laFiles[1], llResult, lcResult
 
@@ -1737,15 +1736,15 @@ if vartype(m.tcFile) == 'C' and (file(m.tcFile) or directory(m.tcFile))
 
 	llBS = rightc(rtrim(m.tcFile), 1) == '\'
 	lcFile = fullpath(m.tcFile)
-	lcResult = iif(left(m.lcFile, 2) == '\\', '\\', ''); && network drive
+	lcResult = iif(left(m.lcFile, 2) == '\\', '\\', ''); && {fr} network drive
 	 	+ upper(getwordnum(m.lcFile, 1, '\'))
 
-	* Pour chaque dossier dans le chemin, et le fichier
+	* {fr} Pour chaque dossier dans le chemin, et le fichier
 	for lnWord = 2 to getwordcount(m.lcFile, '\')
 
 		lcResult = m.lcResult + '\'
-		dimension laFiles[1] && aClear() peut être indisponible
-		laFiles[1] = .f. && Dans VFP localisé en espagnol, laFiles = .F. fait perdre à laFiles son type 'Array'
+		dimension laFiles[1] && {fr} aClear() peut être indisponible
+		laFiles[1] = .f. && {fr} Dans VFP localisé en espagnol, laFiles = .F. fait perdre à laFiles son type 'Array'
 
 		llResult = adir(laFiles, m.lcResult + getwordnum(m.lcFile, m.lnWord, '\'), [HSD], 1) > 0 && 1 : Display represents original Case in names
 		if m.llResult
@@ -1757,7 +1756,7 @@ if vartype(m.tcFile) == 'C' and (file(m.tcFile) or directory(m.tcFile))
 
 	if m.llResult
 		if not (lTrue(m.tlFullPath)) and not '~' $ m.tcFile
-			lcResult = rightc(m.lcResult, len(m.tcFile)) && au cas oû l'adresse indiquée était partielle
+			lcResult = rightc(m.lcResult, len(m.tcFile)) && {fr} au cas oû l'adresse indiquée était partielle
 		endif
 		if m.llBS
 			lcResult = addbs(m.lcResult)
@@ -1770,7 +1769,7 @@ endif
 return m.lcResult
 
 * ========================================
-procedure cFileCased_Test	&& Teste cFileCased()
+procedure cFileCased_Test && {fr} Teste cFileCased()
 
 local loTest as abUnitTest of abDev.prg
 loTest = newobject('abUnitTest', 'abDev.prg')
@@ -1781,15 +1780,15 @@ loTest.Test( "C:\Program Files\VFP9\Tools\AB\abfile.prg", "ab\abFile.prg", .t.)
 return loTest.result()
 
 * ========================================
-function lPath && Une chaîne de caractère peut être admise comme adresse complète ou relative
+function lPath && {fr} Une chaîne de caractère peut être admise comme adresse complète ou relative
 lparameters ;
-  tcPath;	&& Adresse à analyser
-, tlSkeleton && [.F.] L'adresse peut être un masque de fichiers
+  tcPath; && {fr} Adresse à analyser
+, tlSkeleton && [.F.] {fr} L'adresse peut être un squelette de fichiers
 
 return .t.;
 	and vartype(m.tcPath) == 'C';
 	and not empty(m.tcPath);
-	and m.tcPath == chrtran(m.tcPath; && aucun caractère interdit
+	and m.tcPath == chrtran(m.tcPath; && {fr} aucun caractère interdit
 			, iif(lTrue(m.tlSkeleton);
 				, chrtran(CAR_INT_DS_ADR_FICH, '?*', '');
 				, CAR_INT_DS_ADR_FICH;
@@ -1798,24 +1797,24 @@ return .t.;
 			)
 
 * ========================================
-function lFullPath && Une chaîne de caractère peut être admise comme adresse complète
+function lFullPath && {fr} Une chaîne de caractère peut être admise comme adresse complète
 lparameters ;
-	tcPath,; && Adresse à analyser
-	tlDrive,; && [.F.] Le lecteur doit exister
-	tlSkeleton && [.F.] L'adresse peut être un masque de fichiers
+	tcPath,; && {fr} Adresse à analyser
+	tlDrive,; && [.F.] {fr} Le lecteur doit exister
+	tlSkeleton && [.F.] {fr} L'adresse peut être un squelette de fichiers
 
 tlDrive = lTrue(m.tlDrive)
 
 return .t.;
 	and lPath(m.tcPath, m.tlSkeleton);
 	and (.f.;
-		or (.t.; && lecteur mappé
+		or (.t.; && {fr} lecteur mappé
 			and isalpha(justdrive(m.tcPath));
 			and substr(m.tcPath, 2, 2) == ':\';
 			and (not m.tlDrive or directory(justdrive(m.tcPath)));
 			);
 		or (.t.;
-			and left(m.tcPath, 2) == '\\'; && lecteur réseau
+			and left(m.tcPath, 2) == '\\'; && {fr} lecteur réseau
 			and (.f.;
 				or not m.tlDrive;
 				or directory(left(m.tcPath, at_c('\', m.tcPath, 3)));
@@ -1825,15 +1824,15 @@ return .t.;
 		)
 
 * ========================================
-function lFileAddress	&& Adresse de fichier valide
-lparameters tcFileAddr	&& Adresse de fichier à analyser
+function lFileAddress && {fr} Adresse de fichier valide
+lparameters tcFileAddr && {fr} Adresse de fichier à analyser
 
 return .t.;
 	and lFullPath(m.tcFileAddr);
 	and lFileName(justfname(m.tcFileAddr))
 
 * ========================================
-procedure lFileAddress_Test	&& Teste lFileAddress()
+procedure lFileAddress_Test && {fr} Teste lFileAddress()
 
 local loTest as abUnitTest of abDev.prg
 loTest = newobject('abUnitTest', 'abDev.prg')
@@ -1846,8 +1845,8 @@ loTest.Test(.f., "J:\aDossier\3592 VD Vignettes\Client\prop15|Ecl.pdf")
 return loTest.result()
 
 * ========================================*******************************
-function c83Address && Version courte (8.3) de l'adresse d'un fichier/dossier EXISTANT
-lparameter tcPath && Adresse supposée longue (> 8.3)
+function c83Address && {fr} Version courte (8.3) de l'adresse d'un fichier/dossier EXISTANT
+lparameter tcPath && {fr} Adresse supposée longue (> 8.3)
 
 local lcResult;
 , lnResult;
@@ -1855,18 +1854,18 @@ local lcResult;
 
 lcResult = ''
 
-* Si le fichier ou le dossier existe
+* {fr} Si le fichier ou le dossier existe
 if vartype(m.tcPath) == 'C'
 
 	tcPath = upper(alltrim(m.tcPath))
 	llPath = lDir(m.tcPath, .T.)
-	if not m.llPath && ce doit être une adresse de fichier
+	if not m.llPath && {fr} ce doit être une adresse de fichier
 		local array laFiles[1]
-		llPath = adir(laFiles, m.tcPath) = 1 && file() ne fonctionne pas avec les adresses courtes
+		llPath = adir(laFiles, m.tcPath) = 1 && {fr} file() ne fonctionne pas avec les adresses courtes
 	endif
 	if m.llPath
 
-		* Lire l'adresse courte
+		* {fr} Lire l'adresse courte
 		declare integer GetShortPathName in Win32API;
 		  string @lpszLongPath,	;
 		  string @lpszShortPath,;
@@ -1876,8 +1875,8 @@ if vartype(m.tcPath) == 'C'
 		lnResult = GetShortPathName(@m.tcPath, @m.lcShortName, m.lnLength)
 
 		lcResult = iif(m.lnResult > 0;
-			, left (m.lcShortName, m.lnResult); && la conversion a réussi
-			, m.tcPath; && la conversion a échoué : l'adresse spécifiée est 8.3
+			, left (m.lcShortName, m.lnResult); && {fr} la conversion a réussi
+			, m.tcPath; && {fr} la conversion a échoué : l'adresse spécifiée est 8.3
 			)
 	endif
 endif
@@ -1885,15 +1884,15 @@ endif
 return m.lcResult
 
 * ========================================
-function cFileFreshest && Adresse de la dernière version d'un fichier d'après son nÂ° de version (suffixe de la racine du nom)
+function cFileFreshest && {fr} Adresse de la dernière version d'un fichier d'après son n° de version (suffixe de la racine du nom)
 lparameters ;
-	tcFileAddrSkel,; && Masque d'adresse du fichier à trouver (sans nÂ° de version)
-	tnVersion && @ nÂ° de la version la plus récente
+	tcFileAddrSkel,; && {fr} squelette d'adresse du fichier à trouver (sans n° de version)
+	tnVersion && @ {fr} n° de la version la plus récente
 local lcResult
 lcResult = ''
 tnVersion = 0
 
-* Si le chemin existe
+* {fr} Si le chemin existe
 if vartype(m.tcFileAddrSkel)='C' ;
  and ! empty(m.tcFileAddrSkel)
 
@@ -1901,7 +1900,7 @@ if vartype(m.tcFileAddrSkel)='C' ;
 	lcPath = addbs(justpath(tcFileAddrSkel))
 	if empty(m.lcPath) or lDir(m.lcPath, .T.)
 
-		* Lire la racine du nom sans le nÂ° de version éventuel
+		* {fr} Lire la racine du nom sans le n° de version éventuel
 		local lcStem, lcExt
 		lcStem = upper(juststem(m.tcFileAddrSkel))
 		lcExt = upper(justext(m.tcFileAddrSkel))
@@ -1909,45 +1908,45 @@ if vartype(m.tcFileAddrSkel)='C' ;
 			lcStem = left(m.lcStem, len(m.lcStem)-1)
 		enddo
 
-		* Si au moins un fichier a la même racine de nom
+		* {fr} Si au moins un fichier a la même racine de nom
 		local lcSkel, lnFiles
 		local array laFiles[1]
 		lcSkel = m.lcStem + iif (right (m.lcStem, 1) = '*', '', '*') + '.' + m.lcExt
 		lnFiles = adir(laFiles, m.lcPath + m.lcSkel)
 		if m.lnFiles > 0
 
-			* Pour chaque fichier trouvé,
+			* {fr} Pour chaque fichier trouvé,
 			local lnFile, lcSuffixe
 			for lnFile = m.lnFiles to 1 step -1
 
-				* Lire le suffixe du stem du fichier
-				lcSuffixe = strtran(upper(juststem(laFiles[lnFile, 1])), m.lcStem, '')	&&	élimine la 'racine'
-				lcSuffixe = chrtran(m.lcSuffixe, ' _-', '')	&&	élimine d'éventuels caractères de séparation
+				* {fr} Lire le suffixe du stem du fichier
+				lcSuffixe = strtran(upper(juststem(laFiles[lnFile, 1])), m.lcStem, '') && {fr} élimine la 'racine'
+				lcSuffixe = chrtran(m.lcSuffixe, ' _-', '') && {fr} élimine d'éventuels caractères de séparation
 
-				* Si le suffixe n'est composé que de chiffres ou est vide (fichier original)
+				* {fr} Si le suffixe n'est composé que de chiffres ou est vide (fichier original)
 				if lDigits(m.lcSuffixe) ;
 				 or empty(m.lcSuffixe)
 
-					* Stocker le numéro de version dans la deuxième colonne du tableau (à la place de la taille)
+					* {fr} Stocker le numéro de version dans la deuxième colonne du tableau (à la place de la taille)
 					laFiles[lnFile, 2] = val(m.lcSuffixe)
 
-				* Sinon, supprimer le fichier de la liste
+				* {fr} Sinon, supprimer le fichier de la liste
 				else
 					adel(laFiles, m.lnFile)
 					lnFiles = m.lnFiles - 1
 				endif
 			endfor
 
-			* Si au moins un fichier est valide
+			* {fr} Si au moins un fichier est valide
 			if m.lnFiles > 0
 
-				* Ignoer les fichiers invalides
+				* {fr} Ignoer les fichiers invalides
 				dimension laFiles[m.lnFiles, Alen(laFiles, 2)]
 
-				* Trier les fichiers valides par nÂ° de version croissant
-				asort(laFiles, 2)	&&	Trie sur la deuxième colonne
+				* {fr} Trier les fichiers valides par n° de version croissant
+				asort(laFiles, 2) && {fr} Trie sur la deuxième colonne
 
-				* Le dernier fichier est celui cherché
+				* {fr} Le dernier fichier est celui cherché
 				lcResult = m.lcPath + laFiles[m.lnFiles, 1]
 				tnVersion = laFiles[m.lnFiles, 2]
 			endif
@@ -1958,9 +1957,9 @@ endif
 return m.lcResult
 
 * ========================================-----
-function oProjectFiles && Collection Files d'un projet
+function oProjectFiles && {fr} Collection Files d'un projet
 lparameters ;
-	toProject	&& [Projet courant] Référence à un objet projet ou à sa collection 'Files'
+	toProject && [Projet courant] {fr} Référence à un objet projet ou à sa collection 'Files'
 local loResult
 loResult = null
 
@@ -1984,30 +1983,30 @@ endcase
 return m.loResult
 
 * ========================================-----
-procedure ProjectFileAdd && Ajoute un fichier à un projet ouvert s'il n'y est déjà
+procedure ProjectFileAdd && {fr} Ajoute un fichier à un projet ouvert s'il n'y est déjà
 lparameters ;
-	tcFileAddr,; && Adresse complète du fichier à ajouter au projet
-	toProject,;	&& [Projet courant] Référence à un objet projet ou à sa collection 'Files'
-	tlInclude && [.F.] Inclure au projet
+	tcFileAddr,; && {fr} Adresse complète du fichier à ajouter au projet
+	toProject,; && [Projet courant] {fr} Référence à un objet projet ou à sa collection 'Files'
+	tlInclude && [.F.] {fr} Inclure au projet
 local llResult
 
-* Si une adresse de fichier valide a bien été passée
+* {fr} Si une adresse de fichier valide a bien été passée
 llResult = vartype(m.tcFileAddr) = 'C' and lFile(m.tcFileAddr)
 assert m.llResult message program() + CRLF + "Adresse de fichier invalide : " + transform(m.tcFileAddr)
 if m.llResult
 
-	* Si un projet et sa collection de fichiers peuvent être trouvés
+	* {fr} Si un projet et sa collection de fichiers peuvent être trouvés
 	local loFiles
 	loFiles = oProjectFiles(m.toProject)
 	llResult = not isnull(m.loFiles)
 	assert m.llResult message program() + CRLF + "Aucun projet courant ou spec de projet invalide : " + transform(m.toProject)
 	if m.llResult
 
-		* Si le fichier n'est pas déjà dans le projet
+		* {fr} Si le fichier n'est pas déjà dans le projet
 		local lcFileAddr, loFile, llFile
 		lcFileAddr = c83Address(m.tcFileAddr)
 		for each loFile in m.loFiles
-			llFile = justext(m.loFile.name) == justext(m.tcFileAddr) ; && to save time
+			llFile = justext(m.loFile.name) == justext(m.tcFileAddr) ; && {fr} to save time
 			 				and c83Address(m.loFile.name) == m.lcFileAddr
 			if m.llFile
 				exit
@@ -2015,8 +2014,8 @@ if m.llResult
 		endfor
 		if ! m.llFile
 
-* Si le ficher est une table ouverte, mémoriser comment elle est ouverte
-&& l'ajout d'une table au projet provoque sa fermeture !
+* {fr} Si le ficher est une table ouverte, mémoriser comment elle est ouverte
+&& {fr} l'ajout d'une table au projet provoque sa fermeture !
 			local llUsed
 			if upper(justext(m.tcFileAddr)) = 'DBF'
 
@@ -2028,11 +2027,11 @@ if m.llResult
 					local lnUsed, lcAlias
 					for lnUsed = 1 to m.lnUsedCount
 
-						lcAlias = laUsed[m.lnUsed, 1] && column 1 contains aliases
+						lcAlias = laUsed[m.lnUsed, 1] && {fr} column 1 contains aliases
 						llUsed = c83Address(cTableAddress(m.lcAlias)) == m.lcFileAddr
 						if llUsed
 
-&& à passer en procédure ...
+&& {fr} à passer en procédure ...
 							local lcExclusive, lcOrder
 							lcExclusive = iif(isexclusive(m.lcAlias), 'EXCLUSIVE', '')
 							lcOrder = order(m.lcAlias)
@@ -2045,13 +2044,13 @@ if m.llResult
 				endif
 			endif
 
-			* Ajouter le fichier au projet
+			* {fr} Ajouter le fichier au projet
 			local llInclude, loFile
 			llInclude = uDefault(m.tlInclude, .f.)
 			loFile = m.loFiles.add(m.tcFileAddr)
 			loFile.Exclude = not m.llInclude
 
-			* Si le ficher est une table ouverte, rouvrir comme précédemment
+			* {fr} Si le ficher est une table ouverte, rouvrir comme précédemment
 			if m.llUsed
 				use (m.tcFileAddr) in 0 alias(m.lcAlias) &lcExclusive &lcOrder
 			endif
@@ -2062,13 +2061,13 @@ endif
 return m.llResult
 
 *==============================================
-function nFileLines && Nombre de lignes dans un fichier
+function nFileLines && {fr} Nombre de lignes dans un fichier
 lparameters ;
-	tcFileAddr && Addresse du fichier
-local llResult, lnResult &&  && Taille du fichier en octets
+	tcFileAddr && {fr} Addresse du fichier
+local llResult, lnResult &&  && {fr} Taille du fichier en octets
 lnResult = 0
 
-* If file can be found
+* {fr} If file can be found
 llResult = vartype(m.tcFileAddr) == 'C' and file(m.tcFileAddr)
 assert m.llResult message program() + CRLF + "Invalid File Address Specification: " + transform(m.tcFileAddr)
 if m.llResult
@@ -2079,14 +2078,14 @@ endif
 return m.lnResult
 
 * ========================================
-procedure FilesExtChange && Change l'extension de fichiers dans un dossier [et ses sous-dossiers]
+procedure FilesExtChange && {fr} Change l'extension de fichiers dans un dossier [et ses sous-dossiers]
 lparameters ;
-	tcFoldAddr,; && Adresse complète du dossier
-	tcExtOld,; && Ancienne extension
-	tcExtNew,; && Nouvelle extention
-	tlSubFolders,; && [.F.] Chercher aussi dans les sous-dossiers
-	tcSubFoldsExcl && [''] Sous-dossiers à exclure de la recherche (séparés par ',')
-local lnResult && nombre de fichiers traités
+	tcFoldAddr,; && {fr} Adresse complète du dossier
+	tcExtOld,; && {fr} Ancienne extension
+	tcExtNew,; && {fr} Nouvelle extention
+	tlSubFolders,; && [.F.] {fr} Chercher aussi dans les sous-dossiers
+	tcSubFoldsExcl && [''] {fr} Sous-dossiers à exclure de la recherche (séparés par ',')
+local lnResult && {fr} nombre de fichiers traités
 lnResult = 0
 
 local llResult
@@ -2109,10 +2108,10 @@ endif
 return m.lnResult
 
 * ========================================
-procedure FileExtChange && Change l'extension de fichiers dans un dossier [et ses sous-dossiers]
+procedure FileExtChange && {fr} Change l'extension de fichiers dans un dossier [et ses sous-dossiers]
 lparameters ;
-	tcFileAddr,; && Adresse du fichier
-	tcExtNew && Nouvelle extension
+	tcFileAddr,; && {fr} Adresse du fichier
+	tcExtNew && {fr} Nouvelle extension
 local llResult
 
 llResult = vartype(m.tcFileAddr) == 'C' and file(m.tcFileAddr)
@@ -2137,8 +2136,8 @@ endif
 return m.llResult
 
 * ========================================
-function cSpecialFolderPath && Chemin des dossiers spéciaux
-lparameters tiSpecialFolderID && cf. abFile.h
+function cSpecialFolderPath && {fr} Chemin des dossiers spéciaux
+lparameters tiSpecialFolderID && {fr} cf. abFile.h
 local lcResult
 lcResult = space(255)
 
@@ -2154,17 +2153,17 @@ lcResult = rtrim(m.lcResult)
 return left(m.lcResult, len(m.lcResult)-1)
 
 * ========================================
-function FullPath_ && FullPath() amélioré
+function FullPath_ && {fr} FullPath() amélioré
 lparameters tcFile1, tcFile2
 return iif(empty(m.tcFile1), '', fullpath(m.tcFile1, m.tcFile2))
 
 * ========================================
-function ForceStem && Modifie la racine d'une adresse de fichier
+function ForceStem && {fr} Modifie la racine d'une adresse de fichier
 lparameters tcFile, tcStem
 return addbs(justpath(m.tcFile)) + m.tcStem + '.' + justext(m.tcFile) && {V1.11} ForceExt() ne fonctionne pas si la racine du nom de fichier comporte un '.'
 
 * ========================================
-procedure SetPathFull && Change les chemins relatifs dans Set("Path") en chemins absolus
+procedure SetPathFull && {fr} Change les chemins relatifs dans Set("Path") en chemins absolus
 
 local laSetPath[1], lnSetPath, liSetPath;
 , lcPath, lcRest
@@ -2193,7 +2192,7 @@ if m.lnSetPath > 0
 		lcPath = cListOfArray(@m.laSetPath, ';')
 		do while .t.
 			lcPath = cTronc(m.lcPath, 4095, .t., @m.lcRest, .t., ';')
-			set path to (m.lcPath) additive && When using the ADDITIVE parameter, paths must be included either as a quoted string or valid expression. If you use macro substitution, it must be properly quoted as in following examples
+			set path to (m.lcPath) additive && {fr} When using the ADDITIVE parameter, paths must be included either as a quoted string or valid expression. If you use macro substitution, it must be properly quoted as in following examples
 			if empty(m.lcRest)
 				exit
 			else
@@ -2204,7 +2203,7 @@ if m.lnSetPath > 0
 endif
 
 * ========================================
-function ForceDrive && change la lettre du disque dans une adresse de fichier
+function ForceDrive && {fr} change la lettre du disque dans une adresse de fichier
 lparameters ;
 	tcFile,;
 	tcDrive
@@ -2232,7 +2231,7 @@ endif
 return m.lcResult
 
 * ========================================
-function lFileWritable && Wait for a given delay until a file can be accessed
+function lFileWritable && {en} Wait for a given delay until a file can be accessed
 lparameters cFile, nMS && [Between(m.nMS, 50 ms, 5000 ms)]
 
 local success;
@@ -2252,7 +2251,7 @@ if file(m.cFile)
 			Sleep(m.nMS / 10)
 		endif
 	enddo
-	nMS = nMS(m.nSeconds) && feedback
+	nMS = nMS(m.nSeconds) && {fr} feedback
 	return m.success
 else
 	return .t.

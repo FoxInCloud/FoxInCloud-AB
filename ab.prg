@@ -1,31 +1,29 @@
-* ab.prg
+* {fr} ab.prg
 * =====================================================
 * (c) Abaque SARL, 66 rue Michel Ange - 75016 Paris - France
 * contact@FoxInCloud.com - http://foxincloud.com/ - +33 9 53 41 90 90
-* -----------------------------------------------------
-* Ce logiciel est distribué sous GNU General Public License, tel quel, sans aucune garantie
-* Il peut être utilisé et/ou redistribué sans restriction
-* Toute modification doit être reversée à la communauté
-* La présente mention doit être intégralement reproduite
-&& dans toute copie même partielle
-* -----------------------------------------------------
-* This software is distributed under the terms of GNU General Public License, AS IS, without any warranty 
-* It may be used and/or distributed without restriction
-* Any substantial improvement must be given for free to the community
-* This permission notice shall be entirely included in all copies
-&& or substantial portions of the Software
+* {fr} -----------------------------------------------------
+* {fr} Ce logiciel est distribué sous GNU General Public License, tel quel, sans aucune garantie
+* {fr} Il peut être utilisé et/ou redistribué sans restriction
+* {fr} Toute modification doit être reversée à la communauté
+* {fr} La présente mention doit être intégralement reproduite dans toute copie même partielle
+* {en} -----------------------------------------------------
+* {en} This software is distributed under the terms of GNU General Public License, AS IS, without any warranty
+* {en} It can be used and/or distributed without restriction
+* {en} Any modification or improvement must be given for free to the community
+* {en} This permission notice shall be entirely included in all copies or substantial portions of the Software
 * =====================================================
 #INCLUDE AB.h
 
 LPARAMETERS ;
-  tlClear; && [.F.] Supprimer les références de Set("Procedure") et Set("Classlib")
-, tlAppExe; && [.F.] Le programme principal est un app ou un exe
-, tlGAno && [.F.] RELEASE PROCEDURE abga
+  tlClear; && [.F.] {fr} Supprimer les références de Set("Procedure") et Set("Classlib")
+, tlAppExe; && [.F.] {fr} Le programme principal est un app ou un exe
+, tlGAno && [.F.] {fr} RELEASE PROCEDURE abga
 
 local lcFXPs
 lcFXPs = cABprgs(.T.)
 
-* Si suppression des ressources
+* {fr} Si suppression des ressources
 IF (Vartype(m.tlClear) == 'L' AND m.tlClear)
 
 	IF '\ab.fxp' $ Lower(Set("Procedure"))
@@ -36,16 +34,16 @@ IF (Vartype(m.tlClear) == 'L' AND m.tlClear)
 		ENDIF
 	ENDIF
 
-* Sinon, installation des ressources
+* {fr} Sinon, installation des ressources
 ELSE
 	
 	IF NOT (Vartype(m.tlAppExe) == 'L' AND m.tlAppExe)
 		local lcDirAB, lcDirA_
-		set path to (Home(1)) additive && VFP
+		set path to (Home(1)) additive && {fr} VFP
 		set path to (Home(1) + 'FFC\') additive
 		set path to (Home(1) + 'Tools\') additive
 		lcDirAB = Addbs(JustPath(Sys(16)))
-		set path to (m.lcDirAB) additive && dossier du présent programme
+		set path to (m.lcDirAB) additive && {fr} dossier du présent programme
 *!*				lcDirA_ = m.lcDirAB + 'at\'
 *!*				if Directory(m.lcDirA_)
 *!*					set path to (m.lcDirA_) additive 
@@ -56,12 +54,12 @@ ELSE
 		endif
 	ENDIF
 
-	* Si ce n'est pas un serveur d'automation
-	&& VFP implicitly performs a SET PROCEDURE and a SET CLASSLIB to the entire server by default when you instantiate an .exe or .dll COM server
+	* {fr} Si ce n'est pas un serveur d'automation
+	&& {en} VFP implicitly performs a SET PROCEDURE and a SET CLASSLIB to the entire server by default when you instantiate an .exe or .dll COM server
 	IF NOT InList(_VFP.StartMode;
-		, 2; && VFP was started as an out-of-process .exe automation server
-		, 3; && VFP was started as an in-process .dll automation server
-		, 5; && VFP was started as an in-process .dll automation server for multithreaded use
+		, 2; && {en} VFP was started as an out-of-process .exe automation server
+		, 3; && {en} VFP was started as an in-process .dll automation server
+		, 5; && {en} VFP was started as an in-process .dll automation server for multithreaded use
 		)
 
 		SET PROCEDURE TO &lcFXPs ADDITIVE
@@ -70,37 +68,37 @@ ELSE
 			RELEASE PROCEDURE abGA
 		ENDIF
 
-		declare short GetKeyState in User32.dll; && see abDev.h
+		declare short GetKeyState in User32.dll; && modify file abDev.h
 			integer vKey
 
-		declare integer ShellExecute IN Shell32.dll; && If the function succeeds, it returns a value greater than 32
-	      integer nWinHandle; && A handle to the parent window used for displaying a UI or error messages. This value can be NULL if the operation is not associated with a window.
+		declare integer ShellExecute IN Shell32.dll; && {en} If the function succeeds, it returns a value greater than 32
+	      integer nWinHandle; && {en} A handle to the parent window used for displaying a UI or error messages. This value can be NULL if the operation is not associated with a window.
 	    , string cOperation;
-	    	; && edit: Launches an editor and opens the document for editing. If lpFile is not a document file, the function will fail.
-				; && explore: Explores a folder specified by lpFile.
-				; && find: Initiates a search beginning in the directory specified by lpDirectory.
-				; && open: Opens the item specified by the lpFile parameter. The item can be a file or folder.
-				; && print: Prints the file specified by lpFile. If lpFile is not a document file, the function fails.
-				; && NULL: The default verb is used, if available. If not, the "open" verb is used. If neither verb is available, the system uses the first verb listed in the registry.
-	    , string cFileName; && file or object on which to execute the specified verb
-	    , string cParameters; && parameters to be passed to the application
-	    , string cDirectory; && default (working) directory for the action. If this value is NULL, the current working directory is used
-	    , integer nShowWindow && how an application is to be displayed when it is opened (see abDev.h)
+	    	; && {en} edit: Launches an editor and opens the document for editing. If lpFile is not a document file, the function will fail.
+				; && {en} explore: Explores a folder specified by lpFile.
+				; && {en} find: Initiates a search beginning in the directory specified by lpDirectory.
+				; && {en} open: Opens the item specified by the lpFile parameter. The item can be a file or folder.
+				; && {en} print: Prints the file specified by lpFile. If lpFile is not a document file, the function fails.
+				; && {en} NULL: The default verb is used, if available. If not, the "open" verb is used. If neither verb is available, the system uses the first verb listed in the registry.
+	    , string cFileName; && {en} file or object on which to execute the specified verb
+	    , string cParameters; && {en} parameters to be passed to the application
+	    , string cDirectory; && {en} default (working) directory for the action. If this value is NULL, the current working directory is used
+	    , integer nShowWindow && {en} how an application is to be displayed when it is opened (see abDev.h)
 
 		IF .T.;
-		 and File('aw.vcx'); && exclu d'awAdapter.pjx/app
+		 and File('aw.vcx'); && {fr} exclu d'awAdapter.pjx/app
 		 and ! '\AW.VCX' $ Set("Classlib")
 			LOCAL lcAW
-			lcAW = 'aw.vcx' && évite d'embarquer aw.vcx dans le projet
+			lcAW = 'aw.vcx' && {fr} évite d'embarquer aw.vcx dans le projet
 			SET CLASSLIB TO (m.lcAW) ADDITIVE
 		ENDIF
 	ENDIF
 	
-	SET COMPATIBLE OFF && Très important pour array = <value> (abArray.prg et autres)
+	SET COMPATIBLE OFF && {fr} Très important pour array = <value> (abArray.prg et autres)
 ENDIF
 
 * --------------------------------------------------
-PROCEDURE AB_test && teste AB()
+PROCEDURE AB_test && {fr} teste AB()
 
 LOCAL loTest as abUnitTest OF abDev.prg
 loTest = NewObject('abUnitTest', 'abDev.prg')
@@ -110,29 +108,34 @@ loTest.Test(.T.)
 RETURN loTest.Result()
 
 * --------------------------------------------------
-PROCEDURE AB_Tests && teste les modules de la classe AB
+PROCEDURE AB_Tests && {fr} teste les modules de la classe AB
 
 local success as Boolean;
 , loAsserts as abSet of abDev.prg;
 , laPrg[1], lcPrg
 
-success = ALines(laPrg, cABprgs(), 5, ',') > 0
+success = aABprgs(laPrg) > 0
 if m.success
 
 	CLEAR
 	loAsserts = abSet('ASSERTS', 'OFF')
-
 	for each lcPrg in m.laPrg
 		success = Evaluate(JustStem(m.lcPrg) + '()') and m.success
 	endfor
 endif
 
 wait clear
-
 return m.success
+endproc
 
 * =================================
-FUNCTION cABprgs(lFXPs) && *.prg|fxp de la classe ab
+function aABprgs(aABprgs, lFXPs) && {fr} fichiers *.prg|fxp de la classe ab
+external array aABprgs
+return ALines(aABprgs, cABprgs(m.lFXPs), 5, ',')
+endfunc
+
+* =================================
+FUNCTION cABprgs(lFXPs) && {fr} fichiers *.prg|fxp de la classe ab
 
 local lcResult
 
@@ -147,14 +150,15 @@ lcResult = 'ab.prg';
 	+	', abOOP.prg';
 	+	', abTxt.prg';
 	+	', awPublic.prg';
-	+ ''
+	;
+	+	', abModule.prg';
 
-return Iif(Vartype(m.lFXPs) == 'L' and m.lFXPs;
+return Iif(Vartype(m.lFXPs) == 'L' and m.lFXPs; && {fr} lTrue() indisponible
 	, Strtran(m.lcResult, '.prg', '.fxp');
 	, m.lcResult;
 	)
 
-external procedure ab.prg; && for project manager
+external procedure ab.prg; && {fr} for project manager
 	, abArray.prg;
 	, abData.prg;
 	, abDate.prg;
@@ -166,61 +170,81 @@ external procedure ab.prg; && for project manager
 	, abTxt.prg;
 	, awPublic.prg
 
+endfunc
 
 * =================================
-FUNCTION aABsrce && Fichiers source de la classe ab
-LPARAMETERS taSrce && @ Fichiers source de la classe ab
+FUNCTION cABhs && {fr} fichiers *.h de la classe ab
 
-RETURN Iif(aClear(@m.taSrce);
-	, ALines(taSrce,;
-					'ab.h';
-			+	', abdev.h';
-			+	', abdata.h';
-			+	', abfile.h';
-			+	', abOffice.h';
-			+	', abtxt.h';
-			+	', awpublic.h';
-			+	', ' + cABprgs();
-			+	', aw.vcx';
-			+	', aw.vct';
-			+	', awGenMenu.prg';
-			+	', ga_.h'; && pour ga*.prg
-			+	', european.mem'; && nécessaire
-			+	', Graphics\aw.ico';
-			+	', Graphics\indicator_remembermilk_orange.gif';
-			+	', Graphics\exclamation64.png';
-			+	', Graphics\info64.png';
-			+	', Graphics\question64.png';
-			+	', Graphics\standby64.png';
-			+	', Graphics\folder.png';
-			+	', Graphics\folder_image.png';
-			+	', Graphics\folder_table.png';
-			+	', Graphics\arrows-gray-gray.png';
-			+	', Graphics\arrows-black-gray.png';
-			+	', Graphics\arrows-gray-black.png';
-			+	', Graphics\arrowdoubleleft.png';
-			+	', Graphics\arrowdoubleright.png';
-			+	', Graphics\refreshblue32.png';
-			+	', Graphics\prefirst.png';
-			+	', Graphics\prelast.png';
-			+	', Graphics\preprev.png';
-			+	', Graphics\prenext.png';
-		, 1, ',');
+return 'ab.h';
+	+	', abDev.h';
+	+	', abData.h';
+	+	', abFile.h';
+	+	', abOffice.h';
+	+	', abTxt.h';
+	+	', awPublic.h';
+	+	', ga_.h'; && {fr} pour ga*.prg
+
+* =================================
+function aABsrce(aABsrce) && {fr} fichiers source de la classe ab
+external array aABsrce
+return ALines(aABsrce, cWords(',', cABhs(), cABprgs()), 5, ',')
+endfunc
+
+* =================================
+FUNCTION cABothers && {fr} autres fichiers de la classe ab
+
+return ' aw.vcx';
+		+	', aw.vct';
+		+	', awGenMenu.prg';
+		+	', european.mem'; && {fr} nécessaire
+		+	', Graphics\aw.ico';
+		+	', Graphics\indicator_remembermilk_orange.gif';
+		+	', Graphics\exclamation64.png';
+		+	', Graphics\info64.png';
+		+	', Graphics\question64.png';
+		+	', Graphics\standby64.png';
+		+	', Graphics\folder.png';
+		+	', Graphics\folder_image.png';
+		+	', Graphics\folder_table.png';
+		+	', Graphics\arrows-gray-gray.png';
+		+	', Graphics\arrows-black-gray.png';
+		+	', Graphics\arrows-gray-black.png';
+		+	', Graphics\arrowdoubleleft.png';
+		+	', Graphics\arrowdoubleright.png';
+		+	', Graphics\refreshblue32.png';
+		+	', Graphics\prefirst.png';
+		+	', Graphics\prelast.png';
+		+	', Graphics\preprev.png';
+		+	', Graphics\prenext.png';
+
+
+* =================================
+FUNCTION aABfile && {fr} Fichiers de la classe ab
+LPARAMETERS aABfile && @ {fr} Fichiers de la classe ab
+external array aABfile
+
+RETURN Iif(aClear(@m.aABfile);
+	, ALines(aABfile;
+		, cWords(',', cABhs(), cABprgs(), cABothers());
+		, 1;
+		, ',';
+		);
 	, 0)
 
 
+* =================================
+#IF .F. && {fr} copier coller dans modify command awOOP.prg > awAdapter.Adapt_abSrceCopy()
 
-
-#IF .F. && copier coller dans modify command awOOP.prg > awAdapter.Adapt_abSrceCopy()
-
-EXTERNAL FILE; && pour avoir le code source même si l'app est encrypté
+EXTERNAL FILE; && {fr} pour avoir le code source même si l'app est encrypté
 			ab.h;
 		, abdev.h;
 		, abdata.h;
 		, abfile.h;
 		, abOffice.h;
 		, abtxt.h;
-		, awpublic.h;
+		, awPublic.h;
+		, ga_.h; && {fr} pour ga*.prg
+		;
 		, ab.prg;
 		, abArray.prg;
 		, abData.prg;
@@ -232,10 +256,10 @@ EXTERNAL FILE; && pour avoir le code source même si l'app est encrypté
 		, abOOP.prg;
 		, abTxt.prg;
 		, awPublic.prg;
-		, awCopy.vcx; && pour éviter conflit de nom avec class designer
-		, awCopy.vct; && pour éviter conflit de nom avec class designer
-		, ga_.h; && pour ga*.prg
-		, european.mem; && nécessaire
+		;
+		, awCopy.vcx; && {fr} pour éviter conflit de nom avec class designer
+		, awCopy.vct; && {fr} pour éviter conflit de nom avec class designer
+		, european.mem; && {fr} nécessaire
 		, Graphics\aw.ico;
 		, Graphics\exclamation64.png;
 		, Graphics\indicator_remembermilk_orange.gif;
@@ -258,28 +282,28 @@ EXTERNAL FILE; && pour avoir le code source même si l'app est encrypté
 
 #ENDIF
 * ========================================
-PROCEDURE PathesRemove && Retire des dossiers du Set('Path')
+PROCEDURE PathesRemove && {fr} Retire des dossiers du Set('Path')
 LPARAMETERS ;
-	taFolder,; && @ Dossiers
-	tlRelative && [.F.] Supprimer en relatif au dossier par défaut
+	taFolder,; && @ {fr} Dossiers
+	tlRelative && [.F.] {fr} Supprimer en relatif au dossier par défaut
 
 RETURN PathesAdd(@m.taFolder, .T., m.tlRelative)
 
 * ========================================
-PROCEDURE PathRemove && Retire un dossier du Set('Path') - 9 ms
+PROCEDURE PathRemove && {fr} Retire un dossier du Set('Path') - 9 ms
 LPARAMETERS ;
-	tcFolder,; && Dossier @: Addbs(FullPath(m.tcFolder)) si existant
-	tlRelative && [.F.] Supprimer en relatif au dossier par défaut
+	tcFolder,; && {fr} Dossier @: Addbs(FullPath(m.tcFolder)) si existant
+	tlRelative && [.F.] {fr} Supprimer en relatif au dossier par défaut
 
 RETURN PathAdd(m.tcFolder, .T., m.tlRelative)
 
 * ========================================
-PROCEDURE PathesAdd && Ajoute des dossier à Set('Path')
+PROCEDURE PathesAdd && {fr} Ajoute des dossier à Set('Path')
 LPARAMETERS ;
-	taFolder,; && @ Dossiers
-	tlRemove,; && [.F.] Supprimer du path
-	tlRelative,; && [.F.] Ajouter en relatif au dossier par défaut
-	tlPrepend && [.F.] Ajouter au début de Set('PATH')
+	taFolder,; && @ {fr} Dossiers
+	tlRemove,; && [.F.] {fr} Supprimer du path
+	tlRelative,; && [.F.] {fr} Ajouter en relatif au dossier par défaut
+	tlPrepend && [.F.] {fr} Ajouter au début de Set('PATH')
 EXTERNAL ARRAY taFolder
 
 LOCAL lcFolder, lnResult
@@ -303,29 +327,29 @@ ENDIF
 RETURN m.lnResult
 
 * ========================================
-PROCEDURE PathAdd && Ajoute un dossier à Set('Path') - 8 ms
+PROCEDURE PathAdd && {fr} Ajoute un dossier à Set('Path') - 8 ms
 LPARAMETERS ;
-	tcFolder,; && Dossier @: Addbs(FullPath(m.tcFolder)) si existant
-	tlRemove,; && [.F.] Supprimer du path
-	tlRelative,; && [.F.] Ajouter en relatif au dossier par défaut
-	tlPrepend && [.F.] Ajouter au début de Set('PATH')
+	tcFolder,; && {fr} Dossier @: Addbs(FullPath(m.tcFolder)) si existant
+	tlRemove,; && [.F.] {fr} Supprimer du path
+	tlRelative,; && [.F.] {fr} Ajouter en relatif au dossier par défaut
+	tlPrepend && [.F.] {fr} Ajouter au début de Set('PATH')
 
-LOCAL llResult; && Le dossier existe et a été ajouté à Set('Path')
+LOCAL llResult; && {fr} Le dossier existe et a été ajouté à Set('Path')
 , llFolder, lcPath, laPath[1], lnPath
 
 llResult = Vartype(m.tcFolder) == 'C' AND Directory(m.tcFolder)
 IF m.llResult
 
-	* Tabuler les dossier dans le Set("Path")
+	* {fr} Tabuler les dossier dans le Set("Path")
 	lcPath = Set("Path")
 	ALines(laPath, m.lcPath, 1, ';')
 *!*			FOR lnPath = 1 TO Alen(laPath)
 *!*				laPath[m.lnPath] = Addbs(laPath[m.lnPath])
 *!*			NEXT
 
-	* Voir si le dossier demandé est dans le PATH
+	* {fr} Voir si le dossier demandé est dans le PATH
 	tcFolder = Addbs(Iif(Vartype(m.tlRelative) == 'L' AND m.tlRelative;
-			, '.\' + Sys(2014, m.tcFolder); && Minimum Path to current directory
+			, '.\' + Sys(2014, m.tcFolder); && {fr} Minimum Path to current directory
 			, FullPath(m.tcFolder);
 			))
 	llFolder = Ascan(laPath, m.tcFolder, 1, -1, 1, 6) > 0
@@ -342,7 +366,7 @@ IF m.llResult
 				m.lcPath + m.tcFolder + ';';
 			)
 		lnPath = Lenc(m.lcPath)
-		llResult = m.lnPath < 4096 && SET PATH is limited to a maximum of 4095 characters
+		llResult = m.lnPath < 4096 && {fr} SET PATH is limited to a maximum of 4095 characters
 		ASSERT m.llResult MESSAGE cAssertMsg(Textmerge(ICase(;
 			cLangUser() = 'fr',	[Path trop long (<<m.lnPath>> caractères > 4095 limite), impossible de le régler SET PATH TO <<cTronc(m.lcPath)>>],; && copy-paste this line to add another language support
 													[Path is too long (<<m.lnPath>> characters > 4095 limitation), cannot SET PATH TO <<cTronc(m.lcPath)>>];
@@ -350,7 +374,7 @@ IF m.llResult
 		IF m.llResult
 
 assert !'"' $ m.lcPath
-			SET PATH TO (Substr(m.lcPath, 1, Lenc(m.lcPath)-1)) && ôte le ';' final
+			SET PATH TO (Substr(m.lcPath, 1, Lenc(m.lcPath)-1)) && {fr} ôte le ';' final
 		ENDIF
 	ENDIF
 ENDIF
@@ -358,7 +382,7 @@ ENDIF
 RETURN m.llResult
 
 * --------------------------------------------------
-PROCEDURE PathAdd_test && teste PathAdd()
+PROCEDURE PathAdd_test && {fr} teste PathAdd()
 
 LOCAL loTest as abUnitTest OF abDev.prg
 loTest = NewObject('abUnitTest', 'abDev.prg')
@@ -369,13 +393,13 @@ loTest.Test(.F., 'toto')
 RETURN loTest.Result()
 
 * ========================================
-PROCEDURE PathAddSubFolders && Ajoute un dossier et ses sous-dossiers au Set('Path')
+PROCEDURE PathAddSubFolders && {fr} Ajoute un dossier et ses sous-dossiers au Set('Path')
 LPARAMETERS ;
-	tcFolder,; && Dossier @: Addbs(FullPath(m.tcFolder)) si existant
-	tnLevel,; && [1] Profondeur des sous-dossiers
-	tcFoldersExcl,; && [''] sous-dossiers à exclure ou masque des fichiers attendus dans les dossiers à inclure
-	tlRemove,; && [.F.] Supprimer du path
-	tlRelative && [.F.] Ajouter en relatif au dossier par défaut
+	tcFolder,; && {fr} Dossier @: Addbs(FullPath(m.tcFolder)) si existant
+	tnLevel,; && [1] {fr} Profondeur des sous-dossiers
+	tcFoldersExcl,; && [''] {fr} sous-dossiers à exclure ou masque des fichiers attendus dans les dossiers à inclure
+	tlRemove,; && [.F.] {fr} Supprimer du path
+	tlRelative && [.F.] {fr} Ajouter en relatif au dossier par défaut
 tnLevel = Evl(m.tnLevel, 1)
 
 LOCAL laFolder[1], lcFolder, llResult
@@ -395,17 +419,17 @@ ENDIF
 RETURN m.llResult
 
 * =================================
-FUNCTION abPathesAdd && Ajoute des dossiers à Set('Path') et rétablit Set('Path') au .Destroy()
+FUNCTION abPathesAdd && {fr} Ajoute des dossiers à Set('Path') et rétablit Set('Path') au .Destroy()
 LPARAMETERS ;
-	tvFolders,; && Dossier(s) - @ tableau (array) ou liste délimitée
-	tlRelative,; && [.F.] Ajouter en relatif au dossier par défaut
-	tlPrepend,; && [.F.] Ajouter au début de Set('PATH')
-	tcResult && [''] @ Erreur éventuelle
+	tvFolders,; && {fr} Dossier(s) - @ tableau (array) ou liste délimitée
+	tlRelative,; && [.F.] {fr} Ajouter en relatif au dossier par défaut
+	tlPrepend,; && [.F.] {fr} Ajouter au début de Set('PATH')
+	tcResult && @ [''] {fr} Erreur éventuelle
 
 RETURN CreateObject('abPathesAdd', @m.tvFolders, m.tlRelative, m.tlPrepend, @m.tcResult)
 
 * =================================
-DEFINE CLASS abPathesAdd AS Relation && Ajoute des dossiers à Set('Path') et rétablit Set('Path') au .Destroy()
+DEFINE CLASS abPathesAdd AS Relation && {fr} Ajoute des dossiers à Set('Path') et rétablit Set('Path') au .Destroy()
 
 HIDDEN cPath
 cPath = Set("Path")	
@@ -413,10 +437,10 @@ cPath = Set("Path")
 * ---------------------------------
 PROCEDURE Init
 LPARAMETERS ;
-	tvFolders,; && Dossier(s) - @ tableau (array) ou liste délimitée
-	tlRelative,; && [.F.] Ajouter en relatif au dossier par défaut
-	tlPrepend,; && [.F.] Ajouter au début de Set('PATH')
-	tcResult && [''] @ Erreur éventuelle
+	tvFolders,; && {fr} Dossier(s) - @ tableau (array) ou liste délimitée
+	tlRelative,; && [.F.] {fr} Ajouter en relatif au dossier par défaut
+	tlPrepend,; && [.F.] {fr} Ajouter au début de Set('PATH')
+	tcResult && @ [''] {fr} Erreur éventuelle
 
 LOCAL laFolder[1], llResult
 
@@ -437,7 +461,7 @@ IF m.llResult
 
 		RETURN PathesAdd(;
 				@m.laFolder;
-			,	; && m.tlRemove
+			,	; && {fr} m.tlRemove
 			,	m.tlRelative;
 			,	m.tlPrepend;
 			) > 0
@@ -456,7 +480,7 @@ PROCEDURE Destroy
 
 SET PATH TO (m.this.cPath)
 
-ENDDEFINE && CLASS abPathesAdd
+ENDDEFINE && {fr} CLASS abPathesAdd
 * =================================
 
 * =================================
@@ -465,11 +489,11 @@ DEFINE CLASS abPathAddSubFolders AS abPathesAdd OF ab.prg
 * ---------------------------------
 PROCEDURE Init
 LPARAMETERS ;
-	tcFolder,; && Dossier @: Addbs(FullPath(m.tcFolder)) si existant
-	tnLevel,; && [1] Profondeur des sous-dossiers
-	tcFoldersExcl,; && [''] sous-dossiers à exclure ou masque des fichiers attendus dans les dossiers à inclure ou masque des fichiers attendus dans les dossiers à inclure
-	tlRemove,; && [.F.] Supprimer du path
-	tlRelative && [.F.] Ajouter en relatif au dossier par défaut
+	tcFolder,; && {fr} Dossier @: Addbs(FullPath(m.tcFolder)) si existant
+	tnLevel,; && [1] {fr} Profondeur des sous-dossiers
+	tcFoldersExcl,; && [''] {fr} sous-dossiers à exclure ou masque des fichiers attendus dans les dossiers à inclure ou masque des fichiers attendus dans les dossiers à inclure
+	tlRemove,; && [.F.] {fr} Supprimer du path
+	tlRelative && [.F.] {fr} Ajouter en relatif au dossier par défaut
 
 RETURN PathAddSubFolders(;
 		m.tcFolder;
@@ -479,12 +503,12 @@ RETURN PathAddSubFolders(;
 	, m.tlRelative;
 	)
 
-ENDDEFINE && CLASS abPathAddSubFolders
+ENDDEFINE && {fr} CLASS abPathAddSubFolders
 * =================================
 
 * =================================
-FUNCTION nUnit	&& Unité d'un nombre
-LPARAMETERS tn && Nombre
+FUNCTION nUnit	&& {fr} Unité d'un nombre
+LPARAMETERS tn && {fr} Nombre
 RETURN Int(m.tn) - Int(m.tn/10) * 10
 
 * ---------------------------------
@@ -499,8 +523,8 @@ loTest.Test(2, 052.2)
 RETURN loTest.Result()
 
 * =================================
-FUNCTION nDiz	&& Dizaine d'un nombre
-LPARAMETERS tn && Nombre
+FUNCTION nDiz	&& {fr} Dizaine d'un nombre
+LPARAMETERS tn && {fr} Nombre
 RETURN nUnit(Int(m.tn/10))
 
 * ---------------------------------
@@ -516,8 +540,8 @@ loTest.Test(5, 252)
 RETURN loTest.Result()
 
 * =================================
-FUNCTION nCent && Centaine d'un nombre
-LPARAMETERS tn && Nombre
+FUNCTION nCent && {fr} Centaine d'un nombre
+LPARAMETERS tn && {fr} Nombre
 RETURN nUnit(Int(m.tn/100))
 
 * ---------------------------------
@@ -534,55 +558,55 @@ loTest.Test(2, 5252)
 RETURN loTest.Result()
 
 * =================================
-FUNCTION nR_nG_nB && Composants R G et B d'une couleur (merci Mike Gagnon)
+FUNCTION nR_nG_nB && {fr} Composants R G et B d'une couleur (merci Mike Gagnon)
 LPARAMETERS ;
-	nRGB,; && Valeur RGB
-	nR,; && @ Composante Rouge
-	nG,; && @ Composante Verte
-	nB && @ Composante Bleue
+	nRGB,; && {fr} Valeur RGB
+	nR,; && @ {fr} Composante Rouge
+	nG,; && @ {fr} Composante Verte
+	nB && @ {fr} Composante Bleue
 
 nR = Bitand(0xff, m.nRGB)
 nG = Bitand(0xff, Bitrshift(m.nRGB, 8))
 nB = Bitand(0xff, Bitrshift(m.nRGB, 16))
 
 * =================================
-FUNCTION cRGB && Composants "R,G,B" d'une couleur
-LPARAMETERS nRGB && Valeur RGB
+FUNCTION cRGB && {fr} Composants "R,G,B" d'une couleur
+LPARAMETERS nRGB && {fr} Valeur RGB
 
-LOCAL nR,; && @ Composante Rouge
-	nG,; && @ Composante Verte
-	nB && @ Composante Bleue
+LOCAL nR,; && @ {fr} Composante Rouge
+	nG,; && @ {fr} Composante Verte
+	nB && @ {fr} Composante Bleue
 
 nR_nG_nB(m.nRGB, @m.nR, @m.nG, @m.nB)
 
 RETURN cWords(',', lTrim(Str(m.nR)), lTrim(Str(m.nG)), lTrim(Str(m.nB)))
 
 * =================================
-FUNCTION cRGBhex && RGB en #hex
-LPARAMETERS nRGB && Valeur RGB
+FUNCTION cRGBhex && {fr} RGB en #hex
+LPARAMETERS nRGB && {fr} Valeur RGB
 return '#' + Right(Transform(m.nRGB, '@0'), 6)
 
 * =================================
-FUNCTION cRGBhex_ && RGB en #hex
+FUNCTION cRGBhex_ && {fr} RGB en #hex
 lparameters ;
-	nR,; && @ Composante Rouge
-	nG,; && @ Composante Verte
-	nB && @ Composante Bleue
+	nR,; && @ {fr} Composante Rouge
+	nG,; && @ {fr} Composante Verte
+	nB && @ {fr} Composante Bleue
 
 return cRGBhex(Rgb(m.nR, m.nG, m.nB))
 
 ******************************************************************************************
-FUNCTION ImgSpecs && Propriétés d'une image
+FUNCTION ImgSpecs && {fr} Propriétés d'une image
 LPARAMETERS ;
-	tcImgAddr,; && Adresse de l'image
-	tnXmm,; && @ Largeur en mm
-	tnYmm,; && @ Hauteur en mm
-	tnXPix,; && @ Largeur en pixels
-	tnYPix,; && @ Hauteur en pixels
-	tnXRes,; && @ Résolution X en pixels
-	tnYRes,; && @ Résolution Y en pixels
-	tnImgType,; && @ Type de l'image - 0: inconnu | 1: trait ou CMJN | 2: NG 4 bits | 3: NG 8 bits | 4: Palette 4 bits | 5: Palette 8 bits | 6: 24 bits RGB | 7:24 bits BGR
-	tcImgType && @ Type de l'image en clair
+	tcImgAddr,; && {fr} Adresse de l'image
+	tnXmm,; && @ {fr} Largeur en mm
+	tnYmm,; && @ {fr} Hauteur en mm
+	tnXPix,; && @ {fr} Largeur en pixels
+	tnYPix,; && @ {fr} Hauteur en pixels
+	tnXRes,; && @ {fr} Résolution X en pixels
+	tnYRes,; && @ {fr} Résolution Y en pixels
+	tnImgType,; && @ {fr} Type de l'image - 0: inconnu | 1: trait ou CMJN | 2: NG 4 bits | 3: NG 8 bits | 4: Palette 4 bits | 5: Palette 8 bits | 6: 24 bits RGB | 7:24 bits BGR
+	tcImgType && @ {fr} Type de l'image en clair
 
 RETURN .T.;
 	AND lFile(m.tcImgAddr);
@@ -592,27 +616,27 @@ RETURN .T.;
 		)
 
 ******************************************************************************************
-FUNCTION ImgSpecsKodak && Propriétés de l'image avec le contrôle ActiveX Imaging.AdminCtrl.1
+FUNCTION ImgSpecsKodak && {fr} Propriétés de l'image avec le contrôle ActiveX Imaging.AdminCtrl.1
 LPARAMETERS ;
-	tcImgAddr,; && Adresse de l'image
-	tnXmm,; && @ Largeur en mm
-	tnYmm,; && @ Hauteur en mm
-	tnXPix,; && @ Largeur en pixels
-	tnYPix,; && @ Hauteur en pixels
-	tnXRes,; && @ Résolution X en pixels
-	tnYRes,; && @ Résolution Y en pixels
-	tnImgType,; && @ Type de l'image - 0: inconnu | 1: trait ou CMJN | 2: NG 4 bits | 3: NG 8 bits | 4: Palette 4 bits | 5: Palette 8 bits | 6: 24 bits RGB | 7:24 bits BGR
-	tcImgType && @ Type de l'image en clair
+	tcImgAddr,; && {fr} Adresse de l'image
+	tnXmm,; && @ {fr} Largeur en mm
+	tnYmm,; && @ {fr} Hauteur en mm
+	tnXPix,; && @ {fr} Largeur en pixels
+	tnYPix,; && @ {fr} Hauteur en pixels
+	tnXRes,; && @ {fr} Résolution X en pixels
+	tnYRes,; && @ {fr} Résolution Y en pixels
+	tnImgType,; && @ {fr} Type de l'image - 0: inconnu | 1: trait ou CMJN | 2: NG 4 bits | 3: NG 8 bits | 4: Palette 4 bits | 5: Palette 8 bits | 6: 24 bits RGB | 7:24 bits BGR
+	tcImgType && @ {fr} Type de l'image en clair
 
 LOCAL lcExt, llResult
 
-* Si l'extension de l'image est valide
+* {fr} Si l'extension de l'image est valide
 lcExt = Upper(JustExt(m.tcImgAddr))
 llResult = Len(m.lcExt) = 3 AND m.lcExt $ 'BMP,JPG,JPE,TIF,PCX,GIF'
 ASSERT m.llResult MESSAGE Program() + " - Extension non supportée : " + cLitteral(m.lcExt)
 IF m.llResult
 
-	* Si le contrôle Activex peut être instancié (dans un formulaire car impossible d'instancier dans une variable)
+	* {fr} Si le contrôle Activex peut être instancié (dans un formulaire car impossible d'instancier dans une variable)
 	LOCAL loFooForm
 	loFooForm = CreateObject('Form')
 	llResult = loFooForm.addObject('oleFooCtrl', 'oleControl','Imaging.AdminCtrl.1')
@@ -620,7 +644,7 @@ IF m.llResult
 	IF m.llResult
 		WITH m.loFooForm.oleFooCtrl as Imaging.AdminCtrl.1
 
-			* Si l'image peut être lue
+			* {fr} Si l'image peut être lue
 			LOCAL lcError
 			lcError = On('ERROR')
 			ON ERROR m.llResult = .F.
@@ -629,7 +653,7 @@ IF m.llResult
 			ASSERT m.llResult MESSAGE Program() + " - Impossible d'ouvrir l'image " + cLitteral(m.tcImgAddr)
 			IF m.llResult
 
-				* Si les propriétés de l'image sont valides (retour de l'activeX)
+				* {fr} Si les propriétés de l'image sont valides (retour de l'activeX)
 				tnXPix = .ImageWidth
 				tnYPix = .ImageHeight
 				llResult = Vartype(m.tnXPix) == 'N' AND Vartype(m.tnYPix) == 'N' AND m.tnXPix > 0 AND m.tnYPix > 0
@@ -651,8 +675,8 @@ ENDIF
 RETURN m.llResult
 
 ******************************************************************************************
-FUNCTION cImgTypeKodak && Type d'image Kodak en clair
-LPARAMETERS tnImgType && Code Type d'image Kodak
+FUNCTION cImgTypeKodak && {fr} Type d'image Kodak en clair
+LPARAMETERS tnImgType && {fr} Code Type d'image Kodak
 LOCAL lcResult
 lcResult = "Type d'image non numérique"
 
@@ -682,21 +706,21 @@ ENDIF
 RETURN m.lcResult
 
 ******************************************************************************************
-FUNCTION ImgSpecsGDIPlus && Propriétés de l'image avec GDI+
+FUNCTION ImgSpecsGDIPlus && {fr} Propriétés de l'image avec GDI+
 LPARAMETERS ;
-	tcImgAddr,; && Adresse de l'image
-	tnXmm,; && @ Largeur en mm
-	tnYmm,; && @ Hauteur en mm
-	tnXPix,; && @ Largeur en pixels
-	tnYPix,; && @ Hauteur en pixels
-	tnXRes,; && @ Résolution X en pixels
-	tnYRes,; && @ Résolution Y en pixels
-	tnImgType,; && @ Type de l'image - 0: inconnu | 1: trait ou CMJN | 2: NG 4 bits | 3: NG 8 bits | 4: Palette 4 bits | 5: Palette 8 bits | 6: 24 bits RGB | 7:24 bits BGR
-	tcImgType && @ Type de l'image en clair
+	tcImgAddr,; && {fr} Adresse de l'image
+	tnXmm,; && @ {fr} Largeur en mm
+	tnYmm,; && @ {fr} Hauteur en mm
+	tnXPix,; && @ {fr} Largeur en pixels
+	tnYPix,; && @ {fr} Hauteur en pixels
+	tnXRes,; && @ {fr} Résolution X en pixels
+	tnYRes,; && @ {fr} Résolution Y en pixels
+	tnImgType,; && @ {fr} Type de l'image - 0: inconnu | 1: trait ou CMJN | 2: NG 4 bits | 3: NG 8 bits | 4: Palette 4 bits | 5: Palette 8 bits | 6: 24 bits RGB | 7:24 bits BGR
+	tcImgType && @ {fr} Type de l'image en clair
 
 LOCAL loGDI AS GPimage OF _GDIplus.vcx, llResult
 
-* Si le fichier existe
+* {fr} Si le fichier existe
 llResult = Vartype(m.tcImgAddr) == 'C' AND File(m.tcImgAddr)
 ASSERT m.llResult MESSAGE cAssertMsg(Textmerge(ICase(;
 	cLangUser() = 'fr',	[L'image '<<m.tcImgAddr>>' est introuvable],; && copy-paste this line to add another language support
@@ -704,7 +728,7 @@ ASSERT m.llResult MESSAGE cAssertMsg(Textmerge(ICase(;
 )))
 IF m.llResult
 
-	* Si le contrôle GDI+ peut être instancié
+	* {fr} Si le contrôle GDI+ peut être instancié
 	loGDI = NewObject('GPimage', '_GDIplus.vcx')
 	llResult = Vartype(m.loGDI) == 'O'
 	ASSERT m.llResult MESSAGE cAssertMsg(Textmerge(ICase(;
@@ -715,7 +739,7 @@ IF m.llResult
 	IF m.llResult
 		WITH loGDI as GPimage OF _GDIplus.vcx
 
-			* Si l'image peut être ouverte
+			* {fr} Si l'image peut être ouverte
 			tcImgAddr = cFileCased(m.tcImgAddr, .T.)
 			llResult = .CreateFromFile(m.tcImgAddr)
 			ASSERT m.llResult MESSAGE cAssertMsg(Textmerge(ICase(;
@@ -724,7 +748,7 @@ IF m.llResult
 			)))
 			IF m.llResult
 
-				* Si les propriétés de l'image sont valides
+				* {fr} Si les propriétés de l'image sont valides
 				tnXPix = .ImageWidth
 				tnYPix = .ImageHeight
 				llResult = Vartype(m.tnXPix) == 'N' AND Vartype(m.tnYPix) == 'N' AND m.tnXPix > 0 AND m.tnYPix > 0
@@ -749,8 +773,8 @@ ENDIF
 RETURN m.llResult
 
 ******************************************************************************************
-FUNCTION cImgTypeGDIPlus && Type d'image GDI+ en clair
-LPARAMETERS tnImgType && Code Type d'image GDI+
+FUNCTION cImgTypeGDIPlus && {fr} Type d'image GDI+ en clair
+LPARAMETERS tnImgType && {fr} Code Type d'image GDI+
 
 LOCAL lcResult
 lcResult = "Type d'image non numérique"
@@ -782,15 +806,15 @@ ENDIF
 RETURN m.lcResult
 
 ******************************************************************************************
-function ImgCropToRatio && adapted from http://weblogs.foxite.com/vfpimaging/2006/05/25/crop-images-with-gdi/
+function ImgCropToRatio && {en} adapted from http://weblogs.foxite.com/vfpimaging/2006/05/25/crop-images-with-gdi/
 lparameters ;
-  result; && @ result
+  result; && @ {en} result
 ,	cImgSrce;
 , cImgDest; && @ 
-, tnWH && [1] Width / Height ratio
+, tnWH && [1] {en} Width / Height ratio
 
 cImgDest = ForceExt(Evl(m.cImgDest, m.cImgSrce), 'png')
-tnWH = Evl(m.tnWH, 1) && square
+tnWH = Evl(m.tnWH, 1) && {fr} square
 
 local success as Boolean;
 , oImage as GPimage of _GDIplus.vcx;
@@ -812,7 +836,7 @@ if m.success
 	nWidth = m.oImage.imageWidth
 	nHeight = m.oImage.imageHeight
 
-	lW = m.nWidth / m.nHeight > m.tnWH && width must be adjusted
+	lW = m.nWidth / m.nHeight > m.tnWH && {fr} width must be adjusted
 
 	nWidth = Iif(m.lW;
 		, m.nHeight * m.tnWH;
@@ -832,7 +856,7 @@ if m.success
 		, (m.oImage.ImageHeight - m.nHeight) / 2;
 		)
 
-	* gpstatus wingdipapi GdipCloneBitmapAreaI
+	* {fr} gpstatus wingdipapi GdipCloneBitmapAreaI
 	* (int x, int y, int width, int height, pixelFormat format, GPbitmap *srcbitmap, GPbitmap **dstbitmap)
 	declare long GdipCloneBitmapAreaI in GDIplus.dll ;
 	   long x, long y, long nwidth, long nheight, ;
@@ -854,14 +878,14 @@ return m.success
 endfunc
 
 ******************************************************************************************
-function ImgResize && adapted from http://weblogs.foxite.com/vfpimaging/2006/02/06/resize-images-with-vfp9-and-gdi/
+function ImgResize && {en} adapted from http://weblogs.foxite.com/vfpimaging/2006/02/06/resize-images-with-vfp9-and-gdi/
 lparameters ;
-  result; && @ result
+  result; && @ {en} result
 ,	cImgSrce;
 , cImgDest; && @ [overwrite cImgSrce]
-, tnWidth; && pixels
-, tnHeight; && [isometric] pixels
-, tlBox; && [.F.] image should fit inside a box of tnWidth x tnHeight
+, tnWidth; && {fr} pixels
+, tnHeight; && [isometric] {fr} pixels
+, tlBox; && [.F.] {en} image should fit inside a box of tnWidth x tnHeight
 
 cImgSrce = Evl(m.cImgSrce, '')
 
@@ -879,7 +903,7 @@ success = .T.;
  and (m.oImage.CreateFromFile(m.cImgSrce) or cResultAdd(@m.result, Textmerge([could not open image '<<m.cImgSrce>>'])));
  and varStore(@m.cImgDest, Evl(m.cImgDest, m.cImgSrce));
  and .T.
-if m.success && and m.tnWidth < m.oImage.ImageWidth
+if m.success && {fr} and m.tnWidth < m.oImage.ImageWidth
 	
 	if Vartype(m.tlBox) == 'L' and m.tlBox
 		
@@ -918,13 +942,13 @@ return success
 endfunc
 
 ******************************************************************************************
-function ImgResizeBox && Resize an image so that it fits in a box
+function ImgResizeBox && {en} Resize an image so that it fits in a box
 lparameters ;
-  result; && @ result
-,	cImgSrce; && source image
-, cImgDest; && @ [overwrite cImgSrce] destination image
-, tnWidth; && pixels max
-, tnHeight; && pixels max
+  result; && @ {fr} result
+,	cImgSrce; && {en} source image
+, cImgDest; && @ [overwrite cImgSrce] {en} destination image
+, tnWidth; && {fr} pixels max
+, tnHeight; && {fr} pixels max
 
 return ImgResize(;
 	  @m.result;
@@ -940,25 +964,25 @@ endfunc
 
 
 * -------------------------------------------------------------
-FUNCTION nMMofPX	&& Dimension mm papier de pixels écran
-LPARAMETERS tnPix 	&& Nombre de pixels écran
-
+FUNCTION nMMofPX && {fr} Dimension mm papier de pixels écran
+LPARAMETERS tnPix && {fr} Nombre de pixels écran
 RETURN Iif(Vartype(m.tnPix)=='N' AND m.tnPix > 0;
-,	m.tnPix / 96 * 25.4; && 96 pixels/pouce (standard Windows) et 25.4 mm/pouce
-,	0)
+	,	m.tnPix / 96 * 25.4; && 96 pixels/pouce (standard Windows) et 25.4 mm/pouce
+	,	0;
+	)
 
 * -------------------------------------------------------------
-FUNCTION nPXofMM	&& Pixels écran de mm papier
-LPARAMETERS tnMM 	&& Dimension en mm papier
-
+FUNCTION nPXofMM && {fr} Pixels écran de mm papier
+LPARAMETERS tnMM && {fr} Dimension en mm papier
 RETURN Int(Iif(Vartype(m.tnMM)== 'N' AND m.tnMM > 0;
-,	m.tnMM / 25.4 * 96; 	&& 96 pixels/pouce (standard Windows) et 25.4 mm/pouce
-,	0))
+	,	m.tnMM / 25.4 * 96; && 96 pixels/pouce (standard Windows) et 25.4 mm/pouce
+	,	0;
+	))
 
 * -------------------------------------------------------------
-FUNCTION nPXofPt && Pixels écran de point CSS
-LPARAMETERS tnPt && Dimension en points
-
-RETURN Iif(Vartype(m.tnPt)== 'N' AND m.tnPt > 0;
-,	Round(m.tnPt / 72 * 90, 1); && 72 pt /pouce, 96 pixels/pouce (standard Windows) ramené à 90 pour ajuster
-, 0)
+FUNCTION nPXofPt && {fr} Pixels écran de point CSS
+LPARAMETERS tnPt && {fr} Dimension en points
+RETURN Int(Iif(Vartype(m.tnPt)== 'N' AND m.tnPt > 0;
+	,	Round(m.tnPt / 72 * 90, 1); && 72 pt /pouce, 96 pixels/pouce (standard Windows) ramené à 90 pour ajuster
+	, 0;
+	))

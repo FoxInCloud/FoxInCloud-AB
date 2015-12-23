@@ -1,0 +1,87 @@
+ 1-abLocalized
+ 2-abRegExp
+ 3-abRegExp.clear
+ 4-abRegExp.cPatterns
+ 5-abRegExp.DebugDisplay
+ 6-abRegExp.Execute
+ 7-abRegExp.init
+ 8-abRegExp.replace
+ 9-abRegExp.setup
+10-abRegExp.Test
+11-addFS
+12-anWordIn
+13-aOperands
+14-c2Words
+15-cC
+16-cChainFract
+17-cChr
+18-cComparable
+19-cCR2to
+20-cCRDel
+21-cCRLF2fix
+22-cCRLFfix
+23-cCRSpace
+24-cCRto
+25-cEscaped
+26-cEuroANSI
+27-cFigures
+28-cFirstAlpha
+29-cFirstProper
+30-chunked
+31-cJustified
+32-cL
+33-cListEdit
+34-cListOfArray
+35-cListOfArrayC
+36-cLitteral
+37-cLitteralDTStrict
+38-cLitteralJS
+39-cLitteralNum
+40-cLitterals
+41-cLJS
+42-cOfLitteral
+43-cOuiNon
+44-cParenth
+45-cPrintable
+46-cRandPW
+47-cRefAppend
+48-cRepCharDel
+49-cRepCharsDel
+50-cSepGrpsXFigs
+51-cSpaceAround
+52-cSpaceAroundGroup
+53-cStringsMasked
+54-cTagsStripped
+55-cTagStripped
+56-cTronc
+57-cUIDRand
+58-cUnescaped
+59-cVFPNameSubStr
+60-cVFPOpSepCarsList
+61-cWords
+62-cy
+63-cYes
+64-cYesNo
+65-lBotSpider
+66-lDigits
+67-lEmailAddrOK
+68-lExpr
+69-lExpression
+70-lInList
+71-lNumber
+72-lNumChar
+73-lWordIn
+74-lWordsIn
+75-nAtDigits
+76-nAtSep
+77-nChainFract
+78-nChainFractLines
+79-nLRAtSep
+80-nRAtSep
+81-nWidthMMtext
+82-nWidthPXText
+83-ParmsLit
+84-srceCodeWindow
+85-srceCodeWindow
+86-test1.init
+87-uEmpty

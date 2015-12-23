@@ -1,19 +1,17 @@
-* abArray.prg
+* {fr} abArray.prg
 * =====================================================
 * (c) Abaque SARL, 66 rue Michel Ange - 75016 Paris - France
 * contact@FoxInCloud.com - http://foxincloud.com/ - +33 9 53 41 90 90
-* -----------------------------------------------------
-* Ce logiciel est distribué sous GNU General Public License, tel quel, sans aucune garantie
-* Il peut être utilisé et/ou redistribué sans restriction
-* Toute modification doit être reversée à la communauté
-* La présente mention doit être intégralement reproduite
-&& dans toute copie même partielle
-* -----------------------------------------------------
-* This software is distributed under the terms of GNU General Public License, AS IS, without any warranty
-* It may be used and/or distributed without restriction
-* Any substantial improvement must be given for free to the community
-* This permission notice shall be entirely included in all copies
-&& or substantial portions of the Software
+* {fr} -----------------------------------------------------
+* {fr} Ce logiciel est distribué sous GNU General Public License, tel quel, sans aucune garantie
+* {fr} Il peut être utilisé et/ou redistribué sans restriction
+* {fr} Toute modification doit être reversée à la communauté
+* {fr} La présente mention doit être intégralement reproduite dans toute copie même partielle
+* {en} -----------------------------------------------------
+* {en} This software is distributed under the terms of GNU General Public License, AS IS, without any warranty
+* {en} It can be used and/or distributed without restriction
+* {en} Any modification or improvement must be given for free to the community
+* {en} This permission notice shall be entirely included in all copies or substantial portions of the Software
 * =====================================================
 
 #INCLUDE AB.H
@@ -26,9 +24,9 @@ lparameters ;
   taResult; && @ {fr} Résultat {en} Result
 , tcString && {fr} Chaîne à splitter {en} String to be splitted
 
-external array taResult && pour le gestionnaire de projet
+external array taResult && {fr} pour le gestionnaire de projet
 
-local lnResult; && nombre de lignes du Résultat
+local lnResult; && {fr} nombre de lignes du Résultat
 , llResult;
 , lnChar
 
@@ -56,9 +54,9 @@ return m.lnResult
 * ===================================================================
 function aAppend && {fr} Ajoute les lignes d'un tableau à un autre {en} Appends line from an array to another
 lparameters ;
-	taDest,; && @ {fr} Résultat {en} Result
+	taDest,; && @ {fr} Résultat {en} Result array
 	taSrce,; && @ {fr} Source des lignes ajoutées à taDest {en} array to append to taDest
-	tlUnique,; && [.F.] {fr} ne pas ajouter les lignes existantes {en} don't append lines that already exists in the target
+	tlUnique,; && [.F.] {fr} ne pas ajouter les lignes existantes {en} don't append lines that already exists in the result array
 	tlPrepend && [.F.] {fr} ajouter en début de tableau {en} append at the beginning of the array
 
 external array taDest, taSrce && {fr} pour le gestionnaire de projet {en} for the project manager
@@ -77,7 +75,7 @@ lnResult = 0
 llResult = type('taDest',1) == 'A' and type('taSrce', 1) == 'A'
 assert m.llResult message cAssertMsg(icase(;
 	cLangUser() = 'fr',	'Les deux paramètres taDest et taSrce doivent être des tableaux',; && copy-paste this line to add another language support
-						'The type of parameters taDest and taSrce must be array'; && Default: English
+											'The type of parameters taDest and taSrce must be array'; && Default: English
 	))
 if m.llResult
 
@@ -162,12 +160,12 @@ taTest1[3,2] = "H"
 taTest1[3,3] = "I"
 
 * -----------------------------------------------------------------
-procedure aAppend_Test && Teste aAppend()
+procedure aAppend_Test && {fr} Teste aAppend()
 
 local loUnitTest as abUnitTest of abDev.prg
 loUnitTest = newobject('abUnitTest', 'abDev.prg')
 
-public array laTest[3, 3], laTest1[3, 3] && PUBLIC pour l'examiner après test
+public array laTest[3, 3], laTest1[3, 3] && {fr} PUBLIC pour l'examiner après test
 
 loUnitTest.Test(6, @m.laTest, @m.laTest1)
 loUnitTest.assert(6, alen(laTest, 1))
@@ -210,7 +208,7 @@ endif
 return m.lnResult
 
 * -------------------------------------------------------------
-procedure aSubstract_Test && Teste aSubstract()
+procedure aSubstract_Test && {fr} Teste aSubstract()
 
 local loUnitTest as abUnitTest of abDev.prg, laDest[1], laSrce[1]
 
@@ -236,7 +234,7 @@ lparameters ;
 
 external array taDest, taSrce
 
-local lnResult as integer; && dimension du tableau résultat
+local lnResult as integer; && {fr} dimension du tableau résultat
 , llResult as Boolean;
 , liDest, luDest;
 , lnSrce, liSrce;
@@ -260,7 +258,7 @@ if m.llResult
 	lnSrce = alen(taSrce)
 	liCompare = 0;
 		+ iif(lTrue(m.tlCase), 0, 1);
-		+ iif(lTrue(m.tlExactOff), 0, 2) + 4 && override SET EXACT setting
+		+ iif(lTrue(m.tlExactOff), 0, 2) + 4 && {fr} override SET EXACT setting
 	tlExclude = lTrue(m.tlExclude)
 
 	for liDest = m.lnResult to 1 step -1
@@ -284,7 +282,7 @@ endif
 return m.lnResult
 
 * -------------------------------------------------------------
-procedure aFilter_Test && Teste aFilter()
+procedure aFilter_Test && {fr} Teste aFilter()
 
 local loUnitTest as abUnitTest of abDev.prg, laDest[1], laSrce[1]
 
@@ -314,7 +312,7 @@ lparameters ta && @ {fr} Tableau à vérifier {en} array to verify
 return not type('ta', 1) == 'A' or ;
 	alen(ta) = 1 and vartype(ta[1]) == 'L' and not ta[1]
 
-external array ta && après RETURN pour éviter exécution
+external array ta && {fr} après RETURN pour éviter exécution
 
 * -------------------------------------------------------------
 procedure laEmpty_test
@@ -337,7 +335,7 @@ external array taResult
 local llResult, lnResult && {fr} par analogie avec aDel(), 1 si la ligne est bien supprimée, 0 sinon {en} like aDel(), 1 if the line is suppressed, otherwise 0
 
 lnResult = 0
-llResult = not type('taResult[1,2]') == 'U' ; && au moins 2 colonnes
+llResult = not type('taResult[1,2]') == 'U' ; && {fr} au moins 2 colonnes
  and vartype(m.tnRow) == 'N' ;
  and m.tnRow > 0 ;
  and m.tnRow <= alen(taResult, 1)
@@ -347,10 +345,10 @@ assert m.llResult message cAssertMsg(icase(;
 	))
 if m.llResult
 
-	* Effacer la ligne
+	* {fr} Effacer la ligne
 	adel(taResult, m.tnRow)
 
-	* Redimensionner
+	* {fr} Redimensionner
 	lnResult = alen(taResult, 1) - 1
 	if m.lnResult = 0
 		aClear(@m.taResult)
@@ -409,7 +407,7 @@ endif
 return m.llResult
 
 * -------------------------------------------------------------
-procedure aRowMove_test && Teste aRowMove()
+procedure aRowMove_test && {fr} Teste aRowMove()
 
 local loUnitTest as abUnitTest of abDev.prg, laResult[1]
 
@@ -438,8 +436,8 @@ loUnitTest.assert('11', m.laResult[3, 1])
 return loUnitTest.Result()
 
 	* -------------------------------------------------------------
-	function aRowMove_test_a1 && tableau de test à 1 dimension
-	lparameters laResult && @ tableau
+	function aRowMove_test_a1 && {fr} tableau de test à 1 dimension
+	lparameters laResult && @ {fr} tableau
 	external array laResult
 
 	dimension laResult[6]
@@ -451,8 +449,8 @@ return loUnitTest.Result()
 	laResult[6] = '6'
 
 	* -------------------------------------------------------------
-	function aRowMove_test_a2 && tableau de test à 2 dimensions
-	lparameters laResult && @ tableau
+	function aRowMove_test_a2 && {fr} tableau de test à 2 dimensions
+	lparameters laResult && @ {fr} tableau
 
 	local lcResult
 	text TO lcResult NOSHOW PRETEXT 1+2
@@ -476,7 +474,7 @@ local lnRow, liRow, lnCol, llResult, lnResult && {fr} par analogie avec aDel(), 
 
 lnResult = 0
 llResult = .t.;
-	 and not type('taResult[1,2]') == 'U' ; && au moins 2 colonnes
+	 and not type('taResult[1,2]') == 'U' ; && {fr} au moins 2 colonnes
 	 and vartype(m.tnCol) == 'N' ;
 	 and between(m.tnCol, 1, alen(taResult, 2))
 assert m.llResult message cAssertMsg(icase(;
@@ -485,12 +483,12 @@ assert m.llResult message cAssertMsg(icase(;
 	))
 if m.llResult
 
-	* Convertir le tableau en mono-dimensionnel
+	* {fr} Convertir le tableau en mono-dimensionnel
 	lnRow = alen(taResult, 1)
 	lnCol = alen(taResult, 2)
 	dimension taResult[m.lnRow * m.lnCol]
 
-	* Supprimer physiquement les cellules de la colonne à enlever
+	* {fr} Supprimer physiquement les cellules de la colonne à enlever
 	for m.liRow = m.lnRow to 1 step -1
 		lnResult = adel(taResult, (m.liRow - 1) * m.lnCol + m.tnCol)
 		if m.lnResult = 0
@@ -498,7 +496,7 @@ if m.llResult
 		endif
 	endfor
 
- 	* Rétablir le tableau en 2 dimensions
+ 	* {fr} Rétablir le tableau en 2 dimensions
 	if m.lnResult > 0
 		dimension taResult[m.lnRow, m.lnCol - 1]
 	endif
@@ -507,18 +505,56 @@ endif
 return m.lnResult
 
 * --------------------------------------
+procedure aColDel_Test
+
+local loUnitTest as abUnitTest of abDev.prg, laTest[1]
+loUnitTest = newobject('abUnitTest', 'abDev.prg')
+
+* {fr} Supprimer la colonne de gauche
+aColDel_Test_a(@m.laTest)
+loUnitTest.Test(1, @m.laTest, 1)
+loUnitTest.assert(alen(laTest, 2), 3)
+loUnitTest.assert(laTest[1,1], 2)
+loUnitTest.assert(laTest[2,1], "B")
+loUnitTest.assert(laTest[1,2], 3)
+loUnitTest.assert(laTest[2,2], "C")
+
+* {fr} Supprimer une colonne interne
+aColDel_Test_a(@m.laTest)
+loUnitTest.Test(1, @m.laTest, 2)
+loUnitTest.assert(alen(laTest, 2), 3)
+loUnitTest.assert(laTest[1,1], 1)
+loUnitTest.assert(laTest[2,1], "A")
+loUnitTest.assert(laTest[1,2], 3)
+loUnitTest.assert(laTest[2,2], "C")
+
+* {fr} Supprimer la colonne de droite
+aColDel_Test_a(@m.laTest)
+loUnitTest.Test(1, @m.laTest, 4)
+loUnitTest.assert(alen(laTest, 2), 3)
+loUnitTest.assert(laTest[1,1], 1)
+loUnitTest.assert(laTest[2,1], "A")
+loUnitTest.assert(laTest[1,2], 2)
+loUnitTest.assert(laTest[2,2], "B")
+loUnitTest.assert(laTest[1,3], 3)
+loUnitTest.assert(laTest[2,3], "C")
+
+return loUnitTest.Result()
+
+* --------------------------------------
 procedure aColDel_Test_a(laTest)
 
 dimension laTest[2,4]
-laTest = .f.
+
 laTest[1,1] = 1
-laTest[1,2] = 2
-laTest[1,3] = 3
-laTest[1,4] = 4
+	laTest[1,2] = 2
+		laTest[1,3] = 3
+			laTest[1,4] = 4
+
 laTest[2,1] = "A"
-laTest[2,2] = "B"
-laTest[2,3] = "C"
-laTest[2,4] = "D"
+	laTest[2,2] = "B"
+		laTest[2,3] = "C"
+			laTest[2,4] = "D"
 
 * --------------------------------------
 procedure aColDel_Test_aa(laTest)
@@ -533,43 +569,6 @@ ENDTEXT
 
 return aLinesCols(@m.laTest, m.lcTest, TABUL, 'ILCD')
 
-* --------------------------------------
-procedure aColDel_Test
-
-local loUnitTest as abUnitTest of abDev.prg, laTest[1]
-loUnitTest = newobject('abUnitTest', 'abDev.prg')
-
-* Supprimer la colonne de gauche
-aColDel_Test_a(@m.laTest)
-loUnitTest.Test(1, @m.laTest, 1)
-loUnitTest.assert(alen(laTest, 2), 3)
-loUnitTest.assert(laTest[1,1], 2)
-loUnitTest.assert(laTest[2,1], "B")
-loUnitTest.assert(laTest[1,2], 3)
-loUnitTest.assert(laTest[2,2], "C")
-
-* Supprimer une colonne interne
-aColDel_Test_a(@m.laTest)
-loUnitTest.Test(1, @m.laTest, 2)
-loUnitTest.assert(alen(laTest, 2), 3)
-loUnitTest.assert(laTest[1,1], 1)
-loUnitTest.assert(laTest[2,1], "A")
-loUnitTest.assert(laTest[1,2], 3)
-loUnitTest.assert(laTest[2,2], "C")
-
-* Supprimer la colonne de droite
-aColDel_Test_a(@m.laTest)
-loUnitTest.Test(1, @m.laTest, 4)
-loUnitTest.assert(alen(laTest, 2), 3)
-loUnitTest.assert(laTest[1,1], 1)
-loUnitTest.assert(laTest[2,1], "A")
-loUnitTest.assert(laTest[1,2], 2)
-loUnitTest.assert(laTest[2,2], "B")
-loUnitTest.assert(laTest[1,3], 3)
-loUnitTest.assert(laTest[2,3], "C")
-
-return loUnitTest.Result()
-
 * ===================================================================
 function aColsDel && {fr} Supprime physiquement plusieurs colonnes d'un tableau {en} remove many columns from an array
 lparameters ;
@@ -583,7 +582,7 @@ local llResult, lnResult; && {fr} analogue à aDel() : 1 si les colonnes sont bie
 
 lnResult = 0
 
-* Si les paramètres requis sont valides
+* {fr} Si les paramètres requis sont valides
 llResult = not type('taResult[1,2]') == 'U' ; && {fr} au moins 2 colonnes {en} at least two columns
  and vartype(m.tnCol1) == 'N' ;
  and m.tnCol1 > 0 ;
@@ -594,12 +593,12 @@ assert m.llResult message cAssertMsg(icase(;
 	))
 if m.llResult
 
-	* Régler les paramètres optionnels à leur valeur par défaut
+	* {fr} Régler les paramètres optionnels à leur valeur par défaut
 	lnCols = alen(taResult, 2)
 	lnCol2 = iif(vartype(m.tnCol2) == 'N' and m.tnCol2 <= m.lnCols, m.tnCol2, m.lnCols)
 	lnCol2 = max(m.lnCol2, m.tnCol1)
 
-	* Si la suppression des colonnes est possible
+	* {fr} Si la suppression des colonnes est possible
 	llResult = not (m.tnCol1 = 1 and m.lnCol2 = m.lnCols)
 	assert m.llResult message cAssertMsg(icase(;
 	cLangUser() = 'fr',	"Impossible de supprimer toutes les colonnes d'un tableau",; && copy-paste this line to add another language support
@@ -608,7 +607,7 @@ if m.llResult
 
 	if m.llResult
 
-		* Supprimer chaque colonne
+		* {fr} Supprimer chaque colonne
 		for m.liCol = m.lnCol2 to m.tnCol1 step -1
 			lnResult = aColDel(@m.taResult, m.liCol)
 			if m.lnResult = 0
@@ -622,14 +621,14 @@ return m.lnResult
 
 * --------------------------------------
 procedure aColsDel_Test
-? sys(16)
+
 local array laTest[1]
 
 local loUnitTest as abUnitTest of abDev.prg, laTest[1]
 loUnitTest = newobject('abUnitTest', 'abDev.prg')
 
 aColDel_Test_a(@m.laTest)
-loUnitTest.Test(1, @m.laTest, 2, 3)
+loUnitTest.Test(1, @m.laTest, 2, 3) && {fr} colonnes 2 et 3 supprimées
 loUnitTest.assert(alen(laTest, 2), 2)
 loUnitTest.assert(laTest[1,1], 1)
 loUnitTest.assert(laTest[2,1], "A")
@@ -637,12 +636,12 @@ loUnitTest.assert(laTest[1,2], 4)
 loUnitTest.assert(laTest[2,2], "D")
 
 aColDel_Test_a(@m.laTest)
-loUnitTest.Test(1, @m.laTest, 3)
+loUnitTest.Test(1, @m.laTest, 3) && {fr} colonnes 3 et 4 supprimées
 loUnitTest.assert(alen(laTest, 2), 2)
 loUnitTest.assert(laTest[1,1], 1)
 loUnitTest.assert(laTest[2,1], "A")
-loUnitTest.assert(laTest[1,2], 4)
-loUnitTest.assert(laTest[2,2], "D")
+loUnitTest.assert(laTest[1,2], 2)
+loUnitTest.assert(laTest[2,2], "B")
 
 return loUnitTest.Result()
 
@@ -688,7 +687,7 @@ local llResult, lnResult; && {fr} Nombre de colonnes après l'insersion {en} numb
 
 lnResult = 0
 
-* Si un tableau a été passé
+* {fr} Si un tableau a été passé
 llResult = type('taResult', 1) == 'A'
 assert m.llResult message cAssertMsg(textmerge(icase(;
 	cLangUser() = 'fr',	[tableau attendu en premier paramètre : <<cLitteral(m.taResult)>> !],; && copy-paste this line to add another language support
@@ -699,15 +698,15 @@ if m.llResult
 	lnRow = alen(taResult, 1)
 	lnCol = alen(taResult, 2)
 
-	* Si tableau à une dim.
+	* {fr} Si tableau à une dim.
 	if m.lnCol = 0
 
-		* Convertir à 2 dimensions
+		* {fr} Convertir à 2 dimensions
 		lnCol = 1
 		dimension taResult[m.lnRow, m.lnCol]
 	endif
 
-	* Vérifier la validité du n° de colonne passé
+	* {fr} Vérifier la validité du n° de colonne passé
 	if vartype(m.tnColBef) == 'N'
 		llResult = between(m.tnColBef, 0, m.lnCol)
 		assert m.llResult message cAssertMsg(textmerge(icase(;
@@ -724,15 +723,15 @@ if m.llResult
 	tnColsIns = iif(vartype(m.tnColsIns) == 'N' and m.tnColsIns > 0, m.tnColsIns, 1)
 	lnResult = m.lnCol + m.tnColsIns
 
-	* Créer un tableau de travail
+	* {fr} Créer un tableau de travail
 	local laTemp[m.lnRow, m.lnResult];
 	,	laType[1], lnType;
 	, llColBeg, lnColIns, llColIns, llColInsTyped
 
-	* Voir si le typage est demandé
+	* {fr} Voir si le typage est demandé
 	lnType = aVarType(@m.laType, @m.tuTypes)
 
-	* Remplir le tableau de travail
+	* {fr} Remplir le tableau de travail
 	for m.liCol = 1 to m.lnResult
 
 		llColBeg = m.liCol <= m.tnColBef
@@ -755,60 +754,60 @@ if m.llResult
 		endfor
 	endfor
 
-	* Copier le tableau de travail dans le résultat
+	* {fr} Copier le tableau de travail dans le résultat
 	dimension taResult[m.lnRow, m.lnResult]
-	acopy(laTemp, taResult) && contrairement à ce que dit la doc, ne dimensionne pas correctement taResult
+	acopy(laTemp, taResult) && {fr} contrairement à ce que dit la doc, ne dimensionne pas correctement taResult
 endif
 
 return m.lnResult
 
 * --------------------------------------
-procedure aColsIns_Test && Teste aColsIns()
+procedure aColsIns_Test && {fr} Teste aColsIns()
 
 local loUnitTest as abUnitTest of abDev.prg, laTest[1]
 loUnitTest = newobject('abUnitTest', 'abDev.prg')
 
-&& TABLEAU À UNE DIMENSION
+&& {fr} TABLEAU À UNE DIMENSION
 
 aColsIns_Test_a(@m.laTest, 3)
 	loUnitTest.Test(3, @m.laTest, 0, 2) && 2 colonnes au début
 	loUnitTest.assert(.f., laTest[3,1]) && 1ère colonne insérée
-	loUnitTest.assert(2, laTest[2,3]) && La colonne initiale est maintenant # 3
+	loUnitTest.assert(2, laTest[2,3]) && {fr} La colonne initiale est maintenant # 3
 
-&& TABLEAU À DEUX DIMENSIONS
+&& {fr} TABLEAU À DEUX DIMENSIONS
 
-&& ajout au début
+&& {fr} ajout au début
 aColsIns_Test_a(@m.laTest, 2, 3)
 	loUnitTest.Test(5, @m.laTest, 0, 2) && 2 colonnes au début (1,2)
-	loUnitTest.assert(6, laTest[2,5]) && donnée initiale
+	loUnitTest.assert(6, laTest[2,5]) && {fr} donnée initiale
 	loUnitTest.assert(.f., laTest[1,2]) && 2ème colonne insérée
 
-&& ajout à l'intérieur
+&& {fr} ajout à l'intérieur
 aColsIns_Test_a(@m.laTest, 2, 3)
 	loUnitTest.Test(5, @m.laTest, 2, 2) && 2 colonnes après la 2 (3,4)
-	loUnitTest.assert(6, laTest[2,5]) && donnée initiale
+	loUnitTest.assert(6, laTest[2,5]) && {fr} donnée initiale
 	loUnitTest.assert(.f., laTest[1,4]) && 2ème colonne insérée
 
-&& ajout à la fin
+&& {fr} ajout à la fin
 aColsIns_Test_a(@m.laTest, 2, 3)
 	loUnitTest.Test(5, @m.laTest, , 2) && 2 colonnes à la fin (4,5)
-	loUnitTest.assert(6, laTest[2,3]) && donnée initiale
+	loUnitTest.assert(6, laTest[2,3]) && {fr} donnée initiale
 	loUnitTest.assert(.f., laTest[2,5]) && 2ème colonne insérée
 
-	&& ajout à la fin avec valeur imposée
+	&& {fr} ajout à la fin avec valeur imposée
 	aColsIns_Test_a(@m.laTest, 2, 3)
 		loUnitTest.Test(5, @m.laTest, , 2, 'test') && 2 colonnes à la fin (4,5)
-		loUnitTest.assert(6, laTest[2,3]) && donnée initiale
+		loUnitTest.assert(6, laTest[2,3]) && {fr} donnée initiale
 		loUnitTest.assert('test', laTest[2,5]) && 2ème colonne insérée
 
-	&& ajout à la fin avec type imposé
+	&& {fr} ajout à la fin avec type imposé
 	aColsIns_Test_a(@m.laTest, 2, 3)
 		loUnitTest.Test(5, @m.laTest, , 2, , 'IC') && 2 colonnes à la fin (4,5)
-		loUnitTest.assert(6, laTest[2,3]) && donnée initiale
+		loUnitTest.assert(6, laTest[2,3]) && {fr} donnée initiale
 		loUnitTest.assert('', laTest[2,5]) && 2ème colonne insérée
 
 	* --------------------------------------
-	procedure aColsIns_Test_a && Initialise le tableau de test avec aElement()
+	procedure aColsIns_Test_a && {fr} Initialise le tableau de test avec aElement()
 	lparameters taTest, tnRows, tnCols
 	external array taTest
 	if empty(m.tnCols)
@@ -835,7 +834,7 @@ local llParms, lnElt1, lnElt2, lnCol1, lnCol2, liElt, luElt1, luElt2, llElt;
 , lcType, llDelta, lnDelta, liDelta;
 , llResult && {fr} Tableaux identiques {en} same arrays
 
-* Si deux tableaux ont bien été passés
+* {fr} Si deux tableaux ont bien été passés
 llParms = type('ta1', 1) == 'A' and type('ta2', 1) == 'A'
 assert m.llParms message cAssertMsg(textmerge(icase(;
 	cLangUser() = 'fr',	[Deux tableaux attendus: <<ta1>> | <<ta2>>],; && copy-paste this line to add another language support
@@ -849,7 +848,7 @@ if m.llParms
 	lnElt2 = alen(ta2)
 	if m.lnElt1 = m.lnElt2 or m.llDelta
 
-		* Pour chaque élément
+		* {fr} Pour chaque élément
 		lnDelta = 0
 		lnCol1 = alen(m.ta1, 2)
 		lnCol2 = alen(m.ta2, 2)
@@ -923,7 +922,7 @@ external array ta1, ta2
 local llResult; && {fr} La ligne existe {en} The line exists
 , lnCol, liRow, laRow[1]
 
-* Si des tableaux ont bien été passés
+* {fr} Si des tableaux ont bien été passés
 llResult = type('ta1', 1) == 'A'  and type('ta2', 1) = 'A'
 assert m.llResult message cAssertMsg(textmerge(icase(;
 	cLangUser() = 'fr',	[paramètre(s) invalides],; && copy-paste this line to add another language support
@@ -931,7 +930,7 @@ assert m.llResult message cAssertMsg(textmerge(icase(;
 	)))
 if m.llResult
 
-	* Si le second tableau est à 2 dims et les deux tableaux ont le même nombre de colonnes
+	* {fr} Si le second tableau est à 2 dims et les deux tableaux ont le même nombre de colonnes
 	lnCol = alen(ta2, 2)
 	llResult = m.lnCol > 0 and alen(ta1) = m.lnCol
 	assert m.llResult message cAssertMsg(textmerge(icase(;
@@ -940,15 +939,15 @@ if m.llResult
 	)))
 	if m.llResult
 
-		* Pour chaque ligne du second tableau
+		* {fr} Pour chaque ligne du second tableau
 		dimension laRow[m.lnCol]
 		for liRow = 1 to alen(ta2, 1)
 
-			* Extraire la ligne dans un tableau temporaire
+			* {fr} Extraire la ligne dans un tableau temporaire
 			acopy(ta2, laRow, aelement(ta2, m.liRow, 1), m.lnCol)
-			dimension laRow[m.lnCol] && Acopy() dimensionne laRow comme ta2
+			dimension laRow[m.lnCol] && {fr} Acopy() dimensionne laRow comme ta2
 
-			* Si la ligne est identique au tableau 1, terminé
+			* {fr} Si la ligne est identique au tableau 1, terminé
 			llResult = laEqual(@m.laRow, @m.ta1, m.tlCase)
 			if m.llResult
 				exit
@@ -972,7 +971,7 @@ local lnResult; && {fr} Nombre de lignes du tableau après dédoublonnage {en} num
 
 lnResult = 0
 
-* Si tableau
+* {fr} Si tableau
 llResult = type('taResult', 1) == 'A'
 assert m.llResult message cAssertMsg(textmerge(icase(;
 	cLangUser() = 'fr',	[Tableau attendu au lieu de <<cLitteral(taResult)>>],; && copy-paste this line to add another language support
@@ -980,22 +979,22 @@ assert m.llResult message cAssertMsg(textmerge(icase(;
 	)))
 if m.llResult
 
-	* Si plus d'une ligne
+	* {fr} Si plus d'une ligne
 	lnResult = alen(taResult, 1)
 	if m.lnResult > 1
 
-		* Pour chaque ligne en partant de la fin
+		* {fr} Pour chaque ligne en partant de la fin
 		lnCol = alen(taResult, 2)
 		dimension laRow[Evl(m.lnCol, 1)]
 		for liRow = m.lnResult to 2 step -1
 
-			* Copier la ligne pour référence
+			* {fr} Copier la ligne pour référence
 			= iif(m.lnCol > 0;
 				, acopy(taResult, laRow, aelement(taResult, m.liRow, 1), m.lnCol);
 				, acopy(taResult, laRow, aelement(taResult, m.liRow), 1);
 				)
 
-			* Pour chaque ligne jusqu'à celle précédant celle examinée
+			* {fr} Pour chaque ligne jusqu'à celle précédant celle examinée
 			for liRow_ = 1 to m.liRow - 1
 				if m.lnCol > 0
 					llDup = .t.
@@ -1013,14 +1012,14 @@ if m.llResult
 				endif
 			endfor
 
-			* Si la ligne existe, supprimer
+			* {fr} Si la ligne existe, supprimer
 			if m.llDup
 				adel(taResult, m.liRow)
 				lnResult = m.lnResult - 1
 			endif
 		endfor
 
-		* Retailler le tableau
+		* {fr} Retailler le tableau
 		if m.lnCol > 0
 			dimension taResult[m.lnResult, m.lnCol]
 		else
@@ -1032,12 +1031,12 @@ endif
 return m.lnResult
 
 * -----------------------------------------------------------------
-procedure aDistinct_Test && Teste aDistinct
+procedure aDistinct_Test && {fr} Teste aDistinct
 
 local loUnitTest as abUnitTest of abDev.prg
 loUnitTest = newobject('abUnitTest', 'abDev.prg')
 
-public array laTest[3, 3] && PUBLIC pour l'examiner après test
+public array laTest[3, 3] && {fr} PUBLIC pour l'examiner après test
 laTest[1, 1] = 'toto'
 laTest[1, 2] = 3
 laTest[1, 3] = .t.
@@ -1115,7 +1114,7 @@ assert m.llResult message cAssertMsg(textmerge(icase(;
 	)))
 if m.llResult
 
-	* Si la valeur existe
+	* {fr} Si la valeur existe
 	liResult = ascan(taSrce, m.tuVal, 1, -1, m.tnCol, m.tnFlags)
 	if m.liResult > 0
 
@@ -1132,13 +1131,13 @@ endif
 return m.lnResult
 
 * -----------------------------------------------------------------
-procedure aSelect_Test && Teste aSelect()
+procedure aSelect_Test && {fr} Teste aSelect()
 
 local loUnitTest as abUnitTest of abDev.prg
 loUnitTest = newobject('abUnitTest', 'abDev.prg')
 
-public array laSrce[1], laDest[1] && PUBLIC pour examen après test
-avcxclasses(laSrce, 'aw'+'.vcx') && évite d'embarquer aw.vcx dans le projet
+public array laSrce[1], laDest[1] && {fr} PUBLIC pour examen après test
+avcxclasses(laSrce, 'aw'+'.vcx') && {fr} évite d'embarquer aw.vcx dans le projet
 
 loUnitTest.Test(2, @m.laSrce, @m.laDest, 2, 'commandbutton')
 
@@ -1205,12 +1204,12 @@ if m.llResult
 		tiDest = iif(vartype(m.tiDest) == 'N' and between(m.tiDest, 0, m.lnResult), m.tiDest, m.lnResult) + 1 && {fr} spec aIns() : AVANT {en} aIns() : BEFORE
 		tiSrce = iif(vartype(m.tiSrce) == 'N' and between(m.tiSrce, 1, alen(taSrce, 1)), m.tiSrce, 1)
 
-		* Insérer la nouvelle ligne
+		* {fr} Insérer la nouvelle ligne
 		lnResult = m.lnResult + 1
 		dimension taDest[m.lnResult, m.lnCol]
 		ains(taDest, m.tiDest)
 
-		* Copier les données dans la nouvelle ligne
+		* {fr} Copier les données dans la nouvelle ligne
 		for liCol = 1 to m.lnCol
 			taDest[m.tiDest, m.liCol] = taSrce[m.tiSrce, m.liCol]
 		endfor
@@ -1285,7 +1284,7 @@ local llResult, lnResult
 lnResult = 0
 
 llResult = type('taResult', 1) == 'A';
- and alen(taResult, 2) = 0 && une dimension
+ and alen(taResult, 2) = 0 && {fr} une dimension
 assert m.llResult message cAssertMsg(textmerge(icase(;
 	cLangUser() = 'fr',	[paramètres invalides ou incomplets],; && copy-paste this line to add another language support
 						[parameters not conform or unusable]; && Default: English
@@ -1316,7 +1315,7 @@ local llResult, lnResult
 lnResult = 0
 
 llResult = type('taResult', 1) == 'A';
- and alen(taResult, 2) = 0; && une dimension
+ and alen(taResult, 2) = 0; && {fr} une dimension
  and pcount() >= 2
 assert m.llResult message cAssertMsg(textmerge(icase(;
 	cLangUser() = 'fr',	[paramètres invalides ou incomplets],; && copy-paste this line to add another language support
@@ -1389,7 +1388,7 @@ liResult = 0
 llResult = .t.;
  and type('taIn', 1) == 'A';
  and type('taFor', 1) == 'A';
- and alen(m.taFor, 2) = 0; && une dimension
+ and alen(m.taFor, 2) = 0; && {fr} une dimension
  and (laEmpty(@m.taIn) or alen(m.taIn, 2) >= alen(m.taFor))
 assert m.llResult message cAssertMsg(textmerge(icase(;
 	cLangUser() = 'fr',	[au moins un paramètre invalide],; && copy-paste this line to add another language support
@@ -1397,7 +1396,7 @@ assert m.llResult message cAssertMsg(textmerge(icase(;
 	)))
 if m.llResult and not laEmpty(@m.taIn)
 
-	* Si au moins une valeur à chercher est non nulle (clé)
+	* {fr} Si au moins une valeur à chercher est non nulle (clé)
 	lnCol = alen(m.taFor)
 	liColKey = cast(m.liColKey as integer)
 	if between(m.liColKey, 1, m.lnCol) and !isnull(m.taFor[m.liColKey])
@@ -1425,15 +1424,15 @@ if m.llResult and not laEmpty(@m.taIn)
 		llResult = .f.
 		do while .t.
 
-			* Si la clé existe dans le tableau
+			* {fr} Si la clé existe dans le tableau
 			liRow = ascan(m.taIn, m.luKey, m.liRow + 1, -1, m.liColKey, m.lnFlags)
 			if m.liRow > 0
 
-				* Si les autres valeurs sont dans la ligne
+				* {fr} Si les autres valeurs sont dans la ligne
 				llResult = .t.
 				for liCol = 1 to m.lnCol
-					if !(vartype(m.taFor[m.liCol]) == 'X'; && ignored
-					 or vartype(m.taFor[m.liCol]) == vartype(m.taIn[m.liRow, m.liCol]); && m.lcType && selon coverage, plus rapide de recalculer Vartype(m.luFor) plusieurs fois que de lire une variable lcType
+					if !(vartype(m.taFor[m.liCol]) == 'X'; && {fr} ignored
+					 or vartype(m.taFor[m.liCol]) == vartype(m.taIn[m.liRow, m.liCol]); && {fr} m.lcType && {fr} selon coverage, plus rapide de recalculer Vartype(m.luFor) plusieurs fois que de lire une variable lcType
 					  and iif(m.tlCaseNo and vartype(m.taFor[m.liCol]) == 'C';
 								, upper(m.taIn[m.liRow, m.liCol]) = upper(m.taFor[m.liCol]);
 								, m.taIn[m.liRow, m.liCol] = m.taFor[m.liCol];
@@ -1534,7 +1533,7 @@ if m.llResult
 
 	lnResult = alen(taRow, 1)
 
-	* Tabuler les séparateurs de colonnes
+	* {fr} Tabuler les séparateurs de colonnes
 	llSep = 1 = aChars(;
 		  @m.laSep;
 		, iif(vartype(m.tcSeps) == 'C' and lenc(m.tcSeps) > 0;
@@ -1542,7 +1541,7 @@ if m.llResult
 			, [,;|] + TABUL;
 		))
 
-	* Calculer le nombre de colonnes et le séparateur s'il est ambigu
+	* {fr} Calculer le nombre de colonnes et le séparateur s'il est ambigu
 	lnCol = 0
 	lcSep = iif(m.llSep, m.tcSeps, space(0))
 	for each lcRow in taRow
@@ -1551,14 +1550,14 @@ if m.llResult
 							, aColsDelim_nColsSep(m.lcRow, @m.laSep, @m.lcSep);
 							))
 	endfor
-*		ASSERT Lenc(m.lcSep) = 1 MESSAGE cAssertMsg(Textmerge([<<Proper(Program())>>() n'a trouvé aucun séparateur, le tableau aura une seule colonne]))
+* {fr} ASSERT Lenc(m.lcSep) = 1 MESSAGE cAssertMsg(Textmerge([<<Proper(Program())>>() n'a trouvé aucun séparateur, le tableau aura une seule colonne]))
 
-	* Si le typage est demandé, forcer le nombre de colonnes à la spécification de types
+	* {fr} Si le typage est demandé, forcer le nombre de colonnes à la spécification de types
 	lnType = aVarType(@m.laType, @m.tuTypes)
 	llType = m.lnType > 0
 	lnCol = max(m.lnCol, m.lnType)
 
-	* Tabuler à deux dimensions
+	* {fr} Tabuler à deux dimensions
 	dimension laRow[m.lnResult, m.lnCol]
 	laRow = space(0)
 	for liRow = 1 to m.lnResult
@@ -1570,7 +1569,7 @@ if m.llResult
 	dimension taRow[m.lnResult, m.lnCol]
 	acopy(laRow, taRow)
 
-	* Le cas échéant, typer les données
+	* {fr} Le cas échéant, typer les données
 	if m.llType
 
 		for liCol = 1 to min(m.lnCol, m.lnType)
@@ -1635,7 +1634,7 @@ assert m.llResult message cAssertMsg(textmerge(icase(;
 	)))
 if m.llResult
 
-	* Tabuler les lignes
+	* {fr} Tabuler les lignes
 	alines(taResult, m.tcTxt)
 
 	return aColsDelim(@m.taResult, m.tcSep, @m.tuTypes)
@@ -1644,7 +1643,7 @@ else
 endif
 
 * -------------------------------------------------------------
-procedure aLinesCols_test && Teste aLinesCols()
+procedure aLinesCols_test && {fr} Teste aLinesCols()
 
 local loUnitTest as abUnitTest of abDev.prg, laLinesCols[1], lcTxt, laType[2]
 loUnitTest = newobject('abUnitTest', 'abDev.prg')
@@ -1681,7 +1680,7 @@ loUnitTest.assert(22, laLinesCols[2,2])
 loUnitTest.Test(3, @m.laLinesCols, m.lcTxt, , replicate('I', 6))
 loUnitTest.assert(21, laLinesCols[2,1])
 loUnitTest.assert(22, laLinesCols[2,2])
-loUnitTest.assert(0, laLinesCols[1,6]) && nombre de colonnes selon typage
+loUnitTest.assert(0, laLinesCols[1,6]) && {fr} nombre de colonnes selon typage
 
 return loUnitTest.Result()
 
@@ -1742,8 +1741,8 @@ return m.lnResult
 * ===================================================================
 function aToBase64 as Boolean
 lparameters ;
-	Result as string; && @ out
-, aa && @ out
+	Result as string; && @ {fr} out
+, aa && @ {fr} out
 
 external array aa
 
@@ -1766,7 +1765,7 @@ if m.success
 		case empty(m.Result)
 			success = cResultAdd(@m.Result, [])
 
-		case !FileDel(m.memFile,,, @m.Result) && FileDelete() abandonné à cause d'un conflit avec FileDelete.exe de web connect
+		case !FileDel(m.memFile,,, @m.Result) && {fr} FileDelete() abandonné à cause d'un conflit avec FileDelete.exe de web connect
 
 		endcase
 
@@ -1788,8 +1787,8 @@ return m.success
 * ===================================================================
 function aOfBase64 as Boolean
 lparameters ;
-	Result as string; && @ out
-, aa; && @ out
+	Result as string; && @ {fr} out
+, aa; && @ {fr} out
 , base64 as string
 
 external array aa
@@ -1817,7 +1816,7 @@ otherwise
 		success = strtofile(strconv(m.base64, 14), m.memFile) > 0
 		if m.success
 			restore from (m.memFile) additive
-			success = FileDel(m.memFile,,, @m.Result) && FileDelete() abandonné à cause d'un conflit avec FileDelete.exe de web connect
+			success = FileDel(m.memFile,,, @m.Result) && {fr} FileDelete() abandonné à cause d'un conflit avec FileDelete.exe de web connect
 		else
 			cResultAdd(@m.Result, [])
 		endif

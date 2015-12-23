@@ -1,6 +1,6 @@
 * VFP
-* requires: set path to (home(1)) additive
-* to set all pathes: do ab
+* {en} requires: set path to (home(1)) additive
+* {en} to set all pathes: do ab
 #INCLUDE FoxPro.h
 #INCLUDE ffc\GDIplus.H
 
@@ -13,11 +13,11 @@
 
 * Gregory Adam
 #INCLUDE GA_.h
-#UNDEFINE true && Javascript literal
-#UNDEFINE false && Javascript literal
+#UNDEFINE true && {fr} Javascript literal
+#UNDEFINE false && {fr} Javascript literal
 
 * FoxInCloud public
-#INCLUDE awPublic.h && en dernier car inclut 'awPublic_Override.h'
+#INCLUDE awPublic.h && {fr} en dernier car inclut 'awPublic_Override.h'
 
 * {en} Override any constant in 'awPublic_override.h' (never replaced with new version install)
 * {fr} Surcharger toute constante dans 'awPublic_override.h' (jamais remplacé par l'installation d'une nouvelle version)

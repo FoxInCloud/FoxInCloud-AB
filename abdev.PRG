@@ -1,19 +1,17 @@
-* abDev.prg
+* {fr} abDev.prg
 * =====================================================
 * (c) Abaque SARL, 66 rue Michel Ange - 75016 Paris - France
 * contact@FoxInCloud.com - http://foxincloud.com/ - +33 9 53 41 90 90
-* -----------------------------------------------------
-* Ce logiciel est distribué sous GNU General Public License, tel quel, sans aucune garantie
-* Il peut être utilisé et/ou redistribué sans restriction
-* Toute modification doit être reversée à la communauté
-* La présente mention doit être intégralement reproduite
-&& dans toute copie même partielle
-* -----------------------------------------------------
-* This software is distributed under the terms of GNU General Public License, AS IS, without any warranty
-* It may be used and/or distributed without restriction
-* Any substantial improvement must be given for free to the community
-* This permission notice shall be entirely included in all copies
-&& or substantial portions of the Software
+* {fr} -----------------------------------------------------
+* {fr} Ce logiciel est distribué sous GNU General Public License, tel quel, sans aucune garantie
+* {fr} Il peut être utilisé et/ou redistribué sans restriction
+* {fr} Toute modification doit être reversée à la communauté
+* {fr} La présente mention doit être intégralement reproduite dans toute copie même partielle
+* {en} -----------------------------------------------------
+* {en} This software is distributed under the terms of GNU General Public License, AS IS, without any warranty
+* {en} It can be used and/or distributed without restriction
+* {en} Any modification or improvement must be given for free to the community
+* {en} This permission notice shall be entirely included in all copies or substantial portions of the Software
 * =====================================================
 
 #INCLUDE AB.H
@@ -21,78 +19,78 @@ AB()
 return abUnitTests()
 
 * =================================================
-define class cusBatchLog as custom && Trace un processus répétitif dans un tableau à l'écran
+define class cusBatchLog as custom && {fr} Trace un processus répétitif dans un tableau à l'écran
 * =================================================
 
-* Valeurs initiales
+&& {fr} Valeurs initiales
 alConsole = .f.
 alFooter = .f.
 acScreenFont = .null.
 anScreenFontSize = .null.
 
 * -------------------------------
-&& Contenu des lignes du tableau de compte rendu
+&& {fr} Contenu des lignes du tableau de compte rendu
 #define  L_cHEADER		1 && Texte de l'en-tête de la colonne
-#define  L_uVALUE	 		2 && Ligne courante : contenu original de la cellule
-#define  L_cTYPE	 		3 && Ligne courante : type du contenu original
-#define  L_cDISPLAY		4 && Ligne courante : contenu affiché (en caractères bien sûr)
-#define  L_lBORDER		5 && La colonne est délimitée par des barres verticales
-#define  L_nWIDTH			6 && Largeur utilisable pour affichage dans la colonne (foxels)
-#define  L_cID				7 && Identifiant de la colonne
-#define  L_nSUM				8 && Cumul de la donnée si elle est numérique
-#define  L_lSUM				9 && Sommer / moyenner la donnée en fin d'état si elle est numérique
-#define  L_cFORMAT		10 && Format pour Transform()
+#define  L_uVALUE	 		2 && {fr} Ligne courante : contenu original de la cellule
+#define  L_cTYPE	 		3 && {fr} Ligne courante : type du contenu original
+#define  L_cDISPLAY		4 && {fr} Ligne courante : contenu affiché (en caractères bien sûr)
+#define  L_lBORDER		5 && {fr} La colonne est délimitée par des barres verticales
+#define  L_nWIDTH			6 && {fr} Largeur utilisable pour affichage dans la colonne (foxels)
+#define  L_cID				7 && {fr} Identifiant de la colonne
+#define  L_nSUM				8 && {fr} Cumul de la donnée si elle est numérique
+#define  L_lSUM				9 && {fr} Sommer / moyenner la donnée en fin d'état si elle est numérique
+#define  L_cFORMAT		10 && {fr} Format pour Transform()
 #define  L_COUNT 			L_cFORMAT
 * -------------------------------
 dimension aaLog[;
-				L_COUNT; && une ligne par caractéristique
-			, 1] && une colonne par colonne de log
+				L_COUNT; && {fr} une ligne par caractéristique
+			, 1] && {fr} une colonne par colonne de log
 
 anCols = 0
 
-acLine = '' && Contenu de la ligne courante
-anLine = 0 && N° de la ligne courante
-anDataLines = 0 && Nombre de lignes contenant des données
+acLine = '' && {fr} Contenu de la ligne courante
+anLine = 0 && {fr} N° de la ligne courante
+anDataLines = 0 && {fr} Nombre de lignes contenant des données
 
-acWarnings = '' && Avertissements déjà émis
-anWarnings = 0  && Avertissements déjà émis
+acWarnings = '' && {fr} Avertissements déjà émis
+anWarnings = 0  && {fr} Avertissements déjà émis
 
-* Adresses des fichiers
+* {fr} Adresses des fichiers
 acTxtLogAddr = ''
 acWarnTxtLogAddr = ''
 acDBFlogAddr = ''
 acDBFlogAlias = ''
 
-alParentPjFiles = .f. && Parent object has a reference to project files collection
+alParentPjFiles = .f. && {fr} Parent object has a reference to project files collection
 alDocumentView = .f.
 alDataSession = .f.
 alProjectManager = .f.
 
 * -------------------------------------------------
-procedure init && Ouvre les fichiers de compte-rendu et vide la fenêtre VFP
+procedure init && {fr} Ouvre les fichiers de compte-rendu et vide la fenêtre VFP
 lparameters ;
-	tuTxtLog,; && [.T.] Nom, dossier ou adresse du fichier de compte-rendu texte, .T. : automatique
-	tuDBFlog,; && [.T.] Nom, dossier ou adresse du fichier de la table de compte-rendu, .T. : automatique
-	tlFooter,; && [.T.] Produire une ligne de totaux / moyennes en fin de CR
-	tlConsole && [.T.] Afficher le compte rendu à l'écran (s'il est visible)
+	tuTxtLog,; && [.T.] {fr} Nom, dossier ou adresse du fichier de compte-rendu texte, .T. : automatique
+	tuDBFlog,; && [.T.] {fr} Nom, dossier ou adresse du fichier de la table de compte-rendu, .T. : automatique
+	tlFooter,; && [.T.] {fr} Produire une ligne de totaux / moyennes en fin de CR
+	tlConsole && [.T.] {fr} Afficher le compte rendu à l'écran (s'il est visible)
 
 local lnParms, luTxtLog, luDBFlog, llResult
 
 lnParms = pcount()
 
-* Determine if Parent object has a reference to a project files collection
+* {en} Determine if Parent object holds a reference to a project files collection
 this.alParentPjFiles = type('this.parent.aoPjFiles') == 'O' and not isNull(this.parent.aoPjFiles)
 
-* Init/Open log files
+* {en} Init/Open log files
 luTxtLog = iif(m.lnParms>=1 and vartype(m.tuTxtLog) $ 'CL', m.tuTxtLog, .t.)
 luDBFlog = iif(m.lnParms>=2 and vartype(m.tuDBFlog) $ 'CL', m.tuDBFlog, .t.)
 llResult = this.init_Logs(m.luTxtLog, m.luDBFlog)
 assert m.llResult message cAssertMsg(textmerge([Échec de la création des fichiers de compte-rendu]))
 
-* Déterminer si une ligne de totaux / moyennes doit être produite en fin de log
+* {fr} Déterminer si une ligne de totaux / moyennes doit être produite en fin de log
 this.alFooter = m.lnParms < 3 or lTrue(m.tlFooter)
 
-* Déterminer si les sorties doivent être envoyées à l'écran
+* {fr} Déterminer si les sorties doivent être envoyées à l'écran
 this.alConsole = (m.lnParms < 4 or lTrue(m.tlConsole));
 	and inlist(_vfp.startmode, 0, 1, 4);
 	and vartype(_screen) == 'O' ;
@@ -111,19 +109,19 @@ endif
 return m.llResult
 
 * -------------------------------------------------
-procedure init_Logs && Ouvre les fichiers de compte-rendu
+procedure init_Logs && {fr} Ouvre les fichiers de compte-rendu
 lparameters ;
-	tuTxtLog, ; && [.T.] Nom ou adresse du fichier de compte-rendu texte, .T. pour automatique
-	tuDBFlog && [.T.] Nom ou adresse du fichier de la table de compte-rendu, .T. pour automatique
+	tuTxtLog, ; && [.T.] {fr} Nom ou adresse du fichier de compte-rendu texte, .T. pour automatique
+	tuDBFlog && [.T.] {fr} Nom ou adresse du fichier de la table de compte-rendu, .T. pour automatique
 
 local lcLogAddr, lcResult, llResultTXT, llResultDBF
 
-* Si une adresse de log peut être bâtie
+* {fr} Si une adresse de log peut être bâtie
 lcLogAddr = this.cLogPathStem(m.tuTxtLog)
 llResultTXT = !empty(m.lcLogAddr)
 if m.llResultTXT
 
-	* Ouvrir ou créer les fichiers de log
+	* {fr} Ouvrir ou créer les fichiers de log
 	this.acTxtLogAddr = lower(forceext(m.lcLogAddr, EXT_LOG))
 	this.acWarnTxtLogAddr = lower(forceext(m.lcLogAddr , EXT_LOG_WARN))
 	this.LogCheck(m.this.acTxtLogAddr)
@@ -135,7 +133,7 @@ if m.llResultTXT
 	llResultTXT = strtofile(m.lcResult, this.acWarnTxtLogAddr, .t.) > 0 and m.llResultTXT
 endif
 
-* Open/Init table log
+* {fr} Open/Init table log
 lcLogAddr = this.cLogPathStem(m.tuDBFlog)
 llResultDBF = !empty(m.lcLogAddr)
 if m.llResultDBF
@@ -152,25 +150,25 @@ endif
 return m.llResultTXT or m.llResultDBF
 
 * -------------------------------------------------
-procedure destroy && Ferme les fichiers de log et rétablit la fenêtre VFP
+procedure destroy && {fr} Ferme les fichiers de log et rétablit la fenêtre VFP
 
-* Faire le pied du tableau
+* {fr} Faire le pied du tableau
 this.FooterCreate()
 
-* Close log table
+* {en} Close log table
 use in select(this.acDBFlogAlias)
 
-* Show windows hidden AT init()
+* {en} Show windows hidden AT init()
 show window all
-show window all && parfois il reste des fenêtres invisibles
+show window all && {fr} parfois il reste des fenêtres invisibles
 
-* Restore screen font
+* {en} Restore screen font
 _screen.fontname = this.acScreenFont
 _screen.fontsize = this.anScreenFontSize
 
 if m.this.alConsole
 
-	* Si l'utilisateur souhaite voir les avertissements
+	* {fr} Si l'utilisateur souhaite voir les avertissements
 	local lcS, lcBe
 	lcS = Iif(m.this.anWarnings > 1, 's', '')
 	if not empty(m.this.acWarnings);
@@ -187,26 +185,26 @@ if m.this.alConsole
 			, 5000;
 			)
 
-	 	* Copier les avertissements dans un fichier texte temporaire
+	 	* {fr} Copier les avertissements dans un fichier texte temporaire
 	 	local lcFile, loSafety
 	 	lcFile = forcepath(m.this.acWarnTxtLogAddr, sys(2023))
 	 	loSafety = abSet('SAFETY', 'OFF')
 	 	strtofile(m.this.acWarnings, m.lcFile)
 	 	release loSafety
 
-	 	* Afficher dans une fenêtre d'édition
+	 	* {fr} Afficher dans une fenêtre d'édition
 	 	modify file (m.lcFile) nowait
 	 	activate window (justfname(m.lcFile))
 	endif
 endif
 
 * -------------------------------------------------
-procedure LogCheck && Vérifie qu'un fichier de compte-rendu est accessible en écriture
-lparameters tcLogAddr && Adresse du fichier de compte-rendu
+procedure LogCheck && {fr} Vérifie qu'un fichier de compte-rendu est accessible en écriture
+lparameters tcLogAddr && {fr} Adresse du fichier de compte-rendu
 
 if file(m.tcLogAddr)
 
-	* Ajouter le fichier au projet
+	* {fr} Ajouter le fichier au projet
 	if this.alParentPjFiles
 		ProjectFileAdd(m.tcLogAddr, this.parent.aoPjFiles)
 	endif
@@ -240,8 +238,8 @@ if file(m.tcLogAddr)
 endif
 
 * -------------------------------------------------
-procedure cLogPathStem && Adresse d'un fichier de compte-rendu sans l'extension
-lparameters tuLog && [.T.] Nom ou adresse du fichier de compte-rendu texte, .T. pour automatique
+procedure cLogPathStem && {fr} Adresse d'un fichier de compte-rendu sans l'extension
+lparameters tuLog && [.T.] {fr} Nom ou adresse du fichier de compte-rendu texte, .T. pour automatique
 
 local lcSys16, lcResult
 
@@ -277,19 +275,19 @@ endif
 return m.lcResult
 
 * -------------------------------------------------
-procedure ColAdd && Ajoute une colonne à la fin de la table de compte-rendu
+procedure ColAdd && {fr} Ajoute une colonne à la fin de la table de compte-rendu
 lparameters ;
-	tcHeader,; && [''] Contenu de l'en-tête de la colonne
-	tnColWidth,; && [Header width || 10] Largeur de la colonne en foxels
-	tlNoLeftBar,;	 && [.F.] Ne pas délimiter les colonnes par une barre verticale
-	tcID,; && [tcHeader] Identifiant de la colonne
-	tlSum,; && [.F.] Si la donnée est numérique, en fin d'état : .T.: Sommer, .F.: Moyenner, .NULL.: ne rien faire
-	tcFormat && [''] Format pour Transform()
+	tcHeader,; && [''] {fr} Contenu de l'en-tête de la colonne
+	tnColWidth,; && [Header width || 10] {fr} Largeur de la colonne en foxels
+	tlNoLeftBar,;	 && [.F.] {fr} Ne pas délimiter les colonnes par une barre verticale
+	tcID,; && [tcHeader] {fr} Identifiant de la colonne
+	tlSum,; && [.F.] {fr} Si la donnée est numérique, en fin d'état : .T.: Sommer, .F.: Moyenner, .NULL.: ne rien faire
+	tcFormat && [''] {fr} Format pour Transform()
 
-local lnResult && Numéro de la colonne ajoutée
+local lnResult && {fr} Numéro de la colonne ajoutée
 lnResult = 0
 
-if m.this.anLine = 0 && possible only if no line was displayed yet
+if m.this.anLine = 0 && {fr} possible only if no line was displayed yet
 
  	lnResult = this.aColAdd()
 
@@ -308,18 +306,18 @@ if m.this.anLine = 0 && possible only if no line was displayed yet
 	this.aaLog[L_lSUM, m.lnResult] = iif(vartype(m.tlSum) $ 'LX', m.tlSum, .f.)
 	this.aaLog[L_cFORMAT, m.lnResult] = evl(m.tcFormat, '')
 
-	* Si affichage à l'écran (console)
+	* {fr} Si affichage à l'écran (console)
 	if m.this.alConsole
 
-		* Calculer la largeur totale du tableau en caractères
+		* {fr} Calculer la largeur totale du tableau en caractères
 		local lnCol, lnTableWidth
 		lnTableWidth = 0
 		for m.lnCol = 1 to m.lnResult
 			lnTableWidth = m.lnTableWidth + this.aaLog[L_nWIDTH, m.lnCol] + iif(this.aaLog[L_lBORDER, m.lnCol], 1, 0)
 		endfor
-		lnTableWidth = m.lnTableWidth + 1 && right border
+		lnTableWidth = m.lnTableWidth + 1 && {fr} right border
 
-		* Tant que le tableau est plus large que l'écran, réduire la police de l'écran
+		* {fr} Tant que le tableau est plus large que l'écran, réduire la police de l'écran
 		do while m.lnTableWidth * fontmetric(6, _screen.fontname, _screen.fontsize) > _screen.viewportwidth ;
 				and _screen.fontsize > 5
 			_screen.fontsize = _screen.fontsize - 1
@@ -332,11 +330,11 @@ this.anCols = m.lnResult
 return m.lnResult
 
 * -------------------------------------------------
-procedure aColAdd && Ajoute une colonne au tableau de compte-rendu
-local lnResult && Numéro de la colonne ajoutée
+procedure aColAdd && {fr} Ajoute une colonne au tableau de compte-rendu
+local lnResult && {fr} Numéro de la colonne ajoutée
  	lnResult = alen(this.aaLog, 2)
 
-if not vartype(this.aaLog[1]) = 'L' && La première colonne n'est plus disponible
+if not vartype(this.aaLog[1]) = 'L' && {fr} La première colonne n'est plus disponible
 
  	local array laCopy[L_COUNT, m.lnResult]
 
@@ -351,25 +349,24 @@ if not vartype(this.aaLog[1]) = 'L' && La première colonne n'est plus disponible
  	return m.lnResult
 
 * -------------------------------------------------
-procedure nCol && Numéro de colonne d'après son identifiant
+procedure nCol && {fr} Numéro de colonne d'après son identifiant
 lparameters ;
-	tcColID && Identifiant de la colonne
-local lnResult && Numéro de la colonne
+	tcColID && {fr} Identifiant de la colonne
+
+local lnResult && {fr} Numéro de la colonne
 lnResult = 0
 
-local llResult
-llResult = vartype(m.tcColID) == 'C' and not empty(m.tcColID)
-if m.llResult
+if vartype(m.tcColID) == 'C' and not empty(m.tcColID)
 
 	lnResult = ascan(this.aaLog, m.tcColID, 1, -1, -1, 1+2+4)
 	lnResult = asubscript(this.aaLog, m.lnResult, 2)
 endif
 
- 	return m.lnResult
+return m.lnResult
 
 * -------------------------------------------------
-procedure nColWidthTotal && Largeur totale d'un colonne du compte-rendu (avec gouttières)
-lparameters tnCol && Numéro de colonne
+procedure nColWidthTotal && {fr} Largeur totale d'un colonne du compte-rendu (avec gouttières)
+lparameters tnCol && {fr} Numéro de colonne
 
 local lnColWidth, lnResult
 
@@ -380,7 +377,7 @@ if vartype(m.tnCol) = 'N' ;
 
 	lnColWidth = this.aaLog [L_nWIDTH, m.tnCol]
 	lnResult = iif(vartype(m.lnColWidth) == 'N' and m.lnColWidth > 0;
-			 , 1 + m.lnColWidth; && gouttière avant
+			 , 1 + m.lnColWidth; && {fr} gouttière avant
 			 , 0;
 			 )
 endif
@@ -388,17 +385,17 @@ endif
 return m.lnResult
 
 * -------------------------------------------------
-procedure CellFill && Remplit une cellule du compte-rendu
+procedure CellFill && {fr} Remplit une cellule du compte-rendu
 lparameters ;
-	tuCol,; && Numéro ou ID de la colonne
-	tuContent,; && [''] Contenu à placer dans la colonne
-	tlExpand,; && [.F.] Si le contenu est plus large que la colonne, déborder sur les colonnes de droite
-	tlNoDisplay,; && [.F.] Différer l'affichage de la ligne (pour gagner du temps lorsque plusieurs modifications successives de la ligne)
-	tcFormat && [''] Format d'affichage
+	tuCol,; && {fr} Numéro ou ID de la colonne
+	tuContent,; && [''] {fr} Contenu à placer dans la colonne
+	tlExpand,; && [.F.] {fr} Si le contenu est plus large que la colonne, déborder sur les colonnes de droite
+	tlNoDisplay,; && [.F.] {fr} Différer l'affichage de la ligne (pour gagner du temps lorsque plusieurs modifications successives de la ligne)
+	tcFormat && [''] {fr} Format d'affichage
 
 local lnCols, lcType, lnCol, llResult
 
-* Si la définition de colonne est valide
+* {fr} Si la définition de colonne est valide
 lnCols = alen(this.aaLog, 2)
 lcType = vartype(m.tuCol)
 do case
@@ -414,28 +411,28 @@ if m.llResult
 
 	local luContent, llExpand, llNoDisplay, lcFormat, lcContent, lnColWidth
 
-	* Donner leur valeur par défaut aux paramètres optionnels
+	* {fr} Donner leur valeur par défaut aux paramètres optionnels
 	luContent = iif(pcount() >= 2, m.tuContent, '')
  	llExpand = lTrue(m.tlExpand)
 	llNoDisplay = lTrue(m.tlNoDisplay)
 	lcFormat = iif(pcount() >= 5 and vartype(m.tcFormat) == 'C', m.tcFormat, '')
 	lcFormat = evl(m.lcFormat, this.aaLog[L_cFORMAT, m.lnCol])
 
- 		* Si la colonne a une largeur positive
+ 		* {fr} Si la colonne a une largeur positive
  		lnColWidth = this.aaLog[L_nWIDTH, m.lnCol]
  		llResult = m.lnColWidth > 0
  	if m.llResult
 
- 		* Charger la données originale dans la cellule
+ 		* {fr} Charger la données originale dans la cellule
  		this.aaLog[L_uVALUE, m.lnCol] = m.luContent
  		this.aaLog[L_cTYPE, m.lnCol] = vartype(m.luContent)
 
- 		* Si la donnée est numérique, cumuler
+ 		* {fr} Si la donnée est numérique, cumuler
  		if this.aaLog[L_cTYPE, m.lnCol] == 'N'
  			this.aaLog[L_nSUM, m.lnCol] = this.aaLog[L_nSUM, m.lnCol] + m.luContent
  		endif
 
-		* Si la colonne peut déborder
+		* {fr} Si la colonne peut déborder
 		lcContent = transform(m.luContent, m.lcFormat)
 	 	if m.llExpand and m.lnCol < m.lnCols
 
@@ -447,7 +444,7 @@ if m.llResult
 	 		lnColWidth = min(len(m.lcContent), m.lnColWidthX)
 	 	endif
 
- 		* Charger l'affichage dans la cellule
+ 		* {fr} Charger l'affichage dans la cellule
  		this.aaLog[L_cDISPLAY, m.lnCol] = ;
  				this.cCellContent(m.tuContent, m.lnColWidth, m.llExpand, m.lcFormat)
 
@@ -458,12 +455,12 @@ endif
 return m.llResult
 
 * -------------------------------------------------
-procedure cCellContent && Contenu d'une cellule du tableau de compte-rendu, ajusté à la taille de la cellule
+procedure cCellContent && {fr} Contenu d'une cellule du tableau de compte-rendu, ajusté à la taille de la cellule
 lparameters ;
-	tuContent,; && Contenu à placer dans la colonne
-	tnColWidth,; && Largeur de la colonne en foxels
-	tlExpand,; && [.F.] Si le contenu est plus large que la colonne, déborder sur les colonnes de droite
-	tcFormat && [''] Format de présentation
+	tuContent,; && {fr} Contenu à placer dans la colonne
+	tnColWidth,; && {fr} Largeur de la colonne en foxels
+	tlExpand,; && [.F.] {fr} Si le contenu est plus large que la colonne, déborder sur les colonnes de droite
+	tcFormat && [''] {fr} Format de présentation
 tlExpand = lTrue(m.tlExpand)
 tcFormat = evl(m.tcFormat, '')
 
@@ -474,23 +471,23 @@ tcFormat = evl(m.tcFormat, '')
 
  	lcResult = transform(m.tuContent, m.tcFormat)
 
- 	* Manage position in column, trim if necessary
+ 	* {fr} Manage position in column, trim if necessary
  	do case
 
  	case m.lcType $ 'NY'
 		lcResult = iif(m.tlExpand;
-			, this.cColJustified(m.lcResult, m.tnColWidth); && gauche
-			, padl(m.lcResult, m.tnColWidth, space(1)); && Aligner à droite avec un Space(1)
+			, this.cColJustified(m.lcResult, m.tnColWidth); && {fr} gauche
+			, padl(m.lcResult, m.tnColWidth, space(1)); && {fr} Aligner à droite avec un Space(1)
 			)
 
  	case m.lcType = 'L'
 		lcResult = iif(m.tlExpand;
-				, this.cColJustified(m.lcResult, m.tnColWidth); && à gauche
-				, padl(m.lcResult, m.tnColWidth/2+2, space(1)); && centrer
+				, this.cColJustified(m.lcResult, m.tnColWidth); && {fr} à gauche
+				, padl(m.lcResult, m.tnColWidth/2+2, space(1)); && {fr} centrer
 				)
 
  	otherwise
-		* Aligner à gauche en tentant de préserver les espaces en tête
+		* {fr} Aligner à gauche en tentant de préserver les espaces en tête
 		lcResult = this.cColJustified(m.lcResult, m.tnColWidth)
 	endcase
 
@@ -502,10 +499,10 @@ endif
  	return m.lcResult
 
 * -------------------------------------------------
-function cColJustified && Justifie le contenu d'une cellule dans la largeur de la colonne
+function cColJustified && {fr} Justifie le contenu d'une cellule dans la largeur de la colonne
 lparameters ;
-	tcContent, ; && Contenu à placer dans la colonne
-	tnColWidth && Largeur de la colonne en foxels
+	tcContent, ; && {fr} Contenu à placer dans la colonne
+	tnColWidth && {fr} Largeur de la colonne en foxels
 
 local lcResult
 
@@ -526,10 +523,10 @@ endif
 return m.lcResult
 
 * -------------------------------------------------
-procedure LineFill && Écrit une nouvelle ligne à l'écran
+procedure LineFill && {fr} Écrit une nouvelle ligne à l'écran
 lparameters tuContent
 
-local lnResult && Position de la fin de ligne
+local lnResult && {fr} Position de la fin de ligne
 
 lnResult = 0
 if this.LineFeed()
@@ -544,12 +541,12 @@ endif
 return m.lnResult
 
 * -------------------------------------------------
-procedure LineAppend && Ajoute un contenu à la ligne courante et affiche le résultat
+procedure LineAppend && {fr} Ajoute un contenu à la ligne courante et affiche le résultat
 lparameters ;
-	tuContent, ; && Contenu à placer dans la colonne
-	tnPosition && [fin de ligne] Position où le contenu est ajouté
+	tuContent, ; && {fr} Contenu à placer dans la colonne
+	tnPosition && [fin de ligne] {fr} Position où le contenu est ajouté
 
-local lnLine, lnResult && Position où le contenu a été ajouté
+local lnLine, lnResult && {fr} Position où le contenu a été ajouté
 
 this.acLine = alltrim(this.acLine)
 lnLine = len(this.acLine)
@@ -558,7 +555,7 @@ this.acLine = left(this.acLine, m.lnResult) + ;
 							space(iif(empty(m.this.acLine), 0, 1)) + ;
 							transform(m.tuContent)
 
-* Compléter avec des espaces pour superposer la ligne précédente
+* {fr} Compléter avec des espaces pour superposer la ligne précédente
 if m.lnLine > len(this.acLine)
 	this.acLine = padr(this.acLine, m.lnLine, space(1))
 endif
@@ -571,8 +568,8 @@ endif
 return m.lnResult
 
 * -------------------------------------------------
-procedure LineDisplay && Affiche le contenu de l'en-tête ou de la ligne courante
-lparameters tlHeader && [.F.] Afficher l'en-tête du tableau
+procedure LineDisplay && {fr} Affiche le contenu de l'en-tête ou de la ligne courante
+lparameters tlHeader && [.F.] {fr} Afficher l'en-tête du tableau
 tlHeader = lTrue(m.tlHeader)
 
 local lcLineOut, lnDisplayWidth;
@@ -580,7 +577,7 @@ local lcLineOut, lnDisplayWidth;
 , lcCellDisplay, llLeftBar, llResult
 
 
-* Pour chaque colonne
+* {fr} Pour chaque colonne
 lcLineOut = ''
 store 0 to m.lnDisplayWidth, m.lnColsWidth
 for m.lnCol = 1 to alen(this.aaLog, 2)
@@ -599,10 +596,10 @@ for m.lnCol = 1 to alen(this.aaLog, 2)
 	if m.llResult
 
 		do case
-		case m.lnDisplayWidth = m.lnColsWidth && start current column
+		case m.lnDisplayWidth = m.lnColsWidth && {fr} start current column
 			lcLineOut = m.lcLineOut + iif(m.llLeftBar, '|', space(1)) + m.lcCellDisplay
-		case m.lnDisplayWidth >= m.lnColsWidth + m.lnColWidth && Beyond current column
-		otherwise && inside current column
+		case m.lnDisplayWidth >= m.lnColsWidth + m.lnColWidth && {fr} Beyond current column
+		otherwise && {fr} inside current column
 			lcLineOut = padr(m.lcLineOut, m.lnColsWidth + m.lnColWidth, space(1))
 		endcase
 		lnColsWidth = m.lnColsWidth + m.lnColWidth
@@ -620,14 +617,14 @@ endif
 return m.llResult
 
 * -------------------------------------------------
-procedure lineShow && Affiche la ligne courante à l'écran
-lparameters tlHeader && [.F.] Afficher l'en-tête
+procedure lineShow && {fr} Affiche la ligne courante à l'écran
+lparameters tlHeader && [.F.] {fr} Afficher l'en-tête
 
 if m.this.alConsole
 
 	activate screen
-*!*			?? '' AT 0 && bug de TEXT TO m.lcResult TEXTMERGE NOSHOW
-	?? space(1) at 0 && bug de TEXT TO m.lcResult TEXTMERGE NOSHOW
+*!*			?? '' AT 0 && {fr} bug de TEXT TO m.lcResult TEXTMERGE NOSHOW
+	?? space(1) at 0 && {fr} bug de TEXT TO m.lcResult TEXTMERGE NOSHOW
 
 	if lTrue(m.tlHeader)
 		?
@@ -636,24 +633,24 @@ if m.this.alConsole
 endif
 
 * -------------------------------------------------
-procedure LineFeed && Vide la ligne courante pour en commencer une nouvelle
+procedure LineFeed && {fr} Vide la ligne courante pour en commencer une nouvelle
 lparameters ;
-	tlSepLine, ; && [.F.] Tracer une ligne séparatrice après la nouvelle ligne
-	tlDataLine && [.F.] La nouvelle ligne contient des données vivantes
+	tlSepLine, ; && [.F.] {fr} Tracer une ligne séparatrice après la nouvelle ligne
+	tlDataLine && [.F.] {fr} La nouvelle ligne contient des données vivantes
 
 local lcLine, llResult
 
-* Update line count
+* {fr} Update line count
 if this.anCols > 0
 	this.anLine = this.anLine + 1
 	this.anDataLines = this.anDataLines + iif(lTrue(m.tlDataLine), 1, 0)
 endif
 
-* Flush and clear current line
+* {fr} Flush and clear current line
 llResult = this.LineFlush()
 llResult = this.LineClear() and m.llResult
 
-* Move to ENDFOR line, with separation line if required
+* {fr} Move to ENDFOR line, with separation line if required
 if lTrue(m.tlSepLine)
 	lcLine = this.cSepLine()
 	strtofile(CRLF + m.lcLine, this.acTxtLogAddr, .t.)
@@ -668,17 +665,17 @@ endif
 return m.llResult
 
 * -------------------------------------------------
-procedure LineFlush && Sauve la ligne courante dans les fichiers de compte-rendu
+procedure LineFlush && {fr} Sauve la ligne courante dans les fichiers de compte-rendu
 
 local llResult
 llResult = .t.
 
-* Ajouter au log texte
+* {fr} Ajouter au log texte
 if not empty(this.acTxtLogAddr) and not empty(this.acLine)
 	llResult = strtofile(CRLF + this.acLine, this.acTxtLogAddr, .t.) > 0
 endif
 
-* Ajouter au log table
+* {fr} Ajouter au log table
 if not empty(this.acDBFlogAddr)
 	llResult = used(this.acDBFlogAlias) or this.DBFlogCreate()
 	if m.llResult
@@ -689,7 +686,7 @@ endif
 return m.llResult
 
 * -------------------------------------------------
-procedure LineClear && Efface la ligne courante
+procedure LineClear && {fr} Efface la ligne courante
 
 local lnCol, lnWidth
 for m.lnCol = 1 to alen(this.aaLog, 2)
@@ -702,42 +699,42 @@ endfor
 this.acLine = ''
 
 * -------------------------------------------------
-procedure Warning && Affiche un avertissement dans une fenêtre "WAIT WINDOW", ajoute au compte-rendu des avertissements si nouveau
+procedure Warning && {fr} Affiche un avertissement dans une fenêtre "WAIT WINDOW", ajoute au compte-rendu des avertissements si nouveau
 lparameters ;
-  tcWarning; && Avertissement, vide pour nouvelle ligne
-, lAppendNot; && [.F.] Ne pas ajouter l'avertissement au compte-rendu
+  tcWarning; && {fr} Avertissement, vide pour nouvelle ligne
+, lAppendNot; && [.F.] {fr} Ne pas ajouter l'avertissement au compte-rendu
 , lCallingAddNot as Boolean; && [.F.] {en} do not add calling program name as header {fr} ne pas ajouter le nom du programme appelant en-tête
 
 local llWarnNew, lcWarning, lcCallingModule, llResult
 
-* Si avertissement non vide
+* {fr} Si avertissement non vide
 if .t.;
  and vartype(m.tcWarning) == 'C';
  and not empty(m.tcWarning)
 
 	tcWarning = alltrim(m.tcWarning)
 
-	* Si nouvel avertissement
+	* {fr} Si nouvel avertissement
 	lcCallingModule = cTronc(lower(cCallingModule()), 20)
 	lcWarning = Iif(lTrue(m.lCallingAddNot), '', padr(m.lcCallingModule, 20) ) + m.tcWarning
-	llWarnNew = not upper(Chrtran(m.lcWarning, '0123456789', '')) $ upper(Chrtran(m.this.acWarnings, '0123456789', '')) && comparer en ignorant les chiffres
+	llWarnNew = not upper(Chrtran(m.lcWarning, '0123456789', '')) $ upper(Chrtran(m.this.acWarnings, '0123456789', '')) && {fr} comparer en ignorant les chiffres
 	if m.llWarnNew
 
-	* Display warning
+	* {fr} Display warning
 		wait window cTronc('Module ' + m.lcCallingModule + ' : ' + m.tcWarning, 254) nowait
 	*			?? Chr(7)
 	endif
 
-else && blank line
+else && {fr} blank line
 
-	* Clear warning
+	* {fr} Clear warning
 	wait clear
 	llWarnNew = .t.
 	lcWarning = ''
 
 endif
 
-* If requested, Append Warning to Log
+* {fr} If requested, Append Warning to Log
 if m.llWarnNew and not (lTrue(m.lAppendNot))
 
 	lcWarning = CRLF + m.lcWarning
@@ -751,8 +748,8 @@ endif
 return m.llResult
 
 * -------------------------------------------------
-function cSepLine && Ligne séparatrice horizontale
-lparameters tlLeftBars && [.F.] Tracer une barre verticale au début de la nouvelle ligne
+function cSepLine && {fr} Ligne séparatrice horizontale
+lparameters tlLeftBars && [.F.] {fr} Tracer une barre verticale au début de la nouvelle ligne
 
 local lnCol, lnColWidth, llLeftBar, lcResult
 
@@ -775,7 +772,7 @@ endfor
 return iif(m.llResult, m.lcResult + iif(m.llLeftBar, '|', '-'), '')
 
 * -------------------------------------------------
-procedure DBFlogCreate && Crée la table de compte-rendu
+procedure DBFlogCreate && {fr} Crée la table de compte-rendu
 
 local lcFields, lnCol;
 , lcFieldName, lcFieldType, lnFieldLength, lcFieldExp;
@@ -812,7 +809,7 @@ endif
 return m.llResult
 
 * -------------------------------------------------
-procedure DBFlogAppend && Sauve la ligne courante du tableau dans la table de compte-rendu
+procedure DBFlogAppend && {fr} Sauve la ligne courante du tableau dans la table de compte-rendu
 
 local lnCols, llResult
 
@@ -820,17 +817,17 @@ lnCols = alen(this.aaLog, 2)
 llResult = m.lnCols > 0 and used(this.acDBFlogAlias)
 if m.llResult
 
-	* Tabuler les champs de la table de log
+	* {fr} Tabuler les champs de la table de log
 	local array laFields[1]
 	afields(laFields, this.acDBFlogAlias)
 
-	* Pour chaque colonne
+	* {fr} Pour chaque colonne
 	local llAllEmpty, lnCol, lcFieldName, luFieldValue, lcFieldType, lnFieldLength, lcFieldExp, lnField, lcAlter
 	llAllEmpty = .t.
 	lcAlter = ''
 	for lnCol = 1 to m.lnCols
 
-		* Déterminer les caractéristiques du champ pouvant contenir la donnée
+		* {fr} Déterminer les caractéristiques du champ pouvant contenir la donnée
 		lcFieldName = cVFPname(this.aaLog[L_cID, m.lnCol], 10)
 		luFieldValue = this.aaLog[L_uVALUE, m.lnCol]
 		lcFieldType = this.aaLog[L_cTYPE, m.lnCol]
@@ -842,15 +839,15 @@ if m.llResult
 			lcFieldExp = cFieldExp(m.lcFieldName, m.lcFieldType, m.lnFieldLength,,.t.)
 			lnField = ascan(laFields, m.lcFieldName, 1, -1, 1, 1+2+4+8)
 
-			* Si le champ n'existe pas
+			* {fr} Si le champ n'existe pas
 			if m.lnField = 0
 
 				lcAlter = lcAlter + ' ADD COLUMN ' + m.lcFieldExp
 
-			* Sinon (le champ existe)
+			* {fr} Sinon (le champ existe)
 			else
 
-				* Si le champ n'est pas de le bonne taille ou type
+				* {fr} Si le champ n'est pas de le bonne taille ou type
 				if not m.lcFieldType $ VFP7_FIELD_TYPES_FIXED_LEN ;
 				 and laFields[m.lnField, 3] < m.lnFieldLength ;
 				 or not laFields[m.lnField, 2] == m.lcFieldType
@@ -863,10 +860,10 @@ if m.llResult
 		endif
 
 		local (m.lcFieldName)
-		store m.luFieldValue to (m.lcFieldName) && pour GATHER MEMVAR plus loin
+		store m.luFieldValue to (m.lcFieldName) && {fr} pour GATHER MEMVAR plus loin
 	endfor
 
-	* S'il faut changer la structure de la table
+	* {fr} S'il faut changer la structure de la table
 	if not empty(m.lcAlter)
 		llResult = used(ExclusiveForce(this.acDBFlogAlias))
 		if m.llResult
@@ -889,32 +886,32 @@ endif
 return m.llResult
 
 * -------------------------------------------------
-procedure FooterCreate && Crée un pied de tableau avec totaux ou moyennes
+procedure FooterCreate && {fr} Crée un pied de tableau avec totaux ou moyennes
 
-* En cas d'interruption anormale, vider la ligne en cours
+* {fr} En cas d'interruption anormale, vider la ligne en cours
 if not empty(m.this.acLine)
 	this.LineFeed
 endif
 
-* Si au moins une ligne de données
+* {fr} Si au moins une ligne de données
 if m.this.anCols * m.this.anDataLines > 0
 
-	* Tracer une ligne pour fermer le tableau
+	* {fr} Tracer une ligne pour fermer le tableau
 	this.acLine = this.cSepLine()
 	this.lineShow()
 
-	* Si un pied de tableau a été demandé
+	* {fr} Si un pied de tableau a été demandé
 	if m.this.alFooter
 		this.LineFeed()
 
 		local lnCol, lnSum, luSum, llFooter, llTitle
 
-		* Pour chaque colonne
+		* {fr} Pour chaque colonne
 		for m.lnCol = 1 to this.anCols
 			lnSum = this.aaLog[L_nSUM, m.lnCol]
 			luSum = this.aaLog[L_lSUM, m.lnCol]
 
-			* Si la colonne contient un total et qu'un bilan est demandé
+			* {fr} Si la colonne contient un total et qu'un bilan est demandé
 			if m.lnSum > 0 and not isNull(m.luSum) && .NULL.: ne rien faire, ni total ni moyenne
 				this.CellFill(m.lnCol, m.lnSum / iif(m.luSum, 1, m.this.anDataLines))
 				llFooter = .t.
@@ -932,7 +929,7 @@ if m.this.anCols * m.this.anDataLines > 0
 			endif
 		endfor
 
-		* Si le pied d'état a été créé, le sortir
+		* {fr} Si le pied d'état a été créé, le sortir
 		if m.llFooter
 			this.LineFeed(.t.)
 		endif
@@ -940,7 +937,7 @@ if m.this.anCols * m.this.anDataLines > 0
 endif
 
 * -------------------
-enddefine && CLASS cusBatchLog as Custom
+enddefine && {fr} CLASS cusBatchLog as Custom
 
 * -----------------------------------------------------
 procedure cusBatchLog_Test
@@ -975,11 +972,11 @@ with m.loBatchLog
 endwith
 
 * ========================================
-function cModuleInfo && Nom, Chemin ou Adresse d'un module d'après Sys(16)
+function cModuleInfo && {fr} Nom, Chemin ou Adresse d'un module d'après Sys(16)
 lparameters ;
-	tcSys16,; && Chaîne obtenue par Sys(16)
+	tcSys16,; && {fr} Chaîne obtenue par Sys(16)
 	tcInfo,; && ['N'] {N}ame, {A}ddress, {P}ath, {O}bject, {S}ys16, {L}ignée, {F}ull lignée
-	tlCase && [.F.] Respecter la casse sur disque
+	tlCase && [.F.] {fr} Respecter la casse sur disque
 
 tcInfo = iif(vartype(m.tcInfo) = 'C' and not empty(m.tcInfo), upper(left(ltrim(m.tcInfo), 1)), 'N')
 tcInfo = iif(m.tcInfo $ 'NAPSOLF', m.tcInfo, 'N')
@@ -990,15 +987,15 @@ local llProc, lcAddr, lcProc, laMembers[1], lnMembers, llMethod;
 
 lcResult = ''
 
-* Si le paramètre requis est valide
+* {fr} Si le paramètre requis est valide
 llResult = vartype(m.tcSys16) = 'C'
 assert m.llResult message cAssertMsg(textmerge([Invalid Sys(16) Information : <<cLitteral(m.tcSys16)>>]))
-if m.llResult and not upper(left(m.tcSys16, 2)) == 'ON' && ON ...
+if m.llResult and not upper(left(m.tcSys16, 2)) == 'ON' && {fr} ON ...
 
- 	* Repérer le nom de la procédure et l'adresse du fichier dans la chaine sys(16)
+ 	* {fr} Repérer le nom de la procédure et l'adresse du fichier dans la chaine sys(16)
  	llProc = left(upper(m.tcSys16), lenc('PROCEDURE ')) == 'PROCEDURE '
  	lcAddr = iif(m.llProc;
- 		, substr(m.tcSys16, atc(' ', m.tcSys16, 2) + 1); && GetWordNum() ne fonctionne pas si l'adresse contient des espaces
+ 		, substr(m.tcSys16, atc(' ', m.tcSys16, 2) + 1); && {fr} GetWordNum() ne fonctionne pas si l'adresse contient des espaces
  		, m.tcSys16;
  		)
  	lcAddr = iif(m.tlCase, cFileCased(m.lcAddr), m.lcAddr)
@@ -1013,22 +1010,22 @@ if m.llResult and not upper(left(m.tcSys16, 2)) == 'ON' && ON ...
  	if m.llResult
 
 	 	return icase(;
-	 		m.tcInfo == 'N',; && Procedure name (with object name if method)
+	 		m.tcInfo == 'N',; && {fr} Procedure name (with object name if method)
 		 		iif(m.llMethod;
 		 			, laMembers[m.lnMembers-1] + iif(empty(laMembers[m.lnMembers-1]) or empty(laMembers[m.lnMembers]), '', '.') + laMembers[m.lnMembers];
 		 			, m.lcProc;
 		 			),;
-		 	m.tcInfo == 'A',; && Procedure file address
+		 	m.tcInfo == 'A',; && {fr} Procedure file address
 		 		m.lcAddr,;
-		 	m.tcInfo == 'P',; && Procedure file path
+		 	m.tcInfo == 'P',; && {fr} Procedure file path
 		 		addbs(justpath(m.lcAddr)),;
-		 	m.tcInfo == 'S',; && Procedure file address
+		 	m.tcInfo == 'S',; && {fr} Procedure file address
 		 		m.tcSys16,;
-		 	m.tcInfo == 'O',; && Object name
+		 	m.tcInfo == 'O',; && {fr} Object name
 		 		laMembers[m.lnMembers-1],;
-		 	m.tcInfo == 'L',; && Lignée des objets
+		 	m.tcInfo == 'L',; && {fr} Lignée des objets
 		 		leftc(m.lcProc, ratc('.', m.lcProc)-1),;
-		 	m.tcInfo == 'F',; && Lignée complète de la méthode
+		 	m.tcInfo == 'F',; && {fr} Lignée complète de la méthode
 		 		m.lcProc,;
 		 		'';
 		 	)
@@ -1038,12 +1035,12 @@ endif
 return m.lcResult
 
 * ------------------------------------
-procedure cModuleInfo_Test && Test cModuleInfo()
-&& cf 'cModuleInfo_Test.prg' pour test par programme
+procedure cModuleInfo_Test && {fr} Test cModuleInfo()
+&& {fr} cf 'cModuleInfo_Test.prg' pour test par programme
 
 local loUnitTest as abUnitTest of abDev.prg, lcSys16, loClassTest
 loUnitTest = newobject('abUnitTest', 'abDev.prg')
-lcSys16 = sys(16) && module courant
+lcSys16 = sys(16) && {fr} module courant
 
 loUnitTest.Test('CMODULEINFO_TEST', m.lcSys16, 'Name')
 loUnitTest.Test(upper(DOS_AB), m.lcSys16, 'Path')
@@ -1054,28 +1051,28 @@ loClassTest = createobject('cusModuleInfo_Test', m.loUnitTest)
 return loUnitTest.result()
 
 * --------------------------------------
-define class cusModuleInfo_Test as custom && Teste cModuleInfo() au sein d'une classe
+define class cusModuleInfo_Test as custom && {fr} Teste cModuleInfo() au sein d'une classe
 		procedure init
 		lparameters toUnitTest
 		local lcSys16
-		lcSys16 = sys(16) && module courant
+		lcSys16 = sys(16) && {fr} module courant
 		toUnitTest.Test('CUSMODULEINFO_TEST.INIT', m.lcSys16, 'Name')
 		toUnitTest.Test(upper(DOS_AB), m.lcSys16, 'Path')
 		toUnitTest.Test(upper(DOS_AB) + 'ABDEV.FXP', m.lcSys16, 'Address')
 	enddefine
 
 * ========================================
-function cCallingModule && Nom du module appelant (programme, procédure, méthode, ...)
+function cCallingModule && {fr} Nom du module appelant (programme, procédure, méthode, ...)
 lparameters ;
-	tcAddress,; && [''] @ Adresse du fichier où se trouve le module appelant
-	tnStackUp && [0] nombre de niveaux avant le module appelant
+	tcAddress,; && @ [''] {fr} Adresse du fichier où se trouve le module appelant
+	tnStackUp && [0] {fr} nombre de niveaux avant le module appelant
 
 local lnLevelHere, lcSys16, lcResult
 
 lcResult = ''
 
-* Si ce module est appelé par un module appelé
-lnLevelHere = program(-1) && current program level
+* {fr} Si ce module est appelé par un module appelé
+lnLevelHere = program(-1) && {en} current program level
 if m.lnLevelHere > 2
 
 	lcSys16 = sys(16, m.lnLevelHere - 2 - abs(evl(m.tnStackUp, 0)))
@@ -1137,9 +1134,9 @@ define class cCallingModule_Test3 as relation
 	enddefine
 
 * ========================================
-function cCallingModules && Modules appelants
+function cCallingModules && {fr} Modules appelants
 lparameters ;
-	tlCurrent,; && [.F.] Inclure le nom du module courant
+	tlCurrent,; && [.F.] {fr} Inclure le nom du module courant
 	tcInfo && [Name] 'Name', 'Address', 'Path', 'Object' ou 'Lignée'
 
 tlCurrent = lTrue(m.tlCurrent)
@@ -1147,8 +1144,8 @@ tlCurrent = lTrue(m.tlCurrent)
 local lnLevelHere, lnLevel, lcResult
 lcResult = ''
 
-* Si cCallingModules est appelé par un module appelé
-lnLevelHere = program(-1) && current program level
+* {fr} Si cCallingModules est appelé par un module appelé
+lnLevelHere = program(-1) && {fr} current program level
 if m.lnLevelHere > iif(m.tlCurrent, 1, 2)
 
 	for m.lnLevel = 1 to m.lnLevelHere - iif(m.tlCurrent, 1, 2)
@@ -1159,10 +1156,10 @@ endif
 return lower(m.lcResult)
 
 * ========================================
-function lCallingModule && Un module appelle le module appelant cette fonction
+function lCallingModule && {fr} Un module appelle le module appelant cette fonction
 lparameters ;
-	tcModule,; && Module: [class][.]procedure
-	tlModules && [.F.] && appel depuis lCallingModules()
+	tcModule,; && {fr} Module: [class][.]procedure
+	tlModules && [.F.] && {fr} appel depuis lCallingModules()
 
 local llResult as Boolean;
 , liLevelBase as integer;
@@ -1174,8 +1171,8 @@ local llResult as Boolean;
 
 if vartype(m.tcModule) == 'C' and not empty(m.tcModule)
 
-	* Si ce module est appelé par un module appelé
-	liLevelHere = program(-1) && current program level
+	* {fr} Si ce module est appelé par un module appelé
+	liLevelHere = program(-1) && {en} current program level
 	liLevelBase = 2 + iif(lTrue(m.tlModules), 1, 0)
 	if m.liLevelHere > m.liLevelBase
 
@@ -1205,10 +1202,10 @@ endif
 return m.llResult
 
 * ========================================
-function lCallingModules && Plusieurs modules appellent le module appelant cette fonction
+function lCallingModules && {fr} Plusieurs modules appellent le module appelant cette fonction
 lparameters ;
-	tcModules,; && Modules
-	tlOR && [.F.] Au moins un module appelle le module
+	tcModules,; && {fr} Modules
+	tlOR && [.F.] {fr} Au moins un module appelle le module
 tlOR = lTrue(m.tlOR)
 
 local laModules[1], lcModule, llResult
@@ -1234,8 +1231,8 @@ endif
 return m.llResult
 
 * ========================================
-function lUserEventCalling && Un événement utilisateur appelle cette fonction
-lparameters tcClassStart && Classe à partir de laquelle chercher dans la pile d'appel si elle s'y trouve
+function lUserEventCalling && {fr} Un événement utilisateur appelle cette fonction
+lparameters tcClassStart && {fr} Classe à partir de laquelle chercher dans la pile d'appel si elle s'y trouve
 
 local success as Boolean;
 , laStack[1] as string;
@@ -1246,19 +1243,19 @@ local success as Boolean;
 , liEvent as integer;
 
 lnStack = astackinfo(m.laStack)
-if m.lnStack > 0 && should always be .T.
+if m.lnStack > 0 && {fr} should always be .T.
 
 	tcClassStart = lower(evl(m.tcClassStart, ''))
 	lClassStart = !empty(m.tcClassStart)
 	for liStack = m.lnStack to 1 step -1
 		if m.lClassStart and lower(getwordnum(laStack[m.liStack, 3], 1, '.')) == m.tcClassStart
-*				liStack = Aelement(m.laStack, m.liStack, 3)
+* {fr} liStack = Aelement(m.laStack, m.liStack, 3)
 			exit
 		endif
-		laStack[m.liStack, 3] = getwordnum(laStack[m.liStack, 3], getwordcount(laStack[m.liStack, 3], '.'), '.') && Module or Object name
+		laStack[m.liStack, 3] = getwordnum(laStack[m.liStack, 3], getwordcount(laStack[m.liStack, 3], '.'), '.') && {fr} Module or Object name
 	endfor
 	liStack = evl(m.liStack, 1)
-	text to lcEvent noshow flags 1 pretext 3 && could be rearranged for optimization (most frequent events first)
+	text to lcEvent noshow flags 1 pretext 3 && {fr} could be rearranged for optimization (most frequent events first)
 		Activate
 		Afterdock
 		AfterRowColChange
@@ -1312,7 +1309,7 @@ endif
 return m.success
 
 * ------------------------------------
-procedure lUserEventCalling_Test && Teste lUserEventCalling()
+procedure lUserEventCalling_Test && {fr} Teste lUserEventCalling()
 
 local loUnitTest as abUnitTest of abDev.prg
 loUnitTest = newobject('abUnitTest', 'abDev.prg')
@@ -1323,22 +1320,22 @@ loUnitTest.Test(.f., 'abUnitTest')
 return m.loUnitTest.result()
 
 * ========================================
-function uDefault && Valeur par défaut d'un paramètre /!\ .T. non supporté
+function uDefault && {fr} Valeur par défaut d'un paramètre /!\ .T. non supporté
 lparameters ;
-	tuParm,; && Paramètre dont il faut régler la valeur par défaut
-	tuDefault && Valeur par défaut /!\ .T. non supporté
+	tuParm,; && {fr} Paramètre dont il faut régler la valeur par défaut
+	tuDefault && {fr} Valeur par défaut /!\ .T. non supporté
 
 local lcType, luResult
 luResult = .null.
 
-* Si deux paramètres ont été passés
+* {fr} Si deux paramètres ont été passés
 if pcount() = 2
 
-	* Si la valeur par défaut est supportée
+	* {fr} Si la valeur par défaut est supportée
 	lcType = vartype(m.tuDefault)
 	if not (m.lcType == 'L' and m.tuDefault)
 
-		* Si le paramètre est du type de la valeur par défaut, le retourner, sinon retourner la valeur par défaut
+		* {fr} Si le paramètre est du type de la valeur par défaut, le retourner, sinon retourner la valeur par défaut
 		luResult = iif(vartype(m.tuParm) == m.lcType, m.tuParm, m.tuDefault)
 	else
 		assert .f. message cAssertMsg(textmerge([<<Proper(Program())>> ne supporte pas la valeur par défaut .T. comme second paramètre]))
@@ -1348,7 +1345,7 @@ endif
 return m.luResult
 
 * ------------------------------------
-procedure uDefault_Test && Teste uDefault()
+procedure uDefault_Test && {fr} Teste uDefault()
 
 local loUnitTest as abUnitTest of abDev.prg
 loUnitTest = newobject('abUnitTest', 'abDev.prg')
@@ -1364,9 +1361,9 @@ loUnitTest.Test(.null., 0, .t.)
 return loUnitTest.result()
 
 * ==================================
-define class abMachineInfo as GA_LIGHTWEIGHT_CLASS of abGA.prg && Informations sur la machine : processeur, mémoire, etc.
+define class abMachineInfo as GA_LIGHTWEIGHT_CLASS of abGA.prg && {fr} Informations sur la machine : processeur, mémoire, etc.
 
-* Système
+* {fr} Système
 nOEMid = 0
 nPageSize = 0
 nAppAddrMin = 0
@@ -1378,7 +1375,7 @@ cProcessorName = ''
 nAllocationGranularity = 0
 nReserved = 0
 
-* Mémoire
+* {fr} Mémoire
 nMemLoad = 0
 nMemPhysTot = 0
 nMemPhysAvail = 0
@@ -1387,7 +1384,7 @@ nPageFileAvail = 0
 nMemVirtualTot = 0
 nMemVirtualAvail = 0
 
-* Processeur
+* {fr} Processeur
 nAddressWidth = 0
 nArchitecture = 0
 nAvailability = 0
@@ -1419,7 +1416,7 @@ cVersion = ''
 nVoltageCaps = 0
 
 * ------------------------------------
-procedure SystemInfo && Peuple les informations système
+procedure SystemInfo && {fr} Peuple les informations système
 
  declare GetSystemInfo in win32api string @lcSystemInfo
  local lcSysInfo
@@ -1455,7 +1452,7 @@ procedure SystemInfo && Peuple les informations système
  endcase
 
 * ------------------------------------
-procedure MemoryInfo && Peuple les informations mémoire
+procedure MemoryInfo && {fr} Peuple les informations mémoire
 
  declare GlobalMemoryStatus in win32api string @lcMemStat
  local lcMemStat
@@ -1471,7 +1468,7 @@ procedure MemoryInfo && Peuple les informations mémoire
  this.nMemVirtualAvail = StrToLong(substr(m.lcMemStat, 29, 4))
 
 * ------------------------------------
-procedure ProcessorInfo && Peuple les informations sur le processeur
+procedure ProcessorInfo && {fr} Peuple les informations sur le processeur
 
 local loWMIService, loItems, loItem
 loWMIService = getobject("winmgmts:\\.\root\cimv2")
@@ -1509,10 +1506,10 @@ for each loItem in loItems
 	this.nVoltageCaps = loItem.VoltageCaps
 endfor
 
-enddefine && CLASS abMachineInfo
+enddefine && {fr} CLASS abMachineInfo
 
 * ==================================
-procedure abMachineInfo_Test && Teste abMachineInfo
+procedure abMachineInfo_Test && {fr} Teste abMachineInfo
 
 local lnSeconds, loMI as abMachineInfo of abDev.prg
 loMI = createobject('abMachineInfo')
@@ -1587,8 +1584,8 @@ lnSeconds = seconds() - m.lnSeconds
  ,64)
 
 * ------------------------------------
- function LongToStr && Représentation ASCII d'un entier 32 bits positif
- lparameters tnLongVal && Entier 32 bits positif
+ function LongToStr && {fr} Représentation ASCII d'un entier 32 bits positif
+ lparameters tnLongVal && {fr} Entier 32 bits positif
 
  local i, lnLongVal, lcResult
 
@@ -1602,8 +1599,8 @@ lnSeconds = seconds() - m.lnSeconds
  return lcResult
 
 * ------------------------------------
-function StrToLong && Entier 32 bits positif d'après sa représentation ASCII
-lparameters tcLongStr && Représentation ASCII d'un entier 32 bits positif
+function StrToLong && {fr} Entier 32 bits positif d'après sa représentation ASCII
+lparameters tcLongStr && {fr} Représentation ASCII d'un entier 32 bits positif
 
 local i, lcLongStr, lnResult
 lnResult = 0
@@ -1616,11 +1613,11 @@ endfor
 return lnResult
 
 * ------------------------------------
-function cBarsSecs && Une barre pour 50 ms
-lparameters tnSeconds && Nombre de secondes obtenu par différence de seconds()
+function cBarsSecs && {fr} Une barre pour 50 ms
+lparameters tnSeconds && {fr} Nombre de secondes obtenu par différence de seconds()
 
 if vartype(m.tnSeconds) == 'N' and m.tnSeconds >= 0
- 	tnSeconds = m.tnSeconds * 1000 && ms
+ 	tnSeconds = m.tnSeconds * 1000 && {fr} ms
 
  	local lcBars
  	lcBars = replicate('=', min(int(m.tnSeconds / 50), 100)) && 1 barre = 50 ms, 5 secs max
@@ -1634,44 +1631,44 @@ else
 endif
 
 * ------------------------------------
-procedure ProjectFilesInclude && Change l'inclusion de fichiers dans le projet courant
+procedure ProjectFilesInclude && {fr} Change l'inclusion de fichiers dans le projet courant
 lparameters ;
-	tcFileMask,; && [*.*] Expression régulière indiquant le masque de fichier à traiter
+	tcFileMask,; && [*.*] {fr} Expression régulière indiquant le masque de fichier à traiter
 	tlInclude,; && [.T.] .T.: Inclure, .F.: Exclure, .NULL. : Inverser
-	tnResult && @ Nombre de fichiers traités
+	tnResult && @ {fr} Nombre de fichiers traités
 tnResult = 0
 
 local loProject, loProjectFiles, loRegExp as abRegExp of abTxt.prg, llResult
 
-* Si un projet est actif
+* {fr} Si un projet est actif
 loProject = _vfp.activeproject
 llResult = vartype(m.loProject) == 'O'
 if m.llResult
 
-	* Si le projet contient des fichiers
+	* {fr} Si le projet contient des fichiers
 	loProjectFiles = m.loProject.files
 	llResult = m.loProjectFiles.count > 0
 	if m.llResult
 
-		* Créer un objet 'Regular Expression'
+		* {fr} Créer un objet 'Regular Expression'
 		loRegExp = createobject('abRegExp')
 		llResult = vartype(m.loRegExp) == 'O'
 		if m.llResult
 
-			* Donner leur valeur par défaut aux paramètres
+			* {fr} Donner leur valeur par défaut aux paramètres
 			local lcCarsNot, lcFileMask, llInclude, loFile as file
 			lcCarsNot = CAR_INT_DS_NOM_FICH
 			lcFileMask = alltrim(uDefault(m.tcFileMask, textmerge('[^<<m.lcCarsNot>>]+\.[^<<m.lcCarsNot>>]+')))
 			llInclude = iif(pcount() >=2 and vartype(m.tlInclude) $ 'LX', m.tlInclude, .t.)
 
-			* Pour chaque fichier
+			* {fr} Pour chaque fichier
 			loRegExp.setup(m.lcFileMask, .t.)
 			for each loFile in m.loProjectFiles
 
-				* Si le nom du fichier correspond au masque
+				* {fr} Si le nom du fichier correspond au masque
 				if loRegExp.Test(justfname(m.loFile.name))
 
-					* Changer son inclusion
+					* {fr} Changer son inclusion
 					loFile.Exclude = iif(isNull(m.llInclude), not m.loFile.Exclude, m.llInclude)
 					tnResult = m.tnResult + 1
 				endif
@@ -1683,43 +1680,43 @@ endif
 return m.llResult
 
 * ------------------------------------
-procedure ProjectFilesRemove && Ôte des fichiers du projet courant
+procedure ProjectFilesRemove && {fr} Ôte des fichiers du projet courant
 lparameters ;
-	tcFileMask,; && [*.*] Expression régulière indiquant le masque de fichier à traiter
-	tnResult && @ Nombre de fichiers traités
+	tcFileMask,; && [*.*] {fr} Expression régulière indiquant le masque de fichier à traiter
+	tnResult && @ {fr} Nombre de fichiers traités
 tnResult = 0
 
 local loProject, loProjectFiles, loRegExp as abRegExp of abTxt.prg, llResult
 
-* Si un projet est actif
+* {fr} Si un projet est actif
 loProject = _vfp.activeproject
 llResult = vartype(m.loProject) == 'O'
 if m.llResult
 
-	* Si le projet contient des fichiers
+	* {fr} Si le projet contient des fichiers
 	loProjectFiles = m.loProject.files
 	llResult = m.loProjectFiles.count > 0
 	if m.llResult
 
-		* Créer un objet 'Regular Expression'
+		* {fr} Créer un objet 'Regular Expression'
 		loRegExp = createobject('abRegExp')
 		llResult = vartype(m.loRegExp) == 'O'
 		if m.llResult
 
-			* Donner leur valeur par défaut aux paramètres
+			* {fr} Donner leur valeur par défaut aux paramètres
 			local lcCarsNot, lcFileMask, llInclude, loFile as file
 			lcCarsNot = CAR_INT_DS_NOM_FICH
 			lcFileMask = alltrim(uDefault(m.tcFileMask, textmerge('[^<<m.lcCarsNot>>]+\.[^<<m.lcCarsNot>>]+')))
 			llInclude = iif(pcount() >=2 and vartype(m.tlInclude) $ 'LX', m.tlInclude, .t.)
 
-			* Pour chaque fichier
+			* {fr} Pour chaque fichier
 			loRegExp.setup(m.lcFileMask, .t.)
 			for each loFile in m.loProjectFiles
 
-				* Si le nom du fichier correspond au masque
+				* {fr} Si le nom du fichier correspond au masque
 				if loRegExp.Test(justfname(m.loFile.name))
 
-					* öter le fichier
+					* {fr} öter le fichier
 					loFile.remove
 					tnResult = m.tnResult + 1
 				endif
@@ -1732,24 +1729,24 @@ return m.llResult
 
 
 *========================================
-function cVFPname	&& Nom valide pour VFP, avec longueur limitée si nécessaire
+function cVFPname	&& {fr} Nom valide pour VFP, avec longueur limitée si nécessaire
 lparameters ;
-	tcVFPname, ; && Nom VFP à valider
-	tnLength && [len(tcVFPname)] Longueur maximale du nom (par ex. 10 pour un nom de champ de table libre)
+	tcVFPname, ; && {fr} Nom VFP à valider
+	tnLength && [len(tcVFPname)] {fr} Longueur maximale du nom (par ex. 10 pour un nom de champ de table libre)
 local lcResult
 lcResult = ''
 
 if vartype(m.tcVFPname) = 'C' ;
  and not empty(m.tcVFPname)
 
-	* Remove accents
+	* {fr} Remove accents
 	local lcVFPname
 	lcVFPname = cEuroANSI(alltrim(m.tcVFPname))
 
-	* Start with '_' if first is a digit
+	* {fr} Start with '_' if first is a digit
 	lcVFPname = iif(isdigit(m.lcVFPname), '_', '') + m.lcVFPname
 
-	* Turn characters neither digit or letter to '_'
+	* {fr} Turn characters neither digit or letter to '_'
 	local lnCar, lcCar
 	for m.lnCar = 1 to len(m.lcVFPname)
 		lcCar = substrc(m.lcVFPname, m.lnCar, 1)
@@ -1757,11 +1754,11 @@ if vartype(m.tcVFPname) = 'C' ;
 		lcResult = m.lcResult + upper(m.lcCar)
 	endfor
 
-	* Remove duplicate underscores
+	* {fr} Remove duplicate underscores
 	lcResult = cRepCharDel(m.lcResult, '_')
 	lcResult = iif(m.lcResult == '_', '', m.lcResult)
 
-	* Trim right is required
+	* {fr} Trim right is required
 	if vartype(m.tnLength) = 'N' ;
 	 and m.tnLength > 0
 		lcResult = leftc(m.lcResult, m.tnLength)
@@ -1785,8 +1782,8 @@ loUnitTest.Test(leftc('_2CARTABLE_POIRE', 9), '2cartable.:poiré', 9)
 return loUnitTest.result()
 
 *========================================
-function lVFPname	&& Nom valide pour VFP
-lparameters tcVFPname && @ Nom VFP à valider
+function lVFPname	&& {fr} Nom valide pour VFP
+lparameters tcVFPname && @ {fr} Nom VFP à valider
 
 local llResult
 #if .f.
@@ -1809,8 +1806,8 @@ endif
 return m.llResult
 
 * ====================
-function lProcLine && Ligne de code VFP définissant une procédure / fonction
-lparameters tcCodeLine && Ligne de code VFP
+function lProcLine && {fr} Ligne de code VFP définissant une procédure / fonction
+lparameters tcCodeLine && {fr} Ligne de code VFP
 
 local lcCodeLine, lcWord1, lcWord2, llResult
 
@@ -1820,17 +1817,18 @@ if m.llResult
 
 	lcCodeLine = upper(m.tcCodeLine)
 	lcWord1 = left(getwordnum(m.lcCodeLine, 1), 4)
-	lcWord2 = left(getwordnum(m.lcCodeLine, 2), 4)
+	return .F.;
+		or m.lcWord1 $ 'PROC|FUNC';
+		or m.lcWord1 $ 'PROT|HIDD' and left(getwordnum(m.lcCodeLine, 2), 4) $ 'PROC|FUNC'
 
-	llResult = m.lcWord1 $ 'PROC,FUNC' ;
-				or m.lcWord1 $ 'PROT,HIDD' and m.lcWord2 $ 'PROC,FUNC'
 endif
 
 return m.llResult
+endfunc
 
 * ====================
-function cProcType && Type de procédure / fonction défini dans une ligne
-lparameters tcCodeLine && Ligne de code VFP
+function cProcType && {fr} Type de procédure / fonction défini dans une ligne
+lparameters tcCodeLine && {fr} Ligne de code VFP
 
 local lcCodeLine, lnProc, lnFunc, llParm, lcResult && 'P' ou 'F' ou vide si impossible de le définir
 
@@ -1850,8 +1848,8 @@ endif
 return m.lcResult
 
 * ====================
-function lCommandLine && Ligne de code VFP contenant une commande
-lparameters tcCodeLine && Ligne de code VFP
+function lCommandLine && {fr} Ligne de code VFP contenant une commande
+lparameters tcCodeLine && {fr} Ligne de code VFP
 
 local llResult
 
@@ -1861,15 +1859,15 @@ if m.llResult
 
 	llResult = ;
 			not lCommentLine(m.tcCodeLine) ;
-		and not left(getwordnum(m.tcCodeLine, 1), 1) == '#' && directive de compilation
+		and not left(getwordnum(m.tcCodeLine, 1), 1) == '#' && {fr} directive de compilation
 endif
 
 return m.llResult
 
 * ====================
-function lCommentLine && Ligne de commentaire VFP
-lparameters tcCodeLine && Ligne de code VFP
-local llResult && c'est une ligne de commentaire
+function lCommentLine && {fr} Ligne de commentaire VFP
+lparameters tcCodeLine && {fr} Ligne de code VFP
+local llResult && {fr} c'est une ligne de commentaire
 
 llResult = vartype(m.tcCodeLine) == 'C'
 assert m.llResult message cAssertMsg(textmerge([Invalid parameter type]))
@@ -1886,24 +1884,24 @@ endif
 return m.llResult
 
 * ====================
-function lSeparatorLine && Ligne de commentaire de séparation
-lparameters tcCodeLine && Ligne de code VFP
-local llResult && c'est une ligne de séparation
+function lSeparatorLine && {fr} Ligne de commentaire de séparation
+lparameters tcCodeLine && {fr} Ligne de code VFP
+local llResult && {fr} c'est une ligne de séparation
 
-* Si le paramètre est correct
+* {fr} Si le paramètre est correct
 llResult = vartype(m.tcCodeLine) == 'C'
 assert m.llResult message cAssertMsg(textmerge([Invalid parameter type]))
 if m.llResult
 
-	* si c'est une ligne de commentaire
+	* {fr} si c'est une ligne de commentaire
 	llResult = lCommentLine(m.tcCodeLine)
 	if m.llResult
 
-		* Si la ligne n'est pas vide
+		* {fr} Si la ligne n'est pas vide
 		llResult = empty(m.tcCodeLine)
 		if not m.llResult
 
-			* Si la ligne ne comporte aucune lettre ou chiffre
+			* {fr} Si la ligne ne comporte aucune lettre ou chiffre
 			local lnCar, lcCar
 			for m.lnCar = 1 to lenc(m.tcCodeLine)
 				lcCar = substrc(m.tcCodeLine, m.lnCar, 1)
@@ -1919,22 +1917,23 @@ endif
 return m.llResult
 
 * ====================
-function cLineComment && Commentaire dans une ligne de code
-lparameters tcCodeLine && Ligne de code ; si @, retournée sans commentaire ni espaces
+function cLineComment && {fr} Commentaire dans une ligne de code
+lparameters tcCodeLine && {fr} Ligne de code ; si @, retournée sans commentaire ni espaces
 
-local lcResult; && Commentaire dans la ligne de code
+local lcResult; && {fr} Commentaire dans la ligne de code
 , llResult;
 , lnAt, lnAt1;
 
 lcResult = ''
 
-* Si la ligne de code est valide
-tcCodeLine = cCodeLineClean(m.tcCodeLine) && Ligne de code sans caractères parasites
+* {fr} Si la ligne de code est valide
+tcCodeLine = cCodeLineClean(m.tcCodeLine) && {fr} Ligne de code sans caractères parasites
 llResult = not isNull(m.tcCodeLine)
 assert m.llResult message cAssertMsg(textmerge([Line de code invalide : <<m.tcCodeLine>>]))
 if m.llResult
 
-	* Si la ligne comporte un commentaire
+	* {fr} Si la ligne comporte un commentaire
+	
 	lnAt = at_c('*', m.tcCodeLine)
 	if m.lnAt > 0
 		lnAt1 = m.lnAt + 1
@@ -1946,34 +1945,36 @@ if m.llResult
 	endif
 	if m.lnAt > 0
 
-		* Extraire le commentaire et le supprimer
+		* {fr} Extraire le commentaire et le supprimer
 		lcResult = m.tcCodeLine
 		lcResult = alltrim(substrc(m.lcResult, m.lnAt1))
-		lcResult = upper(substrc(m.lcResult, 1, 1)) + substrc(m.lcResult, 2) && capitalise le premier caractère
-		tcCodeLine = substrc(m.tcCodeLine, 1, m.lnAt - 1) && Ligne sans le commentaire
+		lcResult = upper(substrc(m.lcResult, 1, 1)) + substrc(m.lcResult, 2) && {fr} capitalise le premier caractère
+		tcCodeLine = substrc(m.tcCodeLine, 1, m.lnAt - 1) && {fr} Ligne sans le commentaire
 	endif
 endif
 
 return m.lcResult
 
 * --------------------
-procedure cLineComment_Test && Teste cLineComment
+procedure cLineComment_Test && {fr} Teste cLineComment
 
 local loUnitTest as abUnitTest of abDev.prg
 loUnitTest = newobject('abUnitTest', 'abDev.prg')
 
 local lcLine
 lcLine = '      Procedure test ' + replicate('&', 2) + '   test réussi'
-loUnitTest.Test('Test réussi', m.lcLine)
+loUnitTest.Test('Test réussi', @m.lcLine)
+loUnitTest.Assert('Procedure test', m.lcLine)
 
 lcLine = '* Procedure test ' + replicate('&', 2) + '   test réussi'
-loUnitTest.Test('Procedure test ' + replicate('&', 2) + ' test réussi', m.lcLine)
+loUnitTest.Test('Procedure test ' + replicate('&', 2) + ' test réussi', @m.lcLine)
+loUnitTest.Assert('', m.lcLine)
 
 return loUnitTest.result()
 
 * ====================
-function cCodeLineClean && Ligne de code sans caractères parasites
-lparameters tcCodeLine && Ligne de code
+function cCodeLineClean && {fr} Ligne de code sans caractères parasites
+lparameters tcCodeLine && {fr} Ligne de code
 
 local llResult
 
@@ -1981,17 +1982,17 @@ llResult = vartype(m.tcCodeLine)=='C'
 assert m.llResult message cAssertMsg(textmerge([Function argument type is invalid : <<m.tcCodeLine>>]))
 if m.llResult
 
-	return	cRepCharDel(; && supprime les espaces répétés
-						chrtran(ltrim(m.tcCodeLine), chr(9), space(1)); && remplace les tabs par des espaces
+	return	cRepCharDel(; && {fr} supprime les espaces répétés
+						chrtran(ltrim(m.tcCodeLine), chr(9), space(1)); && {fr} remplace les tabs par des espaces
 					)
 else
 	return .null.
 endif
 
 * ====================
-function cCommentStripped && Code sans commentaires
+function cCommentStripped && {fr} Code sans commentaires
 lparameters ;
-	tcInsts; && Instructions
+	tcInsts; && {fr} Instructions
 , tlInLineCommentKeep
 
 local laInst[1], lcInst, lcInst_, llCRLF;
@@ -2003,7 +2004,7 @@ llResult = vartype(m.tcInsts) == 'C'
 assert m.llResult message cAssertMsg(textmerge([Invalid code block: <<m.tcInsts>>]))
 if m.llResult
 
-	if alines(laInst, m.tcInsts) > 0 && garder les espaces en début et fin de ligne
+	if alines(laInst, m.tcInsts) > 0 && {fr} garder les espaces en début et fin de ligne
 
 		llCRLF = rightc(m.tcInsts, 2) == CRLF
 		for each lcInst in m.laInst
@@ -2025,10 +2026,10 @@ endif
 return m.lcResult
 
 * ====================
-function cInLineCommentStripped && Instructions sans commentaire de ligne
+function cInLineCommentStripped && {fr} Instructions sans commentaire de ligne
 lparameters ;
-	tcInsts as string,; && Instructions
-	tcComment as string && @ Commentaires trouvés
+	tcInsts as string,; && {fr} Instructions
+	tcComment as string && @ {fr} Commentaires trouvés
 
 tcComment = ''
 
@@ -2039,7 +2040,7 @@ local lcResult;
 
 lcResult = ''
 
-* Si code valide
+* {fr} Si code valide
 llResult = vartype(m.tcInsts) == 'C'
 assert m.llResult message cAssertMsg(textmerge([Invalid Code: <<cL(m.tcInsts)>>]))
 if m.llResult
@@ -2072,7 +2073,7 @@ endif
 return m.lcResult
 
 * ----------------------------
-procedure cInLineCommentStripped_Test && Teste cInLineCommentStripped()
+procedure cInLineCommentStripped_Test && {fr} Teste cInLineCommentStripped()
 
 local loUnitTest as abUnitTest of abDev.prg, lcCode, lcComment, lcExpected
 
@@ -2083,9 +2084,9 @@ loUnitTest.Test('Moved', m.lcCode, @m.lcComment)
 loUnitTest.assert([&] + [& Occurs when an object is moved to a new position or a container object's Top or Left property settings have been changed programmatically], m.lcComment)
 
 text TO lcCode NOSHOW FLAGS 1 PRETEXT 3
-	MouseWheel && Occurs ...
-	Moved && Occurs when an object is moved to a new position or a container object's Top or Left property settings have been changed programmatically
-	OLECompleteDrag && Occurs ...
+	MouseWheel && {fr} Occurs ...
+	Moved && {fr} Occurs when an object is moved to a new position or a container object's Top or Left property settings have been changed programmatically
+	OLECompleteDrag && {fr} Occurs ...
 ENDTEXT
 
 text TO lcExpected NOSHOW FLAGS 1 PRETEXT 3
@@ -2099,8 +2100,8 @@ loUnitTest.Test(m.lcExpected, m.lcCode)
 return loUnitTest.result()
 
 * ====================
-function aInLineCommentsStripped && Lignes de code sans commentaires de ligne
-lparameters taCodeLines && @ Lignes de code
+function aInLineCommentsStripped && {fr} Lignes de code sans commentaires de ligne
+lparameters taCodeLines && @ {fr} Lignes de code
 external array taCodeLines
 
 local lnCodeLine, llResult, lnResult
@@ -2119,15 +2120,15 @@ endif
 return m.lnResult
 
 * =================================================
-function abON as abON of abDev.prg && Saves and restores ON ...
+function abON as abON of abDev.prg && {en} Saves and restores ON ...
 lparameters ;
-	tcSetting,; && ON ... to be set
-	tvValueNew && Value to set
+	tcSetting,; && {fr} ON ... to be set
+	tvValueNew && {fr} Value to set
 
 return createobject('abON', m.tcSetting, m.tvValueNew)
 
 * =================================================
-define class abON as GA_LIGHTWEIGHT_CLASS of abGA.prg && Saves and restores ON ...
+define class abON as GA_LIGHTWEIGHT_CLASS of abGA.prg && {fr} Saves and restores ON ...
 * =================================================
 
 cSetting = ''
@@ -2136,8 +2137,8 @@ vValueOld = .null.
 * ------------------------------------
 procedure init
 lparameters ;
-	tcSetting,; && ON ... to be set
-	tvValueNew && Value to set
+	tcSetting,; && {fr} ON ... to be set
+	tvValueNew && {fr} Value to set
 
 local llResult
 
@@ -2162,18 +2163,18 @@ lcValue = m.this.vValueOld
 on &lcSetting &lcValue
 
 * =================================================
-enddefine && CLASS abOn
+enddefine && {fr} CLASS abOn
 * =================================================
 
 * =================================================
 function labSet as Boolean
 lparameters ;
-	toObj as abSet of abDev.prg,; && @ abSet Object back
-	tcSetting,; && Setting to perform
-	tvValueNew,; && Value to set, .T. to toggle ON - OFF
-	tnSetting,; && Setting number when appropriate for tcSetting, as of 2nd parameter of set()
-	tlChangeAlways,; && [.F.] Change setting even if required value is current
-	tlSupported && [.F.] assume setting is supported (optimization)
+	toObj as abSet of abDev.prg,; && @ {en} abSet Object back
+	tcSetting,; && {en} Setting to perform
+	tvValueNew,; && {en} Value to set, .T. to toggle ON - OFF
+	tnSetting,; && {en} Setting number when appropriate for tcSetting, as of 2nd parameter of set()
+	tlChangeAlways,; && [.F.] {en} Change setting even if required value is current
+	tlSupported && [.F.] {en} assume setting is supported (optimization)
 
 toObj = abSet(m.tcSetting, m.tvValueNew, m.tnSetting, m.tlChangeAlways, m.tlSupported)
 
@@ -2182,16 +2183,16 @@ return vartype(m.toObj) == 'O'
 * =================================================
 function abSet as abSet of abDev.prg
 lparameters ;
-	tcSetting,; && Setting to perform
-	tvValueNew,; && Value to set, .T. to toggle ON - OFF
-	tnSetting,; && Setting number when appropriate for tcSetting, as of 2nd parameter of set()
-	tlChangeAlways,; && [.F.] Change setting even if required value is current
-	tlSupported && [.F.] assume setting is supported (optimization)
+	tcSetting,; && {en} Setting to perform
+	tvValueNew,; && {en} Value to set, .T. to toggle ON - OFF
+	tnSetting,; && {en} Setting number when appropriate for tcSetting, as of 2nd parameter of set()
+	tlChangeAlways,; && [.F.] {en} Change setting even if required value is current
+	tlSupported && [.F.] {en} assume setting is supported (optimization)
 
 return createobject('abSet', m.tcSetting, m.tvValueNew, m.tnSetting, m.tlChangeAlways, m.tlSupported)
 
 * =================================================
-define class abSet as GA_LIGHTWEIGHT_CLASS of abGA.prg && Saves and restores SET ...
+define class abSet as GA_LIGHTWEIGHT_CLASS of abGA.prg && {fr} Saves and restores SET ...
 * =================================================
 
 cSetting  = ''
@@ -2202,13 +2203,13 @@ vValueNew = .null.
 lOnOff = .f.
 
 * ------------------------------------
-protected procedure init && If valid and supported, performs required environment setting
+protected procedure init && {en} If valid and supported, performs required environment setting
 lparameters ;
-	tcSetting,; && Setting to perform
-	tvValueNew,; && Value to set, .T. to toggle ON <> OFF
-	tnSetting,; && Setting number when appropriate for tcSetting, as of 2nd parameter of set(), eg Set("Alternate", 1) for FileName
-	tlChangeAlways,; && [.F.] Change setting even if required value is current
-	tlSupported && [.F.] assume setting is supported (optimization)
+	tcSetting,; && {en} Setting to perform
+	tvValueNew,; && {en} Value to set, .T. to toggle ON <> OFF
+	tnSetting,; && {en} Setting number when appropriate for tcSetting, as of 2nd parameter of set(), eg Set("Alternate", 1) for FileName
+	tlChangeAlways,; && [.F.] {en} Change setting even if required value is current
+	tlSupported && [.F.] {en} assume setting is supported (optimization)
 
 local success as Boolean;
 , lnSetting;
@@ -2219,7 +2220,7 @@ local success as Boolean;
 
 lnSetting = vartype(m.tnSetting) == 'N'
 
-* If parameters are valid
+* {fr} If parameters are valid
 success = ga_Type_IsChar(m.tcSetting, .t.)
 assert m.success message cAssertMsg(textmerge([Invalid setting <<cLitteral(m.tcSetting)>>]))
 if m.success
@@ -2234,17 +2235,17 @@ if m.success
 		this.nSetting = iif(m.lnSetting, m.tnSetting, .null.)
 		this.cParm2 = iif(m.lnSetting, ',' + transform(m.tnSetting), '')
 
-		* If setting is OK
+		* {fr} If setting is OK
 		success = .t.;
 			and (.f.;
 				or lTrue(m.tlSupported);
 				or vartype(m.tvValueNew) == 'C' and inlist(upper(alltrim(m.tvValueNew)), 'ON', 'OFF');
-				or this.lSupported(m.tcSetting, m.this.cParm2); && supported
+				or this.lSupported(m.tcSetting, m.this.cParm2); && {fr} supported
 				);
-			and this.get(@m.lvValueCur, m.tcSetting, m.this.cParm2) && current value can be read
+			and this.get(@m.lvValueCur, m.tcSetting, m.this.cParm2) && {fr} current value can be read
 		if m.success
 
-			* If required value is valid
+			* {fr} If required value is valid
 			lcTypeCur = vartype(m.lvValueCur)
 			lcTypeNew = vartype(m.tvValueNew)
 			llToggle = m.lcTypeNew == 'L' and m.tvValueNew
@@ -2252,10 +2253,10 @@ if m.success
 			assert m.success message cAssertMsg(textmerge([For setting '<<m.tcSetting>>', value <<cLitteral(m.tvValueNew)>> should be of type '<<m.lcTypeCur>>']))
 			if m.success
 
-				* Adjust value when appropriate
+				* {fr} Adjust value when appropriate
 				tvValueNew = iif(m.tcSetting == 'DEFAULT', addbs(fullpath(m.tvValueNew)), m.tvValueNew)
 
-				* If setting must be changed
+				* {fr} If setting must be changed
 				if .f.;
 				 or m.llToggle;
 				 or lTrue(m.tlChangeAlways);
@@ -2263,17 +2264,17 @@ if m.success
 
 					this.lOnOff = m.lcTypeCur == 'C' and (m.lvValueCur == 'ON' or m.lvValueCur == 'OFF')
 
-					* Toggle value if asked and appropriate
+					* {fr} Toggle value if asked and appropriate
 					if m.llToggle and m.this.lOnOff
 						tvValueNew = iif(m.lvValueCur = 'ON', 'OFF', 'ON')
 					endif
 
-					* If new setting can be performed
+					* {fr} If new setting can be performed
 					success = this.set(m.tcSetting, m.tvValueNew)
 				endif
 				if m.success
 
-					* Persist current values to properties
+					* {fr} Persist current values to properties
 					this.cSetting = m.tcSetting
 					this.vValueOld = m.lvValueCur
 					this.vValueNew = m.tvValueNew
@@ -2286,7 +2287,7 @@ endif
 return m.success
 
 * ------------------------------------
-hidden function get && état courant d'un SET
+hidden function get && {fr} état courant d'un SET
 lparameters lvResult, tcSetting, lcParm2
 
 local llError, loError as exception
@@ -2306,11 +2307,11 @@ endtry
 return !m.llError
 
 * ------------------------------------
-function set && Saves current environment setting and changes to new value
-&& public car appelé par awSets.Set()
+function set && {en} Saves current environment setting and changes to new value
+&& {fr} public car appelé par awSets.Set()
 lparameters ;
-	tcSetting,; && Setting to work on - upper case, trimmed
-	tvValueNew && Value to set
+	tcSetting,; && {en} Setting to work on - upper case, trimmed
+	tvValueNew && {en} Value to set
 
 local llResult as Boolean;
 , lcSetting as string
@@ -2345,10 +2346,10 @@ this.vValueNew = iif(m.llResult, m.tvValueNew, .null.)
 return m.llResult
 
 * ------------------------------------
-hidden function Set_ && Changes setting to new value
+hidden function Set_ && {en} Changes setting to new value
 lparameters ;
-	tcSetting,; && Setting to work on
-	tvValueNew && Value to set
+	tcSetting,; && {en} Setting to work on
+	tvValueNew && {en} Value to set
 
 local llResult as Boolean;
 , loResult as exception;
@@ -2395,10 +2396,10 @@ endtry
 return m.llResult
 
 * ------------------------------------
-hidden function lSupported && Requested environment setting is supported
+hidden function lSupported && {en} Requested environment setting is supported
 lparameters ;
-	tcSetting,; && Setting to work on
-	lcParm2 && Second parameter of set()
+	tcSetting,; && {en} Setting to work on
+	lcParm2 && {en} Second parameter of set()
 
 tcSetting = upper(alltrim(m.tcSetting))
 lcParm2 = alltrim(m.lcParm2, ' ', ',')
@@ -2411,25 +2412,25 @@ local llResult as Boolean;
 , liResult;
 , loResult as exception
 
-&&	Reprocess && strange options
+&& {fr} Reprocess && {fr} strange options
 
 lcUnsupported = ''; && 2015-11-04 thn TEXT ... ENDTEXT removed (should have been done much earlier)
 + [Century, , 3] + CRLF;
-+ [Clock, , 1] + CRLF; && does not restore properly
-+ [Color] + CRLF; && Included for backward compatibility
++ [Clock, , 1] + CRLF; && {fr} does not restore properly
++ [Color] + CRLF; && {fr} Included for backward compatibility
 + [Date, , 1] + CRLF;
-+ [Echo] + CRLF; && Included for backward compatibility
++ [Echo] + CRLF; && {fr} Included for backward compatibility
 + [Fields, , 1] + CRLF;
-+ [Order] + CRLF; && unable to restore
++ [Order] + CRLF; && {fr} unable to restore
 + [Printer, , 2] + CRLF;
 + [Printer, , 3] + CRLF;
 + [Skip] + CRLF;
-+ [Status Bar] + CRLF; && Problem with space between 'Status' and 'Bar' ...
-+ [Topic, .T., 1] + CRLF; && unable to restore
-+ [View] + CRLF; && unable to restore
++ [Status Bar] + CRLF; && {fr} Problem with space between 'Status' and 'Bar' ...
++ [Topic, .T., 1] + CRLF; && {fr} unable to restore
++ [View] + CRLF; && {fr} unable to restore
 
 
-lcUntested  = ''; && Untested sets && 2015-11-04 thn TEXT ... ENDTEXT removed (should have been done much earlier)
+lcUntested  = ''; && {fr} Untested sets && 2015-11-04 thn TEXT ... ENDTEXT removed (should have been done much earlier)
 + [Help, , 1] + CRLF;
 + [Help, , 2] + CRLF;
 + [Help, , 3] + CRLF;
@@ -2438,22 +2439,22 @@ lcUntested  = ''; && Untested sets && 2015-11-04 thn TEXT ... ENDTEXT removed (s
 + [Textmerge, , 4] + CRLF;
 + [Topic, , 1] + CRLF;
 + [Step] + CRLF;
-+ [Display] + CRLF; && Included for backward compatibility
++ [Display] + CRLF; && {fr} Included for backward compatibility
 + [Filter] + CRLF;
 + [Helpfilter] + CRLF;
 + [Pdsetup] + CRLF;
 + [Relation] + CRLF;
 
-&&	textmerge, , 1 && unable to restore - set textmerge delimiters to ...
+&&	textmerge, , 1 && {fr} unable to restore - set textmerge delimiters to ...
 
-try && aLinesCols() may not be in scope
+try && {fr} aLinesCols() may not be in scope
 
 	if lProperty(_screen, 'abSet_aSupported')
 		lnResult = alen(_screen.abSet_aSupported, 1)
 		dimension laResult[m.lnResult, Alen(_screen.abSet_aSupported, 2)]
 		acopy(_screen.abSet_aSupported, laResult)
 	else
-		lnResult = aLinesCols(; && very long ! - to be optimized
+		lnResult = aLinesCols(; && {fr} very long ! - to be optimized
 			  @m.laResult;
 			, upper(chrtran(cInLineCommentStripped(m.lcUnsupported + CRLF + m.lcUntested), space(1), ''));
 			, ',';
@@ -2474,20 +2475,20 @@ try && aLinesCols() may not be in scope
 	assert m.llResult message cAssertMsg(textmerge([this setting is not supported: <<m.tcSetting>> <<m.lcParm2>>]))
 
 catch to loResult
-	llResult = .t. && assume setting is supported
+	llResult = .t. && {fr} assume setting is supported
 endtry
 
 return m.llResult
 
 * ------------------------------------
-hidden function destroy && Restores setting to its original value
+hidden function destroy && {en} Restores setting to its original value
 
 local lvValue
 
 return .t.;
 	and this.get(@m.lvValue, m.this.cSetting, m.this.cParm2);
 	and (.f.;
-		or m.lvValue == m.this.vValueOld; && lvValue et this.vValueOld sont obtenus par this.Get() donc sont de même type et casse
+		or m.lvValue == m.this.vValueOld; && {fr} lvValue et this.vValueOld sont obtenus par this.Get() donc sont de même type et casse
 		or this.set(m.this.cSetting, m.this.vValueOld);
 		)
 
@@ -2496,13 +2497,13 @@ enddefine
 * =================================================
 
 * ------------------------------------
-procedure abSet1 && Règle un set pour test
+procedure abSet1 && {fr} Règle un set pour test
 lparameters ;
-	tcSetting,; && Setting to perform
-	tvValueNew,; && Value to set, .T. to toggle ON - OFF
-	tnSetting,; && Setting number when appropriate for tcSetting, as of 2nd parameter of set()
-	tlChangeAlways,; && [.T.] Change setting even if required value is current
-	tlSupported && [.F.] assume setting is supported
+	tcSetting,; && {en} Setting to perform
+	tvValueNew,; && {en} Value to set, .T. to toggle ON - OFF
+	tnSetting,; && {en} Setting number when appropriate for tcSetting, as of 2nd parameter of set()
+	tlChangeAlways,; && [.T.] {en} Change setting even if required value is current
+	tlSupported && [.F.] {en} assume setting is supported
 
 local loSet
 
@@ -2516,11 +2517,11 @@ return labSet(;
 	)
 
 * ------------------------------------
-procedure abSet1_Test && Teste le réglage d'un set pour mesurer le temps d'exécution
+procedure abSet1_Test && {fr} Teste le réglage d'un set pour mesurer le temps d'exécution
 
 local loUnitTest as abUnitTest of abDev.prg, loAsserts as abSet
 loUnitTest = newobject('abUnitTest', 'abDev.prg')
-loAsserts = abSet('ASSERTS', 'OFF') && pour les settings non supportés
+loAsserts = abSet('ASSERTS', 'OFF') && {fr} pour les settings non supportés
 
 loUnitTest.Test(.t., 'Deleted', 'ON',,,.t.)
 loUnitTest.Test(.t., 'Exact', 'ON')
@@ -2537,7 +2538,7 @@ loUnitTest.Test(.f., 'Skip', 'TO cALIAS')
 return loUnitTest.result()
 
 * ------------------------------------
-procedure abSet_Tests && Tests the abSet Class
+procedure abSet_Tests && {en} Tests the abSet Class
 
 local llResult;
 , lcResult, lnSeconds;
@@ -2553,7 +2554,7 @@ loTalk = abSet('Talk', 'OFF')
 loStatusBar = abSet('Status Bar', 'OFF')
 loAsserts = abSet('Asserts', 'OFF')
 
-* Prepare test resources
+* {fr} Prepare test resources
 lcTestFile = sys(2023) + 'abSet.txt'
 aprinters(m.laPrinters)
 
@@ -2569,18 +2570,18 @@ lcResult = ''
 lnFailed = 0
 store .t. to m.llResult, m.llSet, m.llRestore
 
-* For each test Set
+* {fr} For each test Set
 lnSets = abSet_Tests_aSets(@m.laSets)
 for each m.lcSet in m.laSets
 
 	lcSet = cInLineCommentStripped(m.lcSet)
 
-	* If Setting object can be instanciated
+	* {fr} If Setting object can be instanciated
 	loSet = abSet(&lcSet)
 	llSet = vartype(m.loSet) == 'O' and not isNull(m.loSet)
 	if m.llSet
 
-		* Memorize old values
+		* {fr} Memorize old values
 		lcSetting = m.loSet.cSetting
 		lvValueOld = m.loSet.vValueOld
 		lcParm2 = m.loSet.cParm2
@@ -2589,12 +2590,12 @@ for each m.lcSet in m.laSets
 	endif
 
 
-* Check new value was correctly SET
+* {fr} Check new value was correctly SET
 
-	* Release Setting object to restore original setting
+	* {fr} Release Setting object to restore original setting
 	loSet = .null.
 
-	* Check old value was correctly restored
+	* {fr} Check old value was correctly restored
 	if m.llSet
 		lvValueNew = evaluate('Set("' + m.lcSetting + '"' + m.lcParm2 + ')')
 		lvValueNew = iif(upper(m.lcSetting) == 'DEFAULT', m.lvValueNew + curdir(), m.lvValueNew)
@@ -2605,7 +2606,7 @@ for each m.lcSet in m.laSets
 
 	clear
 
-	* Save any Error
+	* {fr} Save any Error
 	if not m.llSet
 		lnFailed = m.lnFailed + 1
 		lcResult = m.lcResult + CRLF + '- ' + ;
@@ -2619,7 +2620,7 @@ endfor
 use
 close databases
 
-* Display result
+* {fr} Display result
 lcResult = iif(m.llResult, ;
 		'Congratulation, the ' + transform(m.lnSets) + ' Tested Sets Worked !', ;
 		transform(m.lnFailed) + ' of ' + transform(m.lnSets) + ' Set' + iif(m.lnFailed > 1, 's', '') + ' did not work :' + ;
@@ -2637,19 +2638,19 @@ messagebox(m.lcResult, 64)
 return m.llResult
 
 * ------------------------------------
-procedure abSet_Tests_aSets && Tested Sets
-lparameters taSets && @ Array where tested sets should be stored
+procedure abSet_Tests_aSets && {en} Tested Sets
+lparameters taSets && @ {en} Array where tested sets should be stored
 external array taSets
 
-local lnResult; && Number of Tested Sets
+local lnResult; && {fr} Number of Tested Sets
 , lnVersion;
 , lcSets, lcSetsVFP7, lcSetsVFP8, lcSetsVFP9
 
 lnResult = 0
 
-text TO m.lcSetsVFP7 NOSHOW && SET, .T. on "ON/OFF"-type Settings to toggle, TO ...
-	'Textmerge', '<<>>' , 1 && throws an error because not supported
-	'Aternate', m.lcTestFile, 1 && throws an error because misspelled ('Aternate' instead of 'Alternate')
+text TO m.lcSetsVFP7 NOSHOW && {fr} SET, .T. on "ON/OFF"-type Settings to toggle, TO ...
+	'Textmerge', '<<>>' , 1 && {fr} throws an error because not supported
+	'Aternate', m.lcTestFile, 1 && {fr} throws an error because misspelled ('Aternate' instead of 'Alternate')
 	'Alternate', .T.
 	'Alternate', m.lcTestFile, 1
 	'Ansi', .T.
@@ -2663,7 +2664,7 @@ text TO m.lcSetsVFP7 NOSHOW && SET, .T. on "ON/OFF"-type Settings to toggle, TO 
 	'Century', .T.
 	'Century', 20, 1
 	'Century', 50, 2
-	'ClassLib', Home() + 'ffc\_base.vcx' && should exist !
+	'ClassLib', Home() + 'ffc\_base.vcx' && {fr} should exist !
 	'Clock', .T.
 	'Collate', 'MACHINE'
 	'Compatible', .T.
@@ -2677,7 +2678,7 @@ text TO m.lcSetsVFP7 NOSHOW && SET, .T. on "ON/OFF"-type Settings to toggle, TO 
 	'Currency', '€', 1
 	'Cursor', .T.
 	'Database', 'tastrade'
-	'Datasession', m.loSession.DataSessionId && objet créé plus haut
+	'Datasession', m.loSession.DataSessionId && {fr} objet créé plus haut
 	'Date', 'FRENCH'
 	'Debug', .T.
 	'Debugout', .T.
@@ -2784,19 +2785,19 @@ lnResult = alines(m.taSets, m.lcSets)
 return m.lnResult
 
 * ===========================================
-define class abSets as GA_LIGHTWEIGHT_CLASS of abGA.prg && Règle plusieurs Sets et les restaure à la destruction && Custom pour pouvoir être .AddObjected(), mais impossible dans awAppHost as session
+define class abSets as GA_LIGHTWEIGHT_CLASS of abGA.prg && {fr} Règle plusieurs Sets et les restaure à la destruction && {fr} Custom pour pouvoir être .AddObjected(), mais impossible dans awAppHost as session
 * ===========================================
 
 protected lSupported, lInit
 
-lSupported = .f. && assume abSet supports all the settings required
-lInit = .t. && all settings were successful && See in this.Set() why default is .T.
+lSupported = .f. && {fr} assume abSet supports all the settings required
+lInit = .t. && {fr} all settings were successful && {fr} See in this.Set() why default is .T.
 
 *---------------------------------------------------------------------------
 procedure init
 lparameters result && @ {en} error if any {fr} erreur éventuelle
 
-#if .f. && Sample implementation
+#if .f. && {fr} Sample implementation
 with m.this as abSets of abDev.prg
 	.set('EngineBehavior', 70)
 	.set('Deleted', 'ON')
@@ -2808,25 +2809,25 @@ with m.this as abSets of abDev.prg
 	.set('Notify', 'OFF')
 	.set('Talk', 'OFF')
 endwith
-#endif && Sample implementation
+#endif && {fr} Sample implementation
 
-return m.this.lInit && always keep this instruction and/or call dodefault() in sub-class!
+return m.this.lInit && {fr} always keep this instruction and/or call dodefault() in sub-class!
 
 *---------------------------------------------------------------------------
-protected procedure set && Effectue un réglage d'environnement
+protected procedure set && {fr} Effectue un réglage d'environnement
 lparameters ;
-	tcSetting,; && Nom du SET à régler
-	tvValueNew,; && Valeur à régler
-	tnSetting,; && Setting number when appropriate for tcSetting, as of 2nd parameter of set()
-	tlChangeAlways,; && [.T.] Change setting even if required value is current
-	tlSupported && [this.lSupported] assume abSet() supports this setting
+	tcSetting,; && {fr} Nom du SET à régler
+	tvValueNew,; && {fr} Valeur à régler
+	tnSetting,; && {en} Setting number when appropriate for tcSetting, as of 2nd parameter of set()
+	tlChangeAlways,; && [.T.] {en} Change setting even if required value is current
+	tlSupported && [this.lSupported] {en} assume abSet() supports this setting
 
 local success as Boolean;
 , loExact as abSet of abDev.prg;
 , lcProp as string;
 , loProp as abSet of abDev.prg;
 
-* Si le Set est défini
+* {fr} Si le Set est défini
 success = not empty(m.tcSetting)
 assert m.success
 if m.success
@@ -2876,15 +2877,15 @@ assert m.success message cAssertMsg(textmerge(icase(;
 return m.success
 
 * ===========================================
-enddefine && CLASS abSets
+enddefine && {fr} CLASS abSets
 * ===========================================
 
 * ===========================================
-function abSetsMaintain && Sauve les sets critiques et les restore s'ils ont changé
+function abSetsMaintain && {fr} Sauve les sets critiques et les restore s'ils ont changé
 return createobject('abSetsMaintain')
 
 * ------------------------------------
-procedure abSetsMaintain_Test && Test abSetsMaintain()
+procedure abSetsMaintain_Test && {fr} Test abSetsMaintain()
 
 local loUnitTest as abUnitTest of abDev.prg, loResult
 loUnitTest = newobject('abUnitTest', 'abDev.prg')
@@ -2893,19 +2894,19 @@ loResult = newobject('abSetsMaintain', 'abDev.prg')
 *loUnitTest.coverageSet(.T.)
 loUnitTest.Test(.null.) && 1 ms
 
-* loUnitTest.coverageSet(.F.)
+* {fr} loUnitTest.coverageSet(.F.)
 
 return m.loUnitTest.result()
 
 * ===========================================
-define class abSetsMaintain as GA_LIGHTWEIGHT_CLASS of abGA.prg && Sauve les sets critiques et les restore s'ils ont changé
+define class abSetsMaintain as GA_LIGHTWEIGHT_CLASS of abGA.prg && {fr} Sauve les sets critiques et les restore s'ils ont changé
 * ===========================================
 
 hidden aSet[1], nSets
 
 *---------------------------------------------------------------------------
 protected procedure init
-lparameters tlProcClass && [.F.] also save Set("Procedure") & Set("Classlib")
+lparameters tlProcClass && [.F.] {fr} also save Set("Procedure") & Set("Classlib")
 
 local success as Boolean;
 , lcSets, lnSets, laSet[1], liSet
@@ -3067,12 +3068,12 @@ for liSet = 1 to this.nSets
 
 		case m.lcSet == 'TEXTMERGE'
 			do case
-			case m.lnSet = 1 && cLeftDelimiter and cRightDelimiter
+			case m.lnSet = 1 && {fr} cLeftDelimiter and cRightDelimiter
 				luSet = '"' + stuffc(m.luSet, len(m.luSet)/2 + 1, 0, '","') + '"'
 				set textmerge delimiters to &luSet
-			case m.lnSet = 2 && cFileName
+			case m.lnSet = 2 && {fr} cFileName
 				set textmerge to (m.luSet)
-			case m.lnSet = 3 && SHOW/NOSHOW
+			case m.lnSet = 3 && {fr} SHOW/NOSHOW
 				set textmerge to &luSet
 			endcase
 
@@ -3088,13 +3089,13 @@ endfor
 
 
 * ===========================================
-enddefine && CLASS abSetsMaintain
+enddefine && {fr} CLASS abSetsMaintain
 * ===========================================
 
 
 * ========================================
-function lSetClasslib && Un jeu de Set("Classlib") est dans le Set("Classlib") courant
-lparameters tcSetClasslib && Jeu de Set("Classlib")
+function lSetClasslib && {fr} Un jeu de Set("Classlib") est dans le Set("Classlib") courant
+lparameters tcSetClasslib && {fr} Jeu de Set("Classlib")
 
 local laClasslib[1], lcClasslib, lcSetClasslib, llResult
 
@@ -3115,8 +3116,8 @@ endif
 return m.llResult
 
 * ========================================
-function lSetProcedure && Un jeu de Set("Procedure") est dans le Set("Procedure") courant
-lparameters tcSetProcedure && Jeu de Set("Procedure")
+function lSetProcedure && {fr} Un jeu de Set("Procedure") est dans le Set("Procedure") courant
+lparameters tcSetProcedure && {fr} Jeu de Set("Procedure")
 
 local laProcedure[1], lcProcedure, lcSetProc, llResult
 
@@ -3137,10 +3138,10 @@ endif
 return m.llResult
 
 * ========================================
-function cFuncCallParmAdd && Ajoute un paramètre à un appel de fonction
+function cFuncCallParmAdd && {fr} Ajoute un paramètre à un appel de fonction
 lparameters ;
-	tcFuncCall,; && Chaîne contenant un appel de fonction
-	tcParm && Chaîne à ajouter comme paramètre (ex. '@MonParm') /!\ non vérifié
+	tcFuncCall,; && {fr} Chaîne contenant un appel de fonction
+	tcParm && {fr} Chaîne à ajouter comme paramètre (ex. '@MonParm') /!\ non vérifié
 local llResult, lcResult
 lcResult = ''
 
@@ -3164,7 +3165,7 @@ endif
 return m.lcResult
 
 * ------------------------------------
-procedure cFuncCallParmAdd_Test && Teste cFuncCallParmAdd()
+procedure cFuncCallParmAdd_Test && {fr} Teste cFuncCallParmAdd()
 
 local loUnitTest as abUnitTest of abDev.prg
 loUnitTest = newobject('abUnitTest', 'abDev.prg')
@@ -3174,8 +3175,8 @@ loUnitTest.Test('myFunc(toto,m.lcTest)', ' myFunc(toto)', 'm.lcTest')
 return loUnitTest.result()
 
 * ========================================
-function cException && Message d'exception standard
-lparameters toException as exception && Objet exception
+function cException && {fr} Message d'exception standard
+lparameters toException as exception && {fr} Objet exception
 
 local lcResult, luUserValue
 
@@ -3204,7 +3205,7 @@ endif
 return m.lcResult
 
 * ------------------------------------
-procedure cException_Test && Teste cException()
+procedure cException_Test && {fr} Teste cException()
 
 local loUnitTest as abUnitTest of abDev.prg, lcCmd, loException as exception, lcResult
 
@@ -3226,16 +3227,16 @@ endtry
 return loUnitTest.result()
 
 * ---------------------------------------------------
-procedure FilesCompile && Compile des fichiers d'après un squelette
+procedure FilesCompile && {fr} Compile des fichiers d'après un squelette
 lparameters ;
-	tcFilesSkeleton,; && Squelette d'adresse de fichiers
-	tcFilesFailed && @ [''] Fichiers dont la compilation a échoué
+	tcFilesSkeleton,; && {fr} Squelette d'adresse de fichiers
+	tcFilesFailed && @ [''] {fr} Fichiers dont la compilation a échoué
 tcFilesFailed = ''
 
-local lnFiles, laFiles[1], llResult, lnResult && Nombre de fichiers compilés avec succès
+local lnFiles, laFiles[1], llResult, lnResult && {fr} Nombre de fichiers compilés avec succès
 lnResult = 0
 
-* S'il existe au moins un fichier répondant au masque spécifié
+* {fr} S'il existe au moins un fichier répondant au masque spécifié
 lnFiles = aFiles(@m.laFiles, m.tcFilesSkeleton)
 llResult = m.lnFiles > 0
 assert m.llResult message cAssertMsg(textmerge([No file match the specified skeleton: <<cLitteral(m.tcFilesSkeleton)>>]))
@@ -3244,7 +3245,7 @@ if m.llResult
 	local lcFolderAddr, loProc, loClass, lnFile, lcFile, lnFilesFailed, laFilesFailed[1]
 	lcFolderAddr = addbs(justpath(m.tcFilesSkeleton))
 
-	* Sauver les set car COMPILE ferme automatiquement les fichiers
+	* {fr} Sauver les set car COMPILE ferme automatiquement les fichiers
 	loProc = abSet('PROCEDURE', set("Procedure"),,, .t.)
 	loClass = abSet('CLASSLIB', set("ClassLib"),,, .t.)
 
@@ -3252,18 +3253,18 @@ if m.llResult
 	debugout replicate('=', 50)
 	debugout "Compiling", transform(m.lnFiles), 'files in', m.lcFolderAddr
 
-	* Pour chaque fichier
+	* {fr} Pour chaque fichier
 	lnFilesFailed = 0
 	for lnFile = 1 to m.lnFiles
 		lcFile = laFiles[m.lnFile, 1]
 
-		* Compiler le fichier
+		* {fr} Compiler le fichier
 		llResult = FileCompile(m.lcFolderAddr + m.lcFile)
 
-		* Si succès, compter
+		* {fr} Si succès, compter
 		if m.llResult
 			lnResult = m.lnResult + 1
-		* Sinon, tabuler
+		* {fr} Sinon, tabuler
 		else
 			lnFilesFailed = lnFilesFailed + 1
 			dimension laFilesFailed[m.lnFilesFailed]
@@ -3271,12 +3272,12 @@ if m.llResult
 		endif
 	endfor
 
-	release loProc, loClass && Rétablit les SET
+	release loProc, loClass && {fr} Rétablit les SET
 
 	debugout transform(m.lnResult), "files compiled out of", transform(m.lnFiles)
 	debugout replicate('=', 50)
 
-	* Si échec(s), lister les fichiers
+	* {fr} Si échec(s), lister les fichiers
 	if m.lnFilesFailed > 0
 		tcFilesFailed = cListOfArray(@m.laFilesFailed)
 	endif
@@ -3285,12 +3286,12 @@ endif
 return m.lnResult
 
 * ---------------------------------------------------
-procedure FileCompile && Compile un fichier
+procedure FileCompile && {fr} Compile un fichier
 lparameters ;
-	tcFileAddr,; && Adresse du fichier
-	tcResult,; && @ [''] Résultat de la compilation
-	tcClause,; && [''] Clauses de compilation (pour *.prg)
-	tnResult && [0] @ nombre d'erreurs de compilation
+	tcFileAddr,; && {fr} Adresse du fichier
+	tcResult,; && @ [''] {fr} Résultat de la compilation
+	tcClause,; && [''] {fr} Clauses de compilation (pour *.prg)
+	tnResult && @ [0] {fr} nombre d'erreurs de compilation
 tcResult = ''
 tcClause = evl(m.tcClause, '')
 tnResult = 0
@@ -3307,9 +3308,9 @@ assert m.llResult message cAssertMsg(m.tcResult)
 if m.llResult
 
 	loLogErrors = abSet('LOGERRORS', 'ON')
-	loNotify = abSet('NOTIFY', 'OFF') && supprime le thermomètre d'avancement
+	loNotify = abSet('NOTIFY', 'OFF') && {fr} supprime le thermomètre d'avancement
 
-	* Tenter la compilation
+	* {fr} Tenter la compilation
 	tcFileAddr = fullpath(m.tcFileAddr)
 	lcExt = justext(m.tcFileAddr)
 	try
@@ -3324,7 +3325,7 @@ if m.llResult
 			endif
 
 		case m.lcExt = 'VCX'
-			clear classlib (m.tcFileAddr) && par sécurité
+			clear classlib (m.tcFileAddr) && {fr} par sécurité
 			compile classlib (m.tcFileAddr)
 
 		case m.lcExt = 'SCX'
@@ -3351,7 +3352,7 @@ if m.llResult
 		endcase
 
 *- Inutile car COMPILE fait le PACK
-*-				IF InList(m.lcExt, 'SCX', 'VCX', 'FRX', 'LBX', 'DBX') && le code source est dans une table
+*-				IF InList(m.lcExt, 'SCX', 'VCX', 'FRX', 'LBX', 'DBX') && {fr} le code source est dans une table
 *-					PACK (m.tcFileAddr)
 *-				ENDIF
 
@@ -3397,21 +3398,21 @@ endif
 return m.llResult
 
 * ========================================
-procedure ProcEmpty && Sert à mesurer le temps moyen d'appel d'une procédure
+procedure ProcEmpty && {fr} Sert à mesurer le temps moyen d'appel d'une procédure
 lparameters ;
-	Parm1,; && Bidon
-	Parm2,; && Bidon
-	Parm3,; && Bidon
-	Parm4,; && Bidon
-	Parm5,; && Bidon
-	Parm6 && Bidon
+	Parm1,; && {fr} Bidon
+	Parm2,; && {fr} Bidon
+	Parm3,; && {fr} Bidon
+	Parm4,; && {fr} Bidon
+	Parm5,; && {fr} Bidon
+	Parm6 && {fr} Bidon
 local llResult
 llResult = .t.
 uDefault(m.Parm1, 'bidon')
 return m.llResult
 
 * ------------------------------------
-procedure ProcEmpty_Test && Teste ProcEmpty()
+procedure ProcEmpty_Test && {fr} Teste ProcEmpty()
 
 local loUnitTest as abUnitTest of abDev.prg
 loUnitTest = newobject('abUnitTest', 'abDev.prg')
@@ -3422,23 +3423,23 @@ loUnitTest.Test(.t., 2, 'bidon', .f., date())
 return loUnitTest.result()
 
 * ========================================
-function cPWRand && Mot de passe aléatoire sûr selon indications Windows
-lparameters tnLength && [8] Nombre de caractères
+function cPWRand && {fr} Mot de passe aléatoire sûr selon indications Windows
+lparameters tnLength && [8] {fr} Nombre de caractères
 
 local lcResult, lcCars, lnCars, lnCar
 
-&& Passwords must contain characters from three of the following five categories:
+&& {fr} Passwords must contain characters from three of the following five categories:
 lcCars = '';
-	+ 'ABCDEFGHIKKLMNOPQRSTUVWXYZ'; && Uppercase characters of European languages (A through Z, with diacritic marks, Greek and Cyrillic characters)
-	+ 'abcdefghikklmnopqrstuvwxyz'; && Lowercase characters of European languages (a through z, sharp-s, with diacritic marks, Greek and Cyrillic characters)
-	+ '0123456789'; && Base 10 digits (0 through 9)
-	+ '!@#$%&*_-+=/|\(){}[];"' + ['<>,.?]; && Nonalphanumeric characters && ^~`: removed those difficult to type or conflicting with usual syntax
-	+ '' && Any Unicode character that is categorized as an alphabetic character but is not uppercase or lowercase. This includes Unicode characters from Asian languages.
+	+ 'ABCDEFGHIKKLMNOPQRSTUVWXYZ'; && {fr} Uppercase characters of European languages (A through Z, with diacritic marks, Greek and Cyrillic characters)
+	+ 'abcdefghikklmnopqrstuvwxyz'; && {fr} Lowercase characters of European languages (a through z, sharp-s, with diacritic marks, Greek and Cyrillic characters)
+	+ '0123456789'; && {fr} Base 10 digits (0 through 9)
+	+ '!@#$%&*_-+=/|\(){}[];"' + ['<>,.?]; && {fr} Nonalphanumeric characters && ^~`: removed those difficult to type or conflicting with usual syntax
+	+ '' && {fr} Any Unicode character that is categorized as an alphabetic character but is not uppercase or lowercase. This includes Unicode characters from Asian languages.
 
 lnCars = len(m.lcCars)
 lcResult = ''
 
-rand(-1) && To achieve the most random sequence of numbers, issue RAND( ) initially with a negative argument and then issue RAND( ) without an argument.
+rand(-1) && {fr} To achieve the most random sequence of numbers, issue RAND( ) initially with a negative argument and then issue RAND( ) without an argument.
 for lnCar = 1 to iif(vartype(m.tnLength) = 'N' and m.tnLength > 0, m.tnLength, 8)
 	lcResult = m.lcResult + substr(m.lcCars, min(max(int(rand() * m.lnCars), 1), m.lnCars), 1)
 endfor
@@ -3446,23 +3447,23 @@ endfor
 return m.lcResult
 
 * -------------------------------------------------------------
-function cPWRand_Test && Teste cPWRand
+function cPWRand_Test && {fr} Teste cPWRand
 
 ? sys(16)
 ? cPWRand()
 ? cPWRand(15)
 
 * ========================================
-define class abProject as GA_LIGHTWEIGHT_CLASS of abGA.prg && ouvre un projet et le referme automatiquement
+define class abProject as GA_LIGHTWEIGHT_CLASS of abGA.prg && {fr} ouvre un projet et le referme automatiquement
 
-oProject = .null. && Référence au projet
-lOpened = .f. && Le projet a été ouvert - .NULL. le projet a été créé
+oProject = .null. && {fr} Référence au projet
+lOpened = .f. && {fr} Le projet a été ouvert - .NULL. le projet a été créé
 
 * ----------------
 protected procedure init
 lparameters ;
-	tcPJX,; && Adresse du projet
-	tcResult && @ Résultat en cas d'échec
+	tcPJX,; && {fr} Adresse du projet
+	tcResult && @ {fr} Résultat en cas d'échec
 
 local llOpened, llResult
 
@@ -3478,12 +3479,12 @@ if m.this.lOpened or isNull(m.this.lOpened)
 	this.oProject.close
 endif
 
-enddefine && CLASS abProject
+enddefine && {fr} CLASS abProject
 * ========================================
 
 * ========================================
-function lProject && Un projet est ouvert
-lparameters tcPJX && Nom du projet
+function lProject && {fr} Un projet est ouvert
+lparameters tcPJX && {fr} Nom du projet
 
 local success as Boolean;
 , oProject as project
@@ -3501,11 +3502,11 @@ endif
 return m.success
 
 * ========================================
-function oProject && Référence à un projet (ouvert ou créé)
+function oProject && {fr} Référence à un projet (ouvert ou créé)
 lparameters ;
-	tcPJX,; && Adresse du projet
-	result,; && @ Résultat (cumulatif)
-	tlOpened && @ [.F.] Le projet a été ouvert - .NULL. le projet a été créé
+	tcPJX,; && {fr} Adresse du projet
+	result,; && @ {fr} Résultat (cumulatif)
+	tlOpened && @ [.F.] {fr} Le projet a été ouvert - .NULL. le projet a été créé
 
 tlOpened = .f.
 
@@ -3524,14 +3525,14 @@ if vartype(m.tcPJX) == 'C'
 	 	if file(m.tcPJX)
 		 	tcPJX = fullpath(m.tcPJX)
 
-			* Si le projet n'est pas déjà ouvert
+			* {fr} Si le projet n'est pas déjà ouvert
 			llResult = _vfp.projects.count > 0
 			if m.llResult
 				llResult = .f.
 				for each loProject in _vfp.projects foxobject
 					if fullpath(m.loProject.name) == m.tcPJX
 						llResult = .t.
-						loResult = m.loProject && after EXIT, FOR EACH resets loProject to .F.
+						loResult = m.loProject && {fr} after EXIT, FOR EACH resets loProject to .F.
 						exit
 					endif
 				endfor
@@ -3541,13 +3542,13 @@ if vartype(m.tcPJX) == 'C'
 	 	endif
 		if not m.llResult
 
-			* Ouvrir le projet
+			* {fr} Ouvrir le projet
 			try
 				ignoreAll() && modify command abDev
 				modify project (m.tcPJX) save nowait noshow noprojecthook
 				loResult = _vfp.activeproject
 				tlOpened = iif(isNull(m.tlOpened), m.tlOpened, .t.)
-			catch to loException when m.loException.ErrorNo = 1705 && File Access is denied
+			catch to loException when m.loException.ErrorNo = 1705 && {en} File Access is denied
 				cResultAdd(@m.result, cException(m.loException) + ' - ' + ICase(;
 					cLangUser() = 'fr',	[Conseil : fermez toutes les autres instances de VFP où le projet a pu être ouvert],; && copy-paste this line to add another language support
 															[Hint: close all instances of VFP IDE where project can have been open.]; && default: English
@@ -3566,8 +3567,8 @@ endif
 return m.loResult
 
 * ========================================
-procedure IgnoreAll && sélectionne automatiquement l'option 'tout' dans un dialogue tel que ASSERT
-&& contribution by Bob Pierce during FoxInCloud training '15 at Phoenix AZ
+procedure IgnoreAll && {fr} sélectionne automatiquement l'option 'tout' dans un dialogue tel que ASSERT
+&& {fr} contribution by Bob Pierce during FoxInCloud training '15 at Phoenix AZ
 
 local lcVersion3 as String
 
@@ -3576,9 +3577,9 @@ lcVersion3 = Version(3)
 keyboard '';
 	+ '{alt+';
 	+ ICase(;
-		m.lcVersion3 == '33',	't',; && French - 'tout'
-		m.lcVersion3 == '34',	't',; && Spanish - 'todas'
-		m.lcVersion3 == '49',	'a',; && German - 'alle'
+		m.lcVersion3 == '33',	't',; && {fr} French - 'tout'
+		m.lcVersion3 == '34',	't',; && {fr} Spanish - 'todas'
+		m.lcVersion3 == '49',	'a',; && {fr} German - 'alle'
 			'a'; && Default: English - 'all'
 		);
 		+ '}'
@@ -3586,25 +3587,25 @@ keyboard '';
 endproc
 
 * ========================================
-procedure ProjectClose && Ferme un projet
-lparameters tcProject && Nom du projet tel qu'il apparaît dans sa barre de titre
+procedure ProjectClose && {fr} Ferme un projet
+lparameters tcProject && {fr} Nom du projet tel qu'il apparaît dans sa barre de titre
 
-local loProject as project, lcProject, llResult, lcResult && Adresse du projet pour le réouvrir ultérieurement
+local loProject as project, lcProject, llResult, lcResult && {fr} Adresse du projet pour le réouvrir ultérieurement
 
 lcResult = ''
 llResult = vartype(m.tcProject) == 'C' and not empty(m.tcProject)
 assert m.llResult message cAssertMsg(textmerge([Invalid project specification : <<cLitteral(m.tcProject)>>]))
 if m.llResult and _vfp.projects.count > 0
 
-	* Pour chaque projet ouvert
+	* {fr} Pour chaque projet ouvert
 	tcProject = upper(alltrim(m.tcProject))
 	for each m.loProject in _vfp.projects
 		lcProject = m.loProject.name
 
-		* si c'est le projet cherché
+		* {fr} si c'est le projet cherché
 		if upper(juststem(m.lcProject)) == m.tcProject
 
-			* Fermer
+			* {fr} Fermer
 			loProject.close
 			lcResult = m.lcProject
 			exit
@@ -3615,11 +3616,11 @@ endif
 return m.lcResult
 
 * ========================================
-function abProjectsClose as abProjectsClose of abDev.prg && Ferme les projets à .Init(), les rouvre à .Destroy()
+function abProjectsClose as abProjectsClose of abDev.prg && {fr} Ferme les projets à .Init(), les rouvre à .Destroy()
 return createobject('abProjectsClose')
 
 * ========================================
-define class abProjectsClose as GA_LIGHTWEIGHT_CLASS of abGA.prg && Ferme les projets à .Init(), les rouvre à .Destroy()
+define class abProjectsClose as GA_LIGHTWEIGHT_CLASS of abGA.prg && {fr} Ferme les projets à .Init(), les rouvre à .Destroy()
 * ========================================
 
 	hidden aProjects[1], nProjects
@@ -3657,11 +3658,11 @@ define class abProjectsClose as GA_LIGHTWEIGHT_CLASS of abGA.prg && Ferme les pr
 	endif
 
 * ========================================
-enddefine && CLASS abProjectsClose
+enddefine && {fr} CLASS abProjectsClose
 * ========================================
 
 * ========================================
-define class abDBCsClose as GA_LIGHTWEIGHT_CLASS of abGA.prg && Init() ferme les bases de données, Destroy() les rouvre
+define class abDBCsClose as GA_LIGHTWEIGHT_CLASS of abGA.prg && {fr} Init() ferme les bases de données, Destroy() les rouvre
 * ========================================
 
 	hidden aDBCs[1], nDBCs, cDBCCur
@@ -3676,7 +3677,7 @@ define class abDBCsClose as GA_LIGHTWEIGHT_CLASS of abGA.prg && Init() ferme les
 
 		local lnDBC
 		for lnDBC = 1 to this.nDBCs
-			set database to (this.aDBCs[m.lnDBC, 1]) && nom
+			set database to (this.aDBCs[m.lnDBC, 1]) && {fr} nom
 			close databases
 		endfor
 	endif
@@ -3688,7 +3689,7 @@ define class abDBCsClose as GA_LIGHTWEIGHT_CLASS of abGA.prg && Init() ferme les
 
 		local lnDBC
 		for lnDBC = 1 to this.nDBCs
-			open database (this.aDBCs[m.lnDBC, 2]) && adresse
+			open database (this.aDBCs[m.lnDBC, 2]) && {fr} adresse
 		endfor
 		if file(this.cDBCCur)
 			set database to (m.this.cDBCCur)
@@ -3696,15 +3697,15 @@ define class abDBCsClose as GA_LIGHTWEIGHT_CLASS of abGA.prg && Init() ferme les
 	endif
 
 * ========================================
-enddefine && CLASS abDBCsClose
+enddefine && {fr} CLASS abDBCsClose
 * ========================================
 
 
 * ========================================
-function nFColor && Couleur d'avant plan
-lparameters tcFColor && Chaîne selon format "RRR,GGG,BBB"
+function nFColor && {fr} Couleur d'avant plan
+lparameters tcFColor && {fr} Chaîne selon format "RRR,GGG,BBB"
 local lnResult
-lnResult = 0 && black
+lnResult = 0 && {fr} black
 
 if vartype(m.tcFColor) == 'C' and occurs(',', m.tcFColor) = 2
 	local array laFColors[1]
@@ -3715,11 +3716,11 @@ endif
 return m.lnResult
 
 * ========================================
-function nBColor && Couleur d'arrière plan
-lparameters tcBColor && Chaîne selon format "RRR,GGG,BBB"
+function nBColor && {fr} Couleur d'arrière plan
+lparameters tcBColor && {fr} Chaîne selon format "RRR,GGG,BBB"
 
 local lnResult
-lnResult = rgb(255, 255, 255) && white
+lnResult = rgb(255, 255, 255) && {fr} white
 
 if vartype(m.tcBColor) == 'C' and occurs(',', m.tcBColor) = 2
 	local array laBColors[1]
@@ -3730,46 +3731,46 @@ endif
 return m.lnResult
 
 * =================================================
-function abISX && Arrête et redémarre ISX (nécessaire en développement de formulaires)
+function abISX && {fr} Arrête et redémarre ISX (nécessaire en développement de formulaires)
 return createobject('abISX')
 
 * =================================================
-define class abISX as GA_LIGHTWEIGHT_CLASS of abGA.prg && Arrête et redémarre ISX (nécessaire en développement de formulaires)
+define class abISX as GA_LIGHTWEIGHT_CLASS of abGA.prg && {fr} Arrête et redémarre ISX (nécessaire en développement de formulaires)
 * =================================================
 hidden lISX, cISX
 
 lISX = file('ISX.fxp')
 
 * ------------------------------------
-procedure init && Désactive ISX
+procedure init && {fr} Désactive ISX
 
 
-* return .F.
+* {fr} return .F.
 
-if m.this.lISX and lDevMode() && lDevMode() par sécurité, évite un WAIT en unattended server mode
+if m.this.lISX and lDevMode() && {fr} lDevMode() par sécurité, évite un WAIT en unattended server mode
 	this.cISX = fullpath('ISX.fxp')
 	local lcISX
-	lcISX = "ISX('QUIT')" && évite d'embarquer ISX dans le projet
+	lcISX = "ISX('QUIT')" && {fr} évite d'embarquer ISX dans le projet
 	&lcISX
 else
 	return .f.
 endif
 
 * ------------------------------------
-procedure destroy && Résactive ISX
+procedure destroy && {fr} Résactive ISX
 local lcISX
-lcISX = 'DO "' + m.this.cISX + '"' && évite d'embarquer ISX dans le projet
+lcISX = 'DO "' + m.this.cISX + '"' && {fr} évite d'embarquer ISX dans le projet
 &lcISX
 
 * =================================================
-enddefine && CLASS abISX
+enddefine && {fr} CLASS abISX
 * =================================================
 
 * ------------------------------------
-function uValue && Valeur convertie selon le varType spécifié (AKA coercition de type)
+function uValue && {fr} Valeur convertie selon le varType spécifié (AKA coercition de type)
 lparameters ;
-	tuValue,; && Valeur source
- 	tcTypeDest && Type de valeur attendu selon codification de la fonction VFP varType()
+	tuValue,; && {fr} Valeur source
+ 	tcTypeDest && {fr} Type de valeur attendu selon codification de la fonction VFP varType()
 
 && /!\ pourrait être simplifiée et optimisée avec Cast()
 
@@ -3780,19 +3781,19 @@ local luResult;
 
 luResult = .null.
 
-#if .f. && Vartype() VFP9
-	C && Character, Memo, Varchar, Varchar (Binary)
-	D && Date
-	G && General
-	L && Logical
-	n && Numeric, Float, Double, or Integer
-	O && Object
-	Q && Blob, Varbinary
-	t && DateTime
-	U && Unknown or variable does not exist
+#if .f. && {fr} Vartype() VFP9
+	C && {fr} Character, Memo, Varchar, Varchar (Binary)
+	D && {fr} Date
+	G && {fr} General
+	L && {fr} Logical
+	n && {fr} Numeric, Float, Double, or Integer
+	O && {fr} Object
+	Q && {fr} Blob, Varbinary
+	t && {fr} DateTime
+	U && {fr} Unknown or variable does not exist
 	X && .NULL.
-	y && Currency
-	i && Integer && support additionnel
+	y && {fr} Currency
+	i && {fr} Integer && {fr} support additionnel
 #endif
 
 llResult = vartype(m.tcTypeDest) == 'C'
@@ -3818,7 +3819,7 @@ if m.llResult
 				tuValue = upper(alltrim(m.tuValue))
 				if m.lcTypeDest $ 'YNI'
 
-					* Normaliser le point décimal éventuel, supprimer les séparateurs de milliers
+					* {fr} Normaliser le point décimal éventuel, supprimer les séparateurs de milliers
 					local lcPoint, lcSeparator, lcChars
 					lcPoint = set("Point")
 					lcSeparator = set("Separator")
@@ -3836,7 +3837,7 @@ if m.llResult
 					m.lcTypeDest == 'L', icase(inlist(m.tuValue, 'T', '.T.', 'VRAI', 'TRUE'), .t., empty(m.tuValue) or inlist(m.tuValue, 'F', '.F.', 'FAUX', 'FALSE'), .f., evaluate(m.tuValue)),;
 					m.lcTypeDest $ 'DT', iif(left(m.tuValue, 1) = '{', evaluate(m.tuValue), uValue_TD(m.tuValue, m.lcTypeDest)),;
 					.null.)
-				if m.lcTypeDest $ 'DT' && Ctod() et Ctot() peuvent produire un résultat invalide
+				if m.lcTypeDest $ 'DT' && {fr} Ctod() et Ctot() peuvent produire un résultat invalide
 					try
 						dtoc(m.luResult)
 					catch
@@ -3854,7 +3855,7 @@ if m.llResult
 
 			case m.lcTypeSrce $ 'DT'
 				luResult = icase(;
-					m.lcTypeDest == 'C', cLitteral(m.tuValue),; && mieux que Cast()
+					m.lcTypeDest == 'C', cLitteral(m.tuValue),; && {fr} mieux que Cast()
 					m.lcTypeDest == 'D', ttod(m.tuValue),;
 					m.lcTypeDest == 'T', dtot(m.tuValue),;
 					.null.)
@@ -3888,21 +3889,21 @@ return m.luResult
 * ------------------------------------
 function uValue_TD
 lparameters ;
-  tuValue; && Valeur source
-, tcTypeDest; && Type de valeur attendu selon codification de la fonction VFP varType()
+  tuValue; && {fr} Valeur source
+, tcTypeDest; && {fr} Type de valeur attendu selon codification de la fonction VFP varType()
 
 local cMark, lCentury, cDate, cTime
 
 cMark = evl(set("Mark"), '/')
 
 tuValue = strtran(strtran(strtran(strtran(chrtran(cRepCharDel(alltrim(m.tuValue));
-	, '-', m.cMark); && iPhone
+	, '-', m.cMark); && {fr} iPhone
 	, ' ' + m.cMark, m.cMark);
 	, m.cMark + ' ', m.cMark);
 	, ' :', ':');
 	, ': ', ':');
 
-lCentury = len(getwordnum(m.tuValue, 1, '/')) = 4 && YYYY/MM/DD assumed
+lCentury = len(getwordnum(m.tuValue, 1, '/')) = 4 && {fr} YYYY/MM/DD assumed
 
 do case
 
@@ -3911,27 +3912,27 @@ case !vartype(m.tuValue) == 'C';
  or empty(chrtran(m.tuValue, m.cMark+':APM', ''))
 	return iif(m.tcTypeDest = 'D', {/}, {/:}) && {en} empty date[-time] {fr} date[-time] vide
 
-case left(m.tuValue, 1) == '{' and right(m.tuValue, 1) == '}' && litteral
+case left(m.tuValue, 1) == '{' and right(m.tuValue, 1) == '}' && {fr} litteral
 	return evaluate(m.tuValue)
 
 case m.lCentury and m.tcTypeDest = 'D' &&
 	cDate = m.tuValue
 	return date(;
-		  evl(int(val(getwordnum(m.cDate, 1, m.cMark))), year(date())); && year
-		, evl(int(val(getwordnum(m.cDate, 2, m.cMark))), month(date())); && month
-		, evl(int(val(getwordnum(m.cDate, 3, m.cMark))), day(date())); && day
+		  evl(int(val(getwordnum(m.cDate, 1, m.cMark))), year(date())); && {fr} year
+		, evl(int(val(getwordnum(m.cDate, 2, m.cMark))), month(date())); && {fr} month
+		, evl(int(val(getwordnum(m.cDate, 3, m.cMark))), day(date())); && {fr} day
 		)
 
-case m.lCentury && m.tcTypeDest = 'T'
+case m.lCentury && {fr} m.tcTypeDest = 'T'
 	cDate = getwordnum(m.tuValue, 1)
 	cTime = getwordnum(m.tuValue, 2)
 	return datetime(;
-		  evl(int(val(getwordnum(m.cDate, 1, m.cMark))), year(date())); && year
-		, evl(int(val(getwordnum(m.cDate, 2, m.cMark))), month(date())); && month
-		, evl(int(val(getwordnum(m.cDate, 3, m.cMark))), day(date())); && day
-		, int(val(getwordnum(m.cTime, 1, ':'))); && hour
-		, int(val(getwordnum(m.cTime, 2, ':'))); && minute
-		, int(val(getwordnum(m.cTime, 3, ':'))); && seconds
+		  evl(int(val(getwordnum(m.cDate, 1, m.cMark))), year(date())); && {fr} year
+		, evl(int(val(getwordnum(m.cDate, 2, m.cMark))), month(date())); && {fr} month
+		, evl(int(val(getwordnum(m.cDate, 3, m.cMark))), day(date())); && {fr} day
+		, int(val(getwordnum(m.cTime, 1, ':'))); && {fr} hour
+		, int(val(getwordnum(m.cTime, 2, ':'))); && {fr} minute
+		, int(val(getwordnum(m.cTime, 3, ':'))); && {fr} seconds
 		)
 
 case m.tcTypeDest = 'D'
@@ -3944,20 +3945,20 @@ endcase
 endfunc
 
 * -----------------------------------------------------------------
-procedure uValue_Test && Teste uValue()
+procedure uValue_Test && {fr} Teste uValue()
 
 local loUnitTest as abUnitTest of abDev.prg
 loUnitTest = newobject('uValue_Test', 'abDev.prg')
 
 loUnitTest.Test(1421.5, '1 421,5', 'N')
 loUnitTest.Test(1421.5, '1 421.5', 'N')
-* loUnitTest.Test(1421.5, '1,421.5', 'N') && échec
+* {fr} loUnitTest.Test(1421.5, '1,421.5', 'N') && {fr} échec
 loUnitTest.Test($1421.5, '$    1 421.5', 'Y')
 loUnitTest.Test(1421, '1 421.5', 'I')
 
 loUnitTest.Test(.t., 'T', 'L')
 loUnitTest.Test(.t., 2, 'L')
-loUnitTest.Test({}, '23/09/194', 'D') && date invalide && ajouté le 15/05/09
+loUnitTest.Test({}, '23/09/194', 'D') && {fr} date invalide && {fr} ajouté le 15/05/09
 
 loUnitTest.Test({/}, 'boto', 'D') && 2015-06-16 - contributor Gilles Lajot-Sarthou
 
@@ -3971,12 +3972,12 @@ define class uValue_Test as abUnitTest of abDev.prg
 	enddefine
 
 * =================================================
-function luEqual && Deux valeurs sont égales en tenant compte des .NULL.
+function luEqual && {fr} Deux valeurs sont égales en tenant compte des .NULL.
 lparameters ;
-	tu1,; && Valeur 1, par référence si Array
-	tu2,; && Valeur 2, par référence si Array
-	tlStrict,; && [.F.] comparaison de chaînes stricte
-	tlCaseIgnore && [.F.] ignorer la casse
+	tu1,; && {fr} Valeur 1, par référence si Array
+	tu2,; && {fr} Valeur 2, par référence si Array
+	tlStrict,; && [.F.] {fr} comparaison de chaînes stricte
+	tlCaseIgnore && [.F.] {fr} ignorer la casse
 tlStrict = lTrue(m.tlStrict)
 tlCaseIgnore = lTrue(m.tlCaseIgnore)
 
@@ -4001,14 +4002,14 @@ return m.lcType1 == m.lcType2;
 		 	)
 
 * --------------------
-function luEqual_Object	&& Deux objets sont identiques
+function luEqual_Object	&& {fr} Deux objets sont identiques
 lparameters ;
-	tu1,; && objet 1
-	tu2 && objet 2
+	tu1,; && {fr} objet 1
+	tu2 && {fr} objet 2
 
 local laProp[1], lcProp, liItem, la1[1], la2[1], llResult
 
-llResult = m.tu1 = m.tu2 && référence au même objet
+llResult = m.tu1 = m.tu2 && {fr} référence au même objet
 if not m.llResult
 
 	llResult = amembers(laProp, m.tu2) + amembers(laProp, m.tu1) = 0
@@ -4019,9 +4020,9 @@ if not m.llResult
 			llResult = .f.;
 			 or inlist(m.lcProp, 'PARENT', 'CONTROLS', 'OBJECTS', 'PAGES', 'COLUMNS');
 			 or .t.;
-			  and pemstatus(m.tu2, m.lcProp, 5); && extent
-			  and not pemstatus(m.tu1, m.lcProp, 2); && protected
-			  and not pemstatus(m.tu2, m.lcProp, 2); && protected
+			  and pemstatus(m.tu2, m.lcProp, 5); && {fr} extent
+			  and not pemstatus(m.tu1, m.lcProp, 2); && {fr} protected
+			  and not pemstatus(m.tu2, m.lcProp, 2); && {fr} protected
 				and iif(type('m.tu1.' + m.lcProp, 1) == 'A';
 					, .t.;
 						and type('m.tu2.' + m.lcProp, 1) == 'A';
@@ -4053,7 +4054,7 @@ endif
 return m.llResult
 
 * --------------------
-procedure luEqual_Test && Teste luEqual
+procedure luEqual_Test && {fr} Teste luEqual
 
 local loUnitTest as abUnitTest of abDev.prg
 loUnitTest = newobject('abUnitTest', 'abDev.prg')
@@ -4072,7 +4073,7 @@ loUnitTest.Test(.t., 'TOTO ', 'toto', , .t.)
 return loUnitTest.result()
 
 * =================================================
-function cSetPath(tlSort) && Set("Path") bien présenté
+function cSetPath(tlSort) && {fr} Set("Path") bien présenté
 
 local laResult[1]
 
@@ -4084,7 +4085,7 @@ endif
 return cListOfArray(@m.laResult, CRLF)
 
 * =================================================
-function cSetProc(tlSort) && Set("Procedure") bien présenté
+function cSetProc(tlSort) && {fr} Set("Procedure") bien présenté
 
 local laResult[1]
 
@@ -4096,7 +4097,7 @@ endif
 return cListOfArray(@m.laResult, CRLF)
 
 * =================================================
-function cSetClass(tlSort) && Set("Classlib") bien présenté
+function cSetClass(tlSort) && {fr} Set("Classlib") bien présenté
 
 local laResult[1]
 
@@ -4108,12 +4109,12 @@ endif
 return cListOfArray(@m.laResult, CRLF)
 
 * =================================================
-function cMBcmdCaption && Label d'un bouton d'une messageBox() d'après son type
+function cMBcmdCaption && {fr} Label d'un bouton d'une messageBox() d'après son type
 lparameters ;
-	tiType,; && [1] Type selon doc messageBox()
-	tcLang,; && [cLangUser()] Langue
-	tlHotKey && [.F.] souligner la lettre de raccourci
-tiType = int(evl(nvl(m.tiType, 0), 1)) && OK par défaut
+	tiType,; && [1] {fr} Type selon doc messageBox()
+	tcLang,; && [cLangUser()] {fr} Langue
+	tlHotKey && [.F.] {fr} souligner la lettre de raccourci
+tiType = int(evl(nvl(m.tiType, 0), 1)) && {fr} OK par défaut
 tcLang = cLangUser(m.tcLang)
 
 return iif(lTrue(m.tlHotKey), '\<', '');
@@ -4147,9 +4148,9 @@ return iif(lTrue(m.tlHotKey), '\<', '');
 		)
 
 * =================================================
-function nDialogBoxTypeParms && Composantes du paramètre 'nDialogBoxType' d'une messageBox()
+function nDialogBoxTypeParms && {fr} Composantes du paramètre 'nDialogBoxType' d'une messageBox()
 lparameters ;
-	nDialogBoxType,; && cf. messageBox()
+	nDialogBoxType,; && {fr} cf. messageBox()
 	tnButtons,; && @ (0-5) boutons à afficher
 	tnIcon,; && @ (16,32,48 ou 64) icône à afficher
 	tnDefault && @ (0,256,512) Bouton actif par défaut
@@ -4166,12 +4167,12 @@ tnDefault = iif(inlist(m.tnDefault, 256, 512), m.tnDefault, 0)
 return m.nDialogBoxType
 
 * --------------------
-procedure nDialogBoxTypeParms_Test && Teste nDialogBoxTypeParms()
+procedure nDialogBoxTypeParms_Test && {fr} Teste nDialogBoxTypeParms()
 
 local loUnitTest as abUnitTest of abDev.prg
 loUnitTest = newobject('abUnitTest', 'abDev.prg')
 
-local lnDialogBoxType,; && cf. messageBox()
+local lnDialogBoxType,; && {fr} cf. messageBox()
 	lnButtons,; && @ (0-5) boutons à afficher
 	lnIcon,; && @ (16,32,48 ou 64) icône à afficher
 	lnDefault && @ (0,256,512) Bouton actif par défaut
@@ -4202,8 +4203,8 @@ loUnitTest.assert(32, m.lnIcon)
 loUnitTest.assert(256, m.lnDefault)
 
 * =================================================
-function nScreenDockOffset && Nombre de colonnes où commence la partie gauche du _Screen du fait des fenêtres dockées à gauche
-lparameters tlRows && [.F.] décalage ; .T.: vertical (rows), .F.: horizontal (cols)
+function nScreenDockOffset && {fr} Nombre de colonnes où commence la partie gauche du _Screen du fait des fenêtres dockées à gauche
+lparameters tlRows && [.F.] {fr} décalage ; .T.: vertical (rows), .F.: horizontal (cols)
 tlRows = lTrue(m.tlRows)
 
 local laDock[1], lnDocks, lnDock, lnResult
@@ -4214,8 +4215,8 @@ if m.lnDocks > 0
 	for m.lnDock = 1 to m.lnDocks
 		if laDock[m.lnDock, 2] = 1;
 		 and laDock[m.lnDock, 3] = iif(m.tlRows;
-		 	, 0; && top
-		 	, 1); && left
+		 	, 0; && {fr} top
+		 	, 1); && {fr} left
 		 and laDock[m.lnDock, 4] = _screen.caption
 
 			lnResult = m.lnResult + iif(m.tlRows, wrows(laDock[m.lnDock, 1]), wcols(laDock[m.lnDock, 1]))
@@ -4226,11 +4227,11 @@ endif
 return m.lnResult
 
 * =================================================
-function cABuserDataPath && Adresse standard du dossier où résident les données AB
+function cABuserDataPath && {fr} Adresse standard du dossier où résident les données AB
 
 local lcResult
 
-lcResult = home(7) + 'AB\' && Visual FoxPro subdirectory in the user's Visual FoxPro Application Data directory
+lcResult = home(7) + 'AB\' && {en} FoxInCloud subdirectory in the user's Visual FoxPro Application Data directory
 if not directory(m.lcResult)
 	md (m.lcResult)
 endif
@@ -4238,12 +4239,12 @@ endif
 return m.lcResult
 
 * ===========================
-function cABmoduleTestAddr && Adresse du fichier de test d'un module
+function cABmoduleTestAddr && {fr} Adresse du fichier de test d'un module
 lparameters tcModule
 local lcPrevious, lcResult
 lcResult = cABuserDataPath() + forceext(m.tcModule, 'tst')
 
-* Si le fichier est à l'ancienne adresse, déplacer dans la nouvelle
+* {fr} Si le fichier est à l'ancienne adresse, déplacer dans la nouvelle
 lcPrevious = DOS_AB + forceext(m.tcModule, 'tst')
 if lFile(m.lcPrevious)
 	FileMove(m.lcPrevious, m.lcResult)
@@ -4252,15 +4253,17 @@ endif
 return m.lcResult
 
 * ===========================
-function cLocalized && Chaîne localisée
+function cLocalized && {fr} Chaîne localisée
 lparameters ;
-  tcString; && Chaîne à localiser
-, tcLangUser; && [cLangUser()] Langue de l'utilisateur
+  tcString; && {fr} Chaîne à localiser
+, tcLangUser; && [cLangUser()] {fr} Langue de l'utilisateur
+
+&& modify command abTxt > abLocalized() pretty similar
 
 local result as string;
-, liLangUser as integer;
-, liEN as integer;
 , lcEN as string;
+
+lcEN = cLocalized_cLang(m.tcString, 'en')
 
 tcLangUser = iif(ga_Type_IsChar(m.tcLangUser, .t.);
 	 and varSet(@m.tcLangUser, Lower(Alltrim(m.tcLangUser)));
@@ -4271,36 +4274,66 @@ tcLangUser = iif(ga_Type_IsChar(m.tcLangUser, .t.);
 	, cLangUser();
 	)
 
-liLangUser = atcc('{' + m.tcLangUser + '}', m.tcString)
-liEN = atcc('{en}', m.tcString)
-lcEN = Iif(m.liEN > 0, substrc(m.tcString, m.liEN + 4), '')
+result = cLocalized_cLang(m.tcString, m.tcLangUser)
 
-result = Evl(Evl(Iif(m.liLangUser > 0, substrc(m.tcString, m.liLangUser + 4), ''), m.lcEN), m.tcString)
-
-return '';
-	+ Evl(Left(m.tcString, at_c('{', m.tcString)-1), ''); && {en} before the first {localization tag}
-	+ alltrim(iif(m.liEN + m.liLangUser > 0; && {en} at least one language found
-		, leftc(m.result, evl(at_c('{', m.result), lenc(m.result)+1)-1);
-		, m.result;
-		), CR, LF, ' ', chr(9))
+return Evl(c2Words(;
+	  Evl(Left(m.tcString, at_c('{', m.tcString)-1), ''); && {en} before the first localization tag {??}
+	, ' ';
+	, alltrim(Evl(m.result, m.lcEN), CR, LF, ' ', chr(9));
+	), m.tcString)
 
 endfunc
 
+* ===========================
+function cLocalized_cLang && {fr} Mention d'une chaîne dans une langue donnée
+lparameters tcString, tcLang
+
+local result as String;
+, iAt as Integer;
+, iOc as Integer;
+, iNext as Integer;
+
+iAt = atcc('{' + m.tcLang + '}', m.tcString)
+result = Iif(m.iAt > 0, substrc(m.tcString, m.iAt + 4), '')
+
+iNext = 0
+iOc = 1
+do while .T.
+	iAt = Atcc('{', m.result, m.iOc)
+	do case
+	case Empty(m.iAt)
+		exit
+	case .T.;
+	 and isAlpha(Substr(m.result, m.iAt + 1, 1));
+	 and isAlpha(Substr(m.result, m.iAt + 2, 1));
+	 and Substr(m.result, m.iAt + 3, 1) == '}'
+		iNext = m.iAt
+		exit
+	otherwise
+		iOc = m.iOc + 1
+	endcase
+enddo
+
+return Iif(m.iNext > 1, Leftc(m.result, m.iNext-1), m.result)
+endfunc
+
 * ------------------------------------
-procedure cLocalized_Test && Teste cLocalized()
+procedure cLocalized_Test && {fr} Teste cLocalized()
 
 local loUnitTest as abUnitTest of abDev.prg
 loUnitTest = newobject('abUnitTest', 'abDev.prg')
 
-loUnitTest.Test([formulaire où s'est produit l'événement], [ {en} requested form {fr} formulaire où s'est produit l'événement], 'fr')
+loUnitTest.Test([@ formulaire où s'est produit l'événement], [@ {en} requested form {fr} formulaire où s'est produit l'événement], 'fr')
 loUnitTest.Test([requested form], [ {en} requested form {fr} formulaire où s'est produit l'événement], 'en')
+loUnitTest.Test([requested form], [ {fr} {en} requested form], 'fr') && {fr} fr est vide, alors on prend l'anglais
+loUnitTest.Test([test], [test {fr} formulaire où s'est produit l'événement], 'es') && {fr} ni es ni en disponible, on ne prend que l'en-ête
 
 return m.loUnitTest.result()
 endproc
 
 * -----------------------------------
-function cLangUser && Code langue de l'utilisateur courant
-lparameters tuLocale && [.F.] @ Code langue avec locale (genre 'fr-fr') ou langue forcée
+function cLangUser && {fr} Code langue de l'utilisateur courant
+lparameters tuLocale && @ [.F.] {fr} Code langue avec locale (genre 'fr-fr') ou langue forcée
 
 local lcType, llForce, loShell as wScript.shell, lcLang, lcResult
 
@@ -4346,7 +4379,7 @@ else
 endif
 
 * =====================================================
-procedure abUnitTests && Teste les modules (abUnitTest) du programme appelant
+procedure abUnitTests && {fr} Teste les modules (abUnitTest) du programme appelant
 
 local success;
 , lcSys16, lcProcFile, lcProcName;
@@ -4355,39 +4388,39 @@ local success;
 
 success = .t.
 
-lcSys16 = sys(16, program(-1) -1) && calling procedure
+lcSys16 = sys(16, program(-1) -1) && {fr} calling procedure
 lcProcFile = cModuleInfo(m.lcSys16, 'Address', .t.)
 lcProcName = cModuleInfo(m.lcSys16, 'Name', .t.)
 lcProcs = forceext(m.lcProcFile, 'txt')
-strtofile('', m.lcProcs) && vide la liste
+strtofile('', m.lcProcs) && {fr} vide la liste
 
-* Tabuler les éléments contenus dans le fichier source
+* {fr} Tabuler les éléments contenus dans le fichier source
 lnProc = aprocinfo(laProc, forceext(m.lcProcFile, 'PRG')) && 0 (default) - Populates the array with all document information.
 
-* Si au moins un élément,
+* {fr} Si au moins un élément,
 if m.lnProc > 0
 
 	asort(m.laProc, 1, -1, 0, 1)
 
-	* Pour chaque élément
+	* {fr} Pour chaque élément
 	store 0 to m.lnProcPrinc, m.lnProcTest
 	for m.liProc = 1 to m.lnProc
 
-		* Si l'élément est une procédure
+		* {fr} Si l'élément est une procédure
 		if upper(laProc[m.liProc, 3]) = 'PROCEDURE'
 			lcProc = laProc[m.liProc, 1]
 			lcProcU = upper(m.lcProc)
 
-			* Si procédure principale, lister
+			* {fr} Si procédure principale, lister
 			if not '_' $ m.lcProc
 				lnProcPrinc = m.lnProcPrinc + 1
 				strtofile(str(m.lnProcPrinc, 2) + '-' + m.lcProc + CRLF, m.lcProcs, 1)
 			endif
 
-			* Si procédure de test, exécuter
+			* {fr} Si procédure de test, exécuter
 			if .t.;
 			 and rightc(m.lcProcU, lenc('_TEST')) == '_TEST' ;
-			 and not m.lcProcU == m.lcProcName && this procedure
+			 and not m.lcProcU == m.lcProcName && {fr} this procedure
 			 	?
 			 	lnProcTest = m.lnProcTest + 1
 				wait window textmerge("<<m.lcProcFile>>!<<m.lcProc>>() [<<m.lnProcTest>>]") at 10, 10 nowait noclear
@@ -4401,10 +4434,10 @@ endif
 return m.success
 
 * =============================================
-function abUnitTest && Objet abUnitTest
+function abUnitTest && {fr} Objet abUnitTest
 lparameters ;
-	tcModule,; && [Module appelant sans le suffixe '_test'] Nom du module à tester
-	tcAddress && [Adresse du code source du module appelant] Adresse contenant le répertoire où créer le Compte-rendu de test
+	tcModule,; && [Module appelant sans le suffixe '_test'] {fr} Nom du module à tester
+	tcAddress && [Adresse du code source du module appelant] {fr} Adresse contenant le répertoire où créer le Compte-rendu de test
 return createobject('abUnitTest', m.tcModule, m.tcAddress)
 endfunc
 
@@ -4412,29 +4445,29 @@ endfunc
 define class abUnitTest as session
 * =============================================
 
-lSingleTest = .f. && exécuter seulement une fois && cas où la fonction à tester produit un résultat cumulatif et/ou des tableaux
+lSingleTest = .f. && {fr} exécuter seulement une fois && {fr} cas où la fonction à tester produit un résultat cumulatif et/ou des tableaux
 
 protected nTest, lResult
-nTest = 0 && Nombre de tests réalisés
-lResult = .t. && Résultat des testes (.T. tant qu'aucun test n'est réalisé)
+nTest = 0 && {fr} Nombre de tests réalisés
+lResult = .t. && {fr} Résultat des testes (.T. tant qu'aucun test n'est réalisé)
 
 hidden ;
-	cModule,; && Nom du module à tester
-	cAddress,; && Adresse du fichier contenant le module à tester
-	oObject,; && Référence à l'objet si le module est une méthode
-	lResult,; && Résultat des tests ; .T. si tous réussis
-	lResultOut,; && Les résultats des tests ont été sortis
-	cResultAddr,; && Adresse du fichier de résultats
-	lCoverage,; && Enclenche le Coverage lors du test
-	cCoverageAddr,; && Adresse du Fichier de Coverage
-	nTest,; && Nombre de tests réalisés sur le module
-	aTest[1,1] && Résultats des tests
+	cModule,; && {fr} Nom du module à tester
+	cAddress,; && {fr} Adresse du fichier contenant le module à tester
+	oObject,; && {fr} Référence à l'objet si le module est une méthode
+	lResult,; && {fr} Résultat des tests ; .T. si tous réussis
+	lResultOut,; && {fr} Les résultats des tests ont été sortis
+	cResultAddr,; && {fr} Adresse du fichier de résultats
+	lCoverage,; && {fr} Enclenche le Coverage lors du test
+	cCoverageAddr,; && {fr} Adresse du Fichier de Coverage
+	nTest,; && {fr} Nombre de tests réalisés sur le module
+	aTest[1,1] && {fr} Résultats des tests
 
 * -----------------------------------
 procedure init
 lparameters ;
-	tcModule,; && [Module appelant sans le suffixe '_test'] Nom du module à tester
-	tcAddress && [Adresse du code source du module appelant] Adresse contenant le répertoire où créer le Compte-rendu de test
+	tcModule,; && [Module appelant sans le suffixe '_test'] {fr} Nom du module à tester
+	tcAddress && [Adresse du code source du module appelant] {fr} Adresse contenant le répertoire où créer le Compte-rendu de test
 
 set sysformats on
 set multilocks on
@@ -4444,7 +4477,7 @@ this.addproperty('oAsserts', abSet('ASSERTS', 'ON'))
 
 local lcModule, lcAddress, llResult
 
-* Si le nom du module n'est pas précisé, prendre le défaut
+* {fr} Si le nom du module n'est pas précisé, prendre le défaut
 llResult = vartype(m.tcModule) == 'C' and not empty(m.tcModule)
 if m.llResult
 	lcModule = m.tcModule
@@ -4454,20 +4487,20 @@ else
 	llResult = not empty(m.lcModule)
 endif
 
-* Si le nom du module est défini, vérifier son existence
+* {fr} Si le nom du module est défini, vérifier son existence
 if m.llResult
 
 	llResult = this.ModuleSet(m.lcModule, m.lcAddress)
 
-	* Si le module est exécutable, régler la session de données
+	* {fr} Si le module est exécutable, régler la session de données
 	if m.llResult
-		set memowidth to wcols(wontop()) && Fenêtre résultats du test
+		set memowidth to wcols(wontop()) && {fr} Fenêtre résultats du test
 	endif
 endif
 
 if directory(DOS_AB)
 
-	* S'il existe des fichiers de test ou de coverage à l'ancienne adresse, déplacer à la nouvelle
+	* {fr} S'il existe des fichiers de test ou de coverage à l'ancienne adresse, déplacer à la nouvelle
 	local laFiles[1], lcFile
 	if aFiles(@m.laFiles, DOS_AB + '*.tst') > 0
 		for each lcFile in laFiles
@@ -4484,22 +4517,22 @@ endif
 return m.llResult
 
 * -----------------------------------
-procedure EnvSet && Règle l'environnement de la session de données privée avant le(s) test(s)
+procedure EnvSet && {fr} Règle l'environnement de la session de données privée avant le(s) test(s)
 lparameters ;
-	tcEnvCommand && Commande d'environnement
+	tcEnvCommand && {fr} Commande d'environnement
 
 if vartype(m.tcEnvCommand) == 'C'
 	&tcEnvCommand
 endif
 
 * -----------------------------------
-procedure ModuleSet && Définit le nom et l'adresse du module à tester
+procedure ModuleSet && {fr} Définit le nom et l'adresse du module à tester
 lparameters ;
-	tcModule,; && [Module appelant sans le suffixe '_test'] Nom du module à tester
-	tcAddress && [Adresse du code source du module] Répertoire où créer le fichier de CR de test
+	tcModule,; && [Module appelant sans le suffixe '_test'] {fr} Nom du module à tester
+	tcAddress && [Adresse du code source du module] {fr} Répertoire où créer le fichier de CR de test
 local llResult
 
-* Si le module est spécifié correctement
+* {fr} Si le module est spécifié correctement
 local lcModule, lcAddress
 lcModule = evl(m.tcModule, cCallingModule(@m.lcAddress))
 lcAddress = cFileCased(evl(m.tcAddress, m.lcAddress))
@@ -4507,24 +4540,24 @@ llResult = not empty(m.lcModule) and file(m.lcAddress)
 assert m.llResult message cAssertMsg(textmerge([le nom et/ou l'adresse de module est incorrect]))
 if m.llResult
 
-	* Si le module existe
+	* {fr} Si le module existe
 	local lnError, lcError, loAsserts
 	lnError = 0
 	lcError = on('ERROR')
-	on error m.lnError = error() && this.ModuleSet_nError(cModuleInfo(Sys(16)))
+	on error m.lnError = error() && {fr} this.ModuleSet_nError(cModuleInfo(Sys(16)))
 	loAsserts = abSet('ASSERTS', 'OFF')
 	evaluate(m.lcModule + "(this, 'junk', Date(), 0, .F.)")
 	on error &lcError
 	release loAsserts
-	llResult = not m.lnError = 1 && file not found
+	llResult = not m.lnError = 1 && {fr} file not found
 	assert m.llResult message cAssertMsg(textmerge([le module " + m.lcModule + " ne peut être exécuté.]))
 	if m.llResult
 
-		* Mémoriser le nom du module
+		* {fr} Mémoriser le nom du module
 		this.cAddress = m.lcAddress
 		this.cModule  = m.lcModule
 
-		* Définir l'adresse de son fichier résultats
+		* {fr} Définir l'adresse de son fichier résultats
 		this.cResultAddr = cABmoduleTestAddr(m.lcModule)
 		this.cCoverageAddr = forceext(this.cResultAddr, 'cov.log')
 	else
@@ -4535,15 +4568,15 @@ endif
 return m.llResult
 
 * -----------------------------------
-hidden function ModuleSet_nError && N° d'erreur rencontrée lors de la tentative d'exécution du module
+hidden function ModuleSet_nError && {fr} N° d'erreur rencontrée lors de la tentative d'exécution du module
 lparameters ;
-	tcProc && Nom de la procédure où retourner en cas d'erreur
+	tcProc && {fr} Nom de la procédure où retourner en cas d'erreur
 
-return && TO ModuleSet
+return && {fr} TO ModuleSet
 
 * -----------------------------------
-hidden function cModuleDefault && Nom du module à tester d'après le nom du module appelant
-lparameters tcCallingModule && Se termine normalement par '_Test'
+hidden function cModuleDefault && {fr} Nom du module à tester d'après le nom du module appelant
+lparameters tcCallingModule && {fr} Se termine normalement par '_Test'
 
 local lcTest, lnTest, lcResult
 lcResult = ''
@@ -4562,23 +4595,23 @@ endif
 return m.lcResult
 
 * -----------------------------------
-procedure CoverageSet && Démarre / arrête l'enregistrement des temps d'exécution pendant le test
-lparameters tlCoverage && [.F.] démarrer / arrêter l'enregistrement pendant le test
+procedure CoverageSet && {fr} Démarre / arrête l'enregistrement des temps d'exécution pendant le test
+lparameters tlCoverage && [.F.] {fr} démarrer / arrêter l'enregistrement pendant le test
 
 this.lCoverage = lTrue(m.tlCoverage)
 
 * -----------------------------------
-procedure CoverageClear && Efface le fichier de coverage
+procedure CoverageClear && {fr} Efface le fichier de coverage
 
 delete file (m.this.cCoverageAddr)
 
 * -----------------------------------
-procedure Test && Teste le module
+procedure Test && {fr} Teste le module
 lparameters ;
-	tuExpected,; && @ Résultat attendu retourné par le module testé - .NULL. : résultat attendu inconnu
-	tuParm01,tuParm02,tuParm03,tuParm04,tuParm05,tuParm06,tuParm07,tuParm08,tuParm09,tuParm10,tuParm11,tuParm12,tuParm13,tuParm14 && @ paramètres passés au module testé
+	tuExpected,; && @ {fr} Résultat attendu retourné par le module testé - .NULL. : résultat attendu inconnu
+	tuParm01,tuParm02,tuParm03,tuParm04,tuParm05,tuParm06,tuParm07,tuParm08,tuParm09,tuParm10,tuParm11,tuParm12,tuParm13,tuParm14 && @ {fr} paramètres passés au module testé
 
-local luResult as Variant; && résultat du test
+local luResult as Variant; && {fr} résultat du test
 , lnParm;
 , lcParms;
 , liParm;
@@ -4589,25 +4622,25 @@ local luResult as Variant; && résultat du test
 
 luResult = .null.
 
-* Si le module est bien défini
+* {fr} Si le module est bien défini
 if empty(this.cModule)
 	return .f.
 else
 
-	* Bâtir la chaine des paramètres à passer au module
+	* {fr} Bâtir la chaine des paramètres à passer au module
 	lnParm = max(pcount() - 1, 0)
-	lcParms = this.Test_cParms(m.lnParm) && liste des paramètres à passert au module testé
+	lcParms = this.Test_cParms(m.lnParm) && {fr} liste des paramètres à passert au module testé
 
 	#define NCOLSFIXES 8 && /!\ utilisé par this.Test_aTestsDim()
 
-	* Ajuster le tableau de résultats de tests
+	* {fr} Ajuster le tableau de résultats de tests
 	this.nTest = this.nTest + 1
 	this.Test_aTestsDim(m.lnParm)
-	this.aTest[m.this.nTest, NCOLSFIXES] = m.lnParm && Nombre de paramètres passés (peut varier d'un test à l'autre)
+	this.aTest[m.this.nTest, NCOLSFIXES] = m.lnParm && {fr} Nombre de paramètres passés (peut varier d'un test à l'autre)
 
 	if m.lnParm > 0
 		for liParm = 1 to m.lnParm
-			luParm = evaluate(this.Test_cParm(m.liParm)) && Valeur du paramètre
+			luParm = evaluate(this.Test_cParm(m.liParm)) && {fr} Valeur du paramètre
 			this.aTest[m.this.nTest, NCOLSFIXES + m.liParm] = iif(vartype(m.luParm) == 'C';
 				, '"' + m.luParm + '"';
 				, cLitteral(m.luParm);
@@ -4615,9 +4648,9 @@ else
 		endfor
 	endif
 
-* Exécuter le test
+* {fr} Exécuter le test
 * ===========================
-	luResult = this.Test_Exec(; && si le résultat est objet, littéral de cet objet
+	luResult = this.Test_Exec(; && {fr} si le résultat est objet, littéral de cet objet
 		  m.lcParms;
 		, @m.lnElapsed;
 		, @m.laStatus1;
@@ -4639,28 +4672,28 @@ else
 		)
 * ===========================
 
-	* Tabuler le résultat du test
+	* {fr} Tabuler le résultat du test
 	local lcStatus
-	this.aTest[m.this.nTest, 1] = this.lCoverage && Coverage ON
-	this.aTest[m.this.nTest, 2] = m.lnElapsed && Temps d'exécution (non significatif si COVERAGE)
-	this.aTest[m.this.nTest, 3] = empty(pcount()) or isNull(m.tuExpected) or luEqual(iif(vartype(m.tuExpected ) == 'O', cL(m.tuExpected), m.tuExpected), m.luResult) && Valeur produite = valeur attendue && Empty(m.tuExpected) OR
-	this.aTest[m.this.nTest, 4] = m.tuExpected && Résultat attendu
-	this.aTest[m.this.nTest, 5] = m.luResult && Résultat produit
-	this.aTest[m.this.nTest, 6] = this.lStatus(@m.laStatus1, @m.laStatus2, @m.lcStatus) && Environnement modifié ?
-	this.aTest[m.this.nTest, 7] = m.lcStatus && Modification d'environnement éventuelle
+	this.aTest[m.this.nTest, 1] = this.lCoverage && {fr} Coverage ON
+	this.aTest[m.this.nTest, 2] = m.lnElapsed && {fr} Temps d'exécution (non significatif si COVERAGE)
+	this.aTest[m.this.nTest, 3] = empty(pcount()) or isNull(m.tuExpected) or luEqual(iif(vartype(m.tuExpected ) == 'O', cL(m.tuExpected), m.tuExpected), m.luResult) && {fr} Valeur produite = valeur attendue && {fr} Empty(m.tuExpected) OR
+	this.aTest[m.this.nTest, 4] = m.tuExpected && {fr} Résultat attendu
+	this.aTest[m.this.nTest, 5] = m.luResult && {fr} Résultat produit
+	this.aTest[m.this.nTest, 6] = this.lStatus(@m.laStatus1, @m.laStatus2, @m.lcStatus) && {fr} Environnement modifié ?
+	this.aTest[m.this.nTest, 7] = m.lcStatus && {fr} Modification d'environnement éventuelle
 endif
 
 return m.luResult
 
 * -----------------------------------
-procedure assert && Teste une valeur (par exemple élément d'un tableau résultat)
+procedure assert && {fr} Teste une valeur (par exemple élément d'un tableau résultat)
 lparameters ;
-	tuExpected,; && @ Résultat attendu
-	tuValue && @ Valeur à tester
+	tuExpected,; && @ {fr} Résultat attendu
+	tuValue && @ {fr} Valeur à tester
 
 if pcount() >= 2
 
-	this.aTest[m.this.nTest, 3] = luEqual(@m.tuExpected, @m.tuValue) && Valeur produite == valeur attendue
+	this.aTest[m.this.nTest, 3] = luEqual(@m.tuExpected, @m.tuValue) && {fr} Valeur produite == valeur attendue
 
 	assert m.this.aTest[m.this.nTest, 3] message cAssertMsg(textmerge(icase(;
 		cLangUser() = 'fr',	[Échec d'assertion au test n° <<m.this.nTest>> - résultat attendu: <<cL(m.tuExpected)>>, obtenu: <<cL(m.tuValue)>>],; && copy-paste this line to add another language support
@@ -4681,29 +4714,29 @@ endif
 return m.this.aTest[m.this.nTest, 3]
 
 * -----------------------------------
-hidden function Test_cParm && Nom d'un paramètre selon sa position
-lparameters tiParm && Position du paramètre
+hidden function Test_cParm && {fr} Nom d'un paramètre selon sa position
+lparameters tiParm && {fr} Position du paramètre
 
 return 'tuParm' + padl(m.tiParm, 2, '0')
 
 * -----------------------------------
-hidden procedure Test_cParms && Liste de paramètres à passer au module testé
+hidden procedure Test_cParms && {fr} Liste de paramètres à passer au module testé
 lparameters ;
-	tnParms && Nombre de paramètres passés à this.test()
+	tnParms && {fr} Nombre de paramètres passés à this.test()
 
-local lcResult && Liste de paramètres
+local lcResult && {fr} Liste de paramètres
 lcResult = ''
 
 if m.tnParms > 0
 
-	* Pour chaque paramètre passé
+	* {fr} Pour chaque paramètre passé
 	local liParm, lcParm
 	for liParm = 1 to m.tnParms
 
-		* Reconstituer le nom du paramètre
+		* {fr} Reconstituer le nom du paramètre
 		lcParm = '@' + this.Test_cParm(m.liParm)
 
-		* Ajouter au résultat en passant par référence
+		* {fr} Ajouter au résultat en passant par référence
 		lcResult = c2Words(m.lcResult, ',', m.lcParm)
 	endfor
 endif
@@ -4711,17 +4744,17 @@ endif
 return m.lcResult
 
 * -----------------------------------
-hidden procedure Test_Exec && Exécute le test du module
+hidden procedure Test_Exec && {fr} Exécute le test du module
 lparameters ;
-	tcParms,; && Chaîne de paramètres à passer au module testé
-	tnElapsed,; && @ Temps d'exécution en millisecondes
-	taStatus1,; && @ Environnement avant exécution du test
-	taStatus2,; && @ Environnement après exécution du test
+	tcParms,; && {fr} Chaîne de paramètres à passer au module testé
+	tnElapsed,; && @ {fr} Temps d'exécution en millisecondes
+	taStatus1,; && @ {fr} Environnement avant exécution du test
+	taStatus2,; && @ {fr} Environnement après exécution du test
 	tuParm01,tuParm02,tuParm03,tuParm04,tuParm05,tuParm06,tuParm07,tuParm08,tuParm09,tuParm10,tuParm11,tuParm12,tuParm13,tuParm14
 
 external array taStatus1, taStatus2
 
-local luResult as Variant; && Résultat du module testé
+local luResult as Variant; && {fr} Résultat du module testé
 , lnParm, liParm, lcParm, lcParm_;
 , lnRows, lnCols;
 , lcArray;
@@ -4729,7 +4762,7 @@ local luResult as Variant; && Résultat du module testé
 , liAttempt;
 , lnSeconds;
 
-* Sauvegarder les paramètres
+* {fr} Sauvegarder les paramètres
 lnParm = pcount() - 4
 for liParm = 1 to m.lnParm
 	lcParm = this.Test_cParm(m.liParm)
@@ -4749,13 +4782,13 @@ endfor
 lnAttempt = 1
 do while .t.
 
-	* Si c'est le premier test
+	* {fr} Si c'est le premier test
 	if m.lnAttempt = 1
 
-		* Mémoriser l'environnement VFP AVANT l'exécution
+		* {fr} Mémoriser l'environnement VFP AVANT l'exécution
 		this.aStatus(@m.taStatus1)
 
-		* Si le coverage a été demandé, le démarrer
+		* {fr} Si le coverage a été demandé, le démarrer
 		if m.this.lCoverage
 			local lcCoverage
 			lcCoverage = set('COVERAGE', 1)
@@ -4766,7 +4799,7 @@ do while .t.
 	tnElapsed = 0
 	for liAttempt = 1 to m.lnAttempt
 
-		* Restaurer les paramètres
+		* {fr} Restaurer les paramètres
 		for liParm = 1 to m.lnParm
 			lcParm = this.Test_cParm(m.liParm)
 			lcParm_ = m.lcParm + '_'
@@ -4781,41 +4814,41 @@ do while .t.
 			endif
 		endfor
 
-* Exécuter la procédure / fonction
+* {fr} Exécuter la procédure / fonction
 * ===========================================================
 		lnSeconds = seconds()
 		luResult = evaluate(this.cModule + '(' + m.tcParms + ')')
-		tnElapsed = m.tnElapsed + nMS(m.lnSeconds) && millisecondes
+		tnElapsed = m.tnElapsed + nMS(m.lnSeconds) && {fr} millisecondes
 * ===========================================================
 
 	endfor
 
-	luResult = iif(vartype(m.luResult) == 'O'; && exécute .Destroy()
+	luResult = iif(vartype(m.luResult) == 'O'; && {fr} exécute .Destroy()
 		, cL(m.luResult);
 		, m.luResult;
 		)
 
-	* Si c'est le premier test
+	* {fr} Si c'est le premier test
 	if m.lnAttempt = 1
 
-		* Si le coverage a été demandé, l'arrêter
+		* {fr} Si le coverage a été demandé, l'arrêter
 		if this.lCoverage
 			set coverage to &lcCoverage
 		endif
 
-		* Mémoriser l'environnement VFP après l'exécution
+		* {fr} Mémoriser l'environnement VFP après l'exécution
 		this.aStatus(@m.taStatus2)
 	endif
 
-	* Si le temps d'exécution est significatif, terminer
+	* {fr} Si le temps d'exécution est significatif, terminer
 	if .f.;
-	 or m.this.lCoverage;  && avec Coverage, une seule exécution
-	 or m.this.lSingleTest; && simple test demandé
-	 or m.tnElapsed > 2 && && millisecondes (précision au moins 5%)
+	 or m.this.lCoverage;  && {fr} avec Coverage, une seule exécution
+	 or m.this.lSingleTest; && {fr} simple test demandé
+	 or m.tnElapsed > 2 && && {fr} millisecondes (précision au moins 5%)
 
 		exit
 
-	* sinon, répéter le test
+	* {fr} sinon, répéter le test
 	else
 		lnAttempt = m.lnAttempt * 10
 	endif
@@ -4824,26 +4857,26 @@ enddo
 tnElapsed = m.tnElapsed / m.lnAttempt
 
 
-* this.lSingleTest = .F.
+* {fr} this.lSingleTest = .F.
 
 return m.luResult
 
 * -----------------------------------
-hidden procedure Test_aTestsDim && Dimensionne le tableau des résultats pour recevoir ceux du dernier test
-lparameters tnParms && Nombre de paramètres passés pour le test courant
+hidden procedure Test_aTestsDim && {fr} Dimensionne le tableau des résultats pour recevoir ceux du dernier test
+lparameters tnParms && {fr} Nombre de paramètres passés pour le test courant
 
 local lnCols
 lnCols = alen(this.aTest, 2)
 
-* Ajouter une nouvelle LIGNE au tableau de test
+* {fr} Ajouter une nouvelle LIGNE au tableau de test
 dimension this.aTest[m.this.nTest, m.lnCols]
 
-* Si nouveaux paramètres,
+* {fr} Si nouveaux paramètres,
 local lnColsParms
 lnColsParms = NCOLSFIXES + m.tnParms
 if m.lnColsParms > m.lnCols
 
-	* Ajouter le nombre de COLONNES nécessaires au tableau résultat
+	* {fr} Ajouter le nombre de COLONNES nécessaires au tableau résultat
 	local array laTests[1]
 	acopy(this.aTest, m.laTests)
 	aColsIns(@m.laTests, m.lnCols, m.lnColsParms - m.lnCols)
@@ -4861,7 +4894,7 @@ endif
 return this.lResult
 
 * -----------------------------------
-hidden procedure ResultOut && Sort le résultat des test à l'écran et dans le log de test
+hidden procedure ResultOut && {fr} Sort le résultat des test à l'écran et dans le log de test
 
 local lcResult, llResult
 
@@ -4881,28 +4914,28 @@ endif
 return m.llResult
 
 * -----------------------------------
-hidden function cResult && Résultat de test(s)
+hidden function cResult && {fr} Résultat de test(s)
 
 local lcResult
 lcResult = ''
 
-* Si le module est défini
+* {fr} Si le module est défini
 if .t.;
  and vartype(this.cModule) == 'C' ;
  and not empty(this.cModule)
 
-	* Si des tests ont été réalisés sur le module
+	* {fr} Si des tests ont été réalisés sur le module
 	if m.this.nTest > 0
 
-		* Pour chaque test réalisé
+		* {fr} Pour chaque test réalisé
 		local lnCoverage, lnElapsed, lnElapsedMin, lnElapsedMax, lnElapsedAvg, lnSuccess
 		lnElapsedMin = 10^10
 		store 0 to m.lnCoverage, m.lnElapsedMax, m.lnElapsedAvg, m.lnSuccess
 		local lnTest
 		for lnTest = 1 to this.nTest
 
-			* Synthétiser les résultats
-			if this.aTest[m.lnTest, 1] && les temps d'exécution avec COVERAGE ON ne sont pas significatifs
+			* {fr} Synthétiser les résultats
+			if this.aTest[m.lnTest, 1] && {fr} les temps d'exécution avec COVERAGE ON ne sont pas significatifs
 				lnCoverage = m.lnCoverage + 1
 			else
 				lnElapsed = uDefault(this.aTest[m.lnTest, 2], 0)
@@ -4914,14 +4947,14 @@ if .t.;
 				iif(this.aTest[m.lnTest, 3] and this.aTest[m.lnTest, 6], 1, 0)
 		endfor
 
-		* Rectifier le temps moyen en cas de coverage sur certains tests
+		* {fr} Rectifier le temps moyen en cas de coverage sur certains tests
 		local lnCoverageLess
 		lnCoverageLess = this.nTest - m.lnCoverage
 		if m.lnCoverageLess > 0
 			lnElapsedAvg = m.lnElapsedAvg / m.lnCoverageLess
 		endif
 
-		* Compter les échecs
+		* {fr} Compter les échecs
 		local lnFailure
 		lnFailure = this.nTest - m.lnSuccess
 
@@ -4934,7 +4967,7 @@ Résultats de <<m.this.nTest>> test<<Iif(this.nTest = 1, '', 's')>> dont <<m.lnCo
 
 		ENDTEXT
 
-		* Si au moins un test a réussi
+		* {fr} Si au moins un test a réussi
 		if m.lnSuccess > 0
 
 			text TO m.lcResult ADDITIVE TEXTMERGE NOSHOW FLAGS 1
@@ -4944,7 +4977,7 @@ Résultats de <<m.this.nTest>> test<<Iif(this.nTest = 1, '', 's')>> dont <<m.lnCo
 			ENDTEXT
 		endif
 
-		* Si au moins un test a échoué
+		* {fr} Si au moins un test a échoué
 		this.lResult = m.lnFailure = 0
 		if not this.lResult
 			text TO m.lcResult ADDITIVE TEXTMERGE NOSHOW FLAGS 1
@@ -4956,14 +4989,14 @@ Résultats de <<m.this.nTest>> test<<Iif(this.nTest = 1, '', 's')>> dont <<m.lnCo
 			local lnParms, liParm, lcParms;
 			, llString, liString, lcString
 
-			* Pour chaque test échoué
+			* {fr} Pour chaque test échoué
 			for lnTest = 1 to this.nTest
 				do case
 
-				* Cas où l'échec est dû à un mauvais résultat
+				* {fr} Cas où l'échec est dû à un mauvais résultat
 				case not m.this.aTest[m.lnTest, 3]
 
-					* S'il y en a des paramètres, lister leurs valeurs sous forme de constantes
+					* {fr} S'il y en a des paramètres, lister leurs valeurs sous forme de constantes
 					lnParms = this.aTest[m.lnTest, NCOLSFIXES]
 					lcParms = ''
 					if m.lnParms > 0
@@ -4983,7 +5016,7 @@ Résultats de <<m.this.nTest>> test<<Iif(this.nTest = 1, '', 's')>> dont <<m.lnCo
 						endif
 					endfor
 
-					* écrire le n° de test, les résultats attendus et obtenus, les paramètres
+					* {fr} écrire le n° de test, les résultats attendus et obtenus, les paramètres
 					local lcType
 					lcType = vartype(this.aTest[m.lnTest, 5])
 					text TO m.lcResult ADDITIVE TEXTMERGE NOSHOW FLAGS 1
@@ -4995,10 +5028,10 @@ Résultats de <<m.this.nTest>> test<<Iif(this.nTest = 1, '', 's')>> dont <<m.lnCo
 
 					ENDTEXT
 
-				* Cas où l'échec est dû à une modification d'environnement
+				* {fr} Cas où l'échec est dû à une modification d'environnement
 				case not this.aTest[m.lnTest, 6]
 
-					* écrire la variable d'environnement modifiée
+					* {fr} écrire la variable d'environnement modifiée
 					text TO m.lcResult ADDITIVE TEXTMERGE NOSHOW
 - Test n° <<m.lnTest>>
 	L'environnement VFP a changé comme suit :
@@ -5022,27 +5055,27 @@ endif
 return m.lcResult
 
 * -----------------------------------
-hidden function cMS && Temps en avec unité millisecondes
-lparameters tnMS && Temps en millisecondes
+hidden function cMS && {fr} Temps en avec unité millisecondes
+lparameters tnMS && {fr} Temps en millisecondes
 return space(1) + ltrim(transform(m.tnMS, '9,999.999  ms'))
 
 * -----------------------------------
-hidden function aStatus && Environnement Visual FoxPro
-lparameters taStatus && @ Tableau de statut
+hidden function aStatus && {fr} Environnement Visual FoxPro
+lparameters taStatus && @ {fr} Tableau de statut
 
-local lnStatus, lcStatus, laUsed[1], lnResult && Nombre d'éléments d'environnement
+local lnStatus, lcStatus, laUsed[1], lnResult && {fr} Nombre d'éléments d'environnement
 
-* Tabuler les éléments de statut
+* {fr} Tabuler les éléments de statut
 lnResult = alines(m.taStatus, this.cStatus(), .t.)
-aColsIns(@m.taStatus) && ajoute une colonne pour les résultats
+aColsIns(@m.taStatus) && {fr} ajoute une colonne pour les résultats
 
-* Pour chaque élément de statut valide
+* {fr} Pour chaque élément de statut valide
 for lnStatus = 1 to m.lnResult
 
 	lcStatus = m.taStatus[m.lnStatus, 1]
 	if not lCommentLine(m.lcStatus)
 
-		* Évaluer
+		* {fr} Évaluer
 		try
 			taStatus[m.lnStatus, 2] = evaluate(m.lcStatus)
 		catch
@@ -5052,18 +5085,18 @@ endfor
 
 return m.lnResult
 
-external procedure lCommentLine && dans abModuleDir.prg
+external procedure lCommentLine && {fr} dans abModuleDir.prg
 
 * -----------------------------------
-hidden function cStatus && Environnement Visual FoxPro
+hidden function cStatus && {fr} Environnement Visual FoxPro
 local lcResult
 
 text TO m.lcResult NOSHOW PRETEXT 1+2+4
 
-* Nombre de tables ouvertes
+* {fr} Nombre de tables ouvertes
 AUsed(laUsed)
 
-* Zone de travail courante
+* {fr} Zone de travail courante
 Select(0)
 Alias()
 Recno()
@@ -5080,7 +5113,7 @@ Target(3)
 Target(4)
 Target(5)
 
-* Sets
+* {fr} Sets
 Set("Alternate")
 Set("Alternate",1)
 Set("Ansi")
@@ -5138,7 +5171,7 @@ Set("Fields",2)
 Set("Filter")
 Set("Fixed")
 Set("Fullpath")
-* Set("Function") && je ne sais pas comment ça marche
+* {fr} Set("Function") && {fr} je ne sais pas comment ça marche
 Set("Fweek")
 Set("Headings")
 Set("Help")
@@ -5216,31 +5249,31 @@ ENDTEXT
 return m.lcResult
 
 * -----------------------------------
-hidden function lStatus && Compare deux environnements VFP
+hidden function lStatus && {fr} Compare deux environnements VFP
 lparameters ;
-	taStatus1,; && @ Tableau de statut 1 (créé par this.aStatus())
-	taStatus2,; && @ Tableau de statut 2 (créé par this.aStatus())
-	tcModifs && @ Éléments d'environnement ayant évolué (si m.llResult = .F.)
+	taStatus1,; && @ {fr} Tableau de statut 1 (créé par this.aStatus())
+	taStatus2,; && @ {fr} Tableau de statut 2 (créé par this.aStatus())
+	tcModifs && @ {fr} Éléments d'environnement ayant évolué (si m.llResult = .F.)
 
-local llResult && L'environnement VFP est identique
+local llResult && {fr} L'environnement VFP est identique
 llResult = .null.
 tcModifs = ''
 
-* Si le statut a bien été tabulé après test
+* {fr} Si le statut a bien été tabulé après test
 local lnStatusCount
 lnStatusCount = alen(m.taStatus1, 1)
 if alen(m.taStatus2, 1) = m.lnStatusCount
 
-	* Pour chaque élément d'environnement
+	* {fr} Pour chaque élément d'environnement
 	local lnStatus, llStatus
 	llResult = .t.
 	for lnStatus = 1 to m.lnStatusCount
 
-		* Si l'élément n'a pas la même valeur dans les 2 tableaux
+		* {fr} Si l'élément n'a pas la même valeur dans les 2 tableaux
 		llStatus = m.taStatus1[m.lnStatus, 2] == m.taStatus2[m.lnStatus, 2]
 		if not m.llStatus
 
-			* Ajouter la modification au message retourné
+			* {fr} Ajouter la modification au message retourné
 			tcModifs = c2Words(m.tcModifs, CRLF, ;
 				taStatus1[m.lnStatus, 1] + ;
 				space(1) + '-' + space(1) + 'avant Test : ' + cLitteral(m.taStatus1[m.lnStatus, 2]) + ;
@@ -5255,12 +5288,12 @@ return m.llResult
 * -----------------------------------
 procedure destroy
 
-* Sortir le résultat si ça n'a pas été fait
+* {fr} Sortir le résultat si ça n'a pas été fait
 if not this.lResultOut
 	this.ResultOut()
 endif
 
-* Fermer proprement les Aliases ouverts pour le(s) test(s)
+* {fr} Fermer proprement les Aliases ouverts pour le(s) test(s)
 local laAlias[1], lcAlias
 if aused(m.laAlias) > 0
 	for each lcAlias in laAlias
@@ -5269,11 +5302,11 @@ if aused(m.laAlias) > 0
 endif
 
 * =============================================
-enddefine && CLASS abUnitTest
+enddefine && {fr} CLASS abUnitTest
 * =============================================
 
 * -----------------------------------
-function FooTest && Bidon pour démontrer la classe de test abUnitTest
+function FooTest && {fr} Bidon pour démontrer la classe de test abUnitTest
 lparameters tuFoo
 
 local lcType, luResult
@@ -5281,7 +5314,7 @@ lcType = vartype(m.tuFoo)
 
 do case
 
-case m.lcType == 'C' && échec car changement de Set("Deleted")
+case m.lcType == 'C' && {fr} échec car changement de Set("Deleted")
 	local lcDeleted
 	lcDeleted = set("Deleted")
 	lcDeleted = iif(m.lcDeleted == 'ON', 'OFF', 'ON')
@@ -5304,12 +5337,12 @@ endcase
 return m.luResult
 
 *------------------------------------
-function Fox2Pix && foxels to pixels && courtesy Sergey Berezniker http://www.berezniker.com/content/pages/visual-foxpro/pixels-and-foxels
+function Fox2Pix && {fr} foxels to pixels && {fr} courtesy Sergey Berezniker http://www.berezniker.com/content/pages/visual-foxpro/pixels-and-foxels
 lparameters ;
-	tnFoxels,; && foxels to convert
-	tlVertical,; && vertical coordinates
-	tcFontName,; && [current form's] font name
-	tnFontSize && [current form's] font size
+	tnFoxels,; && {fr} foxels to convert
+	tlVertical,; && {fr} vertical coordinates
+	tcFontName,; && [current form's] {fr} font name
+	tnFontSize && [current form's] {fr} font size
 
 return iif(pcount() >= 4;
 	, m.tnFoxels * fontmetric(iif(m.tlVertical, 1, 6), m.tcFontName, m.tnFontSize);
@@ -5317,12 +5350,12 @@ return iif(pcount() >= 4;
 	)
 
 *------------------------------------
-function Pix2Fox && pixels to foxels && courtesy Sergey Berezniker http://www.berezniker.com/content/pages/visual-foxpro/pixels-and-foxels
+function Pix2Fox && {fr} pixels to foxels && {fr} courtesy Sergey Berezniker http://www.berezniker.com/content/pages/visual-foxpro/pixels-and-foxels
 lparameters ;
-	tnPixels,; && pixels to convert
-	tlVertical,; && vertical coordinates
-	tcFontName,; && [current form's] font name
-	tnFontSize && [current form's] font size
+	tnPixels,; && {fr} pixels to convert
+	tlVertical,; && {fr} vertical coordinates
+	tcFontName,; && [current form's] {fr} font name
+	tnFontSize && [current form's] {fr} font size
 
 local lnResult, llResult
 
@@ -5340,21 +5373,21 @@ return iif(m.llResult;
 	)
 
 * ==============================
-function cExprEval && Expression pour évaluer une expression
-lparameters tcExpr && Expression
+function cExprEval && {fr} Expression pour évaluer une expression
+lparameters tcExpr && {fr} Expression
 
 local laOp[1], lcOp, lcOpU, lcExpr, lcResult
 store '' to lcExpr, lcResult
 
-* Pour chaque opérande de l'expression
+* {fr} Pour chaque opérande de l'expression
 if alines(laOp, m.tcExpr, 1, '+') > 0
 	for each lcOp in laOp
 
-		* Si l'opérande est un Chr()
+		* {fr} Si l'opérande est un Chr()
 		lcOpU = chrtran(upper(m.lcOp), space(1), '')
 		if left(m.lcOpU, 4) == 'CHR(' or inlist(m.lcOpU, 'CR', 'CRLF')
 
-			* Ajouter les opérandes accumulés au résultat
+			* {fr} Ajouter les opérandes accumulés au résultat
 			lcResult = cWords('+', m.lcResult, cExprEval_cOp(m.lcExpr), m.lcOp)
 			lcExpr = ''
 		else
@@ -5367,13 +5400,13 @@ endif
 return m.lcResult
 
 * -----------------------------
-function cExprEval_cOp && Adapte un opérande d'une expression
-lparameters tcOp && Opérande
+function cExprEval_cOp && {fr} Adapte un opérande d'une expression
+lparameters tcOp && {fr} Opérande
 
 return iif(empty(m.tcOp), '', textmerge([cLitteral(Evaluate(<<cLitteral(m.tcOp)>>))]))
 
 * ==============================
-function uEval && Expression évaluée si possible
+function uEval && {fr} Expression évaluée si possible
 lparameters tcExpr
 
 local luResult
@@ -5395,7 +5428,7 @@ lparameters ;
 	tcCharEOL && [''] {fr} Caractère de fin de ligne
 
 tcCode = iif(vartype(m.tcCode) == 'C', m.tcCode, '')
-tcIndent = iif(vartype(m.tcIndent) == 'C' and lenc(m.tcIndent) > 0, m.tcIndent, chr(9)) && Evl() ne marche pas sur space() et tab
+tcIndent = iif(vartype(m.tcIndent) == 'C' and lenc(m.tcIndent) > 0, m.tcIndent, chr(9)) && {fr} Evl() ne marche pas sur space() et tab
 tlEmptyDel = lTrue(m.tlEmptyDel)
 tcCharEOL = evl(m.tcCharEOL, '')
 
@@ -5411,7 +5444,7 @@ return '';
 				strtran(strtran(iif(m.tlEmptyDel, cRepCharDel(m.tcCode, CR), m.tcCode);
 					, m.tcCharEOL + CR, m.tcCharEOL + CR + m.tcIndent);
 					, CR + m.tcIndent + CR, CR2),;
-				strtran(strtran(iif(m.tlEmptyDel, cRepCharDel(m.tcCode, LF), m.tcCode); && LF $ m.tcCode, memo par exemple
+				strtran(strtran(iif(m.tlEmptyDel, cRepCharDel(m.tcCode, LF), m.tcCode); && {fr} LF $ m.tcCode, memo par exemple
 					, m.tcCharEOL + LF, m.tcCharEOL + LF + m.tcIndent);
 					, LF + m.tcIndent + LF, LF2);
 			);
@@ -5428,15 +5461,15 @@ return ltrim(icase(;
 			strtran(strtran(m.tcCode, CRLF + TABUL, CRLF), CRLF + space(1), CRLF),;
 		CR $ m.tcCode,;
 			strtran(strtran(m.tcCode, CR + TABUL, CR), CR + space(1), CR),;
-			strtran(strtran(m.tcCode, LF + TABUL, LF), LF + space(1), LF); && memo par exemple
+			strtran(strtran(m.tcCode, LF + TABUL, LF), LF + space(1), LF); && {fr} memo par exemple
 		), TABUL, space(1))
 
 * ==============================
-function cCommented && Instruction(s) commentée(s)
+function cCommented && {fr} Instruction(s) commentée(s)
 lparameters ;
-	tcCode,; && Instruction(s)
-	tcCom,; && [* ] caractère de commentaire
-	tlEmptyDel && [.F.] Supprimer les lignes vides
+	tcCode,; && {fr} Instruction(s)
+	tcCom,; && [* ] {fr} caractère de commentaire
+	tlEmptyDel && [.F.] {fr} Supprimer les lignes vides
 tcCom = evl(m.tcCom, '* ')
 tlEmptyDel = lTrue(m.tlEmptyDel)
 
@@ -5449,28 +5482,28 @@ return iif(empty(m.tcCode);
 						strtran(iif(m.tlEmptyDel, cRepCharsDel(m.tcCode, CRLF), m.tcCode), CRLF, CRLF + m.tcCom),;
 					CR $ m.tcCode,;
 						strtran(iif(m.tlEmptyDel, cRepCharDel(m.tcCode, CR), m.tcCode), CR, CR + m.tcCom),;
-						strtran(iif(m.tlEmptyDel, cRepCharDel(m.tcCode, LF), m.tcCode), LF, LF + m.tcCom); && memo par exemple
+						strtran(iif(m.tlEmptyDel, cRepCharDel(m.tcCode, LF), m.tcCode), LF, LF + m.tcCom); && {fr} memo par exemple
 					), m.tcCom); && ? Trim('totu', 'tu') && 'to'
-		, m.tcCom + CRLF, CRLF); && les lignes vides ne sont pas commentées
-		, m.tcCom + CR, CR); && les lignes vides ne sont pas commentées
-		, m.tcCom + LF, LF); && les lignes vides ne sont pas commentées
+		, m.tcCom + CRLF, CRLF); && {fr} les lignes vides ne sont pas commentées
+		, m.tcCom + CR, CR); && {fr} les lignes vides ne sont pas commentées
+		, m.tcCom + LF, LF); && {fr} les lignes vides ne sont pas commentées
 	)
 
 * ==============================
-function lDevMode && Mode développement
+function lDevMode && {fr} Mode développement
 return _vfp.startmode = 0;
  and not inlist(lower(justext(cModuleInfo(sys(16, 0), 'Address'))), 'app', 'exe')
 
 * ===================================================================
-function cAssertMsg && MESSAGE pour ASSERT limité à 120 caractères sous les IDE non-US
+function cAssertMsg && {fr} MESSAGE pour ASSERT limité à 120 caractères sous les IDE non-US
 lparameters tcMsg && @ {fr} message - si @, retour enrichi
 tcMsg = ltrim(evl(nvl(m.tcMsg, ''), 'empty message?'))
 
 local lcProgram
 
-lcProgram = proper(program(program(-1)-1)) && back compat.
+lcProgram = proper(program(program(-1)-1)) && {fr} back compat.
 
-?? chr(7) && ding && ?? pour ne pas ajouter une ligne à la fenêtre qui a le focus
+?? chr(7) && {fr} ding && ?? pour ne pas ajouter une ligne à la fenêtre qui a le focus
 
 tcMsg = cTronc('';
     + iif(lower(left(m.tcMsg, len(m.lcProgram))) == lower(m.lcProgram);
@@ -5479,10 +5512,10 @@ tcMsg = cTronc('';
 			);
 	  + m.tcMsg;
 	, iif(version(3) == '00'; && 00 - English - 14/06/12 - crédit Francis Faure - http://www.atoutfox.org/nntp.asp?ID=0000009184
-		, 254; && http://www.atoutfox.org/nntp.asp?ID=0000009201
+		, 254; && {fr} http://www.atoutfox.org/nntp.asp?ID=0000009201
 		, 120;
 		);
-	, .t.; && split on a word end
+	, .t.; && {fr} split on a word end
 	)
 
 return m.tcMsg
@@ -5492,19 +5525,19 @@ endfunc
 define class abVoid as custom
 	procedure init
 	return .f.
-enddefine && CLASS abVoid
+enddefine && {fr} CLASS abVoid
 
 * =============================================
-procedure lSetProcedure && a Set("Procedure") is in current Set("Procedure")
-lparameters tcSetProcedure && Set("Procedure") antérieur
+procedure lSetProcedure && {en} a Set("Procedure") is in current Set("Procedure")
+lparameters tcSetProcedure && {fr} Set("Procedure") antérieur
 return setProcedure(m.tcSetProcedure, .t.)
 
 * =============================================
-procedure setProcedure && Restores previous Set("Procedure")
+procedure setProcedure && {en} Restores previous Set("Procedure")
 lparameters ;
-	tcSetPro_,; && Set("Procedure") antérieur
-	tlCheck,; && [.F.] Vérifier si Set("Procedure") antérieur est dans Set("Procedure") courant
-	tlAdditive && [.F.] Ajouter tcSetPro_ à Set("Procedure") courant
+	tcSetPro_,; && {fr} Set("Procedure") antérieur
+	tlCheck,; && [.F.] {fr} Vérifier si Set("Procedure") antérieur est dans Set("Procedure") courant
+	tlAdditive && [.F.] {fr} Ajouter tcSetPro_ à Set("Procedure") courant
 
 tlCheck = lTrue(m.tlCheck)
 tlAdditive = lTrue(m.tlAdditive)
@@ -5570,10 +5603,10 @@ endcase
 return m.llResult
 
 * ========================================
-procedure SetProcClassRestore as Boolean && restores Set("Classlib") or Set("Procedure") to a previous value
+procedure SetProcClassRestore as Boolean && {en} restores Set("Classlib") or Set("Procedure") to a previous value
 lparameters ;
-  tcSetAnte as string; && previous Set("Classlib") or Set("Procedure")
-, tlClassLib as Boolean && [.F.] tcSetAnte is Set("Classlib")
+  tcSetAnte as string; && {en} previous Set("Classlib") or Set("Procedure")
+, tlClassLib as Boolean && [.F.] {en} tcSetAnte is Set("Classlib")
 
 tlClassLib = lTrue(m.tlClassLib)
 
@@ -5591,12 +5624,12 @@ if .t.;
 
 	lcThisFile = cModuleInfo(sys(16), 'Address')
 
-	* Remove unused files
+	* {fr} Remove unused files
 	for each lcFile in m.laFilePost
 		try
 			do case
 			case ascan(m.laFileAnte, m.lcFile, 1, -1, 1, 7) > 0
-&& in previous Set()
+&& {fr} in previous Set()
 			case m.tlClassLib
 				lcFile = iif(' IN ' $ m.lcFile;
 					, '';
@@ -5609,7 +5642,7 @@ if .t.;
 					)
 				release classlib &lcFile
 			case cOfLitteral(m.lcFile) == m.lcThisFile
-&& do not remove this file, we currently use it
+&& {fr} do not remove this file, we currently use it
 			otherwise
 				release procedure &lcFile
 			endcase
@@ -5617,17 +5650,17 @@ if .t.;
 		endtry
 	endfor
 
-	* Add previous files no longer in Set("Classlib") or Set("Procedure")
+	* {fr} Add previous files no longer in Set("Classlib") or Set("Procedure")
 	for each lcFile in m.laFileAnte
 		try
 			do case
 			case ascan(m.laFilePost, m.lcFile, 1, -1, 1, 7) > 0
-&& already in Set()
+&& {fr} already in Set()
 			case !file(alltrim(iif(m.tlClassLib;
 				, trim(substrc(m.lcFile, 1, at_c('ALIAS', m.lcFile)-1));
 				, m.lcFile;
 				), '"', "'"))
-&& File can't be found
+&& {fr} File can't be found
 			case m.tlClassLib
 				set classlib to &lcFile additive
 			otherwise
@@ -5642,14 +5675,14 @@ endif
 return m.success
 
 * =============================================
-function cResultAdd && Ajoute une entrée à un résultat cumulatif
+function cResultAdd && {fr} Ajoute une entrée à un résultat cumulatif
 lparameters ;
-  tcResult; && @ résultat cumulatif
+  tcResult; && @ {fr} résultat cumulatif
 , tuItem; && {fr} élément à ajouter au résultat - type 'N': attend Seconds() pour trace temps d'exécution {en} element to be added to result - type 'N': assumes Seconds() for execution time tracking
-, tlLine; && [.F.] Sauter une ligne au lieu de 2
-, tlPrepend; && [.F.] Ajouter au début
-, tnStackMinus; && [0] nombre de niveaux de pile à retrancher - .T.: ne pas ajouter l'en-tête
-, tlDateTime; && [.F.] add date-time header
+, tlLine; && [.F.] {fr} Sauter une ligne au lieu de 2
+, tlPrepend; && [.F.] {fr} Ajouter au début
+, tnStackMinus; && [0] {fr} nombre de niveaux de pile à retrancher - .T.: ne pas ajouter l'en-tête
+, tlDateTime; && [.F.] {en} add date-time header
 
 tcResult = iif(vartype(m.tcResult) == 'C', m.tcResult, '')
 
@@ -5686,13 +5719,13 @@ if .t.;
 
 endif
 
-return .f. && impératif
+return .f. && {fr} impératif
 
 * ===================================================================
-function cResultHeader && En-tête standard d'un résultat
+function cResultHeader && {fr} En-tête standard d'un résultat
 lparameters ;
   tnStackOffset; && [-1]
-, tlDateTime; && [.F.] add date-time header
+, tlDateTime; && [.F.] {en} add date-time header
 
 local lnStack, lcSys16
 
@@ -5714,7 +5747,7 @@ return '';
 		+ [() - ]
 
 * =============================================
-function lUserAnAdmin as Variant && Current user is a member of the Administrators group
+function lUserAnAdmin as Variant && {en} Current user is a member of the Administrators group
 lparameters result as string && @
 
 local success as Variant
@@ -5724,16 +5757,16 @@ try
 	declare integer IsUserAnAdmin in Shell32
 
 	#if .f.
-		IsUserAnAdmin function && http://msdn.microsoft.com/en-us/library/bb776463.aspx
+		IsUserAnAdmin function && {fr} http://msdn.microsoft.com/en-us/library/bb776463.aspx
 		Minimum supported client: windows XP [desktop apps only]
 		Minimum supported server: windows server 2003 [desktop apps only]
-		end of client support: windows Vista && because of UAC I guess - looks good on Windows 7!
+		end of client support: windows Vista && {fr} because of UAC I guess - looks good on Windows 7!
 		end of server support: windows server 2008
 	#endif
 
 	success = IsUserAnAdmin() # 0
 catch
-	success = .null. && IsUserAnAdmin() is not supported, we don't know
+	success = .null. && {fr} IsUserAnAdmin() is not supported, we don't know
 endtry
 
 result = iif(isNull(m.success);
@@ -5744,7 +5777,7 @@ result = iif(isNull(m.success);
 														[could not determine whether current user account '<<GetEnv("USERNAME")>>' is an administrator because]; && Default: English
 				);
 		+ ' ';
-		+ iif(lUAC(); && Windows > Vista / Server 2008 - end of support of lUserAnAdmin()/IsUserAnAdmin() function according to http://msdn.microsoft.com/en-us/library/bb776463.aspx
+		+ iif(lUAC(); && {fr} Windows > Vista / Server 2008 - end of support of lUserAnAdmin()/IsUserAnAdmin() function according to http://msdn.microsoft.com/en-us/library/bb776463.aspx
 			, icase(;
 					cLangUser() = 'fr',	[Shell32!IsUserAnAdmin() n'est plus supporté sur <<wcWindowsEdition()>>],; && copy-paste this line to add another language support
 															[Shell32!IsUserAnAdmin() is no longer supported on <<wcWindowsEdition()>>]; && Default: English
@@ -5761,15 +5794,15 @@ result = iif(isNull(m.success);
 return m.success
 
 * =============================================
-function lUAC as Boolean && Current Windows version supports UAC
+function lUAC as Boolean && {en} Current Windows version supports UAC
 return val(getwordnum(os(1), 2)) > 6.0
 endfunc
 
 * ========================================
-procedure ProceduresAdd && Ajoute des fichiers prg au Set("Procedure")
-lparameters tcPrgMask && [*.prg] Masque de fichier prg
+procedure ProceduresAdd && {fr} Ajoute des fichiers prg au Set("Procedure")
+lparameters tcPrgMask && [*.prg] {fr} Masque de fichier prg
 
-local lcPrgMask, laPrgs[1], lnPrgs, lnPrg, lnResult && Nombre de fichiers prg ajoutés
+local lcPrgMask, laPrgs[1], lnPrgs, lnPrg, lnResult && {fr} Nombre de fichiers prg ajoutés
 
 lnResult = 0
 lcPrgMask = iif(vartype(m.tcPrgMask)=='C' and not empty(m.tcPrgMask), m.tcPrgMask, '*.prg')
@@ -5784,18 +5817,18 @@ return m.lnResult
 endproc
 
 * ========================================
-procedure ProcedureRemove && ôte un fichier prg de Set("Procedure") s'il y est
-lparameters tcPrg && fichier prg
+procedure ProcedureRemove && {fr} ôte un fichier prg de Set("Procedure") s'il y est
+lparameters tcPrg && {fr} fichier prg
 return ProcedureAdd(m.tcPrg, .T.)
 endproc
 
 * ========================================
-procedure ProcedureAdd && Ajoute un fichier prg à Set("Procedure") s'il n'y est déjà
+procedure ProcedureAdd && {fr} Ajoute un fichier prg à Set("Procedure") s'il n'y est déjà
 lparameters ;
-  tcPrg; && fichier prg
-, tlRemove; && [.F.] Ôter de Set("Procedure")
+  tcPrg; && {fr} fichier prg
+, tlRemove; && [.F.] {fr} Ôter de Set("Procedure")
 
-local llResult && le fichier a été ajouté ou ôté selon la demande
+local llResult && {fr} le fichier a été ajouté ou ôté selon la demande
 if vartype(m.tcPrg) == 'C' and file(m.tcPrg) and inlist(upper(justext(m.tcPrg)), 'PRG', 'FXP')
 
 	tcPrg = fullpath(forceext(m.tcPrg, 'FXP'))
@@ -5818,19 +5851,19 @@ return m.llResult
 endproc
 
 * ========================================
-procedure ClassLibRemove && Ôte un fichier vcx de Set("ClassLib") s'il y est
-lparameters tcVCX && fichier vcx
+procedure ClassLibRemove && {fr} Ôte un fichier vcx de Set("ClassLib") s'il y est
+lparameters tcVCX && {fr} fichier vcx
 
 return ClassLibAdd(m.tcVCX, .t.)
 endproc
 
 * ========================================
-procedure ClassLibAdd && Ajoute un fichier vcx à Set("ClassLib") s'il n'y est déjà
+procedure ClassLibAdd && {fr} Ajoute un fichier vcx à Set("ClassLib") s'il n'y est déjà
 lparameters ;
-	tcVCX,; && fichier(s) vcx
-	tlRemove && [.F.] RELEASE CLASSLIB
+	tcVCX,; && {fr} fichier(s) vcx
+	tlRemove && [.F.] {fr} RELEASE CLASSLIB
 
-local laVCX[1], lcVCX, llSet, lcAlias, llResult && le fichier a été ajouté ou retiré
+local laVCX[1], lcVCX, llSet, lcAlias, llResult && {fr} le fichier a été ajouté ou retiré
 
 if .t.;
  and vartype(m.tcVCX) == 'C';
@@ -5858,7 +5891,7 @@ return m.llResult
 endproc
 
 * ========================================
-function Sys3 && Sys(3) unique même sur une machine rapide
+function Sys3 && {fr} Sys(3) unique même sur une machine rapide
 local Sys3
 Sys3 = sys(3)
 do while m.Sys3 == sys(3)
@@ -5867,7 +5900,7 @@ return m.Sys3
 endfunc
 
 * ========================================
-function Sys2015 && Sys(2015) unique même sur une machine rapide - alias de cSys2015Unique()
+function Sys2015 && {fr} Sys(2015) unique même sur une machine rapide - alias de cSys2015Unique()
 local Sys2015
 Sys2015 = sys(2015)
 do while m.Sys2015 == sys(2015)
@@ -5876,35 +5909,35 @@ return m.Sys2015
 endfunc
 
 * ========================================
-function cSys2015Unique && Sys(2015) unique même sur une machine rapide - alias de Sys2015()
+function cSys2015Unique && {fr} Sys(2015) unique même sur une machine rapide - alias de Sys2015()
 return Sys2015()
 endfunc
 
 * ========================================
-procedure varStore(out, in) as Boolean && assigne une variable - alias de varSet()
-store m.in to out && http://blogs.msdn.com/b/calvin_hsia/archive/2004/12/14/301282.aspx - Calvin: the STORE command doesn't do as much as the "x=y" command. More in a future blog.
+procedure varStore(out, in) as Boolean && {fr} assigne une variable - alias de varSet()
+store m.in to out && {fr} http://blogs.msdn.com/b/calvin_hsia/archive/2004/12/14/301282.aspx - Calvin: the STORE command doesn't do as much as the "x=y" command. More in a future blog.
 endproc
 
 * =============================================
-procedure varSet(out, in) as Boolean && assigne une variable - alias de varStore()
-store m.in to out && http://blogs.msdn.com/b/calvin_hsia/archive/2004/12/14/301282.aspx - Calvin: the STORE command doesn't do as much as the "x=y" command. More in a future blog.
+procedure varSet(out, in) as Boolean && {fr} assigne une variable - alias de varStore()
+store m.in to out && {fr} http://blogs.msdn.com/b/calvin_hsia/archive/2004/12/14/301282.aspx - Calvin: the STORE command doesn't do as much as the "x=y" command. More in a future blog.
 endproc
 
 * =============================================
-function iInc(int, inc) as integer && incrémente une variable
+function iInc(int, inc) as integer && {fr} incrémente une variable
 int = m.int + evl(m.inc, 1)
 return m.int
 endproc
 
 * =============================================
 procedure setStepOn(condition as Boolean) as Boolean
-if (cast(m.condition as L) or empty(pcount())) && and lDevMode() useless
+if (cast(m.condition as L) or empty(pcount())) && {fr} and lDevMode() useless
 	set step on
 endif
 endproc
 
 * =============================================
-function abCoverage && Lance un historique d'exécution && Alias de oCoverage()
+function abCoverage && {fr} Lance un historique d'exécution && {fr} Alias de oCoverage()
 lparameters ;
   condition as Boolean; && [.T.] {fr} condition pour lancer le coverage
 , lAdditive as Boolean; && [.F.] {en} Add to the same file
@@ -5918,16 +5951,16 @@ return iif(empty(pcount());
 endfunc
 
 * =============================================
-function oCoverage && Lance un historique d'exécution
+function oCoverage && {fr} Lance un historique d'exécution
 lparameters ;
   condition as Boolean; && [.T.] {fr} condition pour lancer le coverage
 , lAdditive as Boolean; && [.F.] {en} Add to the same file
 , lProduction as Boolean; && [.F.] {fr} Forcer le Coverage en mode production
 
-* loCoverage = oCoverage([condition]) && {en} Starts log {fr} Commence l'historique
+* {fr} loCoverage = oCoverage([condition]) && {en} Starts log {fr} Commence l'historique
 * 	--<{en} code you want to trace {fr} Code que vous voulez tracer >--
 
-* loCoverage = .null. && {en} Stops log {fr} Arrête l'historique
+* {fr} loCoverage = .null. && {en} Stops log {fr} Arrête l'historique
 
 if .t.;
  and (empty(pcount()) or lTrue(m.condition));
@@ -5938,7 +5971,7 @@ if .t.;
 	local lcFile as string
 
 	lcFile = '';
-		+ lower(cModuleInfo(sys(16,0), 'Address')); && root program
+		+ lower(cModuleInfo(sys(16,0), 'Address')); && {fr} root program
 		+ '_' + lower(cModuleInfo(sys(16, program(-1)-1), 'Name'));
 		+ iif(m.lAdditive;
 			, '';
@@ -6028,7 +6061,7 @@ return m.cResult
 endfunc
 
 * =============================================
-function cObjectCamelCase && Nom ou adresse d'objet où les abréviations des classes sont en casse mixte
+function cObjectCamelCase && {fr} Nom ou adresse d'objet où les abréviations des classes sont en casse mixte
 lparameters cObject
 return strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(m.cObject;
 , 'cad', 'Cad', 1, -1, 1);
@@ -6074,7 +6107,7 @@ return strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(s
 endfunc
 
 * =============================================
-function nEvl(uValue, notEmpty, typeForce) && substitute value instead of not empty value
+function nEvl(uValue, notEmpty, typeForce) && {en} substitute value instead of not empty value
 return icase(;
 	!empty(m.uValue),;
 		m.notEmpty,;
@@ -6085,62 +6118,62 @@ return icase(;
 endfunc
 
 * =============================================
-function nNvl && substitute value instead of a not null value
+function nNvl && {en} substitute value instead of a not null value
 lparameters value, substitute
 return iif(isNull(m.value), m.value, m.substitute)
 endfunc
 
 * =============================================
-function isNullOrEmpty && null or empty value
+function isNullOrEmpty && {en} null or empty value
 lparameters value
 return !vartype(m.value) == 'O' and empty(nvl(m.value, .f.))
 endfunc
 * --------------------------------------------
-function isEmptyOrNull && empty or null value
+function isEmptyOrNull && {en} empty or null value
 lparameters value
 return isNullOrEmpty(m.value)
 endfunc
 
 * =============================================
-function ENvl && substitute for an empty or null value
+function ENvl && {en} substitute for an empty or null value
 lparameters value, substitute
 return iif(isNullOrEmpty(m.value), m.substitute, m.value)
 endfunc
 
 * =============================================
-function nENvl && substitute value instead of not empty and not null value
+function nENvl && {en} substitute value instead of not empty and not null value
 lparameters value, substitute
 return iif(isNullOrEmpty(m.value), m.value, m.substitute)
 endfunc
 
 * =============================================
-function EvlNull && turns empty value into .null.
+function EvlNull && {en} turns empty value into .null.
 lparameters value
 return iif(!vartype(m.value) == 'O' and empty(m.value), .null., m.value)
 endfunc
 
 * =============================================
-function lTrue && a value is .T.
-lparameters value && if @, .T./.F.
+function lTrue && {en} a value is .T.
+lparameters value && {fr} if @, .T./.F.
 value = vartype(m.value) == 'L' and m.value
 return m.value
 endfunc
 * =============================================
-function lFalse && a value is .F.
-lparameters value && if @, .T./.F.
+function lFalse && {en} a value is .F.
+lparameters value && {fr} if @, .T./.F.
 value = vartype(m.value) == 'L' and !m.value
 return m.value
 endfunc
 
-#if .f. && https://raw.githubusercontent.com/npm/node-semver/master/semver.js
+#if .f. && {fr} https://raw.githubusercontent.com/npm/node-semver/master/semver.js
 
 #endif
 
 * =============================
 function cSemVer as String && {en} SemVer of a version string
 lparameters ;
-  result as string; && @ résultat (cumulatif)
-, version as string; && version à analyser
+  result as string; && @ {fr} résultat (cumulatif)
+, version as string; && {fr} version à analyser
 , loose as Boolean; && [.F.]
 
 local oSemVer as abSemVer of abDev.prg
@@ -6160,8 +6193,8 @@ endfunc
 * =============================
 function cSemVerMMP as String && {en} SemVer major.minor.patch (without prereleases)
 lparameters ;
-  result as string; && @ résultat (cumulatif)
-, version as string; && version à analyser
+  result as string; && @ {fr} résultat (cumulatif)
+, version as string; && {fr} version à analyser
 , loose as Boolean; && [.F.]
 
 local oSemVer as abSemVer of abDev.prg
@@ -6181,8 +6214,8 @@ endfunc
 * =============================
 function abSemVer as abSemVer of abDev.prg && {en} abSemVer object from a version string
 lparameters ;
-  result as string; && @ résultat (cumulatif)
-, version as string; && version à analyser
+  result as string; && @ {fr} résultat (cumulatif)
+, version as string; && {fr} version à analyser
 , loose as Boolean; && [.F.]
 
 if vartype(m.version) # 'C'
@@ -6194,16 +6227,16 @@ return createobject('abSemVer', @m.result, m.version, m.loose)
 endfunc
 
 * -----------------
-function labSemVer && c'est un objet de la classe abSemVer
+function labSemVer && {fr} c'est un objet de la classe abSemVer
 lparameters oSemVer as Variant
 return loClass(m.oSemVer, 'abSemVer')
 endfunc
 
 * -----------------
-function iSemVerMMP && ordre de classement de versions SemVer sur majeur-mineur-patch (ignorant les pre-releases)
+function iSemVerMMP && {fr} ordre de classement de versions SemVer sur majeur-mineur-patch (ignorant les pre-releases)
 lparameters ;
-  result as string; && @ résultat (cumulatif)
-, version as string; && version à analyser
+  result as string; && @ {fr} résultat (cumulatif)
+, version as string; && {fr} version à analyser
 , loose as Boolean; && [.F.]
 
 local oSemVer as abSemVer
@@ -6217,13 +6250,13 @@ return Iif(labSemVer(m.oSemVer);
 endfunc
 
 * =============================
-define class abSemVer as GA_LIGHTWEIGHT_CLASS of abGA.prg && Implements Semantic Versioning 2.0.0 http://semver.org/ - inspired by https://github.com/npm/node-semver/
+define class abSemVer as GA_LIGHTWEIGHT_CLASS of abGA.prg && {en} Implements Semantic Versioning 2.0.0 http://semver.org/ - inspired by https://github.com/npm/node-semver/
 * =============================
 
 MAX_LENGTH = 256
-MAX_SAFE_INTEGER = 2^31 - 1 && VFP limitation
+MAX_SAFE_INTEGER = 2^31 - 1 && {fr} VFP limitation
 
-oPattern = .null. && CreateObject('Empty') && statement is not valid is a class definition
+oPattern = .null. && {fr} CreateObject('Empty') && {en} statement is not valid is a class definition
 oRegExpr = .null.
 
 tildeTrimReplace = '$1~'
@@ -6234,30 +6267,30 @@ loose = .null.
 raw = .null.
 version = .null.
 
-&& these are actually numbers
+&& {en} these are actually numbers
 major = .null.
 minor = .null.
 patch = .null.
 
 dimension prerelease[1], build[1]
-prerelease = .null. && array of prerelease(s) identifier(s) and number(s) && keep as lower case
-build = .null. && array of build numbers
+prerelease = .null. && {en} array of prerelease(s) identifier(s) and number(s) && {fr} keep as lower case
+build = .null. && {en} array of build numbers
 
-&& FoxInCloud extensions
-&& these are actually logical
-lMajor = .null. && major release
-lMinor = .null. && minor release
-lPatch = .null. && patch release
-lPreRelease = .null. && pre-release (beta)
-versionMMP = .null. && version Major.Minor.Path (without prerelease(s))
-versionMMPint = .null. && version Major.Minor.Path in integer
-versionIS = .null. && version for InstallShield
+&& {en} FoxInCloud extensions
+&& {en} these are actually logical
+lMajor = .null. && {en} major release
+lMinor = .null. && {en} minor release
+lPatch = .null. && {en} patch release
+lPreRelease = .null. && {en} pre-release (beta)
+versionMMP = .null. && {en} version Major.Minor.Path (without prerelease(s))
+versionMMPint = .null. && {en} version Major.Minor.Path in integer
+versionIS = .null. && {en} version for InstallShield
 
 * -----------------
 procedure Init
 lparameters ;
-  result as string; && @ résultat (cumulatif)
-, version as string; && version à analyser
+  result as string; && @ {fr} résultat (cumulatif)
+, version as string; && {fr} version à analyser
 , loose as Boolean; && [.F.]
 
 local success as Boolean;
@@ -6265,7 +6298,7 @@ local success as Boolean;
 
 success = this.Init_(@m.cResult, m.version, m.loose)
 
-* assert m.success message cAssertMsg(m.cResult)
+* {fr} assert m.success message cAssertMsg(m.cResult)
 = m.success or cResultAdd(@m.result, m.cResult)
 
 return m.success
@@ -6274,8 +6307,8 @@ endproc
 * -----------------
 hidden procedure Init_
 lparameters ;
-  result as string; && @ résultat (cumulatif)
-, version as string; && [this.raw] version à analyser
+  result as string; && @ {fr} résultat (cumulatif)
+, version as string; && [this.raw] {fr} version à analyser
 , loose as Boolean; && [.F.]
 
 local success as Boolean;
@@ -6312,7 +6345,7 @@ endif
 
 oSubMatch = m.oRegExp.matches[3]
 
-&& these are actually numbers
+&& {fr} these are actually numbers
 this.major = cast(m.oSubMatch.item(1) as i) && .Item() évite les erreur de project manager
 this.minor = cast(m.oSubMatch.item(2) as i)
 this.patch = cast(m.oSubMatch.item(3) as i)
@@ -6326,19 +6359,19 @@ case !between(m.this.patch, 0, this.MAX_SAFE_INTEGER)
   return cResultAdd(@m.result, textmerge([Invalid patch version: <<m.this.patch>>]))
 endcase
 
-this.lMajor = empty(m.this.minor) && major release
-this.lMinor = !this.lMajor and empty(m.this.patch) && minor release
-this.lPatch = m.this.patch > 0 && patch release
+this.lMajor = empty(m.this.minor) && {en} major release
+this.lMinor = !this.lMajor and empty(m.this.patch) && {en} minor release
+this.lPatch = m.this.patch > 0 && {en} patch release
 
-&& pre-release; http://semver.org/
-&& A pre-release version MAY be denoted by appending a hyphen and a series of dot separated identifiers immediately following the patch version;
-&& pre-release identifiers:
-&& - MUST comprise only ASCII alphanumerics and hyphen [0-9A-Za-z-].
-&& - MUST NOT be empty.
-&& Numeric identifiers MUST NOT include leading zeroes.
-&& Pre-release versions have a lower precedence than the associated normal version.
-&& A pre-release version indicates that the version is unstable and might not satisfy the intended compatibility requirements as denoted by its associated normal version.
-&& Examples: 1.0.0-alpha, 1.0.0-alpha.1, 1.0.0-0.3.7, 1.0.0-x.7.z.92.
+&& {en} pre-release; http://semver.org/
+&& {en} A pre-release version MAY be denoted by appending a hyphen and a series of dot separated identifiers immediately following the patch version;
+&& {en} pre-release identifiers:
+&& {en} - MUST comprise only ASCII alphanumerics and hyphen [0-9A-Za-z-].
+&& {en} - MUST NOT be empty.
+&& {en} Numeric identifiers MUST NOT include leading zeroes.
+&& {en} Pre-release versions have a lower precedence than the associated normal version.
+&& {en} A pre-release version indicates that the version is unstable and might not satisfy the intended compatibility requirements as denoted by its associated normal version.
+&& {en} Examples: 1.0.0-alpha, 1.0.0-alpha.1, 1.0.0-0.3.7, 1.0.0-x.7.z.92.
 cPreReleases = m.oSubMatch.item(4)
 this.lPreRelease = !empty(m.cPreReleases)
 if m.this.lPreRelease
@@ -6351,7 +6384,7 @@ if m.this.lPreRelease
 				cPreReleases = '';
 					+ Evl(Leftc(m.cPreReleases, m.iPreRelease), 'beta'); && 2015-09-25 thn InstallShield support: prerelease must be a number
 					+ '.';
-					+ Cast(Cast(Substr(m.cPreReleases, m.iPreRelease + 1) as I) as  m) && removes leading 0 if any
+					+ Cast(Cast(Substr(m.cPreReleases, m.iPreRelease + 1) as I) as  m) && {fr} removes leading 0 if any
 				nPreRelease = 2
 				exit
 			endif
@@ -6399,26 +6432,26 @@ return this.version
 endproc
 
 * -----------------
-hidden procedure Init_RegExp && Initializes Regular Expressions are used for tokenizing, validating and parsing abSemVer version strings
-lparameters result as string; && @ résultat (cumulatif)
+hidden procedure Init_RegExp && {en} Initializes Regular Expressions are used for tokenizing, validating and parsing abSemVer version strings
+lparameters result as string; && @ {fr} résultat (cumulatif)
 
 this.oPattern = createobject('Empty')
 this.oRegExpr = createobject('Empty')
 
 && ## Numeric Identifier
-&& A single `0`, or a non-zero digit followed by zero or more digits.
+&& {en} A single `0`, or a non-zero digit followed by zero or more digits.
 
 addproperty(this.oPattern, 'NUMERICIDENTIFIER', '0|[1-9]\d*')
 addproperty(this.oPattern, 'NUMERICIDENTIFIERLOOSE', '[0-9]+')
 
 && ## Non-numeric Identifier
-&& Zero or more digits, followed by a letter or hyphen, and then zero or
-&& more letters, digits, or hyphens.
+&& {en} Zero or more digits, followed by a letter or hyphen, and then zero or
+&& {en} more letters, digits, or hyphens.
 
 addproperty(this.oPattern, 'NONNUMERICIDENTIFIER', '\d*[a-zA-Z-][a-zA-Z0-9-]*')
 
 && ## Main Version
-&& Three dot-separated numeric identifiers.
+&& {en} Three dot-separated numeric identifiers.
 
 addproperty(this.oPattern, 'MAINVERSION', '';
 	+ '(' + this.oPattern.NUMERICIDENTIFIER + ')\.';
@@ -6428,48 +6461,46 @@ addproperty(this.oPattern, 'MAINVERSION', '';
 
 addproperty(this.oPattern, 'MAINVERSIONLOOSE', '';
 	+ '(' + this.oPattern.NUMERICIDENTIFIERLOOSE + ')\.';
-	+ '(' + this.oPattern.NUMERICIDENTIFIERLOOSE + ')(?:\.'; && thn 2015-09-25 back compat.: allow for patch figure missing (eg. '2.20beta')
+	+ '(' + this.oPattern.NUMERICIDENTIFIERLOOSE + ')(?:\.'; && {fr} thn 2015-09-25 {en} back compat.: allow for patch figure missing (eg. '2.20beta')
 	+ '(' + this.oPattern.NUMERICIDENTIFIERLOOSE + '))?';
 	)
 
 && ## Pre-release Version Identifier
-&& A numeric identifier, or a non-numeric identifier.
+&& {en} A numeric identifier, or a non-numeric identifier.
 
 addproperty(this.oPattern, 'PRERELEASEIDENTIFIER', '(?:' + this.oPattern.NUMERICIDENTIFIER + '|' + this.oPattern.NONNUMERICIDENTIFIER + ')')
 addproperty(this.oPattern, 'PRERELEASEIDENTIFIERLOOSE', '(?:' + this.oPattern.NUMERICIDENTIFIERLOOSE + '|' + this.oPattern.NONNUMERICIDENTIFIER + ')')
 
 && ## Pre-release Version
-&& Hyphen, followed by one or more dot-separated pre-release version identifiers.
+&& {en} Hyphen, followed by one or more dot-separated pre-release version identifiers.
 
 addproperty(this.oPattern, 'PRERELEASE', '(?:-(' + this.oPattern.PRERELEASEIDENTIFIER + '(?:\.' + this.oPattern.PRERELEASEIDENTIFIER + ')*))')
 addproperty(this.oPattern, 'PRERELEASELOOSE', '(?:[-\. ]?(' + this.oPattern.PRERELEASEIDENTIFIERLOOSE + '(?:\.' + this.oPattern.PRERELEASEIDENTIFIERLOOSE + ')*))') && 2015-09-25 thn InstallShield support: prerelease is a number separated by '.' from main version
 
 && ## Build Metadata Identifier
-&& Any combination of digits, letters, or hyphens.
+&& {en} Any combination of digits, letters, or hyphens.
 
 addproperty(this.oPattern, 'BUILDIDENTIFIER', '[0-9A-Za-z-]+')
 
 && ## Build Metadata
-&& Plus sign, followed by one or more period-separated build metadata
-&& identifiers.
+&& {en} Plus sign, followed by one or more period-separated build metadata identifiers.
 
 addproperty(this.oPattern, 'BUILD', '(?:\+(' + this.oPattern.BUILDIDENTIFIER + '(?:\.' + this.oPattern.BUILDIDENTIFIER + ')*))')
 
 && ## Full Version String
-&& A main version, followed optionally by a pre-release version and
-&& build metadata.
+&& {en} A main version, followed optionally by a pre-release version and build metadata.
 
-&& Note that the only major, minor, patch, and pre-release sections of
-&& the version string are capturing groups.  The build metadata is not a
-&& capturing group, because it should not ever be used in version
-&& comparison.
+&& {en} Note that the only major, minor, patch, and pre-release sections of
+&& {en} the version string are capturing groups.  The build metadata is not a
+&& {en} capturing group, because it should not ever be used in version
+&& {en} comparison.
 
 FULLPLAIN = 'v?' + this.oPattern.MAINVERSION + this.oPattern.PRERELEASE + '?' + this.oPattern.build + '?'
 
 addproperty(this.oPattern, 'FULL', '^' + FULLPLAIN + '$')
 
-&& like full, but allows v1.2.3 and =1.2.3, which people do sometimes.
-&& also, 1.0.0alpha1 (prerelease without the hyphen) which is pretty common in the npm registry.
+&& {en} like full, but allows v1.2.3 and =1.2.3, which people do sometimes.
+&& {en} also, 1.0.0alpha1 (prerelease without the hyphen) which is pretty common in the npm registry.
 LOOSEPLAIN = '[v=\s]*';
 	+ this.oPattern.MAINVERSIONLOOSE;
 	+ this.oPattern.PRERELEASELOOSE + '?';
@@ -6479,9 +6510,9 @@ addproperty(this.oPattern, 'LOOSE', '^' + LOOSEPLAIN + '$')
 
 addproperty(this.oPattern, 'GTLT', '((?:<|>)?=?)')
 
-&& Something like "2.*" or "1.2.x".
-&& Note that "x.x" is a valid xRange identifer, meaning "any version"
-&& Only the first item is strictly required.
+&& {en} Something like "2.*" or "1.2.x".
+&& {en} Note that "x.x" is a valid xRange identifer, meaning "any version"
+&& {en} Only the first item is strictly required.
 addproperty(this.oPattern, 'XRANGEIDENTIFIERLOOSE', this.oPattern.NUMERICIDENTIFIERLOOSE + '|x|X|\*')
 addproperty(this.oPattern, 'XRANGEIDENTIFIER', this.oPattern.NUMERICIDENTIFIER + '|x|X|\*')
 
@@ -6506,8 +6537,8 @@ addproperty(this.oPattern, 'XRANGEPLAINLOOSE', '';
 addproperty(this.oPattern, 'XRANGE', '^' + this.oPattern.GTLT + '\s*' + this.oPattern.XRANGEPLAIN + '$')
 addproperty(this.oPattern, 'XRANGELOOSE', '^' + this.oPattern.GTLT + '\s*' + this.oPattern.XRANGEPLAINLOOSE + '$')
 
-&& Tilde ranges.
-&& Meaning is "reasonably at or greater than"
+&& {en} Tilde ranges.
+&& {en} Meaning is "reasonably at or greater than"
 addproperty(this.oPattern, 'LONETILDE', '(?:~>?)')
 
 addproperty(this.oPattern, 'TILDETRIM', '(\s*)' + this.oPattern.LONETILDE + '\s+')
@@ -6516,8 +6547,8 @@ addproperty(this.oRegExpr, 'TILDETRIM', abRegExp(this.oPattern.TILDETRIM, 'g'))
 addproperty(this.oPattern, 'TILDE', '^' + this.oPattern.LONETILDE + this.oPattern.XRANGEPLAIN + '$')
 addproperty(this.oPattern, 'TILDELOOSE', '^' + this.oPattern.LONETILDE + this.oPattern.XRANGEPLAINLOOSE + '$')
 
-&& Caret ranges.
-&& Meaning is "at least and backwards compatible with"
+&& {en} Caret ranges.
+&& {en} Meaning is "at least and backwards compatible with"
 addproperty(this.oPattern, 'LONECARET', '(?:\^)')
 
 addproperty(this.oPattern, 'CARETTRIM', '(\s*)' + this.oPattern.LONECARET + '\s+')
@@ -6526,27 +6557,27 @@ addproperty(this.oRegExpr, 'CARETTRIM', abRegExp(this.oPattern.CARETTRIM, 'g'))
 addproperty(this.oPattern, 'CARET', '^' + this.oPattern.LONECARET + this.oPattern.XRANGEPLAIN + '$')
 addproperty(this.oPattern, 'CARETLOOSE', '^' + this.oPattern.LONECARET + this.oPattern.XRANGEPLAINLOOSE + '$')
 
-&& A simple gt/lt/eq thing, or just "" to indicate "any version"
+&& {en} A simple gt/lt/eq thing, or just "" to indicate "any version"
 addproperty(this.oPattern, 'COMPARATORLOOSE', '^' + this.oPattern.GTLT + '\s*(' + LOOSEPLAIN + ')$|^$')
 addproperty(this.oPattern, 'COMPARATOR', '^' + this.oPattern.GTLT + '\s*(' + FULLPLAIN + ')$|^$')
 
 
-&& An expression to strip any whitespace between the gtlt and the thing
-&& it modifies, so that `> 1.2.3` ==> `>1.2.3`
+&& {en} An expression to strip any whitespace between the gtlt and the thing
+&& {en} it modifies, so that `> 1.2.3` ==> `>1.2.3`
 addproperty(this.oPattern, 'COMPARATORTRIM', '(\s*)' + this.oPattern.GTLT + '\s*(' + LOOSEPLAIN + '|' + this.oPattern.XRANGEPLAIN + ')')
 
-&& this one has to use the /g flag
+&& {en} this one has to use the /g flag
 addproperty(this.oRegExpr, 'COMPARATORTRIM', abRegExp(this.oPattern.COMPARATORTRIM, 'g'))
 
-&& Something like `1.2.3 - 1.2.4`
-&& Note that these all use the loose form, because they'll be
-&& checked against either the strict or loose comparator form
-&& later.
+&& {en} Something like `1.2.3 - 1.2.4`
+&& {en} Note that these all use the loose form, because they'll be
+&& {en} checked against either the strict or loose comparator form
+&& {en} later.
 addproperty(this.oPattern, 'HYPHENRANGE', '^\s*(' + this.oPattern.XRANGEPLAIN + ')' + '\s+-\s+' + '(' + this.oPattern.XRANGEPLAIN + ')' + '\s*$')
 
 addproperty(this.oPattern, 'HYPHENRANGELOOSE', '^\s*(' + this.oPattern.XRANGEPLAINLOOSE + ')' + '\s+-\s+' + '(' + this.oPattern.XRANGEPLAINLOOSE + ')' + '\s*$')
 
-&& Star ranges basically just allow anything at all.
+&& {en} Star ranges basically just allow anything at all.
 addproperty(this.oPattern, 'STAR', '(<|>)?=?\s*\*')
 
 local aPattern[1], cPattern
@@ -6561,14 +6592,14 @@ endif
 endproc
 
 * -----------------
-protected function lSemVer && c'est un objet de la classe abSemVer
-lparameters other as Variant && autre version
+protected function lSemVer && {fr} c'est un objet de la classe abSemVer
+lparameters other as Variant && {fr} autre version
 return labSemVer(m.other)
 endfunc
 
 * -----------------
-protected function oSemVer && objet de la classe abSemVer
-lparameters other as Variant && autre version
+protected function oSemVer && {fr} objet de la classe abSemVer
+lparameters other as Variant && {fr} autre version
 return iif(this.lSemVer(m.other);
 	, m.other;
 	, abSemVer(m.other, m.this.loose);
@@ -6576,14 +6607,14 @@ return iif(this.lSemVer(m.other);
 endfunc
 
 * -----------------
-function compare && compare cette version avec une autre
-lparameters other as Variant && autre version
+function compare && {fr} compare cette version avec une autre
+lparameters other as Variant && {fr} autre version
 return evl(this.compareMain(@m.other), this.comparePre(@m.other))
 endfunc
 
 * -----------------
-function compareMinor && compare cette version avec une autre jusqu'à la version mineure en ignorant les patches et les pre-release
-lparameters other as Variant && autre version
+function compareMinor && {fr} compare cette version avec une autre jusqu'à la version mineure en ignorant les patches et les pre-release
+lparameters other as Variant && {fr} autre version
 other = this.oSemVer(m.other)
 return iif(this.lSemVer(m.other);
 	, evl(;
@@ -6594,8 +6625,8 @@ return iif(this.lSemVer(m.other);
 endfunc
 
 * -----------------
-function compareMain && compare les versions principales
-lparameters other as Variant && autre version
+function compareMain && {fr} compare les versions principales
+lparameters other as Variant && {fr} autre version
 
 other = this.oSemVer(m.other)
 return iif(this.lSemVer(m.other);
@@ -6608,8 +6639,8 @@ return iif(this.lSemVer(m.other);
 endfunc
 
 * -----------------
-protected function comparePre && compare les versions de pre-release (beta etc.)
-lparameters other as Variant && autre version
+protected function comparePre && {fr} compare les versions de pre-release (beta etc.)
+lparameters other as Variant && {fr} autre version
 
 local comparePre as integer;
 , iPreRelease as integer;
@@ -6623,7 +6654,7 @@ comparePre = .null.
 other = this.oSemVer(m.other)
 if this.lSemVer(m.other)
 
-  * NOT having a prerelease is > having one
+  * {fr} NOT having a prerelease is > having one
   do case
   case !m.this.lPreRelease and !m.other.lPreRelease
     return 0
@@ -6661,7 +6692,7 @@ endif
 endfunc
 
 * -----------------
-protected function compareIdentifiers(a, b) && compare les versions principales
+protected function compareIdentifiers(a, b) && {fr} compare les versions principales
 return icase(;
 	vartype(m.a) == 'N' and vartype(m.b) <> 'N',;
 		+1,;
@@ -6681,13 +6712,13 @@ return ascan(m.this.prerelease, 'beta')
 endfunc
 
 * -----------------
-function lBeta(iBeta) && beta prerelease
+function lBeta(iBeta) && {fr} beta prerelease
 iBeta = this.iBeta()
 return m.iBeta > 0
 endfunc
 
 * -----------------
-function nBeta && si beta prerelease, n° de beta
+function nBeta && {fr} si beta prerelease, n° de beta
 local iBeta
 return iif(this.lBeta(@m.iBeta) and alen(this.prerelease) > m.iBeta and vartype(this.prerelease[m.iBeta + 1]) == 'N';
 	, this.prerelease[m.iBeta + 1];
@@ -6696,62 +6727,62 @@ return iif(this.lBeta(@m.iBeta) and alen(this.prerelease) > m.iBeta and vartype(
 endfunc
 
 * -----------------
-function GT(other as Variant) && cette version est supérieure à une autre
+function GT(other as Variant) && {fr} cette version est supérieure à une autre
 return this.compare(m.other) > 0
 endfunc
 
 * -----------------
-function GTE(other as Variant) && cette version est supérieure ou égale à une autre
+function GTE(other as Variant) && {fr} cette version est supérieure ou égale à une autre
 return this.compare(m.other) >= 0
 endfunc
 
 * -----------------
-function LT(other as Variant) && cette version est inférieure à une autre
+function LT(other as Variant) && {fr} cette version est inférieure à une autre
 return this.compare(m.other) < 0
 endfunc
 
 * -----------------
-function LTE(other as Variant) && cette version est inférieure ou égale à une autre
+function LTE(other as Variant) && {fr} cette version est inférieure ou égale à une autre
 return this.compare(m.other) <= 0
 endfunc
 
 * -----------------
-function EQ(other as Variant) && cette version est égale à une autre
+function EQ(other as Variant) && {fr} cette version est égale à une autre
 return empty(this.compare(m.other))
 endfunc
 
 * -----------------
-function NEQ(other as Variant) && cette version est différente d'une autre
+function NEQ(other as Variant) && {fr} cette version est différente d'une autre
 return !empty(this.compare(m.other))
 endfunc
 
 * -----------------
-function minorGT(other as Variant) && cette version est supérieure à une autre, au niveau mineur
+function minorGT(other as Variant) && {fr} cette version est supérieure à une autre, au niveau mineur
 return this.compareMinor(m.other) > 0
 endfunc
 
 * -----------------
-function minorGTE(other as Variant) && cette version est supérieure ou égale à une autre, au niveau mineur
+function minorGTE(other as Variant) && {fr} cette version est supérieure ou égale à une autre, au niveau mineur
 return this.compareMinor(m.other) >= 0
 endfunc
 
 * -----------------
-function minorLT(other as Variant) && cette version est inférieure à une autre, au niveau mineur
+function minorLT(other as Variant) && {fr} cette version est inférieure à une autre, au niveau mineur
 return this.compareMinor(m.other) < 0
 endfunc
 
 * -----------------
-function minorLTE(other as Variant) && cette version est inférieure ou égale à une autre, au niveau mineur
+function minorLTE(other as Variant) && {fr} cette version est inférieure ou égale à une autre, au niveau mineur
 return this.compareMinor(m.other) <= 0
 endfunc
 
 * -----------------
-function minorEQ(other as Variant) && cette version est égale à une autre, au niveau mineur
+function minorEQ(other as Variant) && {fr} cette version est égale à une autre, au niveau mineur
 return empty(this.compareMinor(m.other))
 endfunc
 
 * -----------------
-function minorNEQ(other as Variant) && cette version est différente d'une autre, au niveau mineur
+function minorNEQ(other as Variant) && {fr} cette version est différente d'une autre, au niveau mineur
 return !empty(this.compareMinor(m.other))
 endfunc
 
@@ -6769,8 +6800,8 @@ this.lPreRelease = .f.
 * -----------------
 function inc
 lparameters ;
-  release; && [''] type of release
-, Identifier; && ['beta'] if m.release = 'pre..' pre-release identifier such as 'beta'
+  release; && [''] {en} type of release
+, Identifier; && ['beta'] {en} if m.release = 'pre..' pre-release identifier such as 'beta'
 
 release    = evl(m.release, '')
 Identifier = evl(m.Identifier, 'beta')
@@ -6788,8 +6819,8 @@ case !ga_Type_IsChar(m.release, .t.)
 
 case !varSet(@m.release, lower(cEuroANSI(alltrim(m.release))))
 
-&& premajor will bump the version up to the next major release, and immediately down to pre-release.
-&& preminor and prepatch work the same way.
+&& {en} premajor will bump the version up to the next major release, and immediately down to pre-release.
+&& {en} preminor and prepatch work the same way.
 case m.release == 'premajor'
 	this.major = this.major + 1
 	store 0 to this.minor, this.patch
@@ -6802,20 +6833,20 @@ case m.release == 'preminor'
 	this.prereleaseClear
 	success = this.inc('pre', m.Identifier)
 
-case m.release == 'prepatch' && If this is already a prerelease, it'll bump to the next version
-	this.prereleaseClear && drop any prereleases that might already exist, since they are not relevant at this point.
+case m.release == 'prepatch' && {en} If this is already a prerelease, it'll bump to the next version
+	this.prereleaseClear && {en} drop any prereleases that might already exist, since they are not relevant at this point.
 	success = .t.;
 	 and this.inc('patch');
 	 and this.inc('pre', m.Identifier)
 
 case m.release == 'prerelease'
 	success = .t.;
-	 and (m.this.lPreRelease or this.inc('patch')); && If input is a non-prerelease version, this acts the same as a prepatch.
+	 and (m.this.lPreRelease or this.inc('patch')); && {en} If input is a non-prerelease version, this acts the same as a prepatch.
 	 and this.inc('pre', m.Identifier)
 
 
 case m.release == 'major'
-&& If this is a pre-major version, bump up to the same major version, else increment major.
+&& {en} If this is a pre-major version, bump up to the same major version, else increment major.
 && 1.0.0-5 bumps to 1.0.0
 && 1.1.0 bumps to 2.0.0
   if this.minor > 0 or this.patch > 0 or !m.this.lPreRelease
@@ -6825,7 +6856,7 @@ case m.release == 'major'
   this.prereleaseClear
 
 case m.release == 'minor'
-&& If this is a pre-minor version, bump up to the same minor version, else increment minor.
+&& {en} If this is a pre-minor version, bump up to the same minor version, else increment minor.
 && 1.2.0-5 bumps to 1.2.0
 && 1.2.1 bumps to 1.3.0
   if this.patch > 0 or !m.this.lPreRelease
@@ -6835,14 +6866,14 @@ case m.release == 'minor'
   this.prereleaseClear
 
 case m.release == 'patch'
-&& If this is not a pre-release version, it will increment the patch: 1.2.0 patches to 1.2.1
-&& If it is a pre-release it will bump up to the same patch version: 1.2.0-5 patches to 1.2.0
+&& {en} If this is not a pre-release version, it will increment the patch: 1.2.0 patches to 1.2.1
+&& {en} If it is a pre-release it will bump up to the same patch version: 1.2.0-5 patches to 1.2.0
   if !m.this.lPreRelease
     this.patch = this.patch + 1
   endif
   this.prereleaseClear
 
-case m.release == 'pre' and lCallingModule('inc') && && This probably shouldn't be used publicly because 1.0.0 "pre" would become 1.0.0-0 which is the wrong direction.
+case m.release == 'pre' and lCallingModule('inc') && && {en} This probably shouldn't be used publicly because 1.0.0 "pre" would become 1.0.0-0 which is the wrong direction.
 
 	if !m.this.lPreRelease
 		store 0 to this.prerelease, nPreRelease
@@ -6855,8 +6886,8 @@ case m.release == 'pre' and lCallingModule('inc') && && This probably shouldn't 
 				exit
 			endif
 		endfor
-		if empty(m.iPreRelease) && didn't increment anything
-			nPreRelease = m.nPreRelease + 1 && JS Array.push() ajoute un ou plusieurs éléments à la fin d'un tableau et retourne la nouvelle taille du tableau.
+		if empty(m.iPreRelease) && {en} didn't increment anything
+			nPreRelease = m.nPreRelease + 1 && {fr} JS Array.push() ajoute un ou plusieurs éléments à la fin d'un tableau et retourne la nouvelle taille du tableau.
 			dimension this.prerelease[m.nPreRelease]
 			this.prerelease[m.nPreRelease] = 0
 		endif
@@ -6889,12 +6920,12 @@ return m.success
 endfunc
 
 * =============================
-enddefine && CLASS abSemVer
+enddefine && {fr} CLASS abSemVer
 * =============================
 
 * -----------------
-function abSemVer_test && teste la classe abSemVer
-lparameters nTest && @ number for tests ran
+function abSemVer_test && {fr} teste la classe abSemVer
+lparameters nTest && @ {en} number of tests ran
 
 local success as Boolean;
 , unitTest as Boolean;
@@ -6902,68 +6933,68 @@ local success as Boolean;
 , oAsserts as abSet of abDev.prg;
 , oSemVer as abSemVer of abDev.prg;
 
-* oUnitTest = abUnitTest()
+* {fr} oUnitTest = abUnitTest()
 oAsserts  = abSet('ASSERTS', 'ON')
 success = .t.
 nTest = 0
 
-&& InstallShield support: prerelease is a number separated by '.' from main version
+&& {fr} InstallShield support: prerelease is a number separated by '.' from main version
 success = cSemVer('2.20.0.1', .T.) == '2.20.0-beta.1' and m.success
 nTest = m.nTest + 1
 
-&& back compat.: allow for missing dot between prerelease type and number
+&& {fr} back compat.: allow for missing dot between prerelease type and number
 success = cSemVer('2.20beta1', .T.) == '2.20.0-beta.1' and m.success
 nTest = m.nTest + 1
 
-&& back compat.: allow for missing dot between prerelease type and number
+&& {fr} back compat.: allow for missing dot between prerelease type and number
 success = cSemVer('2.20 beta1', .T.) == '2.20.0-beta.1' and m.success
 nTest = m.nTest + 1
 
-&& back compat.: allow for accented characters
+&& {fr} back compat.: allow for accented characters
 success = cSemVer('2.20 bêta1', .T.) == '2.20.0-beta.1' and m.success
 nTest = m.nTest + 1
 
-&& major: 1.0.0-5 bumps to 1.0.0
+&& {fr} major: 1.0.0-5 bumps to 1.0.0
 success = abSemVer_test_inc('1.0.0-5', '1.0.0', 'major') and m.success
 nTest = m.nTest + 1
 
-&& major: 1.1.0 bumps to 2.0.0
+&& {fr} major: 1.1.0 bumps to 2.0.0
 success = abSemVer_test_inc('1.1.0', '2.0.0', 'major') and m.success
 nTest = m.nTest + 1
 
-&& prerelease: 1.2.0-beta.1 bumps to 1.2.0-beta.2
+&& {fr} prerelease: 1.2.0-beta.1 bumps to 1.2.0-beta.2
 success = abSemVer_test_inc('1.2.0-beta.1', '1.2.0-beta.2', 'prerelease') and m.success
 nTest = m.nTest + 1
 
-&& minor: 1.2.0-5 bumps to 1.2.0
+&& {fr} minor: 1.2.0-5 bumps to 1.2.0
 success = abSemVer_test_inc('1.2.0-5', '1.2.0', 'minor') and m.success
 nTest = m.nTest + 1
 
-&& minor: 1.2.1 bumps to 1.3.0
+&& {fr} minor: 1.2.1 bumps to 1.3.0
 success = abSemVer_test_inc('1.2.1', '1.3.0', 'minor') and m.success
 nTest = m.nTest + 1
 
-&& patch: 1.2.1 bumps to 1.2.2
+&& {fr} patch: 1.2.1 bumps to 1.2.2
 success = abSemVer_test_inc('1.2.1', '1.2.2', 'patch') and m.success
 nTest = m.nTest + 1
 
-&& patch: 1.2.1-beta bumps to 1.2.1
+&& {fr} patch: 1.2.1-beta bumps to 1.2.1
 success = abSemVer_test_inc('1.2.1-beta', '1.2.1', 'patch') and m.success
 nTest = m.nTest + 1
 
-&& prepatch: If this is already a prerelease, it'll bump to the next version
+&& {fr} prepatch: If this is already a prerelease, it'll bump to the next version
 success = abSemVer_test_inc('1.2.1-beta', '1.2.2-beta.0', 'prepatch') and m.success
 nTest = m.nTest + 1
 
-&& prepatch:
+&& {fr} prepatch:
 success = abSemVer_test_inc('1.2.1', '1.2.2-beta.0', 'prepatch') and m.success
 nTest = m.nTest + 1
 
-&& prerelease on previous case:
+&& {fr} prerelease on previous case:
 success = abSemVer_test_inc('1.2.2-beta.0', '1.2.2-beta.1', 'prerelease') and m.success
 nTest = m.nTest + 1
 
-#if .F. && select > right click > 'execute selection' > paste below
+#if .F. && {fr} select > right click > 'execute selection' > paste below
 AB()
 nTest = 0
 _cliptext = nEvl(varSet(@m.nTest, 0), '') + textmerge([&]+[& <<Datetime()>> - abSemVer_test(): <<abSemVer_test(@m.nTest)>> - <<m.nTest>> tests] + chr(13))
@@ -6979,12 +7010,12 @@ return m.success
 endfunc
 
 * -----------------
-function abSemVer_test_inc && teste abSemVer.inc() qui est la méthode la plus délicate
+function abSemVer_test_inc && {fr} teste abSemVer.inc() qui est la méthode la plus délicate
 lparameters ;
   versionFrom;
 , versionTo;
-, release; && ['patch'] type of release
-, Identifier; && [''] if m.release = 'pre..' pre-release identifier such as 'beta'
+, release; && ['patch'] {en} type of release
+, Identifier; && [''] {en} if m.release = 'pre..' pre-release identifier such as 'beta'
 
 local success as Boolean;
 , oSemVer as abSemVer of abDev.prg;
@@ -6997,7 +7028,7 @@ return m.success
 endfunc
 
 * -----------------
-function cSemVerInc && Incrémente une version mineure ou patch abSemVer
+function cSemVerInc && {fr} Incrémente une version mineure ou patch abSemVer
 lparameters version
 
 version = Evl(m.version, '2.21.1') && , '2.21.0'
@@ -7007,7 +7038,7 @@ Iif(Val(Substr(m.version, At(".", m.version, 2)+1, 10))=0, Left(m.version, At(".
 endfunc
 
 * -----------------
-procedure cSemVerIncExprToXL_fr && Formule Excel incrémentant une version abSemVer mineure ou patch
+procedure cSemVerIncExprToXL_fr && {fr} Formule Excel incrémentant une version abSemVer mineure ou patch
 _cliptext = '=' + Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(_cliptext;
 	, '".", m.version, 2', '".", m.version, At(".", m.version, 1)+1', 1, -1, 1);
 	, ',', ';');
@@ -7024,7 +7055,7 @@ _cliptext = '=' + Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtra
 	, 'left', 'gauche', 1, -1, 1);
 
 * -----------------
-procedure UTF8fix1252 && corrige les caractères accentués dans un fichier converti par erreur en UTF8
+procedure UTF8fix1252 && {fr} corrige les caractères accentués dans un fichier converti par erreur en UTF8
 lparameters tcSrce
 
 local success as Boolean;
@@ -7048,7 +7079,10 @@ result = Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran(Strtran
 	, 'Ã§', 'ç');
 	, 'Ã´', 'ô');
 	, 'Â°', '°');
-	
+
+&& ? Strconv(Substr(m.european, 128),9)
+&& {fr} for each character in Substr(m.european, 128), text = strtran(text Strconv(char, 9), char)
+
 if m.lFile
 	success = StrToFile(m.result, FullPath(m.tcSrce)) > 0
 else
@@ -7063,11 +7097,12 @@ endproc
 ; {en} Please use an UTF8-aware text editor such as notePad++, subime text or PSPad
 ; {fr} Pour être visible dans le navigateur, ce fichier est encodé en UTF8
 ; {fr} Veuillez l'éditer avec un logiciel sensible à l'UTF8 comme notePad++, subime text ou PSPad
+
 #endif
 
 * -----------------
-function caError && version textuelle plus compréhensible de aError()
-lparameters errNum && @ error number
+function caError && {fr} version textuelle plus compréhensible de aError()
+lparameters errNum && @ {en} error number
 
 local result as String;
 , nError as Integer;
@@ -7082,7 +7117,7 @@ do case
 case Empty(m.nError)
 	errNum = 0
 
-case m.errNum = 1526 && When an ODBC error numbered 1526 occurs, the array contains one or more rows, one row for each ODBC error.
+case m.errNum = 1526 && {en} When an ODBC error numbered 1526 occurs, the array contains one or more rows, one row for each ODBC error.
 	for iError = 1 to m.nError
 		text to result textmerge noshow additive flags 1 pretext 3
 			ODBC error # 1526
@@ -7095,7 +7130,7 @@ case m.errNum = 1526 && When an ODBC error numbered 1526 occurs, the array conta
 		endtext
 	endfor
 
-case InList(m.errNum, 1427, 1429) && When OLE errors numbered 1427 or 1429 occur, the array contains one row. The following table describes the contents of each element
+case InList(m.errNum, 1427, 1429) && {en} When OLE errors numbered 1427 or 1429 occur, the array contains one row. The following table describes the contents of each element
 		text to result textmerge noshow flags 1 pretext 3
 			OLE error  #  <<m.errNum>>
 			Visual FoxPro error message: <<m.aa[2]>>

@@ -1,0 +1,29 @@
+ 1-aAdd
+ 2-aAppend
+ 3-aChars
+ 4-aClear
+ 5-aColDel
+ 6-aColsDel
+ 7-aColsDelim
+ 8-aColsIns
+ 9-aDistinct
+10-aFilter
+11-aLinesCols
+12-aLitteral
+13-aLocate
+14-aLookup
+15-aOfBase64
+16-aPop
+17-aPush
+18-aReverse
+19-aRowCopyIns
+20-aRowDel
+21-aRowMove
+22-aSelect
+23-aStrExtract
+24-aSubstract
+25-aToBase64
+26-aVarType
+27-laEmpty
+28-laEqual
+29-laOccurs

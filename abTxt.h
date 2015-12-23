@@ -29,7 +29,7 @@
 #DEFINE	NON_PRINTABLE	NON_XML + Chr(9)+Chr(10)+Chr(13)+Chr(160)
 #DEFINE	CARS_SEPAR		Chr(33)+Chr(34)+Chr(35)+Chr(36)+Chr(37)+Chr(38)+Chr(39)+Chr(40)+Chr(41)+Chr(42)+Chr(43)+Chr(44)+Chr(45)+Chr(46)+Chr(47)+Chr(58)+Chr(59)+Chr(60)+Chr(61)+Chr(62)+Chr(63)+Chr(64)+Chr(123)+Chr(124)+Chr(125)+Chr(126)+Chr(168)+Chr(169)+Chr(170)+Chr(171)+Chr(172)+Chr(176)+Chr(242)+Chr(246)
 
-&& HTML
+&& {fr} HTML
 #DEFINE NBSPC '&nbsp;'
 #DEFINE _EURO '&euro;'
 #DEFINE _ENSP '&ensp;'
