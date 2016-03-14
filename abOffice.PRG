@@ -21,7 +21,7 @@ return abUnitTests()
 * --------------------------------------------------
 procedure XLWBtablesBeautify && {fr} Améliore l'aspect des feuilles d'un classeur Excel contenant une table
 lparameters ;
-	tcXLWB && {fr} Adresse d'un classeur Excel
+  tcXLWB && {fr} Adresse d'un classeur Excel
 
 local llResult, lnResult && {fr} Nombre de feuilles du classeur ont été traitées
 
@@ -70,9 +70,9 @@ return m.lnResult
 * --------------------------------------------------
 procedure XLWStableBeautify && {fr} Améliore l'aspect d'une feuille Excel contenant une table
 lparameters ;
-	tuXLWS,; && {fr} Référence à une feuille ou @ adresse d'un classeur Excel
-	tcXLWSName,; && [nom du classeur] {fr} Nom de la feuille si on veut la renommer
-	tcTypes && [ignoré] {fr} Types des colonnes
+  tuXLWS; && {fr} Référence à une feuille ou @ adresse d'un classeur Excel
+, tcXLWSName; && [nom du classeur] {fr} Nom de la feuille si on veut la renommer
+, tcTypes && [ignoré] {fr} Types des colonnes
 external array tcTypes
 
 local llResult as Boolean; && {fr} La feuille a été traitée
@@ -266,9 +266,9 @@ enddefine && {fr} CLASS sesXLWSTableBeautify_Test
 * ---------------------
 procedure XLWSMultiLineCellExpand && {fr} Augmente la hauteur des cellules contenant plusieurs lignes
 lparameters ;
-	tuXLWS,; && {fr} Référence à une feuille ou adresse d'un classeur Excel
-	tuCol,; && {fr} n° ou nom de la colonne
-	tnColor && [sans changement] {fr} Couleur à appliquer aux cellules contenant plusieurs lignes
+  tuXLWS; && {fr} Référence à une feuille ou adresse d'un classeur Excel
+, tuCol; && {fr} n° ou nom de la colonne
+, tnColor && [sans changement] {fr} Couleur à appliquer aux cellules contenant plusieurs lignes
 local llResult
 
 * {fr} Si on peut accéder à la feuille Excel
@@ -342,8 +342,8 @@ return m.llResult
 * --------------------------------------------------
 procedure XLWStableBlankLinesDel && {fr} Supprime les lignes vides d'un tableau Excel
 lparameters ;
-	tuXLWS,; && {fr} Référence à une feuille ou adresse d'un classeur Excel
-	tcXLWSName && [nom du classeur] {fr} Nom de la feuille si on veut la renommer
+  tuXLWS; && {fr} Référence à une feuille ou adresse d'un classeur Excel
+, tcXLWSName && [nom du classeur] {fr} Nom de la feuille si on veut la renommer
 local llResult && {fr} La feuille a été traitée
 
 * {fr} Si la feuille excel peut être ouverte
@@ -397,9 +397,9 @@ return m.llResult
 * ---------------------
 procedure XLWSColFormatNumber && {fr} Applique un format de présentation à une colonne d'une feuille Excel
 lparameters ;
-	tuXLWS,; && {fr} Référence à une feuille ou adresse d'un classeur Excel
-	tuCol,; && {fr} n° ou nom de la colonne
-	tcNumberFormat && [sans changement] {fr} Code format Excel à appliquer
+  tuXLWS; && {fr} Référence à une feuille ou adresse d'un classeur Excel
+, tuCol; && {fr} n° ou nom de la colonne
+, tcNumberFormat && [sans changement] {fr} Code format Excel à appliquer
 
 local loXLWSCol as Excel.range, llOpened, llResult
 
@@ -435,9 +435,9 @@ return m.llResult
 * ---------------------
 procedure XLWSColFormatHAlign && {fr} Applique un format d'alignement horizontal à une colonne d'une feuille Excel
 lparameters ;
-	tuXLWS,; && {fr} Référence à une feuille ou adresse d'un classeur Excel
-	tuCol,; && {fr} n° ou nom de la colonne
-	tnHAlign && [xlHAlignGeneral] {fr} format d'alignement horizontal à appliquer (selon constantes Excel)
+  tuXLWS; && {fr} Référence à une feuille ou adresse d'un classeur Excel
+, tuCol; && {fr} n° ou nom de la colonne
+, tnHAlign && [xlHAlignGeneral] {fr} format d'alignement horizontal à appliquer (selon constantes Excel)
 
 local loXLWSCol as Excel.range, llOpened, llResult
 
@@ -474,9 +474,9 @@ return m.llResult
 * ---------------------
 procedure oXLWSCol && {fr} Colonne d'une feuille Excel
 lparameters ;
-	tuXLWS,; && {fr} Référence à une feuille ou adresse d'un classeur Excel
-	tuCol,; && {fr} n° ou nom de la colonne
-	tlOpened && @ {fr} Le classeur excel a été ouvert
+  tuXLWS; && {fr} Référence à une feuille ou adresse d'un classeur Excel
+, tuCol; && {fr} n° ou nom de la colonne
+, tlOpened && @ {fr} Le classeur excel a été ouvert
 
 local llResult, loResult as Excel.range && {fr} Référence à l'objet colonne
 loResult = .null.
@@ -514,11 +514,11 @@ return m.loResult
 * ---------------------
 procedure XLWSRowsInteriorColor && {fr} Applique une couleur de fond à des rangées d'une feuille Excel selon un critère de filtre sur une colonne
 lparameters ;
-	tuXLWS,; && {fr} Référence à une feuille ou adresse d'un classeur Excel
-	tuCol,; && {fr} n° ou nom de la colonne
-	tcCrit,; && {fr} Critère à appliquer : UDF de type logique à UN SEUL PARAMÃˆTRE ou opérateur relationnel (=<>$!)
-	tlOpLeft,; && [.F.] {fr} l'opération relationnelle est appliquée à gauche de la valeur
-	tnColor && [-1] {fr} Couleur rgb(),  -1 pour xlColorIndexNone, -2 pour xlColorIndexAutomatic
+  tuXLWS; && {fr} Référence à une feuille ou adresse d'un classeur Excel
+, tuCol; && {fr} n° ou nom de la colonne
+, tcCrit; && {fr} Critère à appliquer : UDF de type logique à UN SEUL PARAMÃˆTRE ou opérateur relationnel (=<>$!)
+, tlOpLeft; && [.F.] {fr} l'opération relationnelle est appliquée à gauche de la valeur
+, tnColor && [-1] {fr} Couleur rgb(),  -1 pour xlColorIndexNone, -2 pour xlColorIndexAutomatic
 local llResult
 
 * {fr} Si on peut sélectionner les rangées de la feuille Excel
@@ -557,11 +557,11 @@ return m.llResult
 * ---------------------
 function oXLWSRowsFilter && {fr} Rangées d'une feuille Excel selon un critère de filtre sur une colonne
 lparameters ;
-	tuXLWS,; && {fr} Référence à une feuille ou adresse d'un classeur Excel
-	tuCol,; && {fr} n° ou nom de la colonne oû se trouve le critère
-	tcCrit,; && [aucun, toutes les lignes sont renvoyées] {fr} Critère de filtre des lignes : UDF de type logique à UN SEUL PARAMÃˆTRE ou opération relationnelle (=<>$!)
-	tlOpLeft,; && [.F.] {fr} l'opération relationnelle est appliquée à gauche de la valeur
-	tlOpened && @ {fr} Le classeur excel a été ouvert
+  tuXLWS; && {fr} Référence à une feuille ou adresse d'un classeur Excel
+, tuCol; && {fr} n° ou nom de la colonne oû se trouve le critère
+, tcCrit; && [aucun, toutes les lignes sont renvoyées] {fr} Critère de filtre des lignes : UDF de type logique à UN SEUL PARAMÃˆTRE ou opération relationnelle (=<>$!)
+, tlOpLeft; && [.F.] {fr} l'opération relationnelle est appliquée à gauche de la valeur
+, tlOpened && @ {fr} Le classeur excel a été ouvert
 local loResult as Excel.range && {fr} Référence à l'objet Range contenant les lignes
 loResult = .null.
 
@@ -649,10 +649,10 @@ return m.loResult
 * ---------------------
 function cCritEval && {fr} Critère de filtre à évaluer
 lparameters ;
-	tcCrit,; && {fr} Critère de filtre
-	tcVal,; && {fr} Valeur sous forme de constante caractère
-	tlOp,; && {fr} Le critère est une opération relationnelle (UDF si .F.)
-	tlOpLeft && {fr} l'opération relationnelle est appliquée à gauche de la valeur
+  tcCrit; && {fr} Critère de filtre
+, tcVal; && {fr} Valeur sous forme de constante caractère
+, tlOp; && {fr} Le critère est une opération relationnelle (UDF si .F.)
+, tlOpLeft && {fr} l'opération relationnelle est appliquée à gauche de la valeur
 
 return icase(;
 	!m.tlOp,;
@@ -664,7 +664,7 @@ return icase(;
 * ---------------------
 function nXLWSCol && {fr} N° d'une colonne d'après son nom inscrit dans la première ligne
 lparameters ;
-	toXLWS as Excel.WorkSheet,; && {fr} Référence présumée à une feuille Excel
+  toXLWS as Excel.WorkSheet,; && {fr} Référence présumée à une feuille Excel
 	tuCol && {fr} Nom ou n° de de la colonne
 local lnResult
 lnResult = 0
@@ -749,9 +749,9 @@ return m.loResult
 * -------------------------------------------------------------
 function oXLWB && {fr} Référence à un objet Excel.WorkBook
 lparameters ;
-	tuXLWB,; && {fr} Référence ou adresse d'un classeur Excel
-	tlOpened,; && @ {fr} le classeur a été ouvert
-	tlCreated && @ {fr} le classeur a été créé
+  tuXLWB; && {fr} Référence ou adresse d'un classeur Excel
+, tlOpened; && @ {fr} le classeur a été ouvert
+, tlCreated && @ {fr} le classeur a été créé
 store .f. to tlOpened, tlCreated
 
 local loResult as Excel.Workbook
@@ -800,8 +800,8 @@ return m.loResult
 * ---------------------
 function oXLWS && {fr} Référence à un objet Excel.Worksheet
 lparameters ;
-	tuXLWS,; && {fr} Référence à une Feuille Excel OU @ adresse d'un classeur [(|!,) Nom Feuille]
-	tlOpened && @ {fr} le classeur a été ouvert
+  tuXLWS; && {fr} Référence à une Feuille Excel OU @ adresse d'un classeur [(|!,) Nom Feuille]
+, tlOpened && @ {fr} le classeur a été ouvert
 tlOpened = .f.
 
 local loResult as Excel.WorkSheet;
@@ -850,8 +850,8 @@ return m.loResult
 * ---------------------
 function acXLWSs && {fr} Noms des feuilles de calcul contenues dans un classeur Excel
 lparameters ;
-	taXLWS,; && @ {fr} Noms des feuilles de calcul contenues dans le classeur Excel
-	tcXLWBAddr && {fr} Adresse du classeur Excel à explorer
+  taXLWS; && @ {fr} Noms des feuilles de calcul contenues dans le classeur Excel
+, tcXLWBAddr && {fr} Adresse du classeur Excel à explorer
 
 external array taXLWS
 
@@ -936,8 +936,8 @@ return loTest.Result()
 * ---------------------
 function lXLWS && {fr} La feuille XL existe dans le classeur spécifié
 lparameters ;
-	tcSheet,; && {fr} Nom de la feuille cherchée
-	tuXLWB && {fr} Référence ou adresse d'un classeur Excel
+  tcSheet; && {fr} Nom de la feuille cherchée
+, tuXLWB && {fr} Référence ou adresse d'un classeur Excel
 local llResult
 
 * {fr} Si une feuille valide a été indiquée
@@ -970,10 +970,10 @@ return m.llResult
 * -------------------------------------------------------------
 procedure XLWBfromWSs && {fr} Regroupe des feuilles Excel dans un classeur
 lparameters ;
-	taWBWSSrce,; && @ {fr} Adresses des classeurs | noms des feuilles [Feuille # 1] à regrouper
-	tcWBDestAddr,; && {fr} Adresse du classeur Excel destination
-	tlWBSrceDel,; && [.F.] {fr} Supprimer les classeurs source après copie des feuilles dans le classeur destination
-	tlBeautify && [.F.] {fr} Embellir les feuilles
+  taWBWSSrce; && @ {fr} Adresses des classeurs | noms des feuilles [Feuille # 1] à regrouper
+, tcWBDestAddr; && {fr} Adresse du classeur Excel destination
+, tlWBSrceDel; && [.F.] {fr} Supprimer les classeurs source après copie des feuilles dans le classeur destination
+, tlBeautify && [.F.] {fr} Embellir les feuilles
 external array taWBWSSrce
 tlWBSrceDel = lTrue(m.tlWBSrceDel)
 tlBeautify = lTrue(m.tlBeautify)
@@ -1043,8 +1043,8 @@ if type('taWBWSSrce', 1) == 'A'
 					if not m.llWBDest
 						local ;
 							loWBDest as Excel.Workbook,;
-							lnWBDestDefaultSheets,;
-							loWSDest as Excel.WorkSheet
+							lnWBDestDefaultSheets;
+, 						loWSDest as Excel.WorkSheet
 						loWBDest = m.loXL.Workbooks.add() && {fr} new WB
 						lnWBDestDefaultSheets = m.loWBDest.Sheets.count && default sheets
 						loWSDest = m.loWBDest.Sheets(m.lnWBDestDefaultSheets) && {fr} Last sheet
@@ -1171,8 +1171,8 @@ return loTest.Result()
 *========================================
 procedure XLWSofTableMemo && {fr} feuille Excel d'après une table FoxPro avec les champs MEMO (impossible avec COPY TO)
 lparameters ;
-	tuTable,; && [Alias()] {fr} Alias, zone ou adresse de la table source
-	tcXLWBAddr && [forceExt(tuTable, 'XLS'] {fr} Adresse du classeur XL cible
+  tuTable; && [Alias()] {fr} Alias, zone ou adresse de la table source
+, tcXLWBAddr && [forceExt(tuTable, 'XLS'] {fr} Adresse du classeur XL cible
 local llResult
 llResult = .t.
 
@@ -1258,10 +1258,10 @@ return m.llResult
 *========================================
 procedure TableMemoOfXLWS && {fr} Table FoxPro avec les champs MEMO d'après une feuille Excel (impossible avec Import ou append from)
 lparameters ;
-	tuTable,; && [Alias()] {fr} Alias, zone ou adresse de la table destination
-	tcXLWBAddr,; && [forceExt(tuTable, 'XLS'] {fr} Adresse du classeur XL source
-	tcXLWS,; && [première] {fr} Feuille contenant les données à importer
-	tlFieldsCheck && [.F.] {fr} Vérifier que les champs de la feuille sont tous dans la table
+  tuTable; && [Alias()] {fr} Alias, zone ou adresse de la table destination
+, tcXLWBAddr; && [forceExt(tuTable, 'XLS'] {fr} Adresse du classeur XL source
+, tcXLWS; && [première] {fr} Feuille contenant les données à importer
+, tlFieldsCheck && [.F.] {fr} Vérifier que les champs de la feuille sont tous dans la table
 local llResult
 llResult = .t.
 
@@ -1376,13 +1376,13 @@ return m.llResult
 *========================================
 procedure XL8table && {fr} Importe une feuille d'un Classeur Excel 97 dans une table
 lparameters ;
-	tcXLWBAddr,; && {fr} Adresse du MASQUE de classeur Excel contenant la feuille à importer
-	tcSheet,; && [feuille n°1] {fr} Nom de la feuille à importer
-	tlNonVerifDernVers,; && @ [.F.] {fr} Ne pas prendre le dernier n° de version du classeur Excel ; @ la table a été rafraîchie
-	tlImportForce,; && [.F.] {fr} Importer même si le classeur est plus ancien que la table
-	tlCursor,; && [.F.] {fr} Importer dans un curseur
-	tcFieldsAdd,; && [aucun] {fr} Champs à ajouter à la table ou au curseur résultat (définition type ALTER TABLE)
-	tlAutomation && [.F.] {fr} Toujours importer par automation Excel
+  tcXLWBAddr; && {fr} Adresse du MASQUE de classeur Excel contenant la feuille à importer
+, tcSheet; && [feuille n°1] {fr} Nom de la feuille à importer
+, tlNonVerifDernVers; && @ [.F.] {fr} Ne pas prendre le dernier n° de version du classeur Excel ; @ la table a été rafraîchie
+, tlImportForce; && [.F.] {fr} Importer même si le classeur est plus ancien que la table
+, tlCursor; && [.F.] {fr} Importer dans un curseur
+, tcFieldsAdd; && [aucun] {fr} Champs à ajouter à la table ou au curseur résultat (définition type ALTER TABLE)
+, tlAutomation && [.F.] {fr} Toujours importer par automation Excel
 
 tcSheet = upper(uDefault(m.tcSheet, space(0)))
 tlNonVerifDernVers = lTrue(m.tlNonVerifDernVers)
@@ -1558,12 +1558,12 @@ return m.lcResult
 *========================================
 procedure XL8table_Auto && {fr} Importe une feuille excel en automation
 lparameters ;
-	tcXLWBAddr,; && {fr} Adresse du MASQUE de classeur Excel contenant la feuille à importer
-	tcSheet,; && [feuille n°1] {fr} Nom de la feuille à importer
-	tcTable,; && {fr} Table à créer
-	tlNULL,; && [.F.] {fr} accepter les valeurs nulles
-	tlCursor,; && [.F.] {fr} produire un curseur
-	taFieldAdd && @ {fr} Champs additionnels éventuels
+  tcXLWBAddr; && {fr} Adresse du MASQUE de classeur Excel contenant la feuille à importer
+, tcSheet; && [feuille n°1] {fr} Nom de la feuille à importer
+, tcTable; && {fr} Table à créer
+, tlNULL; && [.F.] {fr} accepter les valeurs nulles
+, tlCursor; && [.F.] {fr} produire un curseur
+, taFieldAdd && @ {fr} Champs additionnels éventuels
 
 tlNULL = lTrue(m.tlNULL)
 tlCursor = lTrue(m.tlCursor)
@@ -1721,9 +1721,9 @@ return m.lcResult
 *========================================
 procedure XL8table_ModiStru && {fr} Renomme les champs selon la première ligne de la feuille XL
 lparameters ;
-	tcAlias,; && {fr} Alias de la table importée d'Excel
-	tlCursor,; && [.F.] {fr} produire un curseur
-	taFieldAdd && @ {fr} Champs additionnels éventuels
+  tcAlias; && {fr} Alias de la table importée d'Excel
+, tlCursor; && [.F.] {fr} produire un curseur
+, taFieldAdd && @ {fr} Champs additionnels éventuels
 tlCursor = lTrue(m.tlCursor)
 external array taFieldAdd
 
@@ -1734,18 +1734,18 @@ lcResult = ExclusiveForce(m.tcAlias)
 llResult = used(m.lcResult)
 if m.llResult
 
-	local loSelect,;
-		lnFields,;
-		laFields[1],;
-		lnField,; && {fr} ne pas utiliser 'i' qui est un nom de colonne XL
-		lcField,;
-		laFieldsNew[1],;
-		lcFieldNew,;
-		lnSuffix,;
-		lcSuffix,;
-		lcAlter,;
-		lcDelete,;
-		lcAddr
+	local loSelect;
+, 	lnFields;
+, 	laFields[1],;
+		lnField; && {fr} ne pas utiliser 'i' qui est un nom de colonne XL
+, 	lcField;
+, 	laFieldsNew[1],;
+		lcFieldNew;
+, 	lnSuffix;
+, 	lcSuffix;
+, 	lcAlter;
+, 	lcDelete;
+, 	lcAddr
 
 	* {fr} Lire la structure de la table
 	loSelect = abSelect(m.lcResult)
@@ -1855,10 +1855,10 @@ return m.lcResult
 *========================================
 procedure XL8Tables && {fr} Importe les feuilles d'un Classeur Excel 97 dans des tables (cf. XL8table())
 lparameters ;
-	taXL8Table,; && @ {fr} Tables crées ou rafraîchies ; Col 1 : Adresse, Col 2 : Rafraîchie (.T./.F.)
-	tcXLWBAddr,; && {fr} Adresse du MASQUE de classeur Excel contenant les feuille à importer
-	tlNonVerifDernVers,; && [.F.] {fr} Ne pas prendre la dernière version du classeur Excel
-	tlImportForce && [.F.] {fr} Importer même si le classeur est plus ancien que la table
+  taXL8Table; && @ {fr} Tables crées ou rafraîchies ; Col 1 : Adresse, Col 2 : Rafraîchie (.T./.F.)
+, tcXLWBAddr; && {fr} Adresse du MASQUE de classeur Excel contenant les feuille à importer
+, tlNonVerifDernVers; && [.F.] {fr} Ne pas prendre la dernière version du classeur Excel
+, tlImportForce && [.F.] {fr} Importer même si le classeur est plus ancien que la table
 external array taXL8Table
 tlNonVerifDernVers = lTrue(m.tlNonVerifDernVers)
 tlImportForce = lTrue(m.tlImportForce)
@@ -1987,8 +1987,8 @@ next
 * -------------------------------------
 protected procedure wdFormat && {fr} Code format d'ouverture / sauvegarde
 lparameters ;
-	tcClass,; && {fr} Classe de conversion de document (cf. this.oDoc)
-	tlSave && [.F.] .T.: format de sauvegarde ; .F. : format d'ouverture
+  tcClass; && {fr} Classe de conversion de document (cf. this.oDoc)
+, tlSave && [.F.] .T.: format de sauvegarde ; .F. : format d'ouverture
 tlSave = lTrue(m.tlSave)
 
 local lnConv, lnResult && {fr} Code format
@@ -2016,9 +2016,9 @@ return icase(;
 * -------------------------------------
 function oDoc && {fr} Ouvre un document et fournit sa référence
 lparameters ;
-	tcFileSrce,; && {fr} Document source
-	tcClassSrce,; && {fr} Classe de conversion si l'extension est ambiguÃ«
-	tcPassWord && [''] {fr} mot de passe à l'ouverture
+  tcFileSrce; && {fr} Document source
+, tcClassSrce; && {fr} Classe de conversion si l'extension est ambiguÃ«
+, tcPassWord && [''] {fr} mot de passe à l'ouverture
 tcPassWord = iif(vartype(m.tcPassWord) == 'C', m.tcPassWord, space(0))
 
 local llResult, lnFormat, loExcept as exception, loResult as word.document
@@ -2073,10 +2073,10 @@ return m.toDoc
 * -------------------------------------
 procedure oDocConvert && {fr} Sauvegarde un document dans un autre format (si supporté)
 lparameters ;
-	tcFileDest,; && @ {fr} Adresse du fichier destination
-	tcClassDest,; && {fr} Classe de conversion si l'extension est ambiguÃ«
-	tcPassWord,; && [''] {fr} mot de passe
-	toDoc && [Documents(1)] {fr} Référence au document source
+  tcFileDest; && @ {fr} Adresse du fichier destination
+, tcClassDest; && {fr} Classe de conversion si l'extension est ambiguÃ«
+, tcPassWord; && [''] {fr} mot de passe
+, toDoc && [Documents(1)] {fr} Référence au document source
 tcPassWord = iif(vartype(m.tcPassWord) == 'C', m.tcPassWord, space(0))
 local loException, lnFormat, llResult
 
@@ -2105,11 +2105,11 @@ return m.llResult
 * -------------------------------------
 procedure Convert && {fr} Ouvre un document et le convertit dans un autre format (si supporté)
 lparameters ;
-	tcFileSrce,; && {fr} Document source
-	tcClassSrce,; && {fr} Classe de conversion si l'extension est ambiguÃ«
-	tcFileDest,; && @ {fr} Adresse du fichier destination
-	tcClassDest,; && {fr} Classe de conversion si l'extension est ambiguÃ«
-	tcPassWord && [''] {fr} mot de passe
+  tcFileSrce; && {fr} Document source
+, tcClassSrce; && {fr} Classe de conversion si l'extension est ambiguÃ«
+, tcFileDest; && @ {fr} Adresse du fichier destination
+, tcClassDest; && {fr} Classe de conversion si l'extension est ambiguÃ«
+, tcPassWord && [''] {fr} mot de passe
 local loDoc
 loDoc = this.oDoc(m.tcFileSrce, m.tcClassSrce, m.tcPassWord)
 

@@ -13,7 +13,10 @@
 * {en} Any modification or improvement must be given for free to the community
 * {en} This permission notice shall be entirely included in all copies or substantial portions of the Software
 * =====================================================
-#INCLUDE AB.h
+
+#if File('AB.h') && 2016-02-25 thn -- {en} after FAA adapt, compilation must succeed although pathes are not yet set
+	#include AB.h
+#endif
 
 LPARAMETERS ;
   tlClear; && [.F.] {fr} Supprimer les références de Set("Procedure") et Set("Classlib")
@@ -151,7 +154,7 @@ lcResult = 'ab.prg';
 	+	', abTxt.prg';
 	+	', awPublic.prg';
 	;
-	+	', abModule.prg';
+	+	Iif(File('abModule.prg'), ', abModule.prg', '');
 
 return Iif(Vartype(m.lFXPs) == 'L' and m.lFXPs; && {fr} lTrue() indisponible
 	, Strtran(m.lcResult, '.prg', '.fxp');
@@ -284,26 +287,26 @@ EXTERNAL FILE; && {fr} pour avoir le code source même si l'app est encrypté
 * ========================================
 PROCEDURE PathesRemove && {fr} Retire des dossiers du Set('Path')
 LPARAMETERS ;
-	taFolder,; && @ {fr} Dossiers
-	tlRelative && [.F.] {fr} Supprimer en relatif au dossier par défaut
+  taFolder; && @ {fr} Dossiers
+, tlRelative && [.F.] {fr} Supprimer en relatif au dossier par défaut
 
 RETURN PathesAdd(@m.taFolder, .T., m.tlRelative)
 
 * ========================================
 PROCEDURE PathRemove && {fr} Retire un dossier du Set('Path') - 9 ms
 LPARAMETERS ;
-	tcFolder,; && {fr} Dossier @: Addbs(FullPath(m.tcFolder)) si existant
-	tlRelative && [.F.] {fr} Supprimer en relatif au dossier par défaut
+  tcFolder; && {fr} Dossier @: Addbs(FullPath(m.tcFolder)) si existant
+, tlRelative && [.F.] {fr} Supprimer en relatif au dossier par défaut
 
 RETURN PathAdd(m.tcFolder, .T., m.tlRelative)
 
 * ========================================
 PROCEDURE PathesAdd && {fr} Ajoute des dossier à Set('Path')
 LPARAMETERS ;
-	taFolder,; && @ {fr} Dossiers
-	tlRemove,; && [.F.] {fr} Supprimer du path
-	tlRelative,; && [.F.] {fr} Ajouter en relatif au dossier par défaut
-	tlPrepend && [.F.] {fr} Ajouter au début de Set('PATH')
+  taFolder; && @ {fr} Dossiers
+, tlRemove; && [.F.] {fr} Supprimer du path
+, tlRelative; && [.F.] {fr} Ajouter en relatif au dossier par défaut
+, tlPrepend && [.F.] {fr} Ajouter au début de Set('PATH')
 EXTERNAL ARRAY taFolder
 
 LOCAL lcFolder, lnResult
@@ -316,9 +319,9 @@ IF Type('taFolder', 1) == 'A'
 
 		lnResult = m.lnResult + Iif(PathAdd(;
 				m.lcFolder;
-			,	m.tlRemove;
-			,	m.tlRelative;
-			,	m.tlPrepend;
+			, m.tlRemove;
+			, m.tlRelative;
+			, m.tlPrepend;
 			), 1, 0)
 
 	ENDFOR
@@ -329,10 +332,10 @@ RETURN m.lnResult
 * ========================================
 PROCEDURE PathAdd && {fr} Ajoute un dossier à Set('Path') - 8 ms
 LPARAMETERS ;
-	tcFolder,; && {fr} Dossier @: Addbs(FullPath(m.tcFolder)) si existant
-	tlRemove,; && [.F.] {fr} Supprimer du path
-	tlRelative,; && [.F.] {fr} Ajouter en relatif au dossier par défaut
-	tlPrepend && [.F.] {fr} Ajouter au début de Set('PATH')
+  tcFolder; && {fr} Dossier @: Addbs(FullPath(m.tcFolder)) si existant
+, tlRemove; && [.F.] {fr} Supprimer du path
+, tlRelative; && [.F.] {fr} Ajouter en relatif au dossier par défaut
+, tlPrepend && [.F.] {fr} Ajouter au début de Set('PATH')
 
 LOCAL llResult; && {fr} Le dossier existe et a été ajouté à Set('Path')
 , llFolder, lcPath, laPath[1], lnPath
@@ -366,7 +369,7 @@ IF m.llResult
 				m.lcPath + m.tcFolder + ';';
 			)
 		lnPath = Lenc(m.lcPath)
-		llResult = m.lnPath < 4096 && {fr} SET PATH is limited to a maximum of 4095 characters
+		llResult = m.lnPath <= 4095 && {fr} SET PATH is limited to a maximum of 4095 characters
 		ASSERT m.llResult MESSAGE cAssertMsg(Textmerge(ICase(;
 			cLangUser() = 'fr',	[Path trop long (<<m.lnPath>> caractères > 4095 limite), impossible de le régler SET PATH TO <<cTronc(m.lcPath)>>],; && copy-paste this line to add another language support
 													[Path is too long (<<m.lnPath>> characters > 4095 limitation), cannot SET PATH TO <<cTronc(m.lcPath)>>];
@@ -395,11 +398,11 @@ RETURN loTest.Result()
 * ========================================
 PROCEDURE PathAddSubFolders && {fr} Ajoute un dossier et ses sous-dossiers au Set('Path')
 LPARAMETERS ;
-	tcFolder,; && {fr} Dossier @: Addbs(FullPath(m.tcFolder)) si existant
-	tnLevel,; && [1] {fr} Profondeur des sous-dossiers
-	tcFoldersExcl,; && [''] {fr} sous-dossiers à exclure ou masque des fichiers attendus dans les dossiers à inclure
-	tlRemove,; && [.F.] {fr} Supprimer du path
-	tlRelative && [.F.] {fr} Ajouter en relatif au dossier par défaut
+  tcFolder; && {fr} Dossier @: Addbs(FullPath(m.tcFolder)) si existant
+, tnLevel; && [1] {fr} Profondeur des sous-dossiers
+, tcFoldersExcl; && [''] {fr} sous-dossiers à exclure ou masque des fichiers attendus dans les dossiers à inclure
+, tlRemove; && [.F.] {fr} Supprimer du path
+, tlRelative && [.F.] {fr} Ajouter en relatif au dossier par défaut
 tnLevel = Evl(m.tnLevel, 1)
 
 LOCAL laFolder[1], lcFolder, llResult
@@ -421,10 +424,10 @@ RETURN m.llResult
 * =================================
 FUNCTION abPathesAdd && {fr} Ajoute des dossiers à Set('Path') et rétablit Set('Path') au .Destroy()
 LPARAMETERS ;
-	tvFolders,; && {fr} Dossier(s) - @ tableau (array) ou liste délimitée
-	tlRelative,; && [.F.] {fr} Ajouter en relatif au dossier par défaut
-	tlPrepend,; && [.F.] {fr} Ajouter au début de Set('PATH')
-	tcResult && @ [''] {fr} Erreur éventuelle
+  tvFolders; && {fr} Dossier(s) - @ tableau (array) ou liste délimitée
+, tlRelative; && [.F.] {fr} Ajouter en relatif au dossier par défaut
+, tlPrepend; && [.F.] {fr} Ajouter au début de Set('PATH')
+, tcResult && @ [''] {fr} Erreur éventuelle
 
 RETURN CreateObject('abPathesAdd', @m.tvFolders, m.tlRelative, m.tlPrepend, @m.tcResult)
 
@@ -437,10 +440,10 @@ cPath = Set("Path")
 * ---------------------------------
 PROCEDURE Init
 LPARAMETERS ;
-	tvFolders,; && {fr} Dossier(s) - @ tableau (array) ou liste délimitée
-	tlRelative,; && [.F.] {fr} Ajouter en relatif au dossier par défaut
-	tlPrepend,; && [.F.] {fr} Ajouter au début de Set('PATH')
-	tcResult && @ [''] {fr} Erreur éventuelle
+  tvFolders; && {fr} Dossier(s) - @ tableau (array) ou liste délimitée
+, tlRelative; && [.F.] {fr} Ajouter en relatif au dossier par défaut
+, tlPrepend; && [.F.] {fr} Ajouter au début de Set('PATH')
+, tcResult && @ [''] {fr} Erreur éventuelle
 
 LOCAL laFolder[1], llResult
 
@@ -461,9 +464,9 @@ IF m.llResult
 
 		RETURN PathesAdd(;
 				@m.laFolder;
-			,	; && {fr} m.tlRemove
-			,	m.tlRelative;
-			,	m.tlPrepend;
+			, ; && {fr} m.tlRemove
+			, m.tlRelative;
+			, m.tlPrepend;
 			) > 0
 	ENDIF
 ENDIF
@@ -489,11 +492,11 @@ DEFINE CLASS abPathAddSubFolders AS abPathesAdd OF ab.prg
 * ---------------------------------
 PROCEDURE Init
 LPARAMETERS ;
-	tcFolder,; && {fr} Dossier @: Addbs(FullPath(m.tcFolder)) si existant
-	tnLevel,; && [1] {fr} Profondeur des sous-dossiers
-	tcFoldersExcl,; && [''] {fr} sous-dossiers à exclure ou masque des fichiers attendus dans les dossiers à inclure ou masque des fichiers attendus dans les dossiers à inclure
-	tlRemove,; && [.F.] {fr} Supprimer du path
-	tlRelative && [.F.] {fr} Ajouter en relatif au dossier par défaut
+  tcFolder; && {fr} Dossier @: Addbs(FullPath(m.tcFolder)) si existant
+, tnLevel; && [1] {fr} Profondeur des sous-dossiers
+, tcFoldersExcl; && [''] {fr} sous-dossiers à exclure ou masque des fichiers attendus dans les dossiers à inclure ou masque des fichiers attendus dans les dossiers à inclure
+, tlRemove; && [.F.] {fr} Supprimer du path
+, tlRelative && [.F.] {fr} Ajouter en relatif au dossier par défaut
 
 RETURN PathAddSubFolders(;
 		m.tcFolder;
@@ -560,10 +563,10 @@ RETURN loTest.Result()
 * =================================
 FUNCTION nR_nG_nB && {fr} Composants R G et B d'une couleur (merci Mike Gagnon)
 LPARAMETERS ;
-	nRGB,; && {fr} Valeur RGB
-	nR,; && @ {fr} Composante Rouge
-	nG,; && @ {fr} Composante Verte
-	nB && @ {fr} Composante Bleue
+  nRGB; && {fr} Valeur RGB
+, nR; && @ {fr} Composante Rouge
+, nG; && @ {fr} Composante Verte
+, nB && @ {fr} Composante Bleue
 
 nR = Bitand(0xff, m.nRGB)
 nG = Bitand(0xff, Bitrshift(m.nRGB, 8))
@@ -573,9 +576,9 @@ nB = Bitand(0xff, Bitrshift(m.nRGB, 16))
 FUNCTION cRGB && {fr} Composants "R,G,B" d'une couleur
 LPARAMETERS nRGB && {fr} Valeur RGB
 
-LOCAL nR,; && @ {fr} Composante Rouge
-	nG,; && @ {fr} Composante Verte
-	nB && @ {fr} Composante Bleue
+LOCAL nR; && @ {fr} Composante Rouge
+, nG; && @ {fr} Composante Verte
+, nB && @ {fr} Composante Bleue
 
 nR_nG_nB(m.nRGB, @m.nR, @m.nG, @m.nB)
 
@@ -589,24 +592,24 @@ return '#' + Right(Transform(m.nRGB, '@0'), 6)
 * =================================
 FUNCTION cRGBhex_ && {fr} RGB en #hex
 lparameters ;
-	nR,; && @ {fr} Composante Rouge
-	nG,; && @ {fr} Composante Verte
-	nB && @ {fr} Composante Bleue
+  nR; && @ {fr} Composante Rouge
+, nG; && @ {fr} Composante Verte
+, nB && @ {fr} Composante Bleue
 
 return cRGBhex(Rgb(m.nR, m.nG, m.nB))
 
 ******************************************************************************************
 FUNCTION ImgSpecs && {fr} Propriétés d'une image
 LPARAMETERS ;
-	tcImgAddr,; && {fr} Adresse de l'image
-	tnXmm,; && @ {fr} Largeur en mm
-	tnYmm,; && @ {fr} Hauteur en mm
-	tnXPix,; && @ {fr} Largeur en pixels
-	tnYPix,; && @ {fr} Hauteur en pixels
-	tnXRes,; && @ {fr} Résolution X en pixels
-	tnYRes,; && @ {fr} Résolution Y en pixels
-	tnImgType,; && @ {fr} Type de l'image - 0: inconnu | 1: trait ou CMJN | 2: NG 4 bits | 3: NG 8 bits | 4: Palette 4 bits | 5: Palette 8 bits | 6: 24 bits RGB | 7:24 bits BGR
-	tcImgType && @ {fr} Type de l'image en clair
+  tcImgAddr; && {fr} Adresse de l'image
+, tnXmm; && @ {fr} Largeur en mm
+, tnYmm; && @ {fr} Hauteur en mm
+, tnXPix; && @ {fr} Largeur en pixels
+, tnYPix; && @ {fr} Hauteur en pixels
+, tnXRes; && @ {fr} Résolution X en pixels
+, tnYRes; && @ {fr} Résolution Y en pixels
+, tnImgType; && @ {fr} Type de l'image - 0: inconnu | 1: trait ou CMJN | 2: NG 4 bits | 3: NG 8 bits | 4: Palette 4 bits | 5: Palette 8 bits | 6: 24 bits RGB | 7:24 bits BGR
+, tcImgType && @ {fr} Type de l'image en clair
 
 RETURN .T.;
 	AND lFile(m.tcImgAddr);
@@ -618,15 +621,15 @@ RETURN .T.;
 ******************************************************************************************
 FUNCTION ImgSpecsKodak && {fr} Propriétés de l'image avec le contrôle ActiveX Imaging.AdminCtrl.1
 LPARAMETERS ;
-	tcImgAddr,; && {fr} Adresse de l'image
-	tnXmm,; && @ {fr} Largeur en mm
-	tnYmm,; && @ {fr} Hauteur en mm
-	tnXPix,; && @ {fr} Largeur en pixels
-	tnYPix,; && @ {fr} Hauteur en pixels
-	tnXRes,; && @ {fr} Résolution X en pixels
-	tnYRes,; && @ {fr} Résolution Y en pixels
-	tnImgType,; && @ {fr} Type de l'image - 0: inconnu | 1: trait ou CMJN | 2: NG 4 bits | 3: NG 8 bits | 4: Palette 4 bits | 5: Palette 8 bits | 6: 24 bits RGB | 7:24 bits BGR
-	tcImgType && @ {fr} Type de l'image en clair
+  tcImgAddr; && {fr} Adresse de l'image
+, tnXmm; && @ {fr} Largeur en mm
+, tnYmm; && @ {fr} Hauteur en mm
+, tnXPix; && @ {fr} Largeur en pixels
+, tnYPix; && @ {fr} Hauteur en pixels
+, tnXRes; && @ {fr} Résolution X en pixels
+, tnYRes; && @ {fr} Résolution Y en pixels
+, tnImgType; && @ {fr} Type de l'image - 0: inconnu | 1: trait ou CMJN | 2: NG 4 bits | 3: NG 8 bits | 4: Palette 4 bits | 5: Palette 8 bits | 6: 24 bits RGB | 7:24 bits BGR
+, tcImgType && @ {fr} Type de l'image en clair
 
 LOCAL lcExt, llResult
 
@@ -708,15 +711,15 @@ RETURN m.lcResult
 ******************************************************************************************
 FUNCTION ImgSpecsGDIPlus && {fr} Propriétés de l'image avec GDI+
 LPARAMETERS ;
-	tcImgAddr,; && {fr} Adresse de l'image
-	tnXmm,; && @ {fr} Largeur en mm
-	tnYmm,; && @ {fr} Hauteur en mm
-	tnXPix,; && @ {fr} Largeur en pixels
-	tnYPix,; && @ {fr} Hauteur en pixels
-	tnXRes,; && @ {fr} Résolution X en pixels
-	tnYRes,; && @ {fr} Résolution Y en pixels
-	tnImgType,; && @ {fr} Type de l'image - 0: inconnu | 1: trait ou CMJN | 2: NG 4 bits | 3: NG 8 bits | 4: Palette 4 bits | 5: Palette 8 bits | 6: 24 bits RGB | 7:24 bits BGR
-	tcImgType && @ {fr} Type de l'image en clair
+  tcImgAddr; && {fr} Adresse de l'image
+, tnXmm; && @ {fr} Largeur en mm
+, tnYmm; && @ {fr} Hauteur en mm
+, tnXPix; && @ {fr} Largeur en pixels
+, tnYPix; && @ {fr} Hauteur en pixels
+, tnXRes; && @ {fr} Résolution X en pixels
+, tnYRes; && @ {fr} Résolution Y en pixels
+, tnImgType; && @ {fr} Type de l'image - 0: inconnu | 1: trait ou CMJN | 2: NG 4 bits | 3: NG 8 bits | 4: Palette 4 bits | 5: Palette 8 bits | 6: 24 bits RGB | 7:24 bits BGR
+, tcImgType && @ {fr} Type de l'image en clair
 
 LOCAL loGDI AS GPimage OF _GDIplus.vcx, llResult
 
@@ -809,7 +812,7 @@ RETURN m.lcResult
 function ImgCropToRatio && {en} adapted from http://weblogs.foxite.com/vfpimaging/2006/05/25/crop-images-with-gdi/
 lparameters ;
   result; && @ {en} result
-,	cImgSrce;
+, cImgSrce;
 , cImgDest; && @ 
 , tnWH && [1] {en} Width / Height ratio
 
@@ -881,7 +884,7 @@ endfunc
 function ImgResize && {en} adapted from http://weblogs.foxite.com/vfpimaging/2006/02/06/resize-images-with-vfp9-and-gdi/
 lparameters ;
   result; && @ {en} result
-,	cImgSrce;
+, cImgSrce;
 , cImgDest; && @ [overwrite cImgSrce]
 , tnWidth; && {fr} pixels
 , tnHeight; && [isometric] {fr} pixels
@@ -945,7 +948,7 @@ endfunc
 function ImgResizeBox && {en} Resize an image so that it fits in a box
 lparameters ;
   result; && @ {fr} result
-,	cImgSrce; && {en} source image
+, cImgSrce; && {en} source image
 , cImgDest; && @ [overwrite cImgSrce] {en} destination image
 , tnWidth; && {fr} pixels max
 , tnHeight; && {fr} pixels max
@@ -967,22 +970,22 @@ endfunc
 FUNCTION nMMofPX && {fr} Dimension mm papier de pixels écran
 LPARAMETERS tnPix && {fr} Nombre de pixels écran
 RETURN Iif(Vartype(m.tnPix)=='N' AND m.tnPix > 0;
-	,	m.tnPix / 96 * 25.4; && 96 pixels/pouce (standard Windows) et 25.4 mm/pouce
-	,	0;
+	, m.tnPix / 96 * 25.4; && 96 pixels/pouce (standard Windows) et 25.4 mm/pouce
+	, 0;
 	)
 
 * -------------------------------------------------------------
 FUNCTION nPXofMM && {fr} Pixels écran de mm papier
 LPARAMETERS tnMM && {fr} Dimension en mm papier
 RETURN Int(Iif(Vartype(m.tnMM)== 'N' AND m.tnMM > 0;
-	,	m.tnMM / 25.4 * 96; && 96 pixels/pouce (standard Windows) et 25.4 mm/pouce
-	,	0;
+	, m.tnMM / 25.4 * 96; && 96 pixels/pouce (standard Windows) et 25.4 mm/pouce
+	, 0;
 	))
 
 * -------------------------------------------------------------
 FUNCTION nPXofPt && {fr} Pixels écran de point CSS
 LPARAMETERS tnPt && {fr} Dimension en points
 RETURN Int(Iif(Vartype(m.tnPt)== 'N' AND m.tnPt > 0;
-	,	Round(m.tnPt / 72 * 90, 1); && 72 pt /pouce, 96 pixels/pouce (standard Windows) ramené à 90 pour ajuster
+	, Round(m.tnPt / 72 * 90, 1); && 72 pt /pouce, 96 pixels/pouce (standard Windows) ramené à 90 pour ajuster
 	, 0;
 	))

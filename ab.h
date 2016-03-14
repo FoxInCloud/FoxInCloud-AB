@@ -19,5 +19,5 @@
 * FoxInCloud public
 #INCLUDE awPublic.h && {fr} en dernier car inclut 'awPublic_Override.h'
 
-* {en} Override any constant in 'awPublic_override.h' (never replaced with new version install)
-* {fr} Surcharger toute constante dans 'awPublic_override.h' (jamais remplacé par l'installation d'une nouvelle version)
+* {en} Override any constant in 'awPublic_override.h' (never replaced with by a new version of FoxInCloud install)
+* {fr} Surcharger toute constante dans 'awPublic_override.h' (jamais remplacé par l'installation d'une nouvelle version de FoxInCloud)

@@ -24,8 +24,8 @@ return abUnitTests()
 * ================================================
 function cJJHHMMSS && {fr} "JJ j HH:MM:SS" d'après une durée en secondes {en}
 lparameters ;
-	tnSecs,; && {fr} Nombre de secondes
-	tlFixedLen && [.F.] {fr} Taille fixe (15 caractères)
+  tnSecs; && {fr} Nombre de secondes
+, tlFixedLen && [.F.] {fr} Taille fixe (15 caractères)
 local lcResult
 lcResult = space(iif(m.tlFixedLen, 15, 0))
 
@@ -54,9 +54,9 @@ return loTest.Result()
 * ================================================
 function cHHMMSS && {fr} HH:MM:SS d'après une durée en secondes
 lparameters ;
-	tnSecs,; && {fr} Nombre de secondes
-	tlFixedLen,; && [.F.] {fr} Taille fixe (8 caractères)
-	tlLtrim && [.F.] {fr} Supprimer les heures si = 0
+  tnSecs; && {fr} Nombre de secondes
+, tlFixedLen; && [.F.] {fr} Taille fixe (8 caractères)
+, tlLtrim && [.F.] {fr} Supprimer les heures si = 0
 
 local lnHours, lnMins, lnSecs, lcResult
 lcResult = space(iif(m.tlFixedLen, 8, 0))
@@ -141,8 +141,8 @@ return loTest.Result()
 * ================================================
 function cYMDHMS && {fr} "Y,M,D[,H,M,S]" d'après une date ou dateTime
 lparameters ;
-	tuDate,; && [DateTime()] {fr} Date ou dateTime
-	tlJS && {fr} Javascript
+  tuDate; && [DateTime()] {fr} Date ou dateTime
+, tlJS && {fr} Javascript
 
 local luDate, lcType, liJS, lcResult
 
@@ -330,9 +330,9 @@ return iif(vartype(m.tnMonth)=='N';
 * ================================================
 function cMMAA && {fr} Date MM/AA à partir d'un date JJ/MM/AA avec ou sans JJ et MM ou des MM et AA séparés
 lparameters ;
-	tcDate,; && @ {fr} Date complète [[JJ/]MM/]AA[AA]
-	tcMois,; && @ [''] {fr} Mois séparé
-	tcAn	 && @ [''] {fr} An séparé
+  tcDate; && @ {fr} Date complète [[JJ/]MM/]AA[AA]
+, tcMois; && @ [''] {fr} Mois séparé
+, tcAn	 && @ [''] {fr} An séparé
 
 local lcResult
 lcResult = space(0)
@@ -564,8 +564,8 @@ return loTest.Result()
 * ================================================
 function tDateCTime && {fr} Date et Heure d'après la date et l'heure en caractères (issue de aDir() par ex.)
 lparameters ;
-	td,; && {fr} Date
-	tcTime && {fr} Heure en caractères
+  td; && {fr} Date
+, tcTime && {fr} Heure en caractères
 
 return iif(vartype(m.td) == 'D' ;
 			 and vartype(m.tcTime) == 'C' ;
@@ -576,8 +576,8 @@ return iif(vartype(m.td) == 'D' ;
 * ================================================
 function cDateLong && {fr} Date longue
 lparameters ;
-	tu,; && {fr} Date ou date-heure
-	tlNoDay && [.F.] {fr} ôter le jour de la semaine
+  tu; && {fr} Date ou date-heure
+, tlNoDay && [.F.] {fr} ôter le jour de la semaine
 
 local lcResult;
 , llResult;
@@ -655,8 +655,8 @@ return iYears(m.td, date())
 * ================================================
 function iYears && {fr} Années entières entre deux dates ou date-heures
 lparameters ;
-	tdBeg,; && {fr} date ou date-heure début
-	tdEnd && {fr} date ou date-heure fin
+  tdBeg; && {fr} date ou date-heure début
+, tdEnd && {fr} date ou date-heure fin
 
 local llResult, lnMonthEnd, lnMonthBeg
 
@@ -722,8 +722,8 @@ return icase(;
 * ================================================
 function nMonths && {fr} Nombre de mois entre deux dates ou dates-heure /!\ à renommer 'iMonths'
 lparameters ;
-	tu1,; && {fr} date ou date-heure de départ
-	tu2 && {fr} date ou date-heure d'arrivée
+  tu1; && {fr} date ou date-heure de départ
+, tu2 && {fr} date ou date-heure d'arrivée
 
 return iif(vartype(m.tu1) $ 'DT' and vartype(m.tu2) $ 'DT';
 		, month(m.tu2) - month(m.tu1) + (year(m.tu2) - year(m.tu1)) * 12;
@@ -743,8 +743,8 @@ return loTest.Result()
 * ================================================
 function nWeeks && {fr} Nombre de semaines (périodes de 7 jours) entre deux dates ou dates-heure
 lparameters ;
-	tdt1,; && {fr} date ou date-heure de départ
-	tdt2 && {fr} date ou date-heure d'arrivée
+  tdt1; && {fr} date ou date-heure de départ
+, tdt2 && {fr} date ou date-heure d'arrivée
 
 local lcType1, lcType2, llResult, lnResult
 lnResult = .null.
@@ -789,8 +789,8 @@ return cLitteral(dWeekCurFirst())
 * ================================================
 function cYearWeek && {fr} AAAA|SS à partir d'une date ou d'une date-heure
 lparameters ;
-	tdt,; && {fr} date ou date&heure
-	tcSep && ['|'] {fr} séparateur entre l'année et la semaine
+  tdt; && {fr} date ou date&heure
+, tcSep && ['|'] {fr} séparateur entre l'année et la semaine
 tdt = nvl(m.tdt, uEmpty('D'))
 tcSep = iif(vartype(m.tcSep) == 'C' and not empty(m.tcSep), m.tcSep, '|')
 
@@ -799,7 +799,7 @@ return transform(year(m.tdt), '@L 9999') + m.tcSep + transform(week(m.tdt,0,0), 
 * ================================================
 function dInC && {fr} Date à l'intérieur d'une chaîne de caractères
 lparameters ;
-	tc && @ {fr} Chaîne, au retour avec date ôtée
+  tc && @ {fr} Chaîne, au retour avec date ôtée
 local loRegExp as abRegExp of abtxt.prg, llResult, lcResult, ldResult
 
 llResult = vartype(m.tc) == 'C' and not empty(m.tc)
@@ -838,8 +838,8 @@ return loTest.Result()
 * ================================================
 function TtocSep && {fr} Ttoc(, 1) avec an, mois, jour, etc. séparés
 lparameters ;
-	tt,;
-	tcSep && ['.'] {fr} séparateur entre an, mois, jour, etc.
+  tt;
+, tcSep && ['.'] {fr} séparateur entre an, mois, jour, etc.
 tcSep = left(alltrim(evl(m.tcSep, '.')), 1)
 
 local lnLen, lnSep, lnPos, lcResult
@@ -857,8 +857,8 @@ return m.lcResult
 * ================================================
 function DtocSep && {fr} Dtoc(, 1) avec an, mois, jour, etc. séparés
 lparameters ;
-	tt,;
-	tcSep && ['.'] {fr} séparateur entre an, mois, jour, etc.
+  tt;
+, tcSep && ['.'] {fr} séparateur entre an, mois, jour, etc.
 
 return left(TtocSep(m.tt, m.tcSep), 10)
 
@@ -876,21 +876,19 @@ function nSeconds && {fr} Secondes écoulées tenant compte du passage par minuit
 lparameters tnSeconds && {fr} Seconds() au début, si @, Seconds() en retour
 tnSeconds = iif(vartype(m.tnSeconds) == 'N' and m.tnSeconds > 0, m.tnSeconds, 0)
 
-local lnSeconds, lnResult
+local lnResult, lnSeconds
 
 lnSeconds = seconds()
 
-lnResult = m.lnSeconds - m.tnSeconds
-
-* {fr} Tenir compte du passage éventuel à minuit
-lnResult = m.lnResult + iif(m.lnResult >= 0;
+lnResult = m.lnSeconds - m.tnSeconds + iif(m.lnSeconds < m.tnSeconds;
+	, 86400; && _Cliptext = Transform(24*3600) && {fr} passage à minuit
 	, 0;
-	, 86400; && _Cliptext = Transform(24*3600)
 	)
 
 tnSeconds = m.lnSeconds && {fr} pour retour
 
 return m.lnResult
+endfunc
 
 * ================================================
 function nMilliSeconds && {fr} Millisecondes écoulées tenant compte du passage par minuit
@@ -980,7 +978,7 @@ lparameters ;
   tlT; && [.F.] {fr} Format de date et heure
 , tlXL; && [.F.] {fr} Format pour Excel
 
-tlXL = vartype(m.tlXL) == 'L' and m.tlXL
+tlXL = lTrue(m.tlXL)
 
 local lcResult as string;
 , lcDate as string;
@@ -1015,7 +1013,7 @@ return '';
 		, m.lcResult;
 		, chrtran(m.lcResult, './-', replicate(m.lcMark, len('./-')));
 		);
-	+	iif(vartype(m.tlT) == 'L' and m.tlT;
+	+	iif(lTrue(m.tlT);
 		, space(1) + iif(.f.;
 				or m.lcDate $ 'SHORT,LONG';  && {fr} à approfondir
 			 	or set("Seconds") == 'ON';
@@ -1027,9 +1025,9 @@ return '';
 * ================================================
 function nWeeksYear && {fr} Nombre de semaines dans une année
 lparameters ;
-	tnYear,; && {fr} Année
-	nFirstWeek,; && [1] {fr} première semaine de l'année selon Week()
-	nFirstDayOfWeek && [1] {fr} premier jour de la semaine selon Week()
+  tnYear; && {fr} Année
+, nFirstWeek; && [1] {fr} première semaine de l'année selon Week()
+, nFirstDayOfWeek && [1] {fr} premier jour de la semaine selon Week()
 nFirstWeek = iif(pcount() >= 2 and vartype(m.nFirstWeek) == 'N' and int(m.nFirstWeek) = m.nFirstWeek and between(m.nFirstWeek, 0, 3), m.nFirstWeek, 1)
 nFirstDayOfWeek = iif(pcount() >= 3 and vartype(m.nFirstDayOfWeek) == 'N' and int(m.nFirstDayOfWeek) = m.nFirstDayOfWeek and between(m.nFirstDayOfWeek, 0, 7), m.nFirstDayOfWeek, 1)
 
@@ -1048,10 +1046,11 @@ enddo
 return m.lnResult
 
 * ================================================
-function cAgo && {fr} mention 'il y a'
+function cAgo && {fr} mention 'il y a' {en} 'some time ago' caption
 lparameters ;
   ttd; && {en} date or datetime
-, lShort && [.F.] {en} use abbreviations whenever possible
+, lShort; && [.F.] {en} use abbreviations whenever possible
+, lAgoNo; && [.F.] {en} do not mention 'ago' {fr} pas de 'il y a'
 
 local cAgo as string;
 , cType as string;
@@ -1062,8 +1061,8 @@ local cAgo as string;
 , cLangUser as string;
 
 lShort = lTrue(m.lShort)
+lAgoNo = lTrue(m.lAgoNo)
 cType = vartype(m.ttd)
-
 
 if !m.cType $ 'DT' or Empty(m.ttd)
 	return .null.
@@ -1199,7 +1198,7 @@ else
 
 	return '';
 		+ ICase(;
-			empty(m.nAgoS),;
+			empty(m.nAgoS) or m.lAgoNo,;
 				'',;
 			m.nAgo > 0,; && {fr} ttd is past
 				icase(;
@@ -1217,7 +1216,7 @@ else
 			, m.cAgo;
 			);
 		+ ICase(;
-			empty(m.nAgoS),;
+			empty(m.nAgoS) or m.lAgoNo,;
 				'',;
 			m.nAgo > 0,; && {fr} ttd is past
 				icase(;
@@ -1261,16 +1260,16 @@ return loTest.Result()
 * ================================================
 function cDateFig_Long && {fr} Date eu chiffres et longue
 lparameters ;
-	tu,; && {fr} Date ou date-heure
-	tlNoDay && [.F.] {fr} ôter le jour de la semaine
+  tu; && {fr} Date ou date-heure
+, tlNoDay && [.F.] {fr} ôter le jour de la semaine
 
 return transform(m.tu) + ' (' + cDateLong(m.tu, m.tlNoDay) + ')'
 
 * ================================================
 function ctRFC822 && {fr} Date et heure selon la norme RFC822
 lparameters ;
-	tt,; && [datetime()] {fr} date-heure
-	tlGMT && [.F.] {fr} GMT
+  tt; && [datetime()] {fr} date-heure
+, tlGMT && [.F.] {fr} GMT
 
 local lcType, laDays[7], laMonths[12], lnOffset, lcDate, lcSeconds, lcHours, lcTime, lcResult
 
@@ -1323,3 +1322,8 @@ lcResult = textmerge("<<laDays[Dow(m.tt, 2)]>>, <<Padl(Day(m.tt),2,'0')>> <<laMo
 	+ padl(transform(abs(m.lnOffset)), 2, "0") + "00")
 
 return m.lcResult
+
+* ================================================
+function iQuarter && {fr} N° de trimestre
+lparameters td
+return Ceiling(Month(m.td)/3)

@@ -21,12 +21,12 @@ return abUnitTests()
 * ===================================================================
 function cTronc && {fr} Chaîne tronquée à une longueur donnée en la terminant par "..."
 lparameters ;
-	tcChain,; && {fr} Chaine à tronquer
-	tnTronc,; && [50] {fr} Nombre de caractères oû la chaine totale doit tenir
-	tlWord,; && [.F.] {fr} couper à la fin d'un mot
-	tcDropped,; && @ [''] {fr} Partie éventuellement coupée
-	tlEllipsNot,; && [.F.] {fr} Ne pas ajouter de points de suspension
-	tcSep && [any] {fr} preferred separator
+  tcChain; && {fr} Chaine à tronquer
+, tnTronc; && [50] {fr} Nombre de caractères oû la chaine totale doit tenir
+, tlWord; && [.F.] {fr} couper à la fin d'un mot
+, tcDropped; && @ [''] {fr} Partie éventuellement coupée
+, tlEllipsNot; && [.F.] {fr} Ne pas ajouter de points de suspension
+, tcSep && [any] {fr} preferred separator
 
 local lcResult;
 , llResult;
@@ -106,8 +106,8 @@ return loTest.Result()
 * ===================================================================
 function cJustified && {fr} Chaîne justifiée
 lparameters ;
-	tcChain,; && {fr} Chaîne à justifier
-	tnCols && [80] {fr} Nombre de colonnes
+  tcChain; && {fr} Chaîne à justifier
+, tnCols && [80] {fr} Nombre de colonnes
 tcChain = iif(vartype(m.tcChain) == 'C', m.tcChain, '')
 tnCols = evl(m.tnCols, 80)
 
@@ -132,9 +132,9 @@ endif
 * ===================================================================
 function cWords && {fr} Mots séparés par paires non vides
 lparameters ;
-	tuSep,; && {fr} Séparateur
-	tuW0,; && {fr} tableau de mots (1 dim.) ou premier mot
-	tuW1, tuW2, tuW3, tuW4, tuW5, tuW6, tuW7, tuW8, tuW9, tuW10, tuW11, tuW12, tuW13, tuW14, tuW15, tuW16, tuW17, tuW18, tuW19, tuW20, tuW21, tuW22, tuW23, tuW24 && [''] {fr} mots suivants
+  tuSep; && {fr} Séparateur
+, tuW0; && {fr} tableau de mots (1 dim.) ou premier mot
+, tuW1, tuW2, tuW3, tuW4, tuW5, tuW6, tuW7, tuW8, tuW9, tuW10, tuW11, tuW12, tuW13, tuW14, tuW15, tuW16, tuW17, tuW18, tuW19, tuW20, tuW21, tuW22, tuW23, tuW24 && [''] {fr} mots suivants
 
 local lcResult
 lcResult = space(0)
@@ -178,9 +178,9 @@ laW[6] = null
 * ===================================================================
 function c2Words && {fr} Deux mots séparés si non vides
 lparameters ;
-	tuW1,; && {fr} Premier mot, type variable
-	tuSep,; && {fr} Séparateur, type variable
-	tuW2 && {fr} Second mot, type variable
+  tuW1; && {fr} Premier mot, type variable
+, tuSep; && {fr} Séparateur, type variable
+, tuW2 && {fr} Second mot, type variable
 
 local llW1Empty, llW2Empty, lcSep, lnSep, lcW1, lcW2
 
@@ -234,16 +234,16 @@ return loTest.Result()
 * ===================================================================
 function cC && {fr} Alias de cComparable()
 lparameters ;
-	tc,; && Texte source
-	tnLength && [trim] {fr} Si > 0, le résultat est paddé à cette longueur (pour index)
+  tc; && Texte source
+, tnLength && [trim] {fr} Si > 0, le résultat est paddé à cette longueur (pour index)
 
 return cComparable(m.tc, m.tnLength)
 
 * ===================================================================
 function cComparable && Texte débarrassé de ses variantes typographiques pour comparaison
 lparameters ;
-	tc,; && Texte source
-	tnLength && [trim] {fr} Si > 0, le résultat est paddé à cette longueur (pour index)
+  tc; && Texte source
+, tnLength && [trim] {fr} Si > 0, le résultat est paddé à cette longueur (pour index)
 
 local lcChars, lcResult && Texte comparable
 
@@ -285,8 +285,8 @@ endproc
 * ===================================================================
 function cRepCharsDel && {fr} Séquences de caractères identiques remplacées par un caractère simple
 lparameters ;
-	tcChain,; && {fr} Chaine de caractères à traiter
-	tcChars && {fr} Caractère(s) dont les répétitions sont à éliminer
+  tcChain; && {fr} Chaine de caractères à traiter
+, tcChars && {fr} Caractère(s) dont les répétitions sont à éliminer
 
 local lcChars, llResult, lcResult
 lcResult = space(0)
@@ -308,8 +308,8 @@ return lcResult
 * ===================================================================
 function cRepCharDel && {fr} Séquences d'un caractère remplacées par un caractère simple
 lparameters ;
-	tcChain,; && {fr} Chaine de caractères à traiter
-	tcChar && [space(1)] {fr} Caractère dont les répétitions sont à éliminer
+  tcChain; && {fr} Chaine de caractères à traiter
+, tcChar && [space(1)] {fr} Caractère dont les répétitions sont à éliminer
 
 if vartype(m.tcChain) = 'C'
 
@@ -343,10 +343,10 @@ return loTest.Result()
 * ===================================================================
 function cSpaceAround && {fr} Chaîne oû les nombres d'Space(1) avant et après une sous-chaîne donnée sont normalisés
 lparameters ;
-	tcChain, ; && {fr} Chaine à traiter
-	tcSubChain, ; && {fr} Sous-chaine dont les espaces avant - après sont à normaliser
-	tnBefore, ; && [0] {fr} Nombre d'espaces avant la sous-chaine
-	tnAfter && [tnBefore] {fr} Nombre d'espaces après la sous-chaine
+  tcChain ; && {fr} Chaine à traiter
+, tcSubChain ; && {fr} Sous-chaine dont les espaces avant - après sont à normaliser
+, tnBefore ; && [0] {fr} Nombre d'espaces avant la sous-chaine
+, tnAfter && [tnBefore] {fr} Nombre d'espaces après la sous-chaine
 
 if vartype(m.tcChain) == 'C';
  and vartype(m.tcSubChain) == 'C' ;
@@ -441,9 +441,9 @@ return loTest.Result()
 * ===================================================================
 function cSepGrpsXFigs && {fr} Groupe les chiffres dans une chaîne de caractères
 lparameters ;
-	tcChain,; && {fr} Chaine à traiter
-	tnFactGroup,; && [3] {fr} Facteur de regroupement des groupes de chiffres
-	tcSep && [Space(1)] {fr} Caractère de séparation des groupes de chiffres
+  tcChain; && {fr} Chaine à traiter
+, tnFactGroup; && [3] {fr} Facteur de regroupement des groupes de chiffres
+, tcSep && [Space(1)] {fr} Caractère de séparation des groupes de chiffres
 local lcResult
 store space(0) to m.lcResult
 
@@ -528,9 +528,9 @@ procedure cSepGrpsXFigs_Test && {fr} Teste cSepGrpsXFigs
 * ===================================================================
 function cListOfArrayC && {fr} Liste délimitée du contenu d'un tableau caractère
 lparameters ;
-	taWords, ; && @ {fr} Mots de type C
-	tcDelim, ; && [','] {fr} Délimiteur
-	tnCol && [1] {fr} N° de colonne, -1 pour toutes les colonnes (tableau taWords à 2 dimensions)
+  taWords ; && @ {fr} Mots de type C
+, tcDelim ; && [','] {fr} Délimiteur
+, tnCol && [1] {fr} N° de colonne, -1 pour toutes les colonnes (tableau taWords à 2 dimensions)
 external array taWords
 
 && /!\ en chantier
@@ -538,27 +538,29 @@ external array taWords
 * ===================================================================
 function cListOfArray && {fr} Liste délimitée du contenu d'un tableau
 lparameters ;
-	taWords, ; && @ {fr} Mots de types divers (CNDTLY sont supportés)
-	tcDelim, ; && [','] {fr} Délimiteur
-	tnCol,; && [1] {fr} N° de colonne, -1 pour toutes les colonnes (tableau taWords à 2 dimensions)
-	tlLitterals,; && [.F.] {fr} écrire les mots sous la forme de litteraux VFP (ex. foo > "foo",  02/07/03 > {^2003-02-07})
-	tlKeepEmpty,; && [tlLitterals] {fr} Include empty words
-	tlKeepNull,; && [tlLitterals] {fr} Include .NULL. words
-	tlKeepWeird,; && [.F.] {fr} Include words of type G/U
-	tlDistinct,; && [.F.] {fr} Élimine les doublons
-	tlLines,; && [.F.] {fr} Séparer les lignes (tableau taWords à 2 dimensions et m.tnCol = -1)
-	tnColFilter,; && [aucune] {fr} n° de colonne contenant un filtre des lignes à lister
-	tlRtrimNot && [.F.] {fr} Ne pas supprimer les espaces en queue des éléments de type caractère
+  taWords; && @ {fr} Mots de types divers (CNDTLY sont supportés)
+, tcDelim; && [','] {fr} Délimiteur
+, tnCol; && [1] {fr} N° de colonne, -1 pour toutes les colonnes (tableau taWords à 2 dimensions)
+, tlLitterals; && [.F.] {fr} écrire les mots sous la forme de litteraux VFP (ex. foo > "foo",  02/07/03 > {^2003-02-07})
+, tlKeepEmpty; && [tlLitterals] {fr} Include empty words
+, tlKeepNull; && [tlLitterals] {fr} Include .NULL. words
+, tlKeepWeird; && [.F.] {fr} Include words of type G/U
+, tlDistinct; && [.F.] {fr} Élimine les doublons
+, tlLines; && [.F.] {fr} Séparer les lignes (tableau taWords à 2 dimensions et m.tnCol = -1)
+, tnColFilter; && [aucune] {fr} n° de colonne contenant un filtre des lignes à lister
+, tlRtrimNot; && [.F.] {fr} Ne pas supprimer les espaces en queue des éléments de type caractère
 
 external array taWords
 
 local lnCols;
 , lcPoint, llPoint; && , loPoint
 , liWord, luWord, lcWord;
-, lcVarType, lcDelim, llRtrim;
+, lcVarType;
+, lcDelim;
+, llRtrim;
 , lcResult
 
-lcResult = space(0)
+lcResult = ''
 
 if not laEmpty(@m.taWords)
 
@@ -566,7 +568,7 @@ if not laEmpty(@m.taWords)
 	lnCols = alen(taWords, 2)
 
 	* {fr} Donner leur valeur par défaut aux paramètres optionnels
-	tcDelim = iif(vartype(m.tcDelim) == 'C' and lenc(m.tcDelim) > 0 , m.tcDelim, ',')
+	tcDelim = iif(vartype(m.tcDelim) == 'C' and lenc(m.tcDelim) > 0, m.tcDelim, ',')
 	tnCol = icase(;
 		M.lnCols = 0,; && {fr} tableau à 1 dimension
 			0,;
@@ -594,10 +596,10 @@ if not laEmpty(@m.taWords)
 	llPoint = m.lcPoint $ m.tcDelim
 	if m.llPoint
 		set point to icase(;
-					not '.' $ m.tcDelim, '.',;
-					not ',' $ m.tcDelim, ',',;
-					not ';' $ m.tcDelim, ';',;
-					'?')
+			not '.' $ m.tcDelim, '.',;
+			not ',' $ m.tcDelim, ',',;
+			not ';' $ m.tcDelim, ';',;
+			'?')
 
 *-				loPoint = abSet('POINT', ICase(; && {fr} ne marche pas
 *-									NOT '.' $ m.tcDelim, '.',;
@@ -607,10 +609,15 @@ if not laEmpty(@m.taWords)
 	endif
 
 	* {fr} Pour chaque élément du tableau
+	lcDelim = ''
 	for liWord = 1 to iif(m.tnCol <= 0, alen(m.taWords), alen(m.taWords, 1))
 
-		luWord = iif(m.tnCol <= 0, taWords[m.liWord], taWords[m.liWord, m.tnCol])
-		lcVarType = vartype(m.luWord)
+		luWord = iif(m.tnCol <= 0;
+			, taWords[m.liWord];
+			, taWords[m.liWord, m.tnCol];
+			)
+		lcVarType = Vartype(m.luWord)
+		lcWord = ''
 
 		* {fr} Si la valeur est valide
 		if .t.;
@@ -620,16 +627,11 @@ if not laEmpty(@m.taWords)
 		 and (m.tnColFilter = 0 or not empty(taWords[m.liWord, m.tnColFilter]))
 
 			lcWord = icase(;
-				M.tlLitterals,;
+				m.tlLitterals,;
 					cLitteral(m.luWord, m.llRtrim),;
-				M.lcVarType == 'C' and m.tlRtrimNot,;
-					M.luWord,;
+				m.lcVarType == 'C' and m.tlRtrimNot,;
+					m.luWord,;
 					trim(transform(m.luWord));
-				)
-
-			lcDelim = iif(m.tlLines and asubscript(m.taWords, m.liWord, 2) = m.lnCols;
-				, CRLF;
-				, m.tcDelim;
 				)
 
 			* {fr} Si le mot n'est pas répété
@@ -643,16 +645,25 @@ if not laEmpty(@m.taWords)
 					);
 				)
 
-				lcResult = m.lcResult + m.lcWord + m.lcDelim
+				lcResult = m.lcResult + m.lcDelim + m.lcWord
 			endif
 		endif
+
+		&& 2016-02-23 thn -- {en} fixed: must always set delimiter, even if element is not rendered
+		lcDelim = iCase(;
+			Empty(m.lcResult),;
+				'',;
+			m.tlLines and (Asubscript(m.taWords, m.liWord, 2) = m.lnCols or m.lcDelim == CRLF and Empty(m.lcWord)),;
+				CRLF,;
+				m.tcDelim;
+			)
 	endfor
+	&& 2016-02-23 thn -- {en} no more extra delimiter to remove
+*	lcResult = leftc(m.lcResult, lenc(m.lcResult) - lenc(evl(m.lcDelim, ''))) && {fr} supprime le dernier délimiteur
 
 	if m.llPoint
 		set point to m.lcPoint
 	endif
-
-	lcResult = leftc(m.lcResult, lenc(m.lcResult) - lenc(evl(m.lcDelim, ''))) && {fr} supprime le dernier délimiteur
 endif
 
 return m.lcResult
@@ -693,7 +704,7 @@ return m.loTest.Result()
 * ===================================================================
 function cPrintable && {fr} Chaine ne contenant que des caractères imprimables
 lparameters ;
-	tcChain && {fr} Chaine à normaliser
+  tcChain && {fr} Chaine à normaliser
 
 if vartype(m.tcChain) == 'C' ;
  and not empty(m.tcChain)
@@ -745,10 +756,10 @@ return m.loTest.Result()
 * ===================================================================
 function cL && {fr} Littéral VFP && {fr} Alias de cLitteral()
 lparameters ;
-	tuData, ; && {fr} Valeur à convertir en littéral (type supportés : tous soit CDGLNOQTUXY)
-	tlRTrim,; && [.F.] {fr} si type C, ôter les espaces à droite
-	tnTronc,; && [aucun] {fr} si type C, nombre de caractères de troncature
-	tlXML && [.F.] {fr} Encoder pour XML
+  tuData ; && {fr} Valeur à convertir en littéral (type supportés : tous soit CDGLNOQTUXY)
+, tlRTrim; && [.F.] {fr} si type C, ôter les espaces à droite
+, tnTronc; && [aucun] {fr} si type C, nombre de caractères de troncature
+, tlXML && [.F.] {fr} Encoder pour XML
 
 return cLitteral(;
 	 @m.tuData;
@@ -760,10 +771,10 @@ return cLitteral(;
 * ===================================================================
 function cLitteral && {fr} Littéral VFP
 lparameters ;
-	tuData,; && @ {fr} Valeur à convertir en littéral (type supportés : tous soit CDGLNOQTUXY)
-	tlRTrim,; && [.F.] {fr} si type C, ôter les espaces à droite
-	tnTronc,; && [aucun] {fr} si type C, nombre de caractères de troncature
-	tlXML && [.F.] {fr} Encoder pour XML
+  tuData; && @ {fr} Valeur à convertir en littéral (type supportés : tous soit CDGLNOQTUXY)
+, tlRTrim; && [.F.] {fr} si type C, ôter les espaces à droite
+, tnTronc; && [aucun] {fr} si type C, nombre de caractères de troncature
+, tlXML && [.F.] {fr} Encoder pour XML
 
 #if .f. && {fr} Vartype VFP9
 	C && {fr} Character, Memo, Varchar, Varchar (Binary)
@@ -807,10 +818,10 @@ return icase(;
 * -----------------------------------------------------------------
 function cLitteral_C && {fr} Littéral VFP de type caractère
 lparameters ;
-	tcData, ; && {fr} Valeur à convertir en littéral (type supportés : tous soit CDGLNOQTUXY)
-	tlRTrim,; && [.F.] {fr} si type C, ôter les espaces à droite
-	tnTronc,; && [aucun] {fr} si type C, nombre de caractères de troncature
-	tlXML && [.F.] {fr} Encoder pour support XML
+  tcData ; && {fr} Valeur à convertir en littéral (type supportés : tous soit CDGLNOQTUXY)
+, tlRTrim; && [.F.] {fr} si type C, ôter les espaces à droite
+, tnTronc; && [aucun] {fr} si type C, nombre de caractères de troncature
+, tlXML && [.F.] {fr} Encoder pour support XML
 
 
 local lcResult as string;
@@ -917,8 +928,8 @@ return m.Result
 * -----------------------------------------------------------------
 function cLitteral_N && {fr} Littéral VFP de type numérique
 lparameters ;
-	tuData,; && {fr} Nombre  à convertir en littéral
-	lcVarType
+  tuData; && {fr} Nombre  à convertir en littéral
+, lcVarType
 
 return chrtran(;
 	iif(m.lcVarType = 'Y';
@@ -1238,9 +1249,9 @@ endfunc
 * -----------------------------------------------
 function cLJS && {fr} Littéral Javascript d'après une valeur VFP && {fr} Alias (simplifié) de cLitteralJS()
 lparameters ;
-	tuData,; && @ {fr} Valeur à convertir en littéral ; types supportés : cf. cLitteralJS_lSupport()
-	tlTrim,; && [.F.] {fr} si type C, ôter les espaces à droite
-	tlJSON && [.F.] {fr} produire un littéral compatible JSON
+  tuData; && @ {fr} Valeur à convertir en littéral ; types supportés : cf. cLitteralJS_lSupport()
+, tlTrim; && [.F.] {fr} si type C, ôter les espaces à droite
+, tlJSON && [.F.] {fr} produire un littéral compatible JSON
 
 return cLitteralJS(@m.tuData, m.tlTrim, m.tlJSON)
 endfunc
@@ -1248,8 +1259,8 @@ endfunc
 * -----------------------------------------------
 function cLitteralJS_lSupport && {fr} Une données est supportée pour conversion en littéral Javascript
 lparameters ;
-	tuData,; && {fr} Donnée à analyser
-	tcResult && @ {fr} Résultat localisé si pas supporté
+  tuData; && {fr} Donnée à analyser
+, tcResult && @ {fr} Résultat localisé si pas supporté
 
 local lcVarType, llResult
 
@@ -1319,8 +1330,8 @@ return m.loTest.Result()
 * ===================================================================
 function uEmpty && {fr} Valeur vide selon les différents Type()
 lparameters ;
-	tuType,; && {fr} Type de valeur, ou valeur si m.tlValue
-	tlValue && [.F.] {fr} tuType contient une valeur
+  tuType; && {fr} Type de valeur, ou valeur si m.tlValue
+, tlValue && [.F.] {fr} tuType contient une valeur
 tlValue = lTrue(m.tlValue)
 
 #if .f. && {fr} Types supportés
@@ -1374,8 +1385,8 @@ return m.luResult
 * ===================================================================
 function cLitteralNum && {fr} Littéral numérique d'après une chaine de caractères représentant un nombre
 lparameters ;
-	tcNum,; && {fr} Chaine de caractères supposée représenter un nombre
-	tlPeriod && [.F.] {fr} séparateur décimal point (.F.: courant) [Val() veut courant, calcul et ALTER COLUMN veulent point]
+  tcNum; && {fr} Chaine de caractères supposée représenter un nombre
+, tlPeriod && [.F.] {fr} séparateur décimal point (.F.: courant) [Val() veut courant, calcul et ALTER COLUMN veulent point]
 
 local llResult, lcResult
 lcResult = space(0)
@@ -1530,8 +1541,8 @@ return loTest.Result()
 * ===================================================================
 function cRandPW && {fr} Mot de passe aléatoire sùr selon indications Windows
 lparameters ;
-	tnLength,; && [14] {fr} Nombre de caractères
-	tnSep && [0] {fr} Espacer par groupe tnSep caractères à partir de la droite
+  tnLength; && [14] {fr} Nombre de caractères
+, tnSep && [0] {fr} Espacer par groupe tnSep caractères à partir de la droite
 tnLength = iif(vartype(m.tnLength) = 'N' and m.tnLength > 0, m.tnLength, 14)
 
 local lcCars, lnCars, lnCar, lnSep, lcResult
@@ -1614,10 +1625,10 @@ return m.llResult
 * ===================================================================
 function nAtDigits && {fr} Position de la première série de chiffres dans une chaine
 lparameters ;
-	tcChain,; && {fr} Chaîne de caractère oû chercher la suite de chiffres
-	tnChiffres,; && {fr} Longueur de la suite de chiffres à trouver
-	tlIgnoreSpace,; && [.F.] {fr} Ignorer les espaces au sein de la suite de chiffres
-	tcChiffres && @ {fr} Chaîne de chiffres trouvée en retour
+  tcChain; && {fr} Chaîne de caractère oû chercher la suite de chiffres
+, tnChiffres; && {fr} Longueur de la suite de chiffres à trouver
+, tlIgnoreSpace; && [.F.] {fr} Ignorer les espaces au sein de la suite de chiffres
+, tcChiffres && @ {fr} Chaîne de chiffres trouvée en retour
 local lnResult, llResult
 lnResult = 0
 tcChiffres = space(0)
@@ -1701,9 +1712,9 @@ lcRet = space(0)
 * ===================================================================
 function nAtSep && {fr} Position du premier séparateur en partant de la gauche
 lparameter ;
-	tcChain,; && {fr} Chaîne à analyser
-	tcSeps,; && [".,:;|/\-_*#!$Â§Â£&"] {fr} Séparateurs recherchés
-	tnOcc && [1] {fr} Numéro d'occurrence de séparateur recherchée
+  tcChain; && {fr} Chaîne à analyser
+, tcSeps; && [".,:;|/\-_*#!$Â§Â£&"] {fr} Séparateurs recherchés
+, tnOcc && [1] {fr} Numéro d'occurrence de séparateur recherchée
 local lnResult && {fr} Position du séparateur dans la chaîne (= 0 si aucun)
 
 lnResult = nLRAtSep ('L', m.tcChain, m.tcSeps, m.tnOcc)
@@ -1713,9 +1724,9 @@ return m.lnResult
 * ===================================================================
 function nRAtSep && {fr} Position du premier séparateur en partant de la droite
 lparameter ;
-	tcChain,; && {fr} Chaîne à analyser
-	tcSeps,; && [".,:;|/\-_*#!$Â§Â£&"] {fr} Séparateurs recherchés
-	tnOcc && [1] {fr} Numéro d'occurrence de séparateur recherchée
+  tcChain; && {fr} Chaîne à analyser
+, tcSeps; && [".,:;|/\-_*#!$Â§Â£&"] {fr} Séparateurs recherchés
+, tnOcc && [1] {fr} Numéro d'occurrence de séparateur recherchée
 local lnResult && {fr} Position du séparateur dans la chaîne (= 0 si aucun)
 
 lnResult = nLRAtSep ('R', m.tcChain, m.tcSeps, m.tnOcc)
@@ -1725,10 +1736,10 @@ return m.lnResult
 * ===================================================================
 function nLRAtSep && {fr} Position du premier séparateur en partant de la gauche ou de la droite
 lparameter 	;
-	tcSens,; && ['L'] {fr} indique s'il faut chercher en partant de la gauche (L) ou de la droite (R)
-	tcChain,; && {fr} Chaîne à analyser
-	tcSeps,; && [".,:;|/\-_*#!$Â§Â£&"] {fr} Séparateurs recherchés
-	tnOcc && [1] {fr} Numéro d'occurrence de séparateur recherchée
+  tcSens; && ['L'] {fr} indique s'il faut chercher en partant de la gauche (L) ou de la droite (R)
+, tcChain; && {fr} Chaîne à analyser
+, tcSeps; && [".,:;|/\-_*#!$Â§Â£&"] {fr} Séparateurs recherchés
+, tnOcc && [1] {fr} Numéro d'occurrence de séparateur recherchée
 local lnResult && {fr} Position du séparateur dans la chaîne (= 0 si aucun)
 lnResult = 0
 
@@ -1765,8 +1776,8 @@ return m.lnResult
 * ===================================================================
 function cFigures && {fr} Chiffres contenus dans une chaîne de caractères
 lparameters ;
-	tcChain,; && {fr} Chaîne à analyser
-	tlRight && [.F.] {fr} Chercher en partant de la droite
+  tcChain; && {fr} Chaîne à analyser
+, tlRight && [.F.] {fr} Chercher en partant de la droite
 local lcResult && {fr} Chiffres extraits dans l'ordre oû ils se trouvent
 lcResult = space(0)
 
@@ -1867,8 +1878,8 @@ return m.llResult
 * ===================================================================
 function cVFPNameSubStr && {fr} Nom VFP commençant à partir d'une position donnée dans une chaîne
 lparameters ;
-	tcChain,; && {fr} Chaine de caractère
-	tnPos && {fr} Position du nom dans la chaîne; Si @, devient la position immédiatement après le nom trouvé
+  tcChain; && {fr} Chaine de caractère
+, tnPos && {fr} Position du nom dans la chaîne; Si @, devient la position immédiatement après le nom trouvé
 
 local lcResult;
 , lcChar;
@@ -1906,8 +1917,8 @@ procedure cVFPNameSubStr_Test && {fr} teste cVFPNameSubStr()
 * ===================================================================
 function cParenth && {fr} Met une chaîne entre parenthèses ou autre signes encadrants
 lparameters ;
-	tcChain,; && {fr} chaine source
-	tcParenth && [()] {fr} caractères d'encadement à ajouter
+  tcChain; && {fr} chaine source
+, tcParenth && [()] {fr} caractères d'encadement à ajouter
 
 local llResult, lcResult && {fr} Chaine avec la référence ajoutée
 lcResult = space(0)
@@ -1925,11 +1936,11 @@ return m.lcResult
 * ===================================================================
 function cRefAppend && {en} Appends a (reference) to a string {fr} Ajoute une référence entre parenthèses à la fin d'une chaîne
 lparameters ;
-	tcChain,; && {en} source string {fr} chaine source
-	tuRef,; && {en} reference to append; .null. removes any existing reference {fr} Référence à ajouter ; .NULL. supprimer une référence existante éventuelle
-	tlReplace,; && [.F.] {en} Replace an existing reference if any {fr} Remplacer une référence existante éventuelle
-	tlNoZero,; && [.F.] {en} do not mention '0' {fr} Ne pas mentionner la valeur 0
-	tcPrefix && [''] {en} prefix to the reference to be appended {fr} préfixe à la référence à ajouter
+  tcChain; && {en} source string {fr} chaine source
+, tuRef; && {en} reference to append; .null. removes any existing reference {fr} Référence à ajouter ; .NULL. supprimer une référence existante éventuelle
+, tlReplace; && [.F.] {en} Replace an existing reference if any {fr} Remplacer une référence existante éventuelle
+, tlNoZero; && [.F.] {en} do not mention '0' {fr} Ne pas mentionner la valeur 0
+, tcPrefix && [''] {en} prefix to the reference to be appended {fr} préfixe à la référence à ajouter
 
 local lcResult; && {fr} Chaine avec la référence ajoutée
 , llResult;
@@ -2006,11 +2017,11 @@ return loTest.Result()
 * ===================================================================
 function lInList && {fr} Un mot se trouve dans une liste délimitée
 lparameters ;
-	tcWord,; && {fr} Mot à trouver
-	tcList,; && {fr} Liste délimitée
-	tcSep,; && [,] {fr} Séparateur de liste
-	tlCase,; && [.F.] {fr} Respecter la casse
-	tlExactCur && [.F.] {fr} Conserver Set("Exact") - .F. : SET EXACT ON
+  tcWord; && {fr} Mot à trouver
+, tcList; && {fr} Liste délimitée
+, tcSep; && [,] {fr} Séparateur de liste
+, tlCase; && [.F.] {fr} Respecter la casse
+, tlExactCur && [.F.] {fr} Conserver Set("Exact") - .F. : SET EXACT ON
 
 local laElts[1], llResult
 
@@ -2036,11 +2047,11 @@ return m.llResult
 * ===================================================================
 function cListEdit && {fr} Ajoute ou supprime un élément d'une liste sans doublon
 lparameters ;
-	tcList,; && {fr} Liste à éditer
-	tcElts,; && {fr} Élément(s) à ajouter / supprimer
-	tlRemove,; && [.F.] {fr} Supprimer le ou les élément(s)
-	tcSep,; && [,] {fr} Séparateur de liste
-	tlCase && [.F.] {fr} Respecter la casse
+  tcList; && {fr} Liste à éditer
+, tcElts; && {fr} Élément(s) à ajouter / supprimer
+, tlRemove; && [.F.] {fr} Supprimer le ou les élément(s)
+, tcSep; && [,] {fr} Séparateur de liste
+, tlCase && [.F.] {fr} Respecter la casse
 
 local llResult, lcResult
 
@@ -2112,12 +2123,12 @@ return loTest.Result()
 * ===================================================================
 function lWordsIn && {fr} Plusieurs mots se trouvent dans une chaîne
 lparameters ;
-	tcWords,; && {fr} Mots à chercher
-	tcChain,; && {fr} Chaine oû chercher
-	tlCaseIgnore,; && [.F.] {fr} Ignorer la casse
-	tlAnyWord,; && [.F.] {fr} Traiter le mot même s'il comporte des caractère de séparation
-	tnAtc,; && @ [1] {fr} position de début de recherche, en retour, position trouvée, 0 si pas trouvé
-	tlOr && [.F.] {fr} Trouver au moins un des mots
+  tcWords; && {fr} Mots à chercher
+, tcChain; && {fr} Chaine oû chercher
+, tlCaseIgnore; && [.F.] {fr} Ignorer la casse
+, tlAnyWord; && [.F.] {fr} Traiter le mot même s'il comporte des caractère de séparation
+, tnAtc; && @ [1] {fr} position de début de recherche, en retour, position trouvée, 0 si pas trouvé
+, tlOr && [.F.] {fr} Trouver au moins un des mots
 tlOr = lTrue(m.tlOr)
 
 local laWord[1], lcWord, llWord, llResult
@@ -2149,11 +2160,11 @@ return m.llResult
 * ===================================================================
 function lWordIn && {fr} Un mot se trouve dans une chaîne
 lparameters ;
-	tcWord,; && {fr} Mot à chercher
-	tcChain,; && {fr} Chaine oû chercher
-	tlCaseIgnore,; && [.F.] {fr} Ignorer la casse
-	tlAnyWord,; && [.F.] {fr} Traiter le mot même s'il comporte des caractère de séparation
-	tnAtc && @ [1] {fr} position de début de recherche, en retour, position trouvée, 0 si pas trouvé
+  tcWord; && {fr} Mot à chercher
+, tcChain; && {fr} Chaine oû chercher
+, tlCaseIgnore; && [.F.] {fr} Ignorer la casse
+, tlAnyWord; && [.F.] {fr} Traiter le mot même s'il comporte des caractère de séparation
+, tnAtc && @ [1] {fr} position de début de recherche, en retour, position trouvée, 0 si pas trouvé
 
 local llResult
 
@@ -2230,11 +2241,11 @@ return loTest.Result()
 * ===================================================================
 function anWordIn && {fr} Positions d'un mot dans une chaîne
 lparameters ;
-	ta,; && @ {fr} Positions du mot
-	tcChain,; && {fr} Chaine
-	tcWord,; && {fr} Mot à chercher
-	tlCaseIgnore,; && [.F.] {fr} Ignorer la casse
-	tlAnyWord && [.F.] {fr} Traiter le mot même s'il comporte des caractère de séparation
+  ta; && @ {fr} Positions du mot
+, tcChain; && {fr} Chaine
+, tcWord; && {fr} Mot à chercher
+, tlCaseIgnore; && [.F.] {fr} Ignorer la casse
+, tlAnyWord && [.F.] {fr} Traiter le mot même s'il comporte des caractère de séparation
 external array ta
 
 local lnAtc, lnResult && {fr} nombre de positions trouvées
@@ -2298,8 +2309,8 @@ return loTest.Result()
 * ===================================================================
 function aOperands && {fr} Opérandes d'une expression /!\ simpliste!
 lparameters ;
-	taOps,; && @ {fr} Opérande | position dans l'expression
-	tcExp && {fr} Expression
+  taOps; && @ {fr} Opérande | position dans l'expression
+, tcExp && {fr} Expression
 
 * {fr} Si les paramètres sont valides
 if type('taOps', 1) == 'A' and vartype(m.tcExp) == 'C'
@@ -2350,7 +2361,7 @@ return substr(m.lcResult, 2) && {fr} supprime la ',' initiale
 * ===================================================================
 function cFirstAlpha && {fr} Chaîne dont l'initiale est alphabétique
 lparameters ;
-	tcChain && {fr} Chaine
+  tcChain && {fr} Chaine
 local llResult, lcResult
 lcResult = space(0)
 
@@ -2432,16 +2443,16 @@ nPattern = 0 && {fr} n° du Pattern courant, cf. this.Pattern_Assign()
 && {fr} INTERNES
 protected;
 		oRegExp; && {fr} AS VBScript.RegExp
-	,	nSeconds; && {fr} au début de this.Execute(), Seconds(); à la fin, durée
-	,	lPatterns; && {fr} Patterns multiples, cf. this.Pattern_Assign()
-	,	aPattern[1]; && {fr} Patterns multiples, cf. this.Pattern_Assign()
-	,	lDebug && {fr} Afficher le résultat de this.execute() à l'écran et dans la fenêtre Debug
+	, nSeconds; && {fr} au début de this.Execute(), Seconds(); à la fin, durée
+	, lPatterns; && {fr} Patterns multiples, cf. this.Pattern_Assign()
+	, aPattern[1]; && {fr} Patterns multiples, cf. this.Pattern_Assign()
+	, lDebug && {fr} Afficher le résultat de this.execute() à l'écran et dans la fenêtre Debug
 
 * -----------------------------------------------------------------
 protected procedure init
 lparameters ;
-	tlDebug,; && [.F.] {fr} Afficher le résultat de .execute() à l'écran et dans la fenêtre Debug
-	tcResult && @ [''] {fr} Résultat de l'instanciation
+  tlDebug; && [.F.] {fr} Afficher le résultat de .execute() à l'écran et dans la fenêtre Debug
+, tcResult && @ [''] {fr} Résultat de l'instanciation
 
 local loException as exception, llResult
 
@@ -2462,13 +2473,13 @@ catch to loException
 	tcResult = cException(m.loException)
 endtry
 
-return m.llResult && .F. > objet non créé
+return m.llResult && .F. > {fr} objet non créé
 
 * -----------------------------------------------------------------
 protected function cPatterns
 lparameters ;
-	tcFunction,; && {fr} Fonction qui 'fabrique' les patterns ('.xx' pour une méthode de cet objet ou 'xx' pour une fonction libre)
-	tcParms && {fr} Paramètres à passer à la fonction pour 'fabriquer' les Patterns
+  tcFunction; && {fr} Fonction qui 'fabrique' les patterns ('.xx' pour une méthode de cet objet ou 'xx' pour une fonction libre)
+, tcParms && {fr} Paramètres à passer à la fonction pour 'fabriquer' les Patterns
 
 local laParm[1], lcParm, lcResult
 
@@ -2608,8 +2619,8 @@ return m.llResult
 * -----------------------------------------------------------------
 procedure Execute && {fr} Tabule les occurrences dans this.matches[]
 lparameters ;
-	tcIn,; && {fr} Chaîne oû chercher
-	tlDebug && [.F.] {fr} Débuguer
+  tcIn; && {fr} Chaîne oû chercher
+, tlDebug && [.F.] {fr} Débuguer
 tlDebug = lTrue(m.tlDebug)
 
 local lnResult
@@ -2620,8 +2631,8 @@ with m.this as abRegExp of abTxt.prg
 	.clear
 
 	lnResult = iif(.lPatterns; && /!\ ne marche pas avec HIDDEN .lPatterns !
-		,	.Execute_Patterns(@m.tcIn, m.tlDebug); && {fr} plusieurs patterns (exécution récursive)
-		,	.Execute_Pattern(@m.tcIn, m.tlDebug); && {fr} un seul pattern (cas général)
+		, .Execute_Patterns(@m.tcIn, m.tlDebug); && {fr} plusieurs patterns (exécution récursive)
+		, .Execute_Pattern(@m.tcIn, m.tlDebug); && {fr} un seul pattern (cas général)
 		)
 
 endwith
@@ -2631,8 +2642,8 @@ return m.lnResult
 * -----------------------------------------------------------------
 protected procedure Execute_Patterns && {fr} Exécute des patterns multiples
 lparameters ;
-	tcIn,; && {fr} Chaîne oû chercher
-	tlDebug && [.F.] {fr} Débuguer
+  tcIn; && {fr} Chaîne oû chercher
+, tlDebug && [.F.] {fr} Débuguer
 
 local lnPattern, laMatches[1], laResult[1], lnResult
 
@@ -2668,8 +2679,8 @@ endproc
 * -----------------------------------------------------------------
 protected procedure Execute_Pattern && {fr} Exécute un pattern unique
 lparameters ;
-	tcIn,; && {fr} Chaîne oû chercher
-	tlDebug && [.F.] {fr} Débuguer
+  tcIn; && {fr} Chaîne oû chercher
+, tlDebug && [.F.] {fr} Débuguer
 tlDebug = lTrue(m.tlDebug) or m.this.lDebug
 
 .nSeconds = seconds()
@@ -2711,12 +2722,12 @@ protected procedure Execute_Debug && {fr} Affiche le déboguage de l'exécution co
 lparameters tcIn && {fr} Chaîne oû chercher
 
 local junk;
-,	lcPlural;
-,	lcSecond;
-,	lnMatch;
-,	lnSubMatches;
-,	lnSubMatch;
-,	lcResult
+, lcPlural;
+, lcSecond;
+, lnMatch;
+, lnSubMatches;
+, lnSubMatch;
+, lcResult
 
 activate screen
 if .nPattern = 1
@@ -2771,8 +2782,8 @@ this.DebugDisplay(m.lcResult)
 * -----------------------------------------------------------------
 procedure replace && {fr} Remplace
 lparameters ;
-	tcIn,; && {fr} Chaîne oû chercher
-	tcTo && [''] {fr} Chaîne remplaçante
+  tcIn; && {fr} Chaîne oû chercher
+, tcTo && [''] {fr} Chaîne remplaçante
 
 tcTo = iif(vartype(m.tcTo) == 'C', m.tcTo, '')
 
@@ -2798,13 +2809,14 @@ with m.this as abRegExp of abTxt.prg
 endwith
 
 * -----------------------------------------------------------------
-procedure DebugDisplay && {fr} Affiche un résultat en mode déboguage
+procedure DebugDisplay && {fr} En mode déboguage, affiche un résultat à l'écran et dans la fenêtre de debug
 lparameters tcDebug
 
-tcDebug = CRLF + evl(m.tcDebug, space(0))
+tcDebug = CRLF + evl(m.tcDebug, '')
 
 ? m.tcDebug
 debugout m.tcDebug
+endproc
 
 * ===================================================================
 enddefine && {fr} CLASS abRegExp
@@ -2813,8 +2825,8 @@ enddefine && {fr} CLASS abRegExp
 * ===================================================================
 function cCRto && {fr} chaîne oû les sauts de ligne sont remplacés par ...
 lparameters ;
-	tcChain,; && {fr} Chaîne
-	tcReplace && {fr} Chaîne remplaçant les sauts de ligne
+  tcChain; && {fr} Chaîne
+, tcReplace && {fr} Chaîne remplaçant les sauts de ligne
 
 return strtran(strtran(strtran(strtran(m.tcChain;
 	, CRLF, m.tcReplace); && modify file abtxt.h
@@ -2825,8 +2837,8 @@ return strtran(strtran(strtran(strtran(m.tcChain;
 * ===================================================================
 function cCR2to && {fr} chaîne oû les sauts de ligne doubles sont remplacés par ...
 lparameters ;
-	tcChain,; && {fr} Chaîne
-	tcReplace && {fr} Chaîne remplaçant les sauts de ligne
+  tcChain; && {fr} Chaîne
+, tcReplace && {fr} Chaîne remplaçant les sauts de ligne
 
 return strtran(strtran(strtran(strtran(m.tcChain;
 	, CRLF2, m.tcReplace); && modify file abtxt.h
@@ -3002,6 +3014,7 @@ if vartype(m.tcUA) == 'C' and !empty(m.tcUA)
 	or	'bot/' $ m.tcUA;
 	or 	' bot ' $ m.tcUA;
 	or	'adsbot' $ m.tcUA; && {fr} AdsBot-Google (+http://www.google.com/adsbot.html) 15/6/15
+	or	'zgrab' $ m.tcUA; && 2015-12-31 16:14:19 thn -- {en} https://en.wikipedia.org/wiki/Banner_grabbing Banner grabbing is a technique used to glean information about a computer system on a network and the services running on its open ports. Administrators can use this to take inventory of the systems and services on their network. However, an intruder can use banner grabbing in order to find network hosts that are running versions of applications and operating systems with known exploits.
 	or	'crawl' $ m.tcUA;
 	or	'spider' $ m.tcUA;
 	or 	'robot' $ m.tcUA;
@@ -3388,8 +3401,8 @@ endproc
 * -------------------------------
 function cTagsStripped && {fr} Texte HTML sans balises
 lparameters ;
-	tcHTML,; && {fr} Texte HTML
-	tcTags && [toutes] {fr} Balises à supprimer
+  tcHTML; && {fr} Texte HTML
+, tcTags && [toutes] {fr} Balises à supprimer
 
 local laTags[1], lcTag, loRE, lcResult
 lcResult = m.tcHTML
@@ -3739,10 +3752,10 @@ RETURN m.lnResult
 * -------------------------------------------------------------
 FUNCTION nChainFract_nCarCoup && {fr} N° du dernier caractère de la chaîne avant la coupure
 LPARAMETERS ;
-	tcChain,; && {fr} Chaine à couper
-	tnCarLim,; && {fr} n° du Caractère avant lequel la coupure doit s'opérer
-	tcCarsCoup,; && {fr} caractères où la coupure est autorisée, PAR NOTES DÉCROISSANTES
-	tcCarsCoupNotes && {fr} notes (de 0 à 9) des caractères de coupure (sans séparateur)
+  tcChain; && {fr} Chaine à couper
+, tnCarLim; && {fr} n° du Caractère avant lequel la coupure doit s'opérer
+, tcCarsCoup; && {fr} caractères où la coupure est autorisée, PAR NOTES DÉCROISSANTES
+, tcCarsCoupNotes && {fr} notes (de 0 à 9) des caractères de coupure (sans séparateur)
 
 LOCAL lnResult; && {fr} N° du dernier caractère de la chaîne avant la coupure
 , lcChain;
@@ -3808,11 +3821,11 @@ RETURN loTest.Result()
 * -------------------------------------------------------------
 FUNCTION nWidthMMtext && {fr} Largeur d'un texte en mm papier (PM)
 LPARAMETERS ;
-	tcTexte,; && Texte
-	tcFont,; && {fr} Police
-	tnCorps,; && {fr} Corps en points (un point = 1/72 inch)
-	tcStyle,; && [N] {fr} style selon standard fontMetric : BINOQS–TU
-	tnChasse && [100%] {fr} Chasse en fraction ou en %, de 20 à 2000 %
+  tcTexte; && Texte
+, tcFont; && {fr} Police
+, tnCorps; && {fr} Corps en points (un point = 1/72 inch)
+, tcStyle; && [N] {fr} style selon standard fontMetric : BINOQS–TU
+, tnChasse && [100%] {fr} Chasse en fraction ou en %, de 20 à 2000 %
 
 LOCAL lnResult
 
@@ -3883,10 +3896,10 @@ PROCEDURE nWidthMMtext_Test
 * -------------------------------------------------------------
 FUNCTION nWidthPXText && {fr} Largeur d'un texte en pixels écran
 LPARAMETERS ;
-	tcTexte,; && Texte
-	tcFont,; && {fr} Police
-	tnCorps,; && {fr} Corps en points (un point = 1/72 inch)
-	tcStyle && [N] {fr} style selon standard fontMetric() (BINOQS–TU)
+  tcTexte; && Texte
+, tcFont; && {fr} Police
+, tnCorps; && {fr} Corps en points (un point = 1/72 inch)
+, tcStyle && [N] {fr} style selon standard fontMetric() (BINOQS–TU)
 
 LOCAL lnResult
 

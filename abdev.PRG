@@ -69,10 +69,10 @@ alProjectManager = .f.
 * -------------------------------------------------
 procedure init && {fr} Ouvre les fichiers de compte-rendu et vide la fenêtre VFP
 lparameters ;
-	tuTxtLog,; && [.T.] {fr} Nom, dossier ou adresse du fichier de compte-rendu texte, .T. : automatique
-	tuDBFlog,; && [.T.] {fr} Nom, dossier ou adresse du fichier de la table de compte-rendu, .T. : automatique
-	tlFooter,; && [.T.] {fr} Produire une ligne de totaux / moyennes en fin de CR
-	tlConsole && [.T.] {fr} Afficher le compte rendu à l'écran (s'il est visible)
+  tuTxtLog; && [.T.] {fr} Nom, dossier ou adresse du fichier de compte-rendu texte, .T. : automatique
+, tuDBFlog; && [.T.] {fr} Nom, dossier ou adresse du fichier de la table de compte-rendu, .T. : automatique
+, tlFooter; && [.T.] {fr} Produire une ligne de totaux / moyennes en fin de CR
+, tlConsole && [.T.] {fr} Afficher le compte rendu à l'écran (s'il est visible)
 
 local lnParms, luTxtLog, luDBFlog, llResult
 
@@ -111,8 +111,8 @@ return m.llResult
 * -------------------------------------------------
 procedure init_Logs && {fr} Ouvre les fichiers de compte-rendu
 lparameters ;
-	tuTxtLog, ; && [.T.] {fr} Nom ou adresse du fichier de compte-rendu texte, .T. pour automatique
-	tuDBFlog && [.T.] {fr} Nom ou adresse du fichier de la table de compte-rendu, .T. pour automatique
+  tuTxtLog ; && [.T.] {fr} Nom ou adresse du fichier de compte-rendu texte, .T. pour automatique
+, tuDBFlog && [.T.] {fr} Nom ou adresse du fichier de la table de compte-rendu, .T. pour automatique
 
 local lcLogAddr, lcResult, llResultTXT, llResultDBF
 
@@ -277,12 +277,12 @@ return m.lcResult
 * -------------------------------------------------
 procedure ColAdd && {fr} Ajoute une colonne à la fin de la table de compte-rendu
 lparameters ;
-	tcHeader,; && [''] {fr} Contenu de l'en-tête de la colonne
-	tnColWidth,; && [Header width || 10] {fr} Largeur de la colonne en foxels
-	tlNoLeftBar,;	 && [.F.] {fr} Ne pas délimiter les colonnes par une barre verticale
-	tcID,; && [tcHeader] {fr} Identifiant de la colonne
-	tlSum,; && [.F.] {fr} Si la donnée est numérique, en fin d'état : .T.: Sommer, .F.: Moyenner, .NULL.: ne rien faire
-	tcFormat && [''] {fr} Format pour Transform()
+  tcHeader; && [''] {fr} Contenu de l'en-tête de la colonne
+, tnColWidth; && [Header width || 10] {fr} Largeur de la colonne en foxels
+, tlNoLeftBar;	 && [.F.] {fr} Ne pas délimiter les colonnes par une barre verticale
+, tcID; && [tcHeader] {fr} Identifiant de la colonne
+, tlSum; && [.F.] {fr} Si la donnée est numérique, en fin d'état : .T.: Sommer, .F.: Moyenner, .NULL.: ne rien faire
+, tcFormat && [''] {fr} Format pour Transform()
 
 local lnResult && {fr} Numéro de la colonne ajoutée
 lnResult = 0
@@ -351,7 +351,7 @@ if not vartype(this.aaLog[1]) = 'L' && {fr} La première colonne n'est plus dispo
 * -------------------------------------------------
 procedure nCol && {fr} Numéro de colonne d'après son identifiant
 lparameters ;
-	tcColID && {fr} Identifiant de la colonne
+  tcColID && {fr} Identifiant de la colonne
 
 local lnResult && {fr} Numéro de la colonne
 lnResult = 0
@@ -387,11 +387,11 @@ return m.lnResult
 * -------------------------------------------------
 procedure CellFill && {fr} Remplit une cellule du compte-rendu
 lparameters ;
-	tuCol,; && {fr} Numéro ou ID de la colonne
-	tuContent,; && [''] {fr} Contenu à placer dans la colonne
-	tlExpand,; && [.F.] {fr} Si le contenu est plus large que la colonne, déborder sur les colonnes de droite
-	tlNoDisplay,; && [.F.] {fr} Différer l'affichage de la ligne (pour gagner du temps lorsque plusieurs modifications successives de la ligne)
-	tcFormat && [''] {fr} Format d'affichage
+  tuCol; && {fr} Numéro ou ID de la colonne
+, tuContent; && [''] {fr} Contenu à placer dans la colonne
+, tlExpand; && [.F.] {fr} Si le contenu est plus large que la colonne, déborder sur les colonnes de droite
+, tlNoDisplay; && [.F.] {fr} Différer l'affichage de la ligne (pour gagner du temps lorsque plusieurs modifications successives de la ligne)
+, tcFormat && [''] {fr} Format d'affichage
 
 local lnCols, lcType, lnCol, llResult
 
@@ -457,10 +457,10 @@ return m.llResult
 * -------------------------------------------------
 procedure cCellContent && {fr} Contenu d'une cellule du tableau de compte-rendu, ajusté à la taille de la cellule
 lparameters ;
-	tuContent,; && {fr} Contenu à placer dans la colonne
-	tnColWidth,; && {fr} Largeur de la colonne en foxels
-	tlExpand,; && [.F.] {fr} Si le contenu est plus large que la colonne, déborder sur les colonnes de droite
-	tcFormat && [''] {fr} Format de présentation
+  tuContent; && {fr} Contenu à placer dans la colonne
+, tnColWidth; && {fr} Largeur de la colonne en foxels
+, tlExpand; && [.F.] {fr} Si le contenu est plus large que la colonne, déborder sur les colonnes de droite
+, tcFormat && [''] {fr} Format de présentation
 tlExpand = lTrue(m.tlExpand)
 tcFormat = evl(m.tcFormat, '')
 
@@ -501,8 +501,8 @@ endif
 * -------------------------------------------------
 function cColJustified && {fr} Justifie le contenu d'une cellule dans la largeur de la colonne
 lparameters ;
-	tcContent, ; && {fr} Contenu à placer dans la colonne
-	tnColWidth && {fr} Largeur de la colonne en foxels
+  tcContent ; && {fr} Contenu à placer dans la colonne
+, tnColWidth && {fr} Largeur de la colonne en foxels
 
 local lcResult
 
@@ -543,8 +543,8 @@ return m.lnResult
 * -------------------------------------------------
 procedure LineAppend && {fr} Ajoute un contenu à la ligne courante et affiche le résultat
 lparameters ;
-	tuContent, ; && {fr} Contenu à placer dans la colonne
-	tnPosition && [fin de ligne] {fr} Position où le contenu est ajouté
+  tuContent ; && {fr} Contenu à placer dans la colonne
+, tnPosition && [fin de ligne] {fr} Position où le contenu est ajouté
 
 local lnLine, lnResult && {fr} Position où le contenu a été ajouté
 
@@ -635,8 +635,8 @@ endif
 * -------------------------------------------------
 procedure LineFeed && {fr} Vide la ligne courante pour en commencer une nouvelle
 lparameters ;
-	tlSepLine, ; && [.F.] {fr} Tracer une ligne séparatrice après la nouvelle ligne
-	tlDataLine && [.F.] {fr} La nouvelle ligne contient des données vivantes
+  tlSepLine ; && [.F.] {fr} Tracer une ligne séparatrice après la nouvelle ligne
+, tlDataLine && [.F.] {fr} La nouvelle ligne contient des données vivantes
 
 local lcLine, llResult
 
@@ -974,9 +974,9 @@ endwith
 * ========================================
 function cModuleInfo && {fr} Nom, Chemin ou Adresse d'un module d'après Sys(16)
 lparameters ;
-	tcSys16,; && {fr} Chaîne obtenue par Sys(16)
-	tcInfo,; && ['N'] {N}ame, {A}ddress, {P}ath, {O}bject, {S}ys16, {L}ignée, {F}ull lignée
-	tlCase && [.F.] {fr} Respecter la casse sur disque
+  tcSys16; && {fr} Chaîne obtenue par Sys(16)
+, tcInfo; && ['N'] {N}ame, {A}ddress, {P}ath, {O}bject, {S}ys16, {L}ignée, {F}ull lignée
+, tlCase && [.F.] {fr} Respecter la casse sur disque
 
 tcInfo = iif(vartype(m.tcInfo) = 'C' and not empty(m.tcInfo), upper(left(ltrim(m.tcInfo), 1)), 'N')
 tcInfo = iif(m.tcInfo $ 'NAPSOLF', m.tcInfo, 'N')
@@ -1064,8 +1064,8 @@ define class cusModuleInfo_Test as custom && {fr} Teste cModuleInfo() au sein d'
 * ========================================
 function cCallingModule && {fr} Nom du module appelant (programme, procédure, méthode, ...)
 lparameters ;
-	tcAddress,; && @ [''] {fr} Adresse du fichier où se trouve le module appelant
-	tnStackUp && [0] {fr} nombre de niveaux avant le module appelant
+  tcAddress; && @ [''] {fr} Adresse du fichier où se trouve le module appelant
+, tnStackUp && [0] {fr} nombre de niveaux avant le module appelant
 
 local lnLevelHere, lcSys16, lcResult
 
@@ -1086,12 +1086,12 @@ return m.lcResult
 * ------------------------------------
 procedure cCallingModule_Test
 
-local loUnitTest as abUnitTest of abDev.prg
-loUnitTest = newobject('abUnitTest', 'abDev.prg')
-
-local lcSys16, lcSys16module, lcSys16address;
+local loUnitTest as abUnitTest of abDev.prg;
+, lcSys16, lcSys16module, lcSys16address;
 , lcModule, lcAddress;
 , loTest as cCallingModule_Test3 of abDev.prg;
+
+loUnitTest = newobject('abUnitTest', 'abDev.prg')
 
 lcSys16 = sys(16)
 lcSys16module = upper(cModuleInfo(m.lcSys16, 'Name'))
@@ -1108,58 +1108,61 @@ lcModule = cCallingModule_Test2(@m.lcAddress, -1)
 ? upper(m.lcModule) == m.lcSys16module
 ? upper(m.lcAddress) == m.lcSys16address
 
-
 loTest = newobject('cCallingModule_Test3', 'abDev.prg')
-
 lcModule = loTest.Test(@m.lcAddress, -1)
 
 ? upper(m.lcModule) == m.lcSys16module
 ? upper(m.lcAddress) == m.lcSys16address
 
-* ------------------------------------
+	* ------------------------------------
 	procedure cCallingModule_Test1
 	lparameters tcAddress, tnStackUp
 	return cCallingModule(@m.tcAddress, m.tnStackUp)
 
-* ------------------------------------
+	* ------------------------------------
 	procedure cCallingModule_Test2
 	lparameters tcAddress, tnStackUp
 	return cCallingModule_Test1(@m.tcAddress, m.tnStackUp)
 
-* ------------------------------------
-define class cCallingModule_Test3 as relation
-	procedure Test
-	lparameters tcAddress, tnStackUp
-	return cCallingModule_Test1(@m.tcAddress, m.tnStackUp)
-	enddefine
+	* ------------------------------------
+	define class cCallingModule_Test3 as relation
+		procedure Test
+		lparameters tcAddress, tnStackUp
+		return cCallingModule_Test1(@m.tcAddress, m.tnStackUp)
+		enddefine
 
 * ========================================
 function cCallingModules && {fr} Modules appelants
 lparameters ;
-	tlCurrent,; && [.F.] {fr} Inclure le nom du module courant
-	tcInfo && [Name] 'Name', 'Address', 'Path', 'Object' ou 'Lignée'
+  tlCurrent; && [.F.] {fr} Inclure le nom du module courant
+, tcInfo; && [Name] 'Name', 'Address', 'Path', 'Object' ou 'Lignée'
+, tlLineNo; && [.F.] {en} Add Line number in the object source file
 
-tlCurrent = lTrue(m.tlCurrent)
+local lcResult;
+, liStack;
+, aa[1];
 
-local lnLevelHere, lnLevel, lcResult
-lcResult = ''
-
-* {fr} Si cCallingModules est appelé par un module appelé
-lnLevelHere = program(-1) && {fr} current program level
-if m.lnLevelHere > iif(m.tlCurrent, 1, 2)
-
-	for m.lnLevel = 1 to m.lnLevelHere - iif(m.tlCurrent, 1, 2)
-		lcResult = c2Words(m.lcResult, ' > ', textmerge("<<m.lnLevel>>.<<Chr(160)>><<cModuleInfo(Sys(16, m.lnLevel), m.tcInfo)>>"))
-	endfor
+tlLineNo = lTrue(m.tlLineNo)
+if m.tlLineNo
+	AStackInfo(aa) && [1- Call Stack Level, 2- Current program filename, 3- Module or Object name, 4- Module or Object Source filename, 5- Line number in the object source file, 6- Source line contents]
 endif
 
-return lower(m.lcResult)
+lcResult = ''
+for liStack = 1 to program(-1) - iif(lTrue(m.tlCurrent), 1, 2) && {fr} current program level in call stack
+	lcResult = m.lcResult + ' > ' + textmerge('';
+		+ "<<m.liStack>>_<<cModuleInfo(Sys(16, m.liStack), m.tcInfo)>>"; && <<Chr(160)>>
+		+ Iif(m.tlLineNo, " (<<Evl(m.aa[m.liStack, 5], 'N/A')>>)", "");
+		)
+endfor
+
+return Lower(Ltrim(m.lcResult, ' ', '>'))
+endfunc
 
 * ========================================
 function lCallingModule && {fr} Un module appelle le module appelant cette fonction
 lparameters ;
-	tcModule,; && {fr} Module: [class][.]procedure
-	tlModules && [.F.] && {fr} appel depuis lCallingModules()
+  tcModule; && {fr} Module: [class][.]procedure
+, tlModules; && [.F.] && {fr} appel depuis lCallingModules()
 
 local llResult as Boolean;
 , liLevelBase as integer;
@@ -1183,7 +1186,7 @@ if vartype(m.tcModule) == 'C' and not empty(m.tcModule)
 		for m.liLevel = m.liLevelHere - m.liLevelBase to 1 step -1
 			lcLevel = program(m.liLevel)
 
-			if m.tcModule == icase(;
+			if m.tcModule == ICase(;
 				m.llMethod,;
 					'.' + justext(m.lcLevel),;
 				m.llClassMethod,;
@@ -1204,8 +1207,8 @@ return m.llResult
 * ========================================
 function lCallingModules && {fr} Plusieurs modules appellent le module appelant cette fonction
 lparameters ;
-	tcModules,; && {fr} Modules
-	tlOR && [.F.] {fr} Au moins un module appelle le module
+  tcModules; && {fr} Modules
+, tlOR && [.F.] {fr} Au moins un module appelle le module
 tlOR = lTrue(m.tlOR)
 
 local laModules[1], lcModule, llResult
@@ -1322,8 +1325,8 @@ return m.loUnitTest.result()
 * ========================================
 function uDefault && {fr} Valeur par défaut d'un paramètre /!\ .T. non supporté
 lparameters ;
-	tuParm,; && {fr} Paramètre dont il faut régler la valeur par défaut
-	tuDefault && {fr} Valeur par défaut /!\ .T. non supporté
+  tuParm; && {fr} Paramètre dont il faut régler la valeur par défaut
+, tuDefault && {fr} Valeur par défaut /!\ .T. non supporté
 
 local lcType, luResult
 luResult = .null.
@@ -1633,9 +1636,9 @@ endif
 * ------------------------------------
 procedure ProjectFilesInclude && {fr} Change l'inclusion de fichiers dans le projet courant
 lparameters ;
-	tcFileMask,; && [*.*] {fr} Expression régulière indiquant le masque de fichier à traiter
-	tlInclude,; && [.T.] .T.: Inclure, .F.: Exclure, .NULL. : Inverser
-	tnResult && @ {fr} Nombre de fichiers traités
+  tcFileMask; && [*.*] {fr} Expression régulière indiquant le masque de fichier à traiter
+, tlInclude; && [.T.] .T.: Inclure, .F.: Exclure, .NULL. : Inverser
+, tnResult && @ {fr} Nombre de fichiers traités
 tnResult = 0
 
 local loProject, loProjectFiles, loRegExp as abRegExp of abTxt.prg, llResult
@@ -1682,8 +1685,8 @@ return m.llResult
 * ------------------------------------
 procedure ProjectFilesRemove && {fr} Ôte des fichiers du projet courant
 lparameters ;
-	tcFileMask,; && [*.*] {fr} Expression régulière indiquant le masque de fichier à traiter
-	tnResult && @ {fr} Nombre de fichiers traités
+  tcFileMask; && [*.*] {fr} Expression régulière indiquant le masque de fichier à traiter
+, tnResult && @ {fr} Nombre de fichiers traités
 tnResult = 0
 
 local loProject, loProjectFiles, loRegExp as abRegExp of abTxt.prg, llResult
@@ -1731,8 +1734,8 @@ return m.llResult
 *========================================
 function cVFPname	&& {fr} Nom valide pour VFP, avec longueur limitée si nécessaire
 lparameters ;
-	tcVFPname, ; && {fr} Nom VFP à valider
-	tnLength && [len(tcVFPname)] {fr} Longueur maximale du nom (par ex. 10 pour un nom de champ de table libre)
+  tcVFPname ; && {fr} Nom VFP à valider
+, tnLength && [len(tcVFPname)] {fr} Longueur maximale du nom (par ex. 10 pour un nom de champ de table libre)
 local lcResult
 lcResult = ''
 
@@ -1809,7 +1812,8 @@ return m.llResult
 function lProcLine && {fr} Ligne de code VFP définissant une procédure / fonction
 lparameters tcCodeLine && {fr} Ligne de code VFP
 
-local lcCodeLine, lcWord1, lcWord2, llResult
+local llResult;
+, lcCodeLine, lcWord1, lcWord2
 
 llResult = vartype(m.tcCodeLine) == 'C'
 assert m.llResult message cAssertMsg(textmerge([Invalid parameter type]))
@@ -1992,7 +1996,7 @@ endif
 * ====================
 function cCommentStripped && {fr} Code sans commentaires
 lparameters ;
-	tcInsts; && {fr} Instructions
+  tcInsts; && {fr} Instructions
 , tlInLineCommentKeep
 
 local laInst[1], lcInst, lcInst_, llCRLF;
@@ -2028,8 +2032,8 @@ return m.lcResult
 * ====================
 function cInLineCommentStripped && {fr} Instructions sans commentaire de ligne
 lparameters ;
-	tcInsts as string,; && {fr} Instructions
-	tcComment as string && @ {fr} Commentaires trouvés
+  tcInsts as string; && {fr} Instructions
+, tcComment as string && @ {fr} Commentaires trouvés
 
 tcComment = ''
 
@@ -2122,8 +2126,8 @@ return m.lnResult
 * =================================================
 function abON as abON of abDev.prg && {en} Saves and restores ON ...
 lparameters ;
-	tcSetting,; && {fr} ON ... to be set
-	tvValueNew && {fr} Value to set
+  tcSetting; && {fr} ON ... to be set
+, tvValueNew && {fr} Value to set
 
 return createobject('abON', m.tcSetting, m.tvValueNew)
 
@@ -2137,8 +2141,8 @@ vValueOld = .null.
 * ------------------------------------
 procedure init
 lparameters ;
-	tcSetting,; && {fr} ON ... to be set
-	tvValueNew && {fr} Value to set
+  tcSetting; && {fr} ON ... to be set
+, tvValueNew && {fr} Value to set
 
 local llResult
 
@@ -2169,12 +2173,12 @@ enddefine && {fr} CLASS abOn
 * =================================================
 function labSet as Boolean
 lparameters ;
-	toObj as abSet of abDev.prg,; && @ {en} abSet Object back
-	tcSetting,; && {en} Setting to perform
-	tvValueNew,; && {en} Value to set, .T. to toggle ON - OFF
-	tnSetting,; && {en} Setting number when appropriate for tcSetting, as of 2nd parameter of set()
-	tlChangeAlways,; && [.F.] {en} Change setting even if required value is current
-	tlSupported && [.F.] {en} assume setting is supported (optimization)
+  toObj as abSet of abDev.prg,; && @ {en} abSet Object back
+	tcSetting; && {en} Setting to perform
+, tvValueNew; && {en} Value to set, .T. to toggle ON - OFF
+, tnSetting; && {en} Setting number when appropriate for tcSetting, as of 2nd parameter of set()
+, tlChangeAlways; && [.F.] {en} Change setting even if required value is current
+, tlSupported && [.F.] {en} assume setting is supported (optimization)
 
 toObj = abSet(m.tcSetting, m.tvValueNew, m.tnSetting, m.tlChangeAlways, m.tlSupported)
 
@@ -2183,11 +2187,11 @@ return vartype(m.toObj) == 'O'
 * =================================================
 function abSet as abSet of abDev.prg
 lparameters ;
-	tcSetting,; && {en} Setting to perform
-	tvValueNew,; && {en} Value to set, .T. to toggle ON - OFF
-	tnSetting,; && {en} Setting number when appropriate for tcSetting, as of 2nd parameter of set()
-	tlChangeAlways,; && [.F.] {en} Change setting even if required value is current
-	tlSupported && [.F.] {en} assume setting is supported (optimization)
+  tcSetting; && {en} Setting to perform
+, tvValueNew; && {en} Value to set, .T. to toggle ON - OFF
+, tnSetting; && {en} Setting number when appropriate for tcSetting, as of 2nd parameter of set()
+, tlChangeAlways; && [.F.] {en} Change setting even if required value is current
+, tlSupported && [.F.] {en} assume setting is supported (optimization)
 
 return createobject('abSet', m.tcSetting, m.tvValueNew, m.tnSetting, m.tlChangeAlways, m.tlSupported)
 
@@ -2205,11 +2209,11 @@ lOnOff = .f.
 * ------------------------------------
 protected procedure init && {en} If valid and supported, performs required environment setting
 lparameters ;
-	tcSetting,; && {en} Setting to perform
-	tvValueNew,; && {en} Value to set, .T. to toggle ON <> OFF
-	tnSetting,; && {en} Setting number when appropriate for tcSetting, as of 2nd parameter of set(), eg Set("Alternate", 1) for FileName
-	tlChangeAlways,; && [.F.] {en} Change setting even if required value is current
-	tlSupported && [.F.] {en} assume setting is supported (optimization)
+  tcSetting; && {en} Setting to perform
+, tvValueNew; && {en} Value to set, .T. to toggle ON <> OFF
+, tnSetting; && {en} Setting number when appropriate for tcSetting, as of 2nd parameter of set(), eg Set("Alternate", 1) for FileName
+, tlChangeAlways; && [.F.] {en} Change setting even if required value is current
+, tlSupported && [.F.] {en} assume setting is supported (optimization)
 
 local success as Boolean;
 , lnSetting;
@@ -2310,8 +2314,8 @@ return !m.llError
 function set && {en} Saves current environment setting and changes to new value
 && {fr} public car appelé par awSets.Set()
 lparameters ;
-	tcSetting,; && {en} Setting to work on - upper case, trimmed
-	tvValueNew && {en} Value to set
+  tcSetting; && {en} Setting to work on - upper case, trimmed
+, tvValueNew && {en} Value to set
 
 local llResult as Boolean;
 , lcSetting as string
@@ -2348,8 +2352,8 @@ return m.llResult
 * ------------------------------------
 hidden function Set_ && {en} Changes setting to new value
 lparameters ;
-	tcSetting,; && {en} Setting to work on
-	tvValueNew && {en} Value to set
+  tcSetting; && {en} Setting to work on
+, tvValueNew && {en} Value to set
 
 local llResult as Boolean;
 , loResult as exception;
@@ -2398,8 +2402,8 @@ return m.llResult
 * ------------------------------------
 hidden function lSupported && {en} Requested environment setting is supported
 lparameters ;
-	tcSetting,; && {en} Setting to work on
-	lcParm2 && {en} Second parameter of set()
+  tcSetting; && {en} Setting to work on
+, lcParm2 && {en} Second parameter of set()
 
 tcSetting = upper(alltrim(m.tcSetting))
 lcParm2 = alltrim(m.lcParm2, ' ', ',')
@@ -2499,11 +2503,11 @@ enddefine
 * ------------------------------------
 procedure abSet1 && {fr} Règle un set pour test
 lparameters ;
-	tcSetting,; && {en} Setting to perform
-	tvValueNew,; && {en} Value to set, .T. to toggle ON - OFF
-	tnSetting,; && {en} Setting number when appropriate for tcSetting, as of 2nd parameter of set()
-	tlChangeAlways,; && [.T.] {en} Change setting even if required value is current
-	tlSupported && [.F.] {en} assume setting is supported
+  tcSetting; && {en} Setting to perform
+, tvValueNew; && {en} Value to set, .T. to toggle ON - OFF
+, tnSetting; && {en} Setting number when appropriate for tcSetting, as of 2nd parameter of set()
+, tlChangeAlways; && [.T.] {en} Change setting even if required value is current
+, tlSupported && [.F.] {en} assume setting is supported
 
 local loSet
 
@@ -2816,11 +2820,11 @@ return m.this.lInit && {fr} always keep this instruction and/or call dodefault()
 *---------------------------------------------------------------------------
 protected procedure set && {fr} Effectue un réglage d'environnement
 lparameters ;
-	tcSetting,; && {fr} Nom du SET à régler
-	tvValueNew,; && {fr} Valeur à régler
-	tnSetting,; && {en} Setting number when appropriate for tcSetting, as of 2nd parameter of set()
-	tlChangeAlways,; && [.T.] {en} Change setting even if required value is current
-	tlSupported && [this.lSupported] {en} assume abSet() supports this setting
+  tcSetting; && {fr} Nom du SET à régler
+, tvValueNew; && {fr} Valeur à régler
+, tnSetting; && {en} Setting number when appropriate for tcSetting, as of 2nd parameter of set()
+, tlChangeAlways; && [.T.] {en} Change setting even if required value is current
+, tlSupported && [this.lSupported] {en} assume abSet() supports this setting
 
 local success as Boolean;
 , loExact as abSet of abDev.prg;
@@ -3140,8 +3144,8 @@ return m.llResult
 * ========================================
 function cFuncCallParmAdd && {fr} Ajoute un paramètre à un appel de fonction
 lparameters ;
-	tcFuncCall,; && {fr} Chaîne contenant un appel de fonction
-	tcParm && {fr} Chaîne à ajouter comme paramètre (ex. '@MonParm') /!\ non vérifié
+  tcFuncCall; && {fr} Chaîne contenant un appel de fonction
+, tcParm && {fr} Chaîne à ajouter comme paramètre (ex. '@MonParm') /!\ non vérifié
 local llResult, lcResult
 lcResult = ''
 
@@ -3186,7 +3190,7 @@ if vartype(m.toException) == 'O' and type('m.toException.BaseClass') == 'C' and 
 
 	with m.toException as exception
 
-		lcResult = cLitteral(.linecontents)
+		lcResult = cLitteral(.lineContents)
 		lcResult = iif(_vfp.startmode = 0;
 			, textmerge(icase(;
 					cLangUser() = 'fr',	[ (<<Iif('...' $ .LineContents, 'code source N/D', m.lcResult)>>)],; && copy-paste this line to add another language support
@@ -3194,7 +3198,7 @@ if vartype(m.toException) == 'O' and type('m.toException.BaseClass') == 'C' and 
 				));
 			, '';
 			)
-		luUserValue = iif(vartype(.uservalue) == 'O' and proper(.uservalue.baseclass) == 'Exception', cException(.uservalue), .uservalue)
+		luUserValue = iif(loClass(.userValue, 'Exception'), cException(.userValue), .userValue)
 		lcResult = textmerge(icase(;
 			cLangUser() = 'fr',	[Méthode ou procédure <<.Procedure>>() : erreur n° <<.ErrorNo>> ("<<c2Words(.Message,' - ', m.luUserValue)>>") à la ligne n° <<.LineNo>><<m.lcResult>>],; && copy-paste this line to add another language support
 													[Method or procedure <<.Procedure>>(): error #<<.ErrorNo>> ("<<c2Words(.Message,' - ', m.luUserValue)>>") at code line #<<.LineNo>><<m.lcResult>>]; && default: English
@@ -3229,8 +3233,8 @@ return loUnitTest.result()
 * ---------------------------------------------------
 procedure FilesCompile && {fr} Compile des fichiers d'après un squelette
 lparameters ;
-	tcFilesSkeleton,; && {fr} Squelette d'adresse de fichiers
-	tcFilesFailed && @ [''] {fr} Fichiers dont la compilation a échoué
+  tcFilesSkeleton; && {fr} Squelette d'adresse de fichiers
+, tcFilesFailed && @ [''] {fr} Fichiers dont la compilation a échoué
 tcFilesFailed = ''
 
 local lnFiles, laFiles[1], llResult, lnResult && {fr} Nombre de fichiers compilés avec succès
@@ -3288,10 +3292,10 @@ return m.lnResult
 * ---------------------------------------------------
 procedure FileCompile && {fr} Compile un fichier
 lparameters ;
-	tcFileAddr,; && {fr} Adresse du fichier
-	tcResult,; && @ [''] {fr} Résultat de la compilation
-	tcClause,; && [''] {fr} Clauses de compilation (pour *.prg)
-	tnResult && @ [0] {fr} nombre d'erreurs de compilation
+  tcFileAddr; && {fr} Adresse du fichier
+, tcResult; && @ [''] {fr} Résultat de la compilation
+, tcClause; && [''] {fr} Clauses de compilation (pour *.prg)
+, tnResult && @ [0] {fr} nombre d'erreurs de compilation
 tcResult = ''
 tcClause = evl(m.tcClause, '')
 tnResult = 0
@@ -3400,12 +3404,12 @@ return m.llResult
 * ========================================
 procedure ProcEmpty && {fr} Sert à mesurer le temps moyen d'appel d'une procédure
 lparameters ;
-	Parm1,; && {fr} Bidon
-	Parm2,; && {fr} Bidon
-	Parm3,; && {fr} Bidon
-	Parm4,; && {fr} Bidon
-	Parm5,; && {fr} Bidon
-	Parm6 && {fr} Bidon
+  Parm1; && {fr} Bidon
+, Parm2; && {fr} Bidon
+, Parm3; && {fr} Bidon
+, Parm4; && {fr} Bidon
+, Parm5; && {fr} Bidon
+, Parm6 && {fr} Bidon
 local llResult
 llResult = .t.
 uDefault(m.Parm1, 'bidon')
@@ -3462,8 +3466,8 @@ lOpened = .f. && {fr} Le projet a été ouvert - .NULL. le projet a été créé
 * ----------------
 protected procedure init
 lparameters ;
-	tcPJX,; && {fr} Adresse du projet
-	tcResult && @ {fr} Résultat en cas d'échec
+  tcPJX; && {fr} Adresse du projet
+, tcResult && @ {fr} Résultat en cas d'échec
 
 local llOpened, llResult
 
@@ -3504,9 +3508,9 @@ return m.success
 * ========================================
 function oProject && {fr} Référence à un projet (ouvert ou créé)
 lparameters ;
-	tcPJX,; && {fr} Adresse du projet
-	result,; && @ {fr} Résultat (cumulatif)
-	tlOpened && @ [.F.] {fr} Le projet a été ouvert - .NULL. le projet a été créé
+  tcPJX; && {fr} Adresse du projet
+, result; && @ {fr} Résultat (cumulatif)
+, tlOpened && @ [.F.] {fr} Le projet a été ouvert - .NULL. le projet a été créé
 
 tlOpened = .f.
 
@@ -3546,6 +3550,7 @@ if vartype(m.tcPJX) == 'C'
 			try
 				ignoreAll() && modify command abDev
 				modify project (m.tcPJX) save nowait noshow noprojecthook
+				keyboard '' clear
 				loResult = _vfp.activeproject
 				tlOpened = iif(isNull(m.tlOpened), m.tlOpened, .t.)
 			catch to loException when m.loException.ErrorNo = 1705 && {en} File Access is denied
@@ -3568,13 +3573,16 @@ return m.loResult
 
 * ========================================
 procedure IgnoreAll && {fr} sélectionne automatiquement l'option 'tout' dans un dialogue tel que ASSERT
-&& {fr} contribution by Bob Pierce during FoxInCloud training '15 at Phoenix AZ
+&& {en} contribution by Bob Pierce during FoxInCloud training '15 at Phoenix AZ
+
+&& 2016-02-08 thn -- {en} in interactive scenario, always clear the keyboard buffer when no longer useful, eg:
+&& keyboard '' clear
 
 local lcVersion3 as String
 
 lcVersion3 = Version(3)
 
-keyboard '';
+keyboard ''; && {en} You can fill the keyboard buffer with up to 128 characters. Once the keyboard buffer is full, additional characters are ignored.
 	+ '{alt+';
 	+ ICase(;
 		m.lcVersion3 == '33',	't',; && {fr} French - 'tout'
@@ -3585,6 +3593,20 @@ keyboard '';
 		+ '}'
 
 endproc
+
+#if .F.
+KEYBOARD "TEST KB BUFFER" CLEAR
+cReadKBB = ''
+DO WHILE .T.
+	nChar = INKEY()
+	IF nChar <> 0
+		cReadKBB = m.cReadKBB + CHR(nChar)
+	else
+		exit
+	endif
+enddo
+? cReadKBB 
+#endif
 
 * ========================================
 procedure ProjectClose && {fr} Ferme un projet
@@ -3769,8 +3791,8 @@ enddefine && {fr} CLASS abISX
 * ------------------------------------
 function uValue && {fr} Valeur convertie selon le varType spécifié (AKA coercition de type)
 lparameters ;
-	tuValue,; && {fr} Valeur source
- 	tcTypeDest && {fr} Type de valeur attendu selon codification de la fonction VFP varType()
+  tuValue; && {fr} Valeur source
+, 	tcTypeDest && {fr} Type de valeur attendu selon codification de la fonction VFP varType()
 
 && /!\ pourrait être simplifiée et optimisée avec Cast()
 
@@ -3974,10 +3996,10 @@ define class uValue_Test as abUnitTest of abDev.prg
 * =================================================
 function luEqual && {fr} Deux valeurs sont égales en tenant compte des .NULL.
 lparameters ;
-	tu1,; && {fr} Valeur 1, par référence si Array
-	tu2,; && {fr} Valeur 2, par référence si Array
-	tlStrict,; && [.F.] {fr} comparaison de chaînes stricte
-	tlCaseIgnore && [.F.] {fr} ignorer la casse
+  tu1; && {fr} Valeur 1, par référence si Array
+, tu2; && {fr} Valeur 2, par référence si Array
+, tlStrict; && [.F.] {fr} comparaison de chaînes stricte
+, tlCaseIgnore && [.F.] {fr} ignorer la casse
 tlStrict = lTrue(m.tlStrict)
 tlCaseIgnore = lTrue(m.tlCaseIgnore)
 
@@ -4004,8 +4026,8 @@ return m.lcType1 == m.lcType2;
 * --------------------
 function luEqual_Object	&& {fr} Deux objets sont identiques
 lparameters ;
-	tu1,; && {fr} objet 1
-	tu2 && {fr} objet 2
+  tu1; && {fr} objet 1
+, tu2 && {fr} objet 2
 
 local laProp[1], lcProp, liItem, la1[1], la2[1], llResult
 
@@ -4111,9 +4133,9 @@ return cListOfArray(@m.laResult, CRLF)
 * =================================================
 function cMBcmdCaption && {fr} Label d'un bouton d'une messageBox() d'après son type
 lparameters ;
-	tiType,; && [1] {fr} Type selon doc messageBox()
-	tcLang,; && [cLangUser()] {fr} Langue
-	tlHotKey && [.F.] {fr} souligner la lettre de raccourci
+  tiType; && [1] {fr} Type selon doc messageBox()
+, tcLang; && [cLangUser()] {fr} Langue
+, tlHotKey && [.F.] {fr} souligner la lettre de raccourci
 tiType = int(evl(nvl(m.tiType, 0), 1)) && {fr} OK par défaut
 tcLang = cLangUser(m.tcLang)
 
@@ -4150,10 +4172,10 @@ return iif(lTrue(m.tlHotKey), '\<', '');
 * =================================================
 function nDialogBoxTypeParms && {fr} Composantes du paramètre 'nDialogBoxType' d'une messageBox()
 lparameters ;
-	nDialogBoxType,; && {fr} cf. messageBox()
-	tnButtons,; && @ (0-5) boutons à afficher
-	tnIcon,; && @ (16,32,48 ou 64) icône à afficher
-	tnDefault && @ (0,256,512) Bouton actif par défaut
+  nDialogBoxType; && {fr} cf. messageBox()
+, tnButtons; && @ (0-5) boutons à afficher
+, tnIcon; && @ (16,32,48 ou 64) icône à afficher
+, tnDefault && @ (0,256,512) Bouton actif par défaut
 
 tnButtons = bitand(m.nDialogBoxType, bitset(bitset(bitset(0, 0),1),2))
 tnButtons = iif(between(m.tnButtons, 0, 5), m.tnButtons, 0)
@@ -4172,10 +4194,10 @@ procedure nDialogBoxTypeParms_Test && {fr} Teste nDialogBoxTypeParms()
 local loUnitTest as abUnitTest of abDev.prg
 loUnitTest = newobject('abUnitTest', 'abDev.prg')
 
-local lnDialogBoxType,; && {fr} cf. messageBox()
-	lnButtons,; && @ (0-5) boutons à afficher
-	lnIcon,; && @ (16,32,48 ou 64) icône à afficher
-	lnDefault && @ (0,256,512) Bouton actif par défaut
+local lnDialogBoxType; && {fr} cf. messageBox()
+, lnButtons; && @ (0-5) boutons à afficher
+, lnIcon; && @ (16,32,48 ou 64) icône à afficher
+, lnDefault && @ (0,256,512) Bouton actif par défaut
 
 lnDialogBoxType = 5
 loUnitTest.Test(m.lnDialogBoxType, m.lnDialogBoxType, @m.lnButtons, @m.lnIcon, @m.lnDefault)
@@ -4335,48 +4357,48 @@ endproc
 function cLangUser && {fr} Code langue de l'utilisateur courant
 lparameters tuLocale && @ [.F.] {fr} Code langue avec locale (genre 'fr-fr') ou langue forcée
 
-local lcType, llForce, loShell as wScript.shell, lcLang, lcResult
+local lcResult as String;
+, lcType;
+, llForce;
+, loShell as wScript.shell
 
 lcType = vartype(m.tuLocale)
-
 llForce = m.lcType == 'C' and not empty(m.tuLocale)
 
-if .t.;
- and not m.llForce;
+do case
+case !m.llForce;
  and type('_Screen.cLangUser') == 'C';
- and not empty(_screen.cLangUser)
+ and !empty(_screen.cLangUser)
 
 	tuLocale = _screen.cLangUser
-	return _screen.cLangUser
+	return m.tuLocale
 
-else
+case !m.llForce
 
-	if m.llForce
+	declare integer GetUserDefaultUILanguage in Win32API
+	loShell = createobject('wScript.Shell')
 
-		lcResult = alltrim(m.tuLocale)
+	lcResult = alltrim(getwordnum('';
+		+ loShell.RegRead("HKLM\Software\Classes\MIME\Database\RFC1766\";
+		+ right(transform(GetUserDefaultUILanguage(), '@0'), 4));
+		, 1, ';'))
 
-	else
+	lcResult = iif(m.lcType == 'L' and m.tuLocale;
+		, m.lcResult + iif('-' $ m.lcResult, '', '-' + m.lcResult);
+		, left(m.lcResult, 2);
+		)
 
-		declare integer GetUserDefaultUILanguage in Win32API
-		loShell = createobject('wScript.Shell')
+otherwise
 
-		lcResult = alltrim(getwordnum('';
-			+ loShell.RegRead("HKLM\Software\Classes\MIME\Database\RFC1766\";
-			+ right(transform(GetUserDefaultUILanguage(), '@0'), 4));
-			, 1, ';'))
+	lcResult = alltrim(m.tuLocale)
 
-		lcResult = iif(m.lcType == 'L' and m.tuLocale;
-			, m.lcResult + iif('-' $ m.lcResult, '', '-' + m.lcResult);
-			, left(m.lcResult, 2);
-			)
+endcase
 
-	endif
+store lower(m.lcResult) to lcResult, tuLocale
+addproperty(_screen, 'cLangUser', m.lcResult)
 
-	store lower(m.lcResult) to lcResult, tuLocale
-	addproperty(_screen, 'cLangUser', m.lcResult)
-
-	return m.lcResult
-endif
+return m.lcResult
+endfunc
 
 * =====================================================
 procedure abUnitTests && {fr} Teste les modules (abUnitTest) du programme appelant
@@ -4436,8 +4458,8 @@ return m.success
 * =============================================
 function abUnitTest && {fr} Objet abUnitTest
 lparameters ;
-	tcModule,; && [Module appelant sans le suffixe '_test'] {fr} Nom du module à tester
-	tcAddress && [Adresse du code source du module appelant] {fr} Adresse contenant le répertoire où créer le Compte-rendu de test
+  tcModule; && [Module appelant sans le suffixe '_test'] {fr} Nom du module à tester
+, tcAddress && [Adresse du code source du module appelant] {fr} Adresse contenant le répertoire où créer le Compte-rendu de test
 return createobject('abUnitTest', m.tcModule, m.tcAddress)
 endfunc
 
@@ -4452,22 +4474,22 @@ nTest = 0 && {fr} Nombre de tests réalisés
 lResult = .t. && {fr} Résultat des testes (.T. tant qu'aucun test n'est réalisé)
 
 hidden ;
-	cModule,; && {fr} Nom du module à tester
-	cAddress,; && {fr} Adresse du fichier contenant le module à tester
-	oObject,; && {fr} Référence à l'objet si le module est une méthode
-	lResult,; && {fr} Résultat des tests ; .T. si tous réussis
-	lResultOut,; && {fr} Les résultats des tests ont été sortis
-	cResultAddr,; && {fr} Adresse du fichier de résultats
-	lCoverage,; && {fr} Enclenche le Coverage lors du test
-	cCoverageAddr,; && {fr} Adresse du Fichier de Coverage
-	nTest,; && {fr} Nombre de tests réalisés sur le module
-	aTest[1,1] && {fr} Résultats des tests
+	cModule; && {fr} Nom du module à tester
+, cAddress; && {fr} Adresse du fichier contenant le module à tester
+, oObject; && {fr} Référence à l'objet si le module est une méthode
+, lResult; && {fr} Résultat des tests ; .T. si tous réussis
+, lResultOut; && {fr} Les résultats des tests ont été sortis
+, cResultAddr; && {fr} Adresse du fichier de résultats
+, lCoverage; && {fr} Enclenche le Coverage lors du test
+, cCoverageAddr; && {fr} Adresse du Fichier de Coverage
+, nTest; && {fr} Nombre de tests réalisés sur le module
+, aTest[1,1] && {fr} Résultats des tests
 
 * -----------------------------------
 procedure init
 lparameters ;
-	tcModule,; && [Module appelant sans le suffixe '_test'] {fr} Nom du module à tester
-	tcAddress && [Adresse du code source du module appelant] {fr} Adresse contenant le répertoire où créer le Compte-rendu de test
+  tcModule; && [Module appelant sans le suffixe '_test'] {fr} Nom du module à tester
+, tcAddress && [Adresse du code source du module appelant] {fr} Adresse contenant le répertoire où créer le Compte-rendu de test
 
 set sysformats on
 set multilocks on
@@ -4519,7 +4541,7 @@ return m.llResult
 * -----------------------------------
 procedure EnvSet && {fr} Règle l'environnement de la session de données privée avant le(s) test(s)
 lparameters ;
-	tcEnvCommand && {fr} Commande d'environnement
+  tcEnvCommand && {fr} Commande d'environnement
 
 if vartype(m.tcEnvCommand) == 'C'
 	&tcEnvCommand
@@ -4528,8 +4550,8 @@ endif
 * -----------------------------------
 procedure ModuleSet && {fr} Définit le nom et l'adresse du module à tester
 lparameters ;
-	tcModule,; && [Module appelant sans le suffixe '_test'] {fr} Nom du module à tester
-	tcAddress && [Adresse du code source du module] {fr} Répertoire où créer le fichier de CR de test
+  tcModule; && [Module appelant sans le suffixe '_test'] {fr} Nom du module à tester
+, tcAddress && [Adresse du code source du module] {fr} Répertoire où créer le fichier de CR de test
 local llResult
 
 * {fr} Si le module est spécifié correctement
@@ -4570,7 +4592,7 @@ return m.llResult
 * -----------------------------------
 hidden function ModuleSet_nError && {fr} N° d'erreur rencontrée lors de la tentative d'exécution du module
 lparameters ;
-	tcProc && {fr} Nom de la procédure où retourner en cas d'erreur
+  tcProc && {fr} Nom de la procédure où retourner en cas d'erreur
 
 return && {fr} TO ModuleSet
 
@@ -4608,8 +4630,8 @@ delete file (m.this.cCoverageAddr)
 * -----------------------------------
 procedure Test && {fr} Teste le module
 lparameters ;
-	tuExpected,; && @ {fr} Résultat attendu retourné par le module testé - .NULL. : résultat attendu inconnu
-	tuParm01,tuParm02,tuParm03,tuParm04,tuParm05,tuParm06,tuParm07,tuParm08,tuParm09,tuParm10,tuParm11,tuParm12,tuParm13,tuParm14 && @ {fr} paramètres passés au module testé
+  tuExpected; && @ {fr} Résultat attendu retourné par le module testé - .NULL. : résultat attendu inconnu
+, tuParm01,tuParm02,tuParm03,tuParm04,tuParm05,tuParm06,tuParm07,tuParm08,tuParm09,tuParm10,tuParm11,tuParm12,tuParm13,tuParm14 && @ {fr} paramètres passés au module testé
 
 local luResult as Variant; && {fr} résultat du test
 , lnParm;
@@ -4688,8 +4710,8 @@ return m.luResult
 * -----------------------------------
 procedure assert && {fr} Teste une valeur (par exemple élément d'un tableau résultat)
 lparameters ;
-	tuExpected,; && @ {fr} Résultat attendu
-	tuValue && @ {fr} Valeur à tester
+  tuExpected; && @ {fr} Résultat attendu
+, tuValue && @ {fr} Valeur à tester
 
 if pcount() >= 2
 
@@ -4722,7 +4744,7 @@ return 'tuParm' + padl(m.tiParm, 2, '0')
 * -----------------------------------
 hidden procedure Test_cParms && {fr} Liste de paramètres à passer au module testé
 lparameters ;
-	tnParms && {fr} Nombre de paramètres passés à this.test()
+  tnParms && {fr} Nombre de paramètres passés à this.test()
 
 local lcResult && {fr} Liste de paramètres
 lcResult = ''
@@ -4746,11 +4768,11 @@ return m.lcResult
 * -----------------------------------
 hidden procedure Test_Exec && {fr} Exécute le test du module
 lparameters ;
-	tcParms,; && {fr} Chaîne de paramètres à passer au module testé
-	tnElapsed,; && @ {fr} Temps d'exécution en millisecondes
-	taStatus1,; && @ {fr} Environnement avant exécution du test
-	taStatus2,; && @ {fr} Environnement après exécution du test
-	tuParm01,tuParm02,tuParm03,tuParm04,tuParm05,tuParm06,tuParm07,tuParm08,tuParm09,tuParm10,tuParm11,tuParm12,tuParm13,tuParm14
+  tcParms; && {fr} Chaîne de paramètres à passer au module testé
+, tnElapsed; && @ {fr} Temps d'exécution en millisecondes
+, taStatus1; && @ {fr} Environnement avant exécution du test
+, taStatus2; && @ {fr} Environnement après exécution du test
+, tuParm01,tuParm02,tuParm03,tuParm04,tuParm05,tuParm06,tuParm07,tuParm08,tuParm09,tuParm10,tuParm11,tuParm12,tuParm13,tuParm14
 
 external array taStatus1, taStatus2
 
@@ -5251,9 +5273,9 @@ return m.lcResult
 * -----------------------------------
 hidden function lStatus && {fr} Compare deux environnements VFP
 lparameters ;
-	taStatus1,; && @ {fr} Tableau de statut 1 (créé par this.aStatus())
-	taStatus2,; && @ {fr} Tableau de statut 2 (créé par this.aStatus())
-	tcModifs && @ {fr} Éléments d'environnement ayant évolué (si m.llResult = .F.)
+  taStatus1; && @ {fr} Tableau de statut 1 (créé par this.aStatus())
+, taStatus2; && @ {fr} Tableau de statut 2 (créé par this.aStatus())
+, tcModifs && @ {fr} Éléments d'environnement ayant évolué (si m.llResult = .F.)
 
 local llResult && {fr} L'environnement VFP est identique
 llResult = .null.
@@ -5339,10 +5361,10 @@ return m.luResult
 *------------------------------------
 function Fox2Pix && {fr} foxels to pixels && {fr} courtesy Sergey Berezniker http://www.berezniker.com/content/pages/visual-foxpro/pixels-and-foxels
 lparameters ;
-	tnFoxels,; && {fr} foxels to convert
-	tlVertical,; && {fr} vertical coordinates
-	tcFontName,; && [current form's] {fr} font name
-	tnFontSize && [current form's] {fr} font size
+  tnFoxels; && {fr} foxels to convert
+, tlVertical; && {fr} vertical coordinates
+, tcFontName; && [current form's] {fr} font name
+, tnFontSize && [current form's] {fr} font size
 
 return iif(pcount() >= 4;
 	, m.tnFoxels * fontmetric(iif(m.tlVertical, 1, 6), m.tcFontName, m.tnFontSize);
@@ -5352,10 +5374,10 @@ return iif(pcount() >= 4;
 *------------------------------------
 function Pix2Fox && {fr} pixels to foxels && {fr} courtesy Sergey Berezniker http://www.berezniker.com/content/pages/visual-foxpro/pixels-and-foxels
 lparameters ;
-	tnPixels,; && {fr} pixels to convert
-	tlVertical,; && {fr} vertical coordinates
-	tcFontName,; && [current form's] {fr} font name
-	tnFontSize && [current form's] {fr} font size
+  tnPixels; && {fr} pixels to convert
+, tlVertical; && {fr} vertical coordinates
+, tcFontName; && [current form's] {fr} font name
+, tnFontSize && [current form's] {fr} font size
 
 local lnResult, llResult
 
@@ -5422,10 +5444,10 @@ return m.luResult
 * ==============================
 function cIndented && {fr} Texte indenté
 lparameters ;
-	tcCode,; && {fr} Texte à indenter
-	tcIndent,; && [tab] {fr} Caractère(s) d'indentation
-	tlEmptyDel,; && [.F.] {fr} Supprimer les lignes vides
-	tcCharEOL && [''] {fr} Caractère de fin de ligne
+  tcCode; && {fr} Texte à indenter
+, tcIndent; && [tab] {fr} Caractère(s) d'indentation
+, tlEmptyDel; && [.F.] {fr} Supprimer les lignes vides
+, tcCharEOL && [''] {fr} Caractère de fin de ligne
 
 tcCode = iif(vartype(m.tcCode) == 'C', m.tcCode, '')
 tcIndent = iif(vartype(m.tcIndent) == 'C' and lenc(m.tcIndent) > 0, m.tcIndent, chr(9)) && {fr} Evl() ne marche pas sur space() et tab
@@ -5467,9 +5489,9 @@ return ltrim(icase(;
 * ==============================
 function cCommented && {fr} Instruction(s) commentée(s)
 lparameters ;
-	tcCode,; && {fr} Instruction(s)
-	tcCom,; && [* ] {fr} caractère de commentaire
-	tlEmptyDel && [.F.] {fr} Supprimer les lignes vides
+  tcCode; && {fr} Instruction(s)
+, tcCom; && [* ] {fr} caractère de commentaire
+, tlEmptyDel && [.F.] {fr} Supprimer les lignes vides
 tcCom = evl(m.tcCom, '* ')
 tlEmptyDel = lTrue(m.tlEmptyDel)
 
@@ -5535,9 +5557,9 @@ return setProcedure(m.tcSetProcedure, .t.)
 * =============================================
 procedure setProcedure && {en} Restores previous Set("Procedure")
 lparameters ;
-	tcSetPro_,; && {fr} Set("Procedure") antérieur
-	tlCheck,; && [.F.] {fr} Vérifier si Set("Procedure") antérieur est dans Set("Procedure") courant
-	tlAdditive && [.F.] {fr} Ajouter tcSetPro_ à Set("Procedure") courant
+  tcSetPro_; && {fr} Set("Procedure") antérieur
+, tlCheck; && [.F.] {fr} Vérifier si Set("Procedure") antérieur est dans Set("Procedure") courant
+, tlAdditive && [.F.] {fr} Ajouter tcSetPro_ à Set("Procedure") courant
 
 tlCheck = lTrue(m.tlCheck)
 tlAdditive = lTrue(m.tlAdditive)
@@ -5860,8 +5882,8 @@ endproc
 * ========================================
 procedure ClassLibAdd && {fr} Ajoute un fichier vcx à Set("ClassLib") s'il n'y est déjà
 lparameters ;
-	tcVCX,; && {fr} fichier(s) vcx
-	tlRemove && [.F.] {fr} RELEASE CLASSLIB
+  tcVCX; && {fr} fichier(s) vcx
+, tlRemove && [.F.] {fr} RELEASE CLASSLIB
 
 local laVCX[1], lcVCX, llSet, lcAlias, llResult && {fr} le fichier a été ajouté ou retiré
 
@@ -7102,7 +7124,7 @@ endproc
 
 * -----------------
 function caError && {fr} version textuelle plus compréhensible de aError()
-lparameters errNum && @ {en} error number
+lparameters errNum && @ {en} [0] error number out
 
 local result as String;
 , nError as Integer;
@@ -7152,5 +7174,53 @@ otherwise
 	
 endcase
 return m.result
+endfunc
 
+* -----------------
+function CPUutilisation as Number && {fr} Pourcentage d'utilisation du CPU
+&& http://msdn2.microsoft.com/en-us/library/aa394597.aspx
+&& http://www.atoutfox.org/articles.asp?ACTION=FCONSULTER&ID=0000000428
+&& (c) Anatole Baudoin
+local result, oWmi, oProcessor, nN1,nD1, nN2,nD2
+result = .null.
+try && 2016-01-25 thn -- {en} added to prevent bugs when "file can't be opened"
+	oWmi = GetObject("winmgmts:{impersonationLevel=impersonate}!\\.\root\cimv2")
+	oProcessor = m.oWmi.Get("Win32_PerfRawData_PerfOS_Processor.Name='_Total'")
+	if Vartype(m.oProcessor) == 'O' && 2016-01-15 thn -- {en} protection
+		nN1 = Val(m.oProcessor.PercentProcessorTime)
+		nD1 = Val(m.oProcessor.TimeStamp_Sys100NS)
+		declare Sleep in kernel32 integer dwMilliseconds
+		Sleep(100)
+		oProcessor = m.oWmi.Get("Win32_PerfRawData_PerfOS_Processor.Name='_Total'")
+		nN2 = Val(m.oProcessor.PercentProcessorTime)
+		nD2 = Val(m.oProcessor.TimeStamp_Sys100NS)
+		result = Max(0, (1 - ((m.nN2 - m.nN1) / (m.nD2 - m.nD1))) * 100)
+	endif
+catch
+	result = .null.
+endtry
+return m.result
+endfunc
+
+* -----------------
+function cInst1Line as String && {fr} Instruction sur une seule ligne (par ex. pour macro-substitution)
+lparameters cInst
+return cRepCharDel(Chrtran(cInLineCommentStripped(m.cInst), ';'+Chr(13)+Chr(10), Space(3)))
+endfunc
+
+* -----------------
+function lIP as Boolean && {fr} a string represents an Internet Protocol address
+lparameters cIP
+local abRegExp as abRegExp of abTxt.prg
+return ga_Type_IsChar(m.cIP, .T.);
+ and varSet(@m.abRegExp, abRegExp());
+ and loClass(m.abRegExp, 'abRegExp');
+ and m.abRegExp.setup("(?:\d{1,3}\.){3}\d{1,3}", .F., .F., .F.);
+ and m.abRegExp.test(m.cIP)
+endfunc
+
+* -----------------
+function DwordOfInt && DWORD from an integer
+lparameters nValue && integer (unsigned)
+return Chr(Mod(m.nValue,256)) + Chr(Int(m.nValue/256)) && binary string
 endfunc

@@ -46,8 +46,8 @@ return m.lcResult
 * ========================================
 function JustField && {fr} Champ et alias d'une chaîne de type "[alias.]field" && {fr} note: JustExt("field") retourne ""
 lparameters ;
-	tcChain,; && {fr} Chaîne présumée de type 'alias.field' ou 'field'
-	tcAlias && @ {fr} Alias en retour
+  tcChain; && {fr} Chaîne présumée de type 'alias.field' ou 'field'
+, tcAlias && @ {fr} Alias en retour
 
 local llResult, lcResult && {fr} Field
 store '' to tcAlias, lcResult
@@ -80,8 +80,8 @@ return m.lcResult
 function JustField && {fr} Champ et alias d'une chaîne de type "[alias.]field"
 && ? JustExt("field") && ""
 lparameters ;
-	tcChain,; && {fr} Chaîne présumée de type 'alias.field' ou 'field'
-	tcAlias && @ [''] {fr} Alias en retour
+  tcChain; && {fr} Chaîne présumée de type 'alias.field' ou 'field'
+, tcAlias && @ [''] {fr} Alias en retour
 
 tcAlias = '' && {fr} important
 
@@ -134,8 +134,8 @@ return loTest.Result()
 * ========================================
 function JustTable && {fr} Table dans une chaîne de type "Base de données!table"
 lparameters ;
-	tcChain,; && {fr} Chaîne présumée de type "Base de données!table"
-	tcDBC && @ {fr} Base de données en retour
+  tcChain; && {fr} Chaîne présumée de type "Base de données!table"
+, tcDBC && @ {fr} Base de données en retour
 
 local lnExclam, llResult, lcResult && {fr} Table ou toute la chaîne source si elle ne comporte aucun '!'
 store '' to lcResult, tcDBC
@@ -170,9 +170,9 @@ return loTest.Result()
 * =================================================
 function abSelect && {fr} Change la zone de travail Select() et rétablit à destruction
 lparameters ;
-	tuSelect,; && [0] {fr} Zone de travail / alias à sélectionner, ou table à ouvrir et sélectionner
-	tlKeepOpened,; && [.F.] {fr} Si la table est ouverte, laisser ouverte en sortie
-	tcError && @ [''] {fr} Erreur éventuelle
+  tuSelect; && [0] {fr} Zone de travail / alias à sélectionner, ou table à ouvrir et sélectionner
+, tlKeepOpened; && [.F.] {fr} Si la table est ouverte, laisser ouverte en sortie
+, tcError && @ [''] {fr} Erreur éventuelle
 
 return createobject('abSelect', m.tuSelect, m.tlKeepOpened, @m.tcError)
 
@@ -180,11 +180,11 @@ return createobject('abSelect', m.tuSelect, m.tlKeepOpened, @m.tcError)
 define class abSelect as GA_LIGHTWEIGHT_CLASS && {fr} Change la zone de travail Select() et rétablit à destruction
 * =================================================
 
-protected nSelect,; && {fr} Zone de travail initiale
-	lTable,; && {fr} Table communiquée
-	cAlias,; && {fr} Alias sous lequel la table est ouverte
-	lOpened,; && {fr} Table ouverte
-	lKeepOpened && {fr} Si table ouverte, laisser ouverte
+protected nSelect; && {fr} Zone de travail initiale
+, lTable; && {fr} Table communiquée
+, cAlias; && {fr} Alias sous lequel la table est ouverte
+, lOpened; && {fr} Table ouverte
+, lKeepOpened && {fr} Si table ouverte, laisser ouverte
 
 nSelect = .f.
 cAlias = ''
@@ -195,9 +195,9 @@ lKeepOpened = .f.
 * ---------------------------------------------------
 procedure init && {fr} Change la zone de travail
 lparameters ;
-	tuSelect,; && [0] {fr} Zone de travail / alias à sélectionner, ou table à ouvrir et sélectionner
-	tlKeepOpened,; && [.F.] {fr} Si la table est ouverte, laisser ouverte en sortie
-	tcError && @ [''] {fr} Erreur éventuelle
+  tuSelect; && [0] {fr} Zone de travail / alias à sélectionner, ou table à ouvrir et sélectionner
+, tlKeepOpened; && [.F.] {fr} Si la table est ouverte, laisser ouverte en sortie
+, tcError && @ [''] {fr} Erreur éventuelle
 tuSelect = evl(m.tuSelect, 0)
 
 local lcType, lcTable, llOpened, llResult
@@ -300,11 +300,11 @@ return m.lcResult
 * ========================================
 function cAlias && {fr} Alias d'une table
 lparameters ;
-	tuTable,; && [Alias()] {fr} Table : Alias | Zone | Adresse | [DB!]Table
-	tlOpened,; && @ {fr} La table a été ouverte, penser à la refermer
-	tlExclusive,; && [.F.] {fr} Ouvrir la table en exclusif
-	tcError,; && @ [''] {fr} Erreur éventuelle
-	tcAlias; && [default] {fr} Alias sous lequel ouvrir la table
+  tuTable; && [Alias()] {fr} Table : Alias | Zone | Adresse | [DB!]Table
+, tlOpened; && @ {fr} La table a été ouverte, penser à la refermer
+, tlExclusive; && [.F.] {fr} Ouvrir la table en exclusif
+, tcError; && @ [''] {fr} Erreur éventuelle
+, tcAlias; && [default] {fr} Alias sous lequel ouvrir la table
 
 tlOpened = .f.
 tcAlias = upper(iif(ga_Type_IsChar(m.tcAlias, .t.) and lVFPName(m.tcAlias), m.tcAlias, ''))
@@ -463,7 +463,7 @@ case varSet(@m.lcFldState, getfldstate(-1, m.tcAlias));
 		, '';
 		))
 
-case !isnull(m.lcFldState); && .null. if Eof(m.tcAlias)
+case !IsNull(m.lcFldState); && .null. if Eof(m.tcAlias)
  and !empty(chrtran(m.lcFldState, '1', ''))
 
 	lBufferDirty = .t. && {fr} Table buffering, current record modified
@@ -598,15 +598,15 @@ endcase
 endfunc
 
 * ========================================
-function oAlias && {fr} Caractéristiques d'un alias
+function abAlias && {fr} Caractéristiques d'un alias
 lparameters ;
-	tcAlias,; && [Alias()] {fr} Alias à analyser
-	tcResult && @ {fr} Résultat
+  tcAlias; && [Alias()] {fr} Alias à analyser
+, tcResult && @ {fr} Résultat
 
-return createobject('oAlias', m.tcAlias, @m.tcResult)
+return createobject('abAlias', m.tcAlias, @m.tcResult)
 
 * ========================================
-define class oAlias as relation && {en} Alias settings {fr} Caractéristiques d'un alias
+define class abAlias as relation && {en} Alias settings {fr} Caractéristiques d'un alias
 * ========================================
 && {fr} as GA_LIGHTWEIGHT_CLASS (GA_LIGHTWEIGHT_CLASS protects this.cResult)
 
@@ -614,6 +614,8 @@ cDBF = .null.
 cAlias = .null.
 lReadonly = .null.
 lExclusive = .null.
+
+dimension aTagInfos[1]
 cOrder = .null.
 cFilter = .null.
 cSetKey1 = .null.
@@ -622,74 +624,197 @@ iBuffering = .null.
 iRecno = .null.
 dimension aRelationSrce[1], aRelationTrgt[1]
 
-cResult = ''
-
 * ---------------------------------------------------
 procedure init && {fr} Mémorise les attributs d'un Alias
 lparameters ;
-	tcAlias,; && [Alias()] {fr} Alias à analyser
-	tcResult && @ {fr} Résultat
+  tcAlias; && [Alias()] {fr} Alias à analyser
+, tcResult; && @ {fr} Résultat
+
 tcAlias = evl(m.tcAlias, alias())
-tcResult = evl(m.tcResult, '')
 
 local loSelect as abSelect of abData.prg;
-, laRelation[1]
+, aa[1]
 
 if used(m.tcAlias)
 
 	loSelect = abSelect(m.tcAlias)
-	with m.this as oAlias of adata.prg
+	with m.this as abAlias of adata.prg
 		.cDBF = fullpath(dbf())
 		.cAlias = m.tcAlias
-		.lReadonly = isreadonly()
-		.lExclusive = isexclusive()
+		.lReadonly = IsReadonly()
+		.lExclusive = IsExclusive()
+
 		.cFilter = filter()
+		if aTagInfoEn(@m.aa) > 0
+			dimension .aTagInfos[alen(m.aa, 1), alen(m.aa, 2)]
+			Acopy(m.aa, .aTagInfos)
+		endif
 		.cOrder = order()
 		.cSetKey1 = set("Key", 1)
 		.cSetKey2 = set("Key", 2)
 		.iBuffering = CursorGetProp("Buffering")
 		.iRecno = Recno_()
-		if aRelationSrce(@m.laRelation) > 0
-			dimension .aRelationSrce[Alen(laRelation, 1), Alen(laRelation, 2)]
-			acopy(m.laRelation, .aRelationSrce)
+		if aRelationSrce(@m.aa) > 0
+			dimension .aRelationSrce[Alen(aa, 1), Alen(aa, 2)]
+			acopy(m.aa, .aRelationSrce)
 		endif
-		if aRelationTrgt(@m.laRelation) > 0
+		if aRelationTrgt(@m.aa) > 0
 			dimension .aRelationTrgt[2]
-			acopy(m.laRelation, .aRelationTrgt)
+			acopy(m.aa, .aRelationTrgt)
 		endif
 	endwith
 else
-	tcResult = textmerge([oAlias.Init() - ] + icase(;
+	return cResultAdd(@m.tcResult, textmerge(ICase(; && {en} object is not created
 		cLangUser() = 'fr',	[L'alias '<<m.tcAlias>>' est introuvable.],; && copy-paste this line to add another language support
 												[Alias '<<m.tcAlias>>' can't be found.]; && Default: English
-		))
-	return .f. && {en} object is not created
+		)))
 endif
+endproc
+
+* ---------------------------------------------------
+procedure destroy
+return this.reset()
+endproc
+
+* ---------------------------------------------------
+procedure reset && {fr} Rétablit les attributs de l'alias
+lparameters tcResult && @ {fr} Résultat
+
+local success as Boolean;
+, result as String;
+, loSelect as abSelect of abData.prg;
+, loException as exception;
+, liValue, lcValue1, lcValue2;
+
+with m.this as abAlias of abData.prg
+try
+
+	loSelect = abSelect(.cAlias)
+	success = lTableExpr(.cFilter)
+	if m.success
+
+		lcValue1 = .cFilter
+		set filter to &lcValue1
+
+		if Alen(.aTagInfos, 2) > 0 and Tagcount() # Alen(.aTagInfos, 1) and IsExclusive()
+			delete tag all
+			for liValue = 1 to Alen(.aTagInfos, 1)
+				lcValue1 = cIndexCmd(.aTagInfos[m.liValue, 1], .aTagInfos[m.liValue, 2], .aTagInfos[m.liValue, 3], .aTagInfos[m.liValue, 4], .aTagInfos[m.liValue, 5], .aTagInfos[m.liValue, 6])
+				&lcValue1
+			endfor
+		endif
+		
+		success = empty(.cOrder) or lTag(.cOrder)
+		if m.success
+
+			set order to (.cOrder)
+			if not empty(.cSetKey1)
+				lcValue1 = .cSetKey1
+				if empty(.cSetKey2)
+					set key to &lcValue1
+				else
+					lcValue2 = .cSetKey2
+					set key to range &lcValue1, &lcValue2
+				endif
+			endif
+			if alen(.aRelationSrce) > 1
+				for liValue = 1 to alen(.aRelationSrce, 1)
+					lcValue1 = .aRelationSrce[m.liValue, 1]
+					lcValue2 = .aRelationSrce[m.liValue, 2]
+					success = lTableExpr(m.lcValue1)
+					if m.success
+						success = used(m.lcValue2)
+						if m.success
+							set relation to &lcValue1 into (m.lcValue2)
+						else
+							result = textmerge(icase(;
+								cLangUser() = 'fr',	[L'alias '<<m.lcValue2>>', cible de relation de '<<.cAlias>>', est introuvable],; && copy-paste this line to add another language support
+																		[Alias '<<m.lcValue2>>', relation target of '<<.cAlias>>', can't be found]; && Default: English
+								))
+						endif
+					else
+						result = textmerge(icase(;
+							cLangUser() = 'fr',	[L'expression relationnelle '<<m.lcValue1>>' est invalide sur la table '<<m.tcDBF>>'],; && copy-paste this line to add another language support
+																	[Relational expression '<<m.lcValue1>>' is invalid on table '<<m.tcDBF>>']; && Default: English
+							))
+					endif
+					if not m.success
+						exit
+					endif
+				endfor
+			endif
+			if m.success and alen(.aRelationTrgt) > 1
+				lcValue1 = .aRelationTrgt[1] && {fr} Relational expression
+				lcValue2 = .aRelationTrgt[2] && {fr} Source Alias
+				set relation to &lcValue1 into (.cAlias) in (m.lcValue2)
+			endif
+		else
+			result = textmerge(icase(;
+				cLangUser() = 'fr',	[L'index '<<.cOrder>>' est introuvable dans la table '<<m.tcDBF>>'],; && copy-paste this line to add another language support
+														[Index tagged '<<.cOrder>>' can't be found in table '<<m.tcDBF>>']; && Default: English
+				))
+		endif
+	else
+		result = textmerge(icase(;
+			cLangUser() = 'fr',	[L'expression de filtre '<<.cFilter>>' est invalide sur la table '<<m.tcDBF>>'],; && copy-paste this line to add another language support
+													[Filter expression '<<.cFilter>>' is invalid on table '<<m.tcDBF>>']; && Default: English
+			))
+	endif
+
+catch to loException
+	success = .f.
+	result = cException(m.loException)
+endtry
+endwith
+
+return m.success or cResultAdd(@m.tcResult, m.result)
+endproc
+
+* ========================================
+enddefine && {fr} CLASS abAlias
+* ========================================
+
+* ========================================
+function oAlias && {fr} Caractéristiques d'un alias
+lparameters ;
+  tcAlias; && [Alias()] {fr} Alias à analyser
+, tcResult && @ {fr} Résultat
+
+return createobject('oAlias', m.tcAlias, @m.tcResult)
+
+* ========================================
+define class oAlias as abAlias of abData.prg
+* ========================================
+
+* ---------------------------------------------------
+procedure destroy
+return && don't execute abAlias.destroy()
+endproc
 
 * ---------------------------------------------------
 procedure Swap && {fr} Ouvre une table sous l'alias initial et lui applique les mêmes attributs
 lparameters ;
-	tcDBF,; && {fr} table
-	tcResult && @ {fr} Résultat
+  tcDBF; && {fr} table
+, tcResult; && @ {fr} Résultat
 
-local loSelect as abSelect of abData.prg;
+local success as Boolean;
+, result as String;
 , loException as exception;
-, lcValue1, lcValue2, liValue;
-, llResult
+, liValue, lcValue1, lcValue2;
 
 with m.this as oAlias of abData.prg
 
 	if file(m.tcDBF)
 
-		llResult = used(.cAlias) and .cDBF == fullpath(m.tcDBF) && {fr} fichier inchangé, inutile de changer
-		if not m.llResult
+		success = used(.cAlias) and .cDBF == fullpath(m.tcDBF) && {fr} fichier inchangé, inutile de changer
+		if not m.success
 
 			try
 
 				* {fr} Fermer l'alias courant
 				if lBufferDirty(.cAlias)
 					liValue = tablerevert(.t., .cAlias)
-					.cResult = textmerge(icase(;
+					result = textmerge(icase(;
 						cLangUser() = 'fr',	[Le tampon de <<.cAlias>> a été vidé, soit <<m.liValue>> enregistrement(s)],; && copy-paste this line to add another language support
 																[Buffered data of <<.cAlias>> were discarded, <<m.liValue>> record(s)]; && Default: English
 						))
@@ -700,91 +825,32 @@ with m.this as oAlias of abData.prg
 				lcValue1 = iif(.lExclusive, ' EXCLUSIVE', ' SHARED')
 				lcValue2 = iif(.lReadonly, ' NOUPDATE', '')
 				use (m.tcDBF) in 0 alias (.cAlias) &lcValue1 &lcValue2
-				loSelect = abSelect(.cAlias)
 
-				llResult = lTableExpr(.cFilter)
-				if m.llResult
+				success = .reset(@m.tcResult);
+					and (CursorSetProp("Buffering", .iBuffering, .cAlias) or cResultAdd(@m.tcResult, [could not restore buffering]));
+					and RecnoSet(.iRecno, .cAlias, @m.tcResult)
 
-					lcValue1 = .cFilter
-					set filter to &lcValue1
-
-					llResult = empty(.cOrder) or lTag(.cOrder)
-					if m.llResult
-
-						set order to (.cOrder)
-						if not empty(.cSetKey1)
-							lcValue1 = .cSetKey1
-							if empty(.cSetKey2)
-								set key to &lcValue1
-							else
-								lcValue2 = .cSetKey2
-								set key to range &lcValue1, &lcValue2
-							endif
-						endif
-						if alen(.aRelationSrce) > 1
-							for liValue = 1 to alen(.aRelationSrce, 1)
-								lcValue1 = .aRelationSrce[m.liValue, 1]
-								lcValue2 = .aRelationSrce[m.liValue, 2]
-								llResult = lTableExpr(m.lcValue1)
-								if m.llResult
-									llResult = used(m.lcValue2)
-									if m.llResult
-										set relation to &lcValue1 into (m.lcValue2)
-									else
-										.cResult = textmerge(icase(;
-											cLangUser() = 'fr',	[L'alias '<<m.lcValue2>>', cible de relation de '<<.cAlias>>', est introuvable],; && copy-paste this line to add another language support
-																					[Alias '<<m.lcValue2>>', relation target of '<<.cAlias>>', can't be found]; && Default: English
-											))
-									endif
-								else
-									.cResult = textmerge(icase(;
-										cLangUser() = 'fr',	[L'expression relationnelle '<<m.lcValue1>>' est invalide sur la table '<<m.tcDBF>>'],; && copy-paste this line to add another language support
-																				[Relational expression '<<m.lcValue1>>' is invalid on table '<<m.tcDBF>>']; && Default: English
-										))
-								endif
-								if not m.llResult
-									exit
-								endif
-							endfor
-						endif
-						if m.llResult and alen(.aRelationTrgt) > 1
-							lcValue1 = .aRelationTrgt[1] && {fr} Relational expression
-							lcValue2 = .aRelationTrgt[2] && {fr} Source Alias
-							set relation to &lcValue1 into (.cAlias) in (m.lcValue2)
-						endif
-					else
-						.cResult = textmerge(icase(;
-							cLangUser() = 'fr',	[L'index '<<.cOrder>>' est introuvable dans la table '<<m.tcDBF>>'],; && copy-paste this line to add another language support
-																	[Index tagged '<<.cOrder>>' can't be found in table '<<m.tcDBF>>']; && Default: English
-							))
-					endif
-				else
-					.cResult = textmerge(icase(;
-						cLangUser() = 'fr',	[L'expression de filtre '<<.cFilter>>' est invalide sur la table '<<m.tcDBF>>'],; && copy-paste this line to add another language support
-																[Filter expression '<<.cFilter>>' is invalid on table '<<m.tcDBF>>']; && Default: English
-						))
-				endif
-				if m.llResult
-					cursorsetprop("Buffering", .iBuffering)
-					RecnoSet(.iRecno)
-				else
-					use in select(.cAlias)
-				endif
 			catch to loException
-				llResult = .f.
-				.cResult = cException(m.loException)
+				success = .f.
+				result = cException(m.loException)
 			endtry
 		endif
 	else
-		.cResult = textmerge(icase(;
+		result = textmerge(icase(;
 			cLangUser() = 'fr',	[Le fichier '<<m.tcDBF>>' est introuvable.],; && copy-paste this line to add another language support
 													[File '<<m.tcDBF>>' can't be found.]; && Default: English
 			))
 	endif
-	tcResult = iif(m.llResult, m.tcResult, .cResult)
+
+	if !m.success
+		use in select(.cAlias)
+	endif
+
 endwith
 
-return m.llResult
+assert m.success message cAssertMsg(m.result)
+return m.success or cResultAdd(@m.tcResult, m.result)
+endproc
 
 * ========================================
 enddefine && {fr} CLASS oAlias
@@ -793,8 +859,8 @@ enddefine && {fr} CLASS oAlias
 * ========================================
 function cAliasUsed && {fr} Alias sous lequel une table est ouverte (le premier si plusieurs)
 lparameters ;
-	tcTable,; && {fr} Adresse de la table
-	tlExclusive && @ [.F.] {fr} La table est ouverte en exclusif
+  tcTable; && {fr} Adresse de la table
+, tlExclusive && @ [.F.] {fr} La table est ouverte en exclusif
 tlExclusive = .f.
 
 local lcResult; && {fr} Alias
@@ -863,10 +929,10 @@ return m.lnResult
 * ========================================
 procedure AliasReuse && {fr} Rouvre un alias dans un autre mode
 lparameters ;
-	tcAlias,; && {fr} Alias
-	tcMode,; && [''] 'Exclusive' | 'Shared' | 'Noupdate' | '' (=Set("EXCLUSIVE"))
-	tlAgain,; && [.F.] {fr} AGAIN
-	tcAliasNew && [m.tcAlias] {fr} Nouvel Alias
+  tcAlias; && {fr} Alias
+, tcMode; && [''] 'Exclusive' | 'Shared' | 'Noupdate' | '' (=Set("EXCLUSIVE"))
+, tlAgain; && [.F.] {fr} AGAIN
+, tcAliasNew && [m.tcAlias] {fr} Nouvel Alias
 
 local lcTable, lcOrder, lcFilter, lcField, lcFields, lcMode, laUsed[1], llAgain, lcAgain;
 	, lnSelect, loException as exception;
@@ -974,19 +1040,19 @@ enddefine && {fr} CLASS abExclusive
 * ========================================
 function lExclusiveForce && {fr} Tente d'ouvrir ou réouvrir une table en exclusif
 lparameters ;
-	tcAlias,; && @ {fr} Alias
-	tuTable,; && [Alias()] {fr} Alias, zone ou adresse d'une table
-	tlExcl && @ {fr} L'alias était déjà ouvert en exclusif
+  tcAlias; && @ {fr} Alias
+, tuTable; && [Alias()] {fr} Alias, zone ou adresse d'une table
+, tlExcl && @ {fr} L'alias était déjà ouvert en exclusif
 
 tcAlias = ExclusiveForce(m.tuTable, @m.tlExcl)
-
 return used(m.tcAlias)
+endfunc
 
 * ========================================
 procedure ExclusiveForce && {fr} Tente d'ouvrir ou réouvrir une table en exclusif
 lparameters ;
-	tuTable,; && [Alias()] {fr} Alias, zone ou adresse d'une table
-	tlExcl && @ {fr} L'alias était déjà ouvert en exclusif
+  tuTable; && [Alias()] {fr} Alias, zone ou adresse d'une table
+, tlExcl && @ {fr} L'alias était déjà ouvert en exclusif
 tlExcl = .f.
 
 local lcAlias, llAlias, lcResult && {fr} Alias sous lequel la table est ouverte en exclusif, vide si impossible d'ouvrir en exclusif
@@ -1006,8 +1072,8 @@ return m.lcResult
 * ========================================
 procedure HeaderFieldsCarry && {fr} Copie le contenu des champs d'entête dans l'enr. suivant
 lparameters ;
-	tuTable,; && [Alias()] {fr} Alias, zone ou adresse d'une table
-	tcFields && [''] {fr} Champs d'en-tête
+  tuTable; && [Alias()] {fr} Alias, zone ou adresse d'une table
+, tcFields && [''] {fr} Champs d'en-tête
 local llResult
 
 * {fr} Si l'alias de la table existe
@@ -1071,8 +1137,8 @@ return m.llResult
 * ========================================
 procedure TableMove && {fr} Déplace une table et ses fichiers dépendants dans un autre dossier
 lparameters ;
-	tcSrceAddr,; && {fr} Adresse actuelle de la table
-	tcDestAddr && {fr} Adresse cible
+  tcSrceAddr; && {fr} Adresse actuelle de la table
+, tcDestAddr && {fr} Adresse cible
 
 local llResult
 
@@ -1131,13 +1197,13 @@ return m.llResult
 * ========================================
 procedure TablesMerge && {fr} Fusionne 2 tables en ajustant la structure de la réceptacle
 lparameters ;
-	tuDestTable,; && {fr} Alias ou zone ou adresse de la table destination (crée si elle n'existe pas)
-	tuSrceTable && [Alias()] {fr} Alias ou zone ou adresse de la table source
+  tuDestTable; && {fr} Alias ou zone ou adresse de la table destination (crée si elle n'existe pas)
+, tuSrceTable && [Alias()] {fr} Alias ou zone ou adresse de la table source
 local llResult && {fr} La fusion a été réalisée
 
 * {fr} Si une table destination a été précisée
-local llParms, ;
-	lcDestAlias, llDestOpened, llDestCreate, ;
+local llParms ;
+, lcDestAlias, llDestOpened, llDestCreate, ;
 	lcSrceAlias, llSrceOpened, lcSrceAddr
 llParms = not empty(m.tuDestTable)
 if m.llParms
@@ -1295,9 +1361,9 @@ return m.llResult
 * ========================================
 function lTablesIdem && {fr} Deux tables sont identiques : mêmes structure et contenu
 lparameters ;
-	tuTable1,; && {fr} Alias ou zone ou adresse de la première table
-	tuTable2,; && {fr} Alias ou zone ou adresse de la seconde table
-	tlFieldsOrder && [.F.] {fr} Les champs doivent être dans le même ordre
+  tuTable1; && {fr} Alias ou zone ou adresse de la première table
+, tuTable2; && {fr} Alias ou zone ou adresse de la seconde table
+, tlFieldsOrder && [.F.] {fr} Les champs doivent être dans le même ordre
 local llResult && {fr} Les tables sont identiques
 
 * {fr} Si les spécifications de tables sont valides
@@ -1354,9 +1420,9 @@ return m.llResult
 * ========================================
 function lFieldsIdem && {fr} Deux tables ont la même structure
 lparameters ;
-	tuTable1,; && {fr} Alias ou zone ou adresse de la première table
-	tuTable2,; && {fr} Alias ou zone ou adresse de la seconde table
-	tlFieldsOrder && [.F.] {fr} Les champs doivent être dans le même ordre
+  tuTable1; && {fr} Alias ou zone ou adresse de la première table
+, tuTable2; && {fr} Alias ou zone ou adresse de la seconde table
+, tlFieldsOrder && [.F.] {fr} Les champs doivent être dans le même ordre
 local llResult && {fr} Les tables ont la même structure
 
 * {fr} Si les spécifications de tables sont valides
@@ -1431,10 +1497,10 @@ return m.llResult
 * ========================================
 function l2FieldsIdem && {fr} deux champs sont de même structure : type[, longueur [décimales]]
 lparameters ;
-	tcTableField1,; && 'table.field' du premier champ
-	tcTableField2,; && 'table.field' du second champ
-	tlNullIgnore,; && [.F.] {fr} Ignorer si "Null values allowed"
-	tlContains && [.F.] {fr} le champ 2 doit pouvoir contenir le champ 1
+  tcTableField1; && 'table.field' du premier champ
+, tcTableField2; && 'table.field' du second champ
+, tlNullIgnore; && [.F.] {fr} Ignorer si "Null values allowed"
+, tlContains && [.F.] {fr} le champ 2 doit pouvoir contenir le champ 1
 local llResult && {fr} Les deux champs ont la même structure
 
 local lcAlias1, lcAlias2, llAlias1, llAlias2, lcField1, lcField2, laFields1[1], laFields2[1], lnField1, lnField2
@@ -1487,9 +1553,9 @@ return loTest.Result()
 * ========================================
 procedure TableOfArray && {fr} Construit une table ou un curseur à partir d'un tableau
 lparameters ;
-	taArray,; && @ {fr} Tableau source
-	tuTable,; && [Cursor] {fr} Adresse de la table à créer ou, si invalide, ordre de créer un curseur
-	tl2D && [.F.] {fr} Créer autant de champs que de colonnes dans le tableau
+  taArray; && @ {fr} Tableau source
+, tuTable; && [Cursor] {fr} Adresse de la table à créer ou, si invalide, ordre de créer un curseur
+, tl2D && [.F.] {fr} Créer autant de champs que de colonnes dans le tableau
 local lcResult && {fr} Adresse de la table ou Alias du curseur
 lcResult = ''
 external array taArray
@@ -1594,11 +1660,11 @@ return 'C' + transform(m.tnCol, '@L 999')
 * ========================================
 procedure TableOfArray_EltInsert && {fr} Ajoute un élément à la table / au curseur
 lparameters ;
-	taArray,; && @ {fr} Tableau source
-	tcAlias,; && {fr} Alias de la table
-	tnRow,; && {fr} N° de ligne
-	tnCol,; && {fr} N° de colonne (0 si tableau à une dimension)
-	tl2D && {fr} Créer autant de champs que de colonnes dans le tableau
+  taArray; && @ {fr} Tableau source
+, tcAlias; && {fr} Alias de la table
+, tnRow; && {fr} N° de ligne
+, tnCol; && {fr} N° de colonne (0 si tableau à une dimension)
+, tl2D && {fr} Créer autant de champs que de colonnes dans le tableau
 local luElt, lcType, lcField, llResult
 
 luElt = iif(m.tnCol > 0, taArray[m.tnRow, m.tnCol], taArray[m.tnRow])
@@ -1627,8 +1693,8 @@ return m.llResult
 * ========================================
 procedure ArrayOfTable && {fr} Reconstitue un tableau à partir d'une sauvegarde par TableOfArray()
 lparameters ;
-	taArray,; && @ {fr} Tableau source
-	tuTable && {fr} Alias ou adresse de la table / du curseur source
+  taArray; && @ {fr} Tableau source
+, tuTable && {fr} Alias ou adresse de la table / du curseur source
 external array taArray
 local lnResult && {fr} Nombre de lignes du tableau
 lnResult = 0
@@ -1696,8 +1762,8 @@ return m.lnResult
 * ========================================
 procedure cFieldsLTrim && {fr} Tronque à gauche les champs de type caractère, pour tous les enr.
 lparameters ;
-	tcTable,; && [Alias()] {fr} Alias, zone ou adresse d'une table
-	tcFieldsIgnore && [''] {fr} Squelette des champs à ignorer
+  tcTable; && [Alias()] {fr} Alias, zone ou adresse d'une table
+, tcFieldsIgnore && [''] {fr} Squelette des champs à ignorer
 local llResult
 
 * {fr} Si la table est accessible
@@ -1730,7 +1796,7 @@ if m.llResult
 
 			if vartype(m.luValue) == 'C';
 			 and not empty(m.luValue);
-			 and not isnull(m.luValue)
+			 and not IsNull(m.luValue)
 
 			 	laRec[m.lnField] = ltrim(m.luValue)
 			endif
@@ -1753,8 +1819,8 @@ return m.llResult
 * ========================================
 function nField && {fr} Position d'un champ dans l'alias courant ou spécifié
 lparameters ;
-	tcField, ; && {fr} Nom du champ dont l'existence est a verifier
-	tuTable && [Alias()] {fr} Alias ou adresse de la table où l'existence du champ est à verifier
+  tcField ; && {fr} Nom du champ dont l'existence est a verifier
+, tuTable && [Alias()] {fr} Alias ou adresse de la table où l'existence du champ est à verifier
 local lnResult
 lnResult = 0
 
@@ -1785,8 +1851,8 @@ return m.lnResult
 * ========================================
 function lTag && {fr} La table courante ou spécifiée a un tag d'index d'un certain nom
 lparameters ;
-	tcTag, ; && {fr} Nom du tag dont l'existence est à verifier
-	tuTable && [Alias()] {fr} Alias ou adresse de la table où l'existence du tag est à verifier
+  tcTag ; && {fr} Nom du tag dont l'existence est à verifier
+, tuTable && [Alias()] {fr} Alias ou adresse de la table où l'existence du tag est à verifier
 local llResult
 
 * {fr} Si un tag a été spécifié
@@ -1835,9 +1901,9 @@ return m.llResult
 * ========================================
 function lTags && {fr} La table courante ou spécifiée comporte des tags d'index d'un certain nom
 lparameters ;
-	tcTags, ; && {fr} Liste des tags dont l'existence est à vérifier
-	tuTable,; && [Alias()] {fr} Alias ou adresse de la table où l'existence des tags est à vérifier
-	tlOneAtLeast &&	[.F.] {fr} Au moins un des tags doit être présent
+  tcTags ; && {fr} Liste des tags dont l'existence est à vérifier
+, tuTable; && [Alias()] {fr} Alias ou adresse de la table où l'existence des tags est à vérifier
+, tlOneAtLeast &&	[.F.] {fr} Au moins un des tags doit être présent
 local llResult
 
 if vartype(m.tcTags) == 'C' and not empty(m.tcTags)
@@ -1875,8 +1941,8 @@ return m.llResult
 * ========================================
 function cTagOfExpr && {fr} Tag d'index d'une table construit sur une expression
 lparameters ;
-	tcExpr,; && {fr} Expression
-	tuTable && [Alias()] {fr} Alias ou adresse de la table
+  tcExpr; && {fr} Expression
+, tuTable && [Alias()] {fr} Alias ou adresse de la table
 
 local lcResult;
 , llResult;
@@ -1914,8 +1980,8 @@ return m.lcResult
 * ========================================
 function cTagExpr && {fr} Expression d'index d'un tag d'une table
 lparameters ;
-	tcTag,; && {fr} Tag à rechercher
-	tuTable && [Alias()] {fr} Alias ou adresse de la table
+  tcTag; && {fr} Tag à rechercher
+, tuTable && [Alias()] {fr} Alias ou adresse de la table
 
 local lcResult;
 , llResult;
@@ -1982,8 +2048,8 @@ define class cTagExpr_Test as abUnitTest of abDev.prg
 * ========================================
 function cTagType && {fr} Type d'index d'un tag d'une table (en anglais)
 lparameters ;
-	tcTag,; && {fr} Tag à rechercher
-	tuTable && [Alias()] {fr} Alias ou adresse de la table
+  tcTag; && {fr} Tag à rechercher
+, tuTable && [Alias()] {fr} Alias ou adresse de la table
 
 local lcAlias, llAlias, lnTag, laTagInfo[1], llResult, lcResult
 lcResult = ''
@@ -2023,11 +2089,11 @@ return m.lcResult
 * ========================================
 function cTagPC && {fr} Premier tag d'index candidat, ou d'index primaire d'une table
 lparameters ;
-	tuTable,; && [Alias()] {fr} Alias ou adresse de la table où l'existence du tag est à vérifier
-	tcTagExp,; && @ [''] {fr} Expression de l'index trouvé
-	tlTagCand,; && @ [.F.] {fr} Index candidat seulement ; @ Un index candidat a été trouvé
-	tnTag,; && @ [0] {fr} N° du tag d'index trouvé
-	tlTagPrim && [.F.] {fr} Index primaire seulement
+  tuTable; && [Alias()] {fr} Alias ou adresse de la table où l'existence du tag est à vérifier
+, tcTagExp; && @ [''] {fr} Expression de l'index trouvé
+, tlTagCand; && @ [.F.] {fr} Index candidat seulement ; @ Un index candidat a été trouvé
+, tnTag; && @ [0] {fr} N° du tag d'index trouvé
+, tlTagPrim && [.F.] {fr} Index primaire seulement
 
 tcTagExp = ''
 tlTagCand = lTrue(m.tlTagCand)
@@ -2107,18 +2173,18 @@ return m.lcResult
 * ========================================
 function cTagP && {fr} Index primaire d'une table (tag, expression)
 lparameters ;
-	tuTable,; && [Alias()] {fr} Alias ou adresse de la table où l'existence du tag est à verifier
-	tcTagExp,; && @ [''] {fr} Expression de l'index trouvé
-	tnTag && @ [0] {fr} N° du tag d'index trouvé
+  tuTable; && [Alias()] {fr} Alias ou adresse de la table où l'existence du tag est à verifier
+, tcTagExp; && @ [''] {fr} Expression de l'index trouvé
+, tnTag && @ [0] {fr} N° du tag d'index trouvé
 
 return cTagPC(m.tuTable, @m.tcTagExp, .f., @m.tnTag, .t.)
 
 * ========================================
 function aTagsPC && {fr} Indexes candidats [et primaire] d'une table
 lparameters ;
-	taTagsPC,; && @ {fr} Indexes candidats [et primaire] : Tag | Expression | Filter Expression
-	tuTable,; && [Alias()] {fr} Alias ou adresse de la table
-	tlTagCand && [.F.] {fr} Indexes candidats seulement
+  taTagsPC; && @ {fr} Indexes candidats [et primaire] : Tag | Expression | Filter Expression
+, tuTable; && [Alias()] {fr} Alias ou adresse de la table
+, tlTagCand && [.F.] {fr} Indexes candidats seulement
 external array taTagsPC
 local lcAlias, llAlias, llResult, lnResult && {fr} nombre d'indexs trouvés
 lnResult = 0
@@ -2196,9 +2262,9 @@ return m.lcResult
 * ========================================
 function keyset && {fr} Rétablit Set("Key") dans un Alias
 lparameters ;
-	tcAlias,; && [Alias()]
-	tcKey,; && {fr} Set("Key")
-	tcResult && @ {fr} Résultat (cumulatif)
+  tcAlias; && [Alias()]
+, tcKey; && {fr} Set("Key")
+, tcResult && @ {fr} Résultat (cumulatif)
 tcAlias = evl(m.tcAlias, alias())
 
 local lnSelect, lnKey, lcKey1, lcKey2, llChar, lcKey, llResult
@@ -2306,9 +2372,9 @@ return loTest.Result()
 * ========================================
 function lViewCAD && {fr} Un alias est une vue liée à un CursorAdapter
 lparameters ;
-	tcAlias,; && [alias courant] {fr} alias à analyser
-	tlUpdateable,; && [.NULL.] {fr} updateable view ; .NULL.: don't care and feedback
-	tiDS && [session de données courante] {fr} identifiant de la session de données
+  tcAlias; && [alias courant] {fr} alias à analyser
+, tlUpdateable; && [.NULL.] {fr} updateable view ; .NULL.: don't care and feedback
+, tiDS && [session de données courante] {fr} identifiant de la session de données
 
 return lView(;
 		tcAlias; && [alias courant] {fr} alias à analyser
@@ -2327,8 +2393,8 @@ lparameters ;
 , tiDS; && [session de données courante] {fr} identifiant de la session de données
 , tlCAD; && @ [.NULL.] {en} View should be linked to a CursorAdapter ; .NULL.: don't care and feedback
 
-tlUpdateable = iif(pcount() < 2 or isnull(m.tlUpdateable), .null., lTrue(m.tlUpdateable))
-tlCAD = iif(pcount() < 4 or isnull(m.tlCAD), .null., lTrue(m.tlCAD))
+tlUpdateable = iif(pcount() < 2 or IsNull(m.tlUpdateable), .null., lTrue(m.tlUpdateable))
+tlCAD = iif(pcount() < 4 or IsNull(m.tlCAD), .null., lTrue(m.tlCAD))
 
 return lView(;
 	  m.tcAlias; && [alias courant] {fr} alias à analyser
@@ -2348,8 +2414,8 @@ lparameters ;
 , tiDS; && [session de données courante] {fr} identifiant de la session de données
 , tlCAD; && @ [.NULL.] {en} View should be linked to a CursorAdapter ; .NULL.: don't care and feedback
 
-tlUpdateable = iif(pcount() < 2 or isnull(m.tlUpdateable), .null., lTrue(m.tlUpdateable))
-tlCAD = iif(pcount() < 4 or isnull(m.tlCAD), .null., lTrue(m.tlCAD))
+tlUpdateable = iif(pcount() < 2 or IsNull(m.tlUpdateable), .null., lTrue(m.tlUpdateable))
+tlCAD = iif(pcount() < 4 or IsNull(m.tlCAD), .null., lTrue(m.tlCAD))
 
 return lView(;
 	  m.tcAlias; && [alias courant] {fr} alias à analyser
@@ -2372,11 +2438,11 @@ lparameters ;
 
 tcAlias = iif(vartype(m.tcAlias) == 'C' and not empty(m.tcAlias), m.tcAlias, alias())
 
-tlUpdateable = iif(pcount() < 2 or isnull(m.tlUpdateable), .null., lTrue(m.tlUpdateable))
-tlCAD = iif(pcount() < 4 or isnull(m.tlCAD), .null., lTrue(m.tlCAD))
-tlRemote = iif(pcount() < 5 or isnull(m.tlRemote), .null., lTrue(m.tlRemote))
+tlUpdateable = iif(pcount() < 2 or IsNull(m.tlUpdateable), .null., lTrue(m.tlUpdateable))
+tlCAD = iif(pcount() < 4 or IsNull(m.tlCAD), .null., lTrue(m.tlCAD))
+tlRemote = iif(pcount() < 5 or IsNull(m.tlRemote), .null., lTrue(m.tlRemote))
 
-local llResult;
+local lView;
 , liDS, llDS;
 , llUpdateable;
 , lnSourceType;
@@ -2412,58 +2478,60 @@ endif
 
 #endif
 
-llResult = .t.;
+lView = .t.;
  and used(m.tcAlias);
  and varSet(@m.lnSourceType, CursorGetProp("SourceType", m.tcAlias));
  and !(InList(m.lnSourceType, 1, 2) and Empty(CursorGetProp("SQL", m.tcAlias))); && {fr} SQL pass-through cursors
  and varSet(@m.lnSourceType_, m.lnSourceType%100);
  and inlist(m.lnSourceType_, 1, 2, 4); && 1 - local SQL view ; 2 - remote SQL view ; 3 – table ; 4 - ADO Recordset attached to a CursorAdapter object
  and varSet(@m.llUpdateable, not empty(CursorGetProp("KeyFieldList", m.tcAlias))); && {fr} IsReadonly(m.tcAlias)
- and iif(isnull(m.tlUpdateable), varSet(@m.tlUpdateable, m.llUpdateable), m.tlUpdateable = m.llUpdateable);
+ and iif(IsNull(m.tlUpdateable), varSet(@m.tlUpdateable, m.llUpdateable), m.tlUpdateable = m.llUpdateable);
  and varSet(@m.llCAD, int(m.lnSourceType / 100) > 0);
- and iif(isnull(m.tlCAD), varSet(@m.tlCAD, m.llCAD), m.tlCAD = m.llCAD);
+ and iif(IsNull(m.tlCAD), varSet(@m.tlCAD, m.llCAD), m.tlCAD = m.llCAD);
  and varSet(@m.llRemote, m.lnSourceType_ = 2);
- and iif(isnull(m.tlRemote), varSet(@m.tlRemote, m.llRemote), m.tlRemote = m.llRemote);
+ and iif(IsNull(m.tlRemote), varSet(@m.tlRemote, m.llRemote), m.tlRemote = m.llRemote);
  and .t.
 
-if !m.llResult
+if !m.lView
 	store .null. to tlUpdateable, tlCAD, tlRemote
 endif
 
- if m.llDS
+if m.llDS
 	set datasession to m.liDS
 endif
 
-return m.llResult
+return m.lView
+endfunc
 
 * ========================================
 function lViewU && {fr} Un alias est une vue updateable
 lparameters ;
-	tcAlias,; && [alias courant] {fr} alias à analyser
-	tiDS && [session de données courante] {fr} identifiant de la session de données
+  tcAlias; && [alias courant] {fr} alias à analyser
+, tiDS && [session de données courante] {fr} identifiant de la session de données
 
 return lView(m.tcAlias, .t., m.tiDS)
 
 * ========================================
 function aViews && {fr} Aliases des vues dans une session de données
 lparameters ;
-	taView,; && @ {fr} Aliases des vues locales dans la session de données
-	tlUpdateable,; && [.NULL.] {fr} vue updateable ; .NULL. don't care
-	tiDS && [session de données courante] {fr} identifiant de la session de données
+  taView; && @ {fr} Aliases des vues locales dans la session de données
+, tlUpdateable; && [.NULL.] {fr} vue updateable ; .NULL. don't care
+, tiDS; && [session de données courante] {fr} identifiant de la session de données
 
 external array taView
-tlUpdateable = iif(pcount() < 2 or isnull(m.tlUpdateable), .null.,  lTrue(m.tlUpdateable))
+tlUpdateable = iif(pcount() < 2 or IsNull(m.tlUpdateable), .null.,  lTrue(m.tlUpdateable))
 
 local lnResult, llResult, liAlias
+
 lnResult = 0
 
-llResult = type('taView',1) == 'A'
+llResult = type('taView', 1) == 'A'
 assert m.llResult message cAssertMsg(textmerge([tableau attendu en premier paramètre <<m.taView>>]))
 if m.llResult
 
 	aClear(@m.taView)
 	tiDS = iif(vartype(m.tiDS) == 'N' and m.tiDS > 0, m.tiDS, set("Datasession"))
-	lnResult = aused(taView, m.tiDS)
+	lnResult = aUsed(taView, m.tiDS)
 	llResult = m.lnResult > 0
 	* {fr} ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([Aucun alias trouvé dans la session de données <<m.tiDS>>]))
 	if m.llResult
@@ -2472,16 +2540,15 @@ if m.llResult
 		aColDel(@m.taView, 2) && {fr} zones de travail inutiles
 		dimension taView[m.lnResult] && {fr} une seule dimension suffit
 		for liAlias = m.lnResult to 1 step -1
-
-			if not lView(taView[m.liAlias], m.tlUpdateable, m.tiDS)
-				adel(taView, m.liAlias)
-				lnResult = m.lnResult - 1
-			endif
+			lnResult = m.lnResult - Iif(lView(taView[m.liAlias], m.tlUpdateable, m.tiDS);
+				, 0;
+				, Adel(taView, m.liAlias);
+				)
 		endfor
-		if m.lnResult = 0
-			aClear(@m.taView)
-		else
+		if m.lnResult > 0
 			dimension taView[m.lnResult]
+		else
+			aClear(@m.taView)
 		endif
 	endif
 endif
@@ -2489,23 +2556,28 @@ endif
 return m.lnResult
 endfunc
 
+#if .F.
+? aUsed(m.aa), 'alias(es) :', cListOfArray(@m.aa)
+? aViews(@m.aa), 'view(s) :', cListOfArray(@m.aa)
+#endif
+
 * ========================================
 function aViewsU && {fr} Aliases des vues updateable dans une session de données
 lparameters ;
-	taView,; && @ {fr} Aliases des vues locales updateable dans la session de données
-	tiDS && [session de données courante] {fr} identifiant de la session de données
+  taView; && @ {fr} Aliases des vues locales updateable dans la session de données
+, tiDS && [session de données courante] {fr} identifiant de la session de données
 
 return aViews(@m.taView, .t., m.tiDS)
 
 * ========================================
 function lCursor && {fr} Un alias est un curseur
 lparameters ;
-	tcAlias,; && [alias courant] {fr} alias à analyser
-	tlReadWrite,; && [.NULL.] {en} updateable cursor (READWRITE); .NULL.: don't care and feedback
-	tiDS && [session de données courante] {fr} identifiant de la session de données
+  tcAlias; && [alias courant] {fr} alias à analyser
+, tlReadWrite; && [.NULL.] {en} updateable cursor (READWRITE); .NULL.: don't care and feedback
+, tiDS && [session de données courante] {fr} identifiant de la session de données
 
 tcAlias = iif(vartype(m.tcAlias) == 'C' and not empty(m.tcAlias), m.tcAlias, alias())
-tlReadWrite = iif(pcount() < 2 or isnull(m.tlReadWrite), .null.,  lTrue(m.tlReadWrite))
+tlReadWrite = iif(pcount() < 2 or IsNull(m.tlReadWrite), .null.,  lTrue(m.tlReadWrite))
 
 local llResult;
 , liDS, llDS;
@@ -2537,9 +2609,9 @@ llResult = m.llAlias;
 	 				or lower(justext(m.lcDBF)) == 'tmp'; && {fr} Spécial Win2k : apparemment CREATE CURSOR crée une table sur disque
 	 				);
 	 		);
-	and (isnull(m.tlReadWrite) or iif(m.tlReadWrite, m.llReadWrite, not m.llReadWrite))
+	and (IsNull(m.tlReadWrite) or iif(m.tlReadWrite, m.llReadWrite, not m.llReadWrite))
 
-tlReadWrite = iif(isnull(m.tlReadWrite) and m.llResult, m.llReadWrite, m.tlReadWrite) && {fr} FeedBack
+tlReadWrite = iif(IsNull(m.tlReadWrite) and m.llResult, m.llReadWrite, m.tlReadWrite) && {fr} FeedBack
 
 if m.llDS
 	set datasession to m.liDS
@@ -2578,10 +2650,10 @@ define class lCursor_Test as abUnitTest of abDev.prg && {fr} AS session
 * ========================================
 function cCursors && {fr} Aliases des curseurs dans une session de données
 lparameters ;
-	taCursor,; && @ {fr} Aliases des curseurs dans la session de données
-	tlReadWrite,; && [.NULL.] {en} READWRITE cursor ; .NULL. don't care
-	tiDS && [session de données courante] {fr} identifiant de la session de données
-tlReadWrite = iif(pcount() = 0 or isnull(m.tlReadWrite);
+  taCursor; && @ {fr} Aliases des curseurs dans la session de données
+, tlReadWrite; && [.NULL.] {en} READWRITE cursor ; .NULL. don't care
+, tiDS && [session de données courante] {fr} identifiant de la session de données
+tlReadWrite = iif(pcount() = 0 or IsNull(m.tlReadWrite);
 	, .null.;
 	, lTrue(m.tlReadWrite);
 	)
@@ -2594,12 +2666,12 @@ return iif(aCursors(@m.taCursor, m.tlReadWrite, m.tiDS, .t.) > 0;
 * ========================================
 function aCursors && {fr} Aliases des curseurs dans une session de données
 lparameters ;
-	taCursor,; && @ {fr} Aliases des curseurs dans la session de données
-	tlReadWrite,; && [.NULL.] {en} READWRITE cursor ; .NULL. don't care
-	tiDS,; && [session de données courante] {fr} identifiant de la session de données
-	tlSort && [.T.] {fr} Trier les aliases par ordre alphabétique
+  taCursor; && @ {fr} Aliases des curseurs dans la session de données
+, tlReadWrite; && [.NULL.] {en} READWRITE cursor ; .NULL. don't care
+, tiDS; && [session de données courante] {fr} identifiant de la session de données
+, tlSort && [.T.] {fr} Trier les aliases par ordre alphabétique
 external array taCursor
-tlReadWrite = iif(pcount() < 2 or isnull(m.tlReadWrite);
+tlReadWrite = iif(pcount() < 2 or IsNull(m.tlReadWrite);
 	, .null.;
 	, lTrue(m.tlReadWrite);
 	)
@@ -2645,8 +2717,8 @@ return m.lnResult
 * ========================================
 function lFieldPK && {fr} Un champ est la clé primaire d'une table
 lparameters ;
-	tcField,; && {fr} Champ
-	tcTable && [Alias()] {fr} Table
+  tcField; && {fr} Champ
+, tcTable && [Alias()] {fr} Table
 local llResult
 
 local lcAlias, llAlias
@@ -2678,8 +2750,8 @@ return m.llResult
 * ========================================
 function lField && {fr} Un champ existe dans une table
 lparameters ;
-	tcField, ; && {fr} Nom du champ dont l'existence est a verifier
-	tuTable	 && [Alias()] {fr} Alias ou adresse de la table où l'existence du champ est à verifier
+  tcField ; && {fr} Nom du champ dont l'existence est a verifier
+, tuTable	 && [Alias()] {fr} Alias ou adresse de la table où l'existence du champ est à verifier
 local lcAlias, llAlias, llResult
 
 if vartype(m.tcField) == 'C'
@@ -2697,8 +2769,8 @@ return m.llResult
 * ========================================
 function lFieldNull && {fr} Un champ existe dans l'alias courant ou spécifié et accepte les valeurs NULL
 lparameters ;
-	tcField, ; && {fr} Nom du champ dont l'existence est a verifier
-	tuTable	 && [Alias()] {fr} Alias ou adresse de la table où l echamp est à verifier
+  tcField ; && {fr} Nom du champ dont l'existence est a verifier
+, tuTable	 && [Alias()] {fr} Alias ou adresse de la table où l echamp est à verifier
 local llResult
 
 llResult = vartype(m.tcField) == 'C' and not empty(m.tcField)
@@ -2731,9 +2803,9 @@ return m.llResult
 * ========================================
 function lFields && {fr} Au moins des | tous les champs existent dans l'alias courant ou spécifié
 lparameters ;
-	tcFields, ; && {fr} Liste de champs dont l'existence est a verifier
-	tuTable,; && [Alias()] {fr} Alias ou adresse de la table où l'existence du champ est à verifier
-	tlOneAtLeast &&	[.F.] {fr} Au moins un des champs doit être présent ; si .F. et par référence, premier champ manquant en retour
+  tcFields ; && {fr} Liste de champs dont l'existence est a verifier
+, tuTable; && [Alias()] {fr} Alias ou adresse de la table où l'existence du champ est à verifier
+, tlOneAtLeast &&	[.F.] {fr} Au moins un des champs doit être présent ; si .F. et par référence, premier champ manquant en retour
 
 local llResult;
 , llOneAtLeast;
@@ -2928,11 +3000,16 @@ endfunc
 * ========================================
 function cFieldExp && {fr} Expression de champ pour instruction CREATE / ALTER TABLE SQL
 lparameters ;
-	tcField,; && {fr} Nom du champ ; si @ nom valide en retour
-	tcType,; && {fr} Type de champ selon abréviations VFP C,N,L, etc.
-	tuLen,; && {fr} Longueur du champ
-	tuDec,; && {fr} Nombre de décimales en cas de champ numérique
-	tuNull && [.F.] {fr} Valeurs null acceptées; si type # 'L', pas précisé (SET NULL agit)
+  tcField; && aField(1) {fr} Nom du champ ; si @ nom valide en retour
+, tcType; && aField(2) {fr} Type de champ selon abréviations VFP C,N,L, etc.
+, tuLen; && aField(3) {fr} Longueur du champ
+, tuDec; && aField(4) {fr} Nombre de décimales en cas de champ numérique
+, tuNull; && [.F.] aField(5) {fr} Valeurs null acceptées; si type # 'L', pas précisé (SET NULL agit)
+, tcCheck; && [''] aField(7) {en} Field validation expression
+, tcText; && [''] aField(8) {en} Field validation text
+, tcDefault; && [''] aField(9) {en} Field default value
+, tiAutoIncNext; && [none] aField(17) {en} NextValue for autoincrementing
+, tiAutoIncStep; && [none] aField(18) {en} Step for autoincrementing
 
 local llResult, lcResult
 lcResult = ''
@@ -2940,7 +3017,8 @@ lcResult = ''
 llResult = vartype(m.tcField) == 'C'
 assert m.llResult message cAssertMsg(textmerge([Nom de champ invalide : <<cLitteral(m.tcField)>>]))
 if m.llResult
-	tcField = cVFPName(m.tcField, 10)
+*	tcField = cVFPName(m.tcField, 10)
+	tcField = Upper(Alltrim(m.tcField)) && 2016-01-22 thn -- {en} long field names - eg see cCursorSchema()
 
 	llResult = vartype(m.tcType) == 'C'
 	if m.llResult
@@ -2968,9 +3046,20 @@ if m.llResult
 			lcResult = textmerge([<<m.lcResult>>(<<m.lcLen>><<Iif(Empty(m.lcDec), '', ',' + m.lcDec)>>)])
 		endif
 
-		if vartype(m.tuNull) == 'L'
-			lcResult = textmerge([<<m.lcResult>> <<Iif(m.tuNull, 'NULL', 'NOT NULL')>>])
-		endif
+		lcResult = lcResult + textmerge([];
+			+ Iif(vartype(m.tuNull) == 'L', [ <<Iif(m.tuNull, 'NULL', 'NOT NULL')>>], '');
+			+ Iif(ga_Type_IsChar(m.tcCheck, .T.), [ CHECK <<m.tcCheck>>], []); && [''] {en} Field validation expression
+			+ Iif(ga_Type_IsChar(m.tcText, .T.), [ ERROR <<cL(m.tcText)>>], []); && [''] {en} Field validation text
+			+ Iif(ga_Type_IsChar(m.tcDefault, .T.), [ DEFAULT <<m.tcDefault>>], []); && [''] {en} Field default value
+			+ Iif(ga_Type_IsPositiveInteger(m.tiAutoIncNext); && [none] {en} NextValue for autoincrementing
+				, [ AUTOINC NEXTVALUE <<m.tiAutoIncNext>>];
+				+ Iif(ga_Type_IsPositiveInteger(m.tiAutoIncStep); && [none] {en} Step for autoincrementing
+					, [ STEP <<m.tiAutoIncStep>>];
+					, [];
+					);
+				, [];
+				);
+			+ [])
 	endif
 endif
 
@@ -2989,10 +3078,10 @@ return loTest.Result()
 * ========================================
 function cFieldExpFrom && {fr} Expression de champ pour instruction CREATE / ALTER TABLE SQL selon un champ existant
 lparameters ;
-	tcField,; && {fr} Champ
-	tcTable,; && {fr} Table
-	tlNullIgnore,; && [.F.] {fr} Ignorer le réglage SET NULL du champ
-	tlNameIgnore && [.F.] {fr} Ignorer le nom du champ
+  tcField; && {fr} Champ
+, tcTable; && {fr} Table
+, tlNullIgnore; && [.F.] {fr} Ignorer le réglage SET NULL du champ
+, tlNameIgnore && [.F.] {fr} Ignorer le nom du champ
 
 local lcAlias, llAlias, laField[1], lnField, llResult, lcResult
 
@@ -3046,10 +3135,10 @@ define class FieldExpFrom_Test as abUnitTest of abDev.prg
 * ========================================
 function cFieldsExpFrom && {fr} Expression de champs pour instruction CREATE / ALTER TABLE SQL d'après une table
 lparameters ;
-	tuTable,; && [Alias()] {fr} Alias ou Zone ou adresse de la table
-	tlParenth,; && [.F.] {fr} Ajouter les parenthèses autour de l'expression
-	tcSep,; && [','] {fr} Séparateur entre champs
-	tlNullIgnore; && [.F.] {fr} Ignorer le réglage SET NULL du champ
+  tuTable; && [Alias()] {fr} Alias ou Zone ou adresse de la table
+, tlParenth; && [.F.] {fr} Ajouter les parenthèses autour de l'expression
+, tcSep; && [','] {fr} Séparateur entre champs
+, tlNullIgnore; && [.F.] {fr} Ignorer le réglage SET NULL du champ
 
 local Result as string;
 , cAlias as string;
@@ -3105,10 +3194,10 @@ endfunc
 * ========================================
 function cFieldsExp && {fr} Expression de champs pour instruction CREATE / ALTER TABLE SQL
 lparameters ;
-	taFields,; && @ {fr} Définitions de champs selon aFields()
-	tlParenth,; && [.F.] {fr} Ajouter les parenthèses autour de l'expression
-	tcSep,; && [','] {fr} Séparateur entre champs
-	tlNullIgnore; && [.F.] {fr} Ignorer le réglage SET NULL du champ
+  taFields; && @ {fr} Définitions de champs selon aFields()
+, tlParenth; && [.F.] {fr} Ajouter les parenthèses autour de l'expression
+, tcSep; && [','] {fr} Séparateur entre champs
+, tlNullIgnore; && [.F.] {fr} Ignorer le réglage SET NULL du champ
 
 external array taFields
 
@@ -3208,9 +3297,9 @@ define class cFieldsTest as abUnitTest of abDev.prg
 * ========================================
 function cFieldsMemvar && {fr} Champs d'une table répondant à un squelette qui sont des variables mémoire
 lparameters ;
-	tuTable,; && [Alias()] {fr} Alias ou Zone ou adresse de la table
-	tcSkeleton,; && [All] {fr} squelette de nom des champs à lister
-	tlExcept && [.F.] {fr} Lister tous les champs SAUF ceux répondant au squelette tcSkeleton
+  tuTable; && [Alias()] {fr} Alias ou Zone ou adresse de la table
+, tcSkeleton; && [All] {fr} squelette de nom des champs à lister
+, tlExcept && [.F.] {fr} Lister tous les champs SAUF ceux répondant au squelette tcSkeleton
 
 local lnFields, laField[1], lnField, lcField, lcResult
 lcResult = ''
@@ -3231,11 +3320,11 @@ return m.lcResult
 * ========================================
 function aFieldsSkeleton && {fr} Champs d'une table répondant à un squelette
 lparameters ;
-	taFields,; && @ {fr} Champs trouvés (1 colonne)
-	tuTable,; && [Alias()] {fr} Alias ou Zone ou adresse de la table
-	tcSkeleton,; && [All] {fr} squelette de nom des champs à lister
-	tlExcept,; && [.F.] {fr} Lister tous les champs SAUF ceux répondant au squelette tcSkeleton
-	tlColsKeep && [.F.] {fr} Garder les colonnes 2 et suivante ; si .F., ne garder que les noms des champs
+  taFields; && @ {fr} Champs trouvés (1 colonne)
+, tuTable; && [Alias()] {fr} Alias ou Zone ou adresse de la table
+, tcSkeleton; && [All] {fr} squelette de nom des champs à lister
+, tlExcept; && [.F.] {fr} Lister tous les champs SAUF ceux répondant au squelette tcSkeleton
+, tlColsKeep && [.F.] {fr} Garder les colonnes 2 et suivante ; si .F., ne garder que les noms des champs
 external array taFields
 
 local lcAlias, llAlias, lnSelect, llResult, lnResult && {fr} Nombre de champs trouvés
@@ -3289,8 +3378,8 @@ return m.lnResult
 procedure RecInsert && {fr} Insère ou ajoute un enregistrement dans une table après l'enregistrement courant
 && {fr} Si succès, la table est positionnée sur le NOUVEL ENREGISTREMENT
 lparameters ;
-	tuTable, ; && [alias()] {fr} Alias ou zone de travail de la table où doit être ajouté l'enregistrement
-	tlCarry	 && [.F.] {fr} Recopier l'enr. courant dans le nouveau (si .F., nouvel enregistrement vide)
+  tuTable ; && [alias()] {fr} Alias ou zone de travail de la table où doit être ajouté l'enregistrement
+, tlCarry	 && [.F.] {fr} Recopier l'enr. courant dans le nouveau (si .F., nouvel enregistrement vide)
 local llResult && {fr} un enregistrement a été inséré
 
 * ================================================================
@@ -3382,9 +3471,9 @@ return m.llResult
 * ========================================
 function cFieldsCarIndexExp && {fr} Expression d'index composite en caractère sur une liste de champs de types quelconques
 lparameters ;
-	tcTable,; && [Alias()] {fr} Alias, zone ou adresse de la table
-	tcIdxFields,; && {fr} Liste de champs
-	tnLength && @ {fr} Longueur de la clé d'index composite en caractères
+  tcTable; && [Alias()] {fr} Alias, zone ou adresse de la table
+, tcIdxFields; && {fr} Liste de champs
+, tnLength && @ {fr} Longueur de la clé d'index composite en caractères
 
 tnLength = 0
 
@@ -3482,7 +3571,7 @@ return m.lcResult
 * ========================================
 function aFieldsCarIndexExp && {fr} Expressions d'index caractère sur des champs de types quelconques
 lparameters ;
-	taIdxFields && @ {fr} Champs à indexer (6 colonnes)
+  taIdxFields && @ {fr} Champs à indexer (6 colonnes)
 local lnResult && {fr} Longueur de la clé composite caractères
 lnResult = 0
 
@@ -3540,10 +3629,10 @@ return m.lnResult
 * ========================================
 function cFieldCarIndexExp && {fr} Expression d'index en caractère sur un champ de type quelconque
 lparameters ;
-	tcField,; && {fr} Nom du champ
-	tcType,; && {fr} Type de champ ($ 'CDTNFIYL')
-	tnWidth,; && {fr} Longueur, partie entière si champ de type N ou F
-	tnPrecision && {fr} partie décimale si champ de type N ou F
+  tcField; && {fr} Nom du champ
+, tcType; && {fr} Type de champ ($ 'CDTNFIYL')
+, tnWidth; && {fr} Longueur, partie entière si champ de type N ou F
+, tnPrecision && {fr} partie décimale si champ de type N ou F
 local lcResult
 
 do case
@@ -3570,8 +3659,8 @@ return m.lcResult
 * ========================================
 procedure FreeTableSlim && {fr} Table libre : supprime les lignes vides et réduit la largeur des champs caractère au minimum
 lparameters ;
-	tuTable,; && {fr} Alias, zone ou adresse d'une table
-	tnLenPercent && [0] {fr} Pourcentage de la longueur des champs caractères à ajouter en réserve
+  tuTable; && {fr} Alias, zone ou adresse d'une table
+, tnLenPercent && [0] {fr} Pourcentage de la longueur des champs caractères à ajouter en réserve
 
 local lcAlias, llAlias, llExclusive, llResult
 
@@ -3603,7 +3692,7 @@ if m.llResult
 		llRecEmpty = .t.
 		for m.lnField = 1 to m.lnFields
 			luField = evaluate(laFields[m.lnField,1])
-			llRecEmpty = m.llRecEmpty and (empty(m.luField) or isnull(m.luField))
+			llRecEmpty = m.llRecEmpty and (empty(m.luField) or IsNull(m.luField))
 
 			* {fr} Si champ caractère, mémoriser longueur max. du contenu
 			if laFields[m.lnField, 2] == 'C'
@@ -3669,7 +3758,7 @@ return m.llResult
 * ========================================
 procedure BlankLinesDel && {fr} Supprime les enregistrements vides d'une table
 lparameters ;
-	tuTable && {fr} Alias ou adresse d'une table
+  tuTable && {fr} Alias ou adresse d'une table
 local llResult
 
 * {fr} Si on peut accéder à la table indiquée
@@ -3714,7 +3803,7 @@ return llResult
 * ========================================
 procedure BlankColsDel && {fr} Supprime les colonnes vides d'une table
 lparameters ;
-	tuTable && {fr} Alias ou adresse d'une table
+  tuTable && {fr} Alias ou adresse d'une table
 local llResult
 
 * {fr} Si on peut accéder à la table indiquée
@@ -3834,8 +3923,8 @@ return m.lcResult
 * ========================================
 procedure TableStruCheck && {fr} Vérifie la structure d'une table, l'ajuste si nécessaire
 lparameters ;
-	tcTable,; && {fr} Alias ou adresse de la table
-	tcFieldsExp && {fr} Expression de description de structure comme dans une commande CREATE TABLE
+  tcTable; && {fr} Alias ou adresse de la table
+, tcFieldsExp && {fr} Expression de description de structure comme dans une commande CREATE TABLE
 
 local lcAlias, llAlias, laFields[1], lcFieldsExp, lcFieldExp;
 	, lcAlter, llResult, lcResult && {fr} Alias de la table vérifiée (vide si ajustement impossible)
@@ -4030,12 +4119,12 @@ return m.llResult
 * ========================================
 function cIndexCmd && {fr} Commande d'indexation d'après les colonnes d'aTagInfo() [Tag, Type, Key, Filter, Order, Collation]
 lparameters ;
-	lcTag,; && 1 {en} Index tag name in a .cdx file or index file name for .idx files
-	lcType,; && 2 {en} Index tag type
-	lcKey,; && 3 {en} Index key expression
-	lcFilter,; && 4 {en} Filter expression
-	lcOrder,; && 5 {en} Index order as created (Ascending or Descending)
-	lcCollate && 6 {en} Collate sequence
+  lcTag; && 1 {en} Index tag name in a .cdx file or index file name for .idx files
+, lcType; && 2 {en} Index tag type
+, lcKey; && 3 {en} Index key expression
+, lcFilter; && 4 {en} Filter expression
+, lcOrder; && 5 {en} Index order as created (Ascending or Descending)
+, lcCollate && 6 {en} Collate sequence
 
 && {en} When using binary indexes, you cannot use the FOR clause to specify a filter expression or the ASCENDING, DESCENDING, UNIQUE, or CANDIDATE keywords
 
@@ -4049,10 +4138,10 @@ return textmerge([INDEX ON <<m.lcKey>> TAG <<m.lcTag>> <<m.lcType>><<m.lcFilter>
 * ========================================
 procedure TableFreeCreateOrAdjust_aTags && {fr} Instructions d'indexation
 lparameters ;
-	taResult,; && @ {fr} Instructions d'indexation
-	taTagInfo,; && @ {fr} Spécifications d'index selon aTagInfo() [Tag, Type, Key, Filter, Order, Collation]
-	tcAlias,; && {fr} Alias, vide si création de la table
-	tlZap && @ [.F.] {fr} Un index candidat doit être créé
+  taResult; && @ {fr} Instructions d'indexation
+, taTagInfo; && @ {fr} Spécifications d'index selon aTagInfo() [Tag, Type, Key, Filter, Order, Collation]
+, tcAlias; && {fr} Alias, vide si création de la table
+, tlZap && @ [.F.] {fr} Un index candidat doit être créé
 external array taResult, taTagInfo
 tlZap = .f.
 
@@ -4153,8 +4242,8 @@ return m.lnResult
 * ========================================
 procedure TableFreeCreateOrAdjust_cFields && {fr} Expression de champs
 lparameters ;
-	taFieldSpec,; && @ {fr} Spécification de champs selon format aFields()
-	tcAlias && {fr} Alias, vide si création de la table
+  taFieldSpec; && @ {fr} Spécification de champs selon format aFields()
+, tcAlias && {fr} Alias, vide si création de la table
 external array taFieldSpec
 
 local lcResult;
@@ -4226,8 +4315,8 @@ return m.lcResult
 * ========================================
 procedure aFields_ && {fr} aFields() d'après un tableau ou une liste ou selon syntaxe CREATE TABLE
 lparameters ;
-	taResult,; && @ {fr} Résultat selon aFields()
-	tuFields && @A|C Spécification de champs dans l'ordre de aFields(), tabulé ou délimité par ';|\t', ou selon syntaxe CREATE TABLE
+  taResult; && @ {fr} Résultat selon aFields()
+, tuFields && @A|C Spécification de champs dans l'ordre de aFields(), tabulé ou délimité par ';|\t', ou selon syntaxe CREATE TABLE
 external array taResult, tuFields
 
 local lnCols, lnRow, lnResult && {fr} Nombre de champs
@@ -4294,9 +4383,9 @@ return m.lnResult
 * ========================================
 procedure aTagInfoEn && {fr} aTagInfo() avec les données en anglais quel que soit la langue courante de VFP /!\ Français supporté seulement
 lparameters ;
-	taResult,; && @ {fr} Spécifications d'indexes au format aTagInfo() [1-tag, 2-type, 3-key expression, 4-filter, 5-order, 6-collate]
-	tcCDXName,; && [all open cdx and idx] {en} Name of the compound index (.cdx) file to return information for
-	tuWAalias && [Alias()] {en} Work Area or alias of the table to return information for
+  taResult; && @ {fr} Spécifications d'indexes au format aTagInfo() [1-tag, 2-type, 3-key expression, 4-filter, 5-order, 6-collate]
+, tcCDXName; && [all open cdx and idx] {en} Name of the compound index (.cdx) file to return information for
+, tuWAalias && [Alias()] {en} Work Area or alias of the table to return information for
 external array taResult
 tcCDXName = evl(m.tcCDXName, '')
 tuWAalias = evl(m.tuWAalias, alias())
@@ -4363,8 +4452,8 @@ return m.lnResult
 * ========================================
 procedure aTagInfo_ && {fr} aTagInfo() d'après un tableau ou une liste
 lparameters ;
-	taResult,; && @ {fr} Spécifications d'indexes au format aTagInfo() [Tag, Type, Key, Filter, Order, Collation]
-	tuTagInfo && @ {fr} Spécification d'indexes au format aTagInfo(), tabulées ou délimitées  par ';|\t'
+  taResult; && @ {fr} Spécifications d'indexes au format aTagInfo() [Tag, Type, Key, Filter, Order, Collation]
+, tuTagInfo && @ {fr} Spécification d'indexes au format aTagInfo(), tabulées ou délimitées  par ';|\t'
 external array taResult, tuTagInfo
 
 #if .f.
@@ -4424,8 +4513,8 @@ return m.lnResult
 * ========================================
 function aFieldsDef && {fr} Définitions de champs selon le format de aFields()
 lparameters ;
-	taFieldsDef,; && @ {fr} Définitions de champs selon le format de aFields()
-	tcFieldsExp && {fr} Expression de description de structure comme dans une commande CREATE TABLE
+  taFieldsDef; && @ {fr} Définitions de champs selon le format de aFields()
+, tcFieldsExp && {fr} Expression de description de structure comme dans une commande CREATE TABLE
 external array taFieldsDef
 
 local lnResult as integer; && {fr} Nombre de champs
@@ -4486,8 +4575,8 @@ return m.lnResult
 * ========================================
 function aFieldsExp && {fr} Expressions de description de champ (comme dans une commande ALTER TABLE)
 lparameters ;
-	taFieldsExp,; && @ {fr} Expressions de champs comme dans une commande ALTER TABLE
-	tcFieldsExp && {fr} Expression de structure comme dans une commande CREATE TABLE
+  taFieldsExp; && @ {fr} Expressions de champs comme dans une commande ALTER TABLE
+, tcFieldsExp && {fr} Expression de structure comme dans une commande CREATE TABLE
 external array taFieldsExp
 
 local llResult, lnResult && {fr} Nombre de champs
@@ -4547,9 +4636,9 @@ return m.lnResult
 * ========================================
 function aFieldSpecs && {fr} Spécifications d'un champ issues de aFields()
 lparameters ;
-	taFieldSpecs,; && @ {fr} Spécifications d'un champ issues de aFields()
-	tcField,; && {fr} Champ à examiner
-	tcAlias && [Alias courant]
+  taFieldSpecs; && @ {fr} Spécifications d'un champ issues de aFields()
+, tcField; && {fr} Champ à examiner
+, tcAlias && [Alias courant]
 
 local llResult, lnResult
 lnResult = 0 && {fr} nombre de specs rendues
@@ -4589,12 +4678,12 @@ return m.lnResult
 * ========================================
 function lFieldExp && {fr} Expression de description de champ valide (comme dans une commande CREATE TABLE)
 lparameters ;
-	tcFieldExp,; && {fr} Expression de description de champ comme dans une commande CREATE TABLE
-	tcField,; && @ [''] {fr} Nom du champ
-	tcType,; && @ [''] {fr} Type du champ
-	tnLen,; && @ [0] {fr} Longueur du champ
-	tnDec,; && @ [0] {fr} Décimales du champ
-	tlNULL && @ [.NULL.] {fr} Le champ accepte les valeurs NULL
+  tcFieldExp; && {fr} Expression de description de champ comme dans une commande CREATE TABLE
+, tcField; && @ [''] {fr} Nom du champ
+, tcType; && @ [''] {fr} Type du champ
+, tnLen; && @ [0] {fr} Longueur du champ
+, tnDec; && @ [0] {fr} Décimales du champ
+, tlNULL && @ [.NULL.] {fr} Le champ accepte les valeurs NULL
 
 tlNULL = .null.
 
@@ -4721,8 +4810,8 @@ return aRelationTrgt(@m.laRelation, m.tcAlias) > 0
 * ========================================
 function aRelationTrgt && {fr} Relation dont un alias est la cible
 lparameters ; && {fr} set relation to <Relational Expression> in <Source Alias> into <Target Alias>
-	taRelation,; && {fr} Relation [Relational Expression, Source Alias]
-	tcAlias && [Alias()] {fr} relation Target Alias
+	taRelation; && {fr} Relation [Relational Expression, Source Alias]
+, tcAlias && [Alias()] {fr} relation Target Alias
 external array taRelation
 tcAlias = upper(evl(m.tcAlias, alias()))
 
@@ -4787,10 +4876,10 @@ return  0 < iif(pcount() = 1;
 * ========================================
 function aRelationSrce && {fr} Relations dont un alias est la source
 lparameters ;
-	taRelation,; && {fr} Relations [1- Relational Expression, 2- Target Alias]
-	tcAlias,; && [Alias()] {fr} Alias à examiner
-	tlExtended,; && [.F., .T. if m.tlCascade] {fr} Relations [1- Relational Expression, 2- Target Alias, 3- Target Index Expression, 4- Source Alias]
-	tlCascade && [.F.] {en} Explore target alias as source alias
+  taRelation; && {fr} Relations [1- Relational Expression, 2- Target Alias]
+, tcAlias; && [Alias()] {fr} Alias à examiner
+, tlExtended; && [.F., .T. if m.tlCascade] {fr} Relations [1- Relational Expression, 2- Target Alias, 3- Target Index Expression, 4- Source Alias]
+, tlCascade && [.F.] {en} Explore target alias as source alias
 
 external array taRelation
 tcAlias = iif(vartype(m.tcAlias) == 'C', upper(m.tcAlias), alias())
@@ -5020,9 +5109,9 @@ enddefine && {fr} CLASS abRelationOff
 * ========================================
 function iAutoInc && {fr} Prochaine clé primaire d'une table
 lparameters ;
-	tcAlias,; && [Alias()] {fr} Alias
-	tcField,; && {fr} Champ clé primaire Integer
-	tiIncrement && [1] {fr} Incrément
+  tcAlias; && [Alias()] {fr} Alias
+, tcField; && {fr} Champ clé primaire Integer
+, tiIncrement && [1] {fr} Incrément
 
 local liResult as integer;
 , llUsed;
@@ -5072,15 +5161,15 @@ return nvl(m.liResult, 0) + evl(m.tiIncrement, 1)
 * ========================================
 function cSelectSQL && {fr} Construit une instruction SELECT-SQL à partir de ses clauses
 lparameters ;
-	tcSELECT as string,; && {fr} Clause SELECT
-	tcFROM as string,; && {fr} Clause FROM
-	tcWHERE as string,; && [''] {fr} Clause WHERE
-	tcGROUP as string,; && [''] {fr} Clause GROUP BY
-	tcHAVING as string,; && [''] {fr} Clause HAVING
-	tcUNION as string,; && [''] {fr} Clause UNION
-	tcORDER as string,; && [''] {fr} Clause ORDER BY
-	tcINTO as string,; && [''] {fr} Clause INTO
-	tlBuffering && [.F.] (VFP seulement) Lire les données en mémoire tampon
+  tcSELECT as string; && {fr} Clause SELECT
+, tcFROM as string; && {fr} Clause FROM
+, tcWHERE as string; && [''] {fr} Clause WHERE
+, tcGROUP as string; && [''] {fr} Clause GROUP BY
+, tcHAVING as string; && [''] {fr} Clause HAVING
+, tcUNION as string; && [''] {fr} Clause UNION
+, tcORDER as string; && [''] {fr} Clause ORDER BY
+, tcINTO as string; && [''] {fr} Clause INTO
+, tlBuffering && [.F.] (VFP seulement) Lire les données en mémoire tampon
 
 tcWHERE = iif(vartype(m.tcWHERE) == 'C' and not empty(m.tcWHERE), 		' WHERE ' + m.tcWHERE, '')
 tcGROUP = iif(vartype(m.tcGROUP) == 'C' and not empty(m.tcGROUP), 		' GROUP BY ' + m.tcGROUP, '')
@@ -5095,29 +5184,32 @@ tlBuffering = iif(pcount() >= 9 and vartype(m.tlBuffering) == 'L';
 return textmerge([SELECT <<m.tcSELECT>> FROM <<m.tcFROM>><<m.tlBuffering>><<m.tcWHERE>><<m.tcGROUP>><<m.tcHAVING>><<m.tcUNION>><<m.tcORDER>><<m.tcINTO>>])
 
 * ========================================
-function VFPselectExecute && {fr} Exécute un SELECT-SQL VFP dans un tableau, une table ou un curseur dont l'alias est sélectionné au retour
+procedure VFPselectExecute && {fr} Exécute un SELECT-SQL VFP dans un tableau, une table ou un curseur dont l'alias est sélectionné au retour
 lparameters ;
-	tcSELECT,; && {fr} Intruction SELECT-SQL
-	tuDest,; && @ {fr} Destination : array OU adresse de table OU nom de curseur [INTO CURSOR Sys(2015)]
-	tlReadWrite,; && [.F.] (applicable si curseur) curseur modifiable
-	tlNoFilter,; && [.F.] (applicable si curseur) forcer la création d'une table sur disque
-	tlThermoNo,; && [.F.] {fr} ne pas afficher la barre d'avancement
-	tcComment,; && [''] {fr} commentaire de debug
-	tcResult && @ [''] {fr} Résultat
+  tcSELECT; && {fr} Intruction SELECT-SQL
+, tuDest; && @ {fr} Destination : array OU adresse de table OU nom de curseur [INTO CURSOR Sys(2015)]
+, tlReadWrite; && [.F.] (applicable si curseur) curseur modifiable
+, tlNoFilter; && [.F.] (applicable si curseur) forcer la création d'une table sur disque
+, tlThermoNo; && [.F.] {fr} ne pas afficher la barre d'avancement
+, tcComment; && [''] {fr} commentaire de debug
+, tcResult && @ [''] {fr} Résultat
 
 tcResult = ''
 
 local lnResult; && {fr} Nombre d'enregistrements trouvés (_tally)
 , llResult;
+, lcLang;
 , lcSelect;
 , lcDest;
 , loSafety as abSet of abDev.prg;
 , loSQLThermo as abSQLthermo of abData.prg;
 , llDegugOut;
+, lnSeconds;
 , lcSelectShow;
 , loExcep as exception;
 
 lnResult = 0
+lcLang = cLangUser()
 
 * {fr} Si l'instruction SELECT est valide
 lcSelect = m.tcSELECT
@@ -5139,6 +5231,7 @@ if m.llResult
 					+ iif(lTrue(m.tlNoFilter), ' NOFILTER', '')
 		endif
 	endif
+
 	lcSelect = m.lcSelect + ' INTO ' + m.lcDest
 
 	* {fr} Exécuter le Select
@@ -5151,13 +5244,18 @@ if m.llResult
 			lcSelectShow = cSelectInstShow(m.lcSelect)
 			tcComment = iif(vartype(m.tcComment) == 'C', space(1) + alltrim(m.tcComment) + space(1), '')
 			debugout space(1)
-			debugout padr(textmerge([<<Datetime()>> - OPTIMIZE <<Set("Optimize")>> - DELETED <<Set("Deleted")>> - COLLATE '<<Set("Collate")>>' - ANSI '<<Set("ANSI")>>' -<<m.tcComment>>]), 120, '-')
+			debugout padr(textmerge([<<Datetime()>> - OPTIMIZE <<Set("Optimize")>> - DELETED <<Set("Deleted")>> - ANSI <<Set("ANSI")>> - COLLATE '<<Set("Collate")>>' -<<m.tcComment>>]), 120, '-')
 			debugout m.lcSelectShow
-			debugout 'Appelé par', cCallingModules()
-			debugout textmerge([L'instruction SELECT fait <<Ltrim(Transform(Len(m.lcSelect), '99 999'))>> caractères, soit <<Int(Len(m.lcSelect)/8192*100)>>% de la limite de 8.192 caractères])
+			debugout ICase(;
+				m.lcLang = 'fr',	'Appelé par',; && copy-paste this line to add another language support
+													'Called by'; && Default: English
+				), cCallingModules()
+			debugout textmerge(ICase(;
+				m.lcLang = 'fr',	[L'instruction SELECT-SQL fait <<Ltrim(Transform(Len(m.lcSelect), '99,999'))>> caractères, soit <<Int(Len(m.lcSelect)/8192*100)>>% de la limite VFP de 8.192 caractères],; && copy-paste this line to add another language support
+													[The SQL-SELECT instruction length is <<Ltrim(Transform(Len(m.lcSelect), '99,999'))>> characters, <<Int(Len(m.lcSelect)/8192*100)>>% of the 8,192 characters VFP limitation]; && Default: English
+				))
 			private pcSYS3054
 			sys(3054, 11, 'pcSYS3054')
-			local lnSeconds
 			lnSeconds = seconds()
 		endif
 
@@ -5166,36 +5264,48 @@ if m.llResult
 
 		if llDegugOut
 			debugout m.pcSYS3054
-			tcResult = cQueryPerf(nSeconds(m.lnSeconds), m.lnResult)
+			tcResult = cBarsSecs(nSeconds(m.lnSeconds));
+			 + ' ' + ICase(;
+				m.lcLang = 'fr',	'pour trouver',; && copy-paste this line to add another language support
+													'to find'; && Default: English
+				);
+			 + ' ' + ltrim(transform(m.lnResult, '999,999'));
+			 + ' ' + ICase(;
+				m.lcLang = 'fr',	'enregistrements',; && copy-paste this line to add another language support
+													'records'; && Default: English
+				)
 		endif
 
-	catch to m.loExcep
+	catch to loExcep
 		llResult = .f.
 		_cliptext = iif(m.llDegugOut, m.lcSelectShow, _cliptext)
-		tcResult = [Erreur dans l'instruction Select ] + iif(llDegugOut, [(dans clip board) ], '') + ": " + cException(m.loExcep)
+		tcResult = ICase(;
+			m.lcLang = 'fr',	[Erreur dans l'instruction SELECT-SQL],; && copy-paste this line to add another language support
+												[Error in SQL-SELECT instruction]; && Default: English
+			);
+		 + iif(!m.llDegugOut, '', ' ' + ICase(;
+			m.lcLang = 'fr',	[(dans le presse-papier)],; && copy-paste this line to add another language support
+												[(in clip board)]; && Default: English
+			));
+		 + ": " + cException(m.loExcep)
 
 	finally
-		if llDegugOut
+		if m.llDegugOut
 			sys(3054, 0)
 		endif
 	endtry
 else
-	tcResult = [Invalid SELECT instruction ] + cLitteral(m.tcSELECT)
+	tcResult = ICase(;
+		m.lcLang = 'fr',	[Instruction SELECT-SQL invalide],; && copy-paste this line to add another language support
+											[Invalid SQL-SELECT instruction]; && Default: English
+		);
+		+ ': ' + cLitteral(m.tcSELECT)
 endif
 
 debugout m.tcResult
-
 assert m.llResult message cAssertMsg(m.tcResult)
-
 return m.lnResult
-
-* ========================================
-function cQueryPerf && {fr} Performance d'une requête
-lparameters ;
-	tnSecs,; && {fr} Nombre de secondes
-	tnRecs && {fr} Nombre d'enr. trouvés
-
-return cBarsSecs(m.tnSecs) + [ pour trouver ]  + ltrim(transform(m.tnRecs, '999 999')) + [ enregistrements]
+endproc
 
 * ========================================
 function lSelectInst && {fr} Instruction SELECT valide
@@ -5327,7 +5437,7 @@ enddefine && {fr} class abSQLthermo
 * ========================================
 function cVarType && {fr} Type de variable d'après le type de champ
 lparameters ;
-	tcType && {fr} Type de champ
+  tcType && {fr} Type de champ
 local lcResult, llResult
 lcResult = ''
 
@@ -5350,9 +5460,9 @@ return m.lcResult
 * ========================================
 procedure TablesFieldRename && {fr} Renomme un champ dans plusieurs tables
 lparameters ;
-	tcTablesSkel,; && {fr} Squelette de l'adresse des tables
-	tcField,; && {fr} Champ à renommer
-	tcFieldNew && {fr} Nouveau nom du champ
+  tcTablesSkel; && {fr} Squelette de l'adresse des tables
+, tcField; && {fr} Champ à renommer
+, tcFieldNew && {fr} Nouveau nom du champ
 local lnResult, llResult && {fr} Nombre de tables traitées
 lnResult = 0
 
@@ -5391,9 +5501,9 @@ return m.lnResult
 * ========================================
 procedure TableFieldRename && {fr} Renomme un champ dans une table
 lparameters ;
-	tcTable,; && {fr} Adresse de la table
-	tcField,; && {fr} Champ à renommer
-	tcFieldNew && {fr} Nouveau nom du champ
+  tcTable; && {fr} Adresse de la table
+, tcField; && {fr} Champ à renommer
+, tcFieldNew && {fr} Nouveau nom du champ
 local llResult && {fr} Le champ a été renommé
 
 * {fr} Si la table existe
@@ -5496,10 +5606,10 @@ return m.llResult
 * ========================================
 function aDBCTablesTree && {fr} Tables d'une base de données dans l'ordre de parenté
 lparameters ;
-	taTables,; && @ {fr} Tables
-	tcDBC,; && {fr} Base de données
-	tcExcludes,;  && {fr} Table(s) à exclure
-	tlAsc && [.F.] /!\ à developper /!\ Ordonner les tables selon les parentés ascendantes
+  taTables; && @ {fr} Tables
+, tcDBC; && {fr} Base de données
+, tcExcludes;  && {fr} Table(s) à exclure
+, tlAsc && [.F.] /!\ à developper /!\ Ordonner les tables selon les parentés ascendantes
 external array taTables
 
 local llResult, lnResult && {fr} nombre de tables
@@ -5588,9 +5698,9 @@ return m.lnResult
 * ========================================
 function lDBCTableParent && {fr} Une table est parente d'une autre dans une base de données
 lparameters ;
-	tcDBC,; && {fr} Base de données
-	tcTableChild,; && {fr} Table enfant
-	tcTableParent && {fr} Table parent supposée
+  tcDBC; && {fr} Base de données
+, tcTableChild; && {fr} Table enfant
+, tcTableParent && {fr} Table parent supposée
 local loSet, laJoins[1], llResult
 
 llResult = vartype(m.tcTableParent) == 'C' and not empty(m.tcTableParent)
@@ -5613,11 +5723,11 @@ return m.llResult
 * ========================================
 function aDBCJoinsUp && {fr} Jointures ascendantes d'une table dans une base de données
 lparameters ;
-	taJoins,; && @ {fr} Jointures ascendantes : [1-Table enfant | 2-Table parent | 3-Tag enfant | 4-Tag parent | 5-RI]
-	tcDBC,; && {fr} Base de données
-	tcTableChild,; && {fr} Table enfant
-	tcTablesIgnore,; && [''] {fr} Tables parent à ignorer
-	tcFKsChild && [toutes] {fr} Clés étrangères (tags) enfant à examiner
+  taJoins; && @ {fr} Jointures ascendantes : [1-Table enfant | 2-Table parent | 3-Tag enfant | 4-Tag parent | 5-RI]
+, tcDBC; && {fr} Base de données
+, tcTableChild; && {fr} Table enfant
+, tcTablesIgnore; && [''] {fr} Tables parent à ignorer
+, tcFKsChild && [toutes] {fr} Clés étrangères (tags) enfant à examiner
 external array taJoins
 
 local laRelations[1], laTablesIgnore[1];
@@ -5678,9 +5788,9 @@ return m.lnResult
 * ========================================
 function aDBCJoinsUp_FKsChild && {fr} [privée de aDBJoinsUp()] - Filtre les relations sur les tags indiqués
 lparameters ;
-	taRelations,; && @ {fr} Relations
-	tcTableChild,; && {fr} Table enfant
-	tcFKsChild && {fr} Clés étrangères (tags) enfant (dans la table enfant)
+  taRelations; && @ {fr} Relations
+, tcTableChild; && {fr} Table enfant
+, tcFKsChild && {fr} Clés étrangères (tags) enfant (dans la table enfant)
 external array taRelations
 
 * {fr} Si des tags enfants sont à examiner
@@ -5708,10 +5818,10 @@ endif
 * ========================================
 function aDBCJoinsUp_1 && {fr} (privée de aDBJoinsUp, récursive) Relations ascendantes d'une table
 lparameters ;
-	taJoins,; && @ {fr} Relations ascendantes : [Table enfant | Table parent | Tag enfant | Tag parent | Vide]
-	taRelations,; && @ {fr} Relations de la base de données
-	tcTableChild,; && {fr} Table enfant
-	taTablesIgnore && @ {fr} Ignorer ces tables parent
+  taJoins; && @ {fr} Relations ascendantes : [Table enfant | Table parent | Tag enfant | Tag parent | Vide]
+, taRelations; && @ {fr} Relations de la base de données
+, tcTableChild; && {fr} Table enfant
+, taTablesIgnore && @ {fr} Ignorer ces tables parent
 external array taJoins, taRelations, taTablesIgnore
 
 local lnRel, lnCols, lcTableParent, lnResult && {fr} Nombre de tables trouvées
@@ -5774,9 +5884,9 @@ return loTest.Result()
 * ========================================
 function aDBCJoinsParent && {fr} Jointures dont une table est parent
 lparameters ;
-	taJoins,; && @ {fr} Jointures: [1-Table enfant | 2-Table parent | 3-Tag enfant | 4-Tag parent | 5-RI]
-	tcDBC,; && {fr} Base de données
-	tcTableParent && {fr} Table de départ
+  taJoins; && @ {fr} Jointures: [1-Table enfant | 2-Table parent | 3-Tag enfant | 4-Tag parent | 5-RI]
+, tcDBC; && {fr} Base de données
+, tcTableParent && {fr} Table de départ
 external array taJoins
 local llResult, lnResult && {fr} Nombre de relations
 lnResult = 0
@@ -5859,10 +5969,10 @@ define class aDBCJoins_Test as abUnitTest of abDev.prg
 * ========================================
 function aDBCJoinsChild && {fr} Jointures dont une table est enfant
 lparameters ;
-	taJoins,; && @ [Table enfant | Table parent | Tag enfant | Tag parent | Vide]
-	tcDBC,; && {fr} Base de données
-	tcTableChild,; && {fr} Table enfant
-	tcTablesIgnore && [''] {fr} Ignorer ces tables parent
+  taJoins; && @ [Table enfant | Table parent | Tag enfant | Tag parent | Vide]
+, tcDBC; && {fr} Base de données
+, tcTableChild; && {fr} Table enfant
+, tcTablesIgnore && [''] {fr} Ignorer ces tables parent
 external array taJoins
 local llResult, lnResult && {fr} Nombre de relations
 lnResult = 0
@@ -5954,8 +6064,8 @@ return m.llResult
 * ========================================
 function lTableExpr && {fr} Une expression est valide sur une table
 lparameters ;
-	tc__Expr,; && {fr} Expression à vérifier
-	tu__Table && [Alias()] {fr} table ou alias où vérifier l'expression
+  tc__Expr; && {fr} Expression à vérifier
+, tu__Table && [Alias()] {fr} table ou alias où vérifier l'expression
 
 local lo__Select, lc__Alias, ll__Opened;
 , lo__Except as exception, ll__Result && {fr} Evite que les noms des variables locales puissent figurer dans l'expression
@@ -5992,9 +6102,9 @@ return m.ll__Result
 * ========================================
 function cExprFieldsPrefixed && {fr} Expression où les noms de champs d'une table sont préfixés (en général par 'm.' ou 'Alias.')
 lparameters ;
-	tcFieldsExpr,; && {fr} Expression comportant en principe des champs
-	tcTable,; && {fr} Table où se trouvent les champs ou son alias
-	tcPrefix && ['m'] {fr} Préfixe à ajouter avant les noms de champs (prefixe.champ)
+  tcFieldsExpr; && {fr} Expression comportant en principe des champs
+, tcTable; && {fr} Table où se trouvent les champs ou son alias
+, tcPrefix && ['m'] {fr} Préfixe à ajouter avant les noms de champs (prefixe.champ)
 
 local lcResult;
 , llResult;
@@ -6047,10 +6157,10 @@ return m.lcResult
 * -----------------------------------------------------------------
 function cExprFieldsPrefixed_Ops && {fr} cExprFieldsPrefixed() : Algorithme avec parcours des opérandes
 lparameters ;
-	taOps,; && @ {fr} Opérandes
-	tcFieldsExpr,; && {fr} Expression comportant en principe des champs
-	tcAlias,; && {fr} Alias de la table où se trouvent les champs
-	tcPrefix && {fr} Préfixe à ajouter avant les noms de champs (prefixe.champ)
+  taOps; && @ {fr} Opérandes
+, tcFieldsExpr; && {fr} Expression comportant en principe des champs
+, tcAlias; && {fr} Alias de la table où se trouvent les champs
+, tcPrefix && {fr} Préfixe à ajouter avant les noms de champs (prefixe.champ)
 external array taOps
 
 local lcResult;
@@ -6102,9 +6212,9 @@ return m.lcResult
 * -----------------------------------------------------------------
 function cExprFieldsPrefixed_Fields && {fr} Algorithme avec parcours des champs de la table
 lparameters ;
-	tcFieldsExpr,; && {fr} Expression comportant en principe des champs
-	tcAlias,; && {fr} Alias de la table où se trouvent les champs
-	tcPrefix && ['m'] {fr} Préfixe à ajouter avant les noms de champs (prefixe.champ)
+  tcFieldsExpr; && {fr} Expression comportant en principe des champs
+, tcAlias; && {fr} Alias de la table où se trouvent les champs
+, tcPrefix && ['m'] {fr} Préfixe à ajouter avant les noms de champs (prefixe.champ)
 
 local lcResult, lcResultU;
 , lnField, lcField, lcField_, lnFieldAt;
@@ -6510,7 +6620,7 @@ if m.success
 	oSelect = abSelect(m.cAlias)
 	this.cAlias = m.cAlias
 	this.cOrder = iif(!m.lUsed, order(), .null.)
-	this.lDesc  = iif(!m.lUsed and !isnull(evl(this.cOrder, .null.)), descending(), .null.)
+	this.lDesc  = iif(!m.lUsed and !IsNull(evl(this.cOrder, .null.)), descending(), .null.)
 
 	cOrder = iif(vartype(m.cOrder) == 'C', m.cOrder, '')
 	if empty(m.cOrder)
@@ -6529,7 +6639,7 @@ return m.success
 * -------------------------------
 protected procedure destroy
 
-if isnull(m.this.cOrder)
+if IsNull(m.this.cOrder)
 	use in (m.this.cAlias)
 else
 	local cOrder, cDesc
@@ -6580,7 +6690,7 @@ return m.success
 * -------------------------------
 protected procedure destroy
 
-if isnull(m.this.cFilter)
+if IsNull(m.this.cFilter)
 	use in (m.this.cAlias)
 else
 	local lcFilter
@@ -6729,11 +6839,11 @@ with m.loTest as abRowBufferSave_Test of abData.prg
 
 .use
 	.Test() && 1
-	.assert(isnull(.cFldState()))
+	.assert(IsNull(.cFldState()))
 
 .insert
 	.Test() && 2
-	.assert(isnull(.cFldState()))
+	.assert(IsNull(.cFldState()))
 
 .setBuffering(3)
 .append
@@ -6857,7 +6967,7 @@ return m.llResult
 
 * -------------------------------
 procedure destroy
-if isnull(m.this.iRecno)
+if IsNull(m.this.iRecno)
 	use in (m.this.cAlias)
 else
 	return RecnoSet(m.this.iRecno, m.this.cAlias)
@@ -6881,9 +6991,9 @@ endif
 * ========================================
 procedure RecnoSet as Boolean && {fr} Place un alias sur un enregistrement déterminé avec Recno_()
 lparameters ;
-	tiRecno,; && {fr} n° d'enregistrement
-	tcAlias,; && [Alias()]
-	tcResult && @ {fr} Résultat (cumulatif)
+  tiRecno; && {fr} n° d'enregistrement
+, tcAlias; && [Alias()]
+, tcResult && @ {fr} Résultat (cumulatif)
 
 tcAlias = evl(m.tcAlias, alias())
 
@@ -6948,15 +7058,18 @@ assert m.llResult message cAssertMsg(m.lcResult)
 cResultAdd(@m.tcResult, m.lcResult)
 
 return m.llResult
-
+endproc
 
 * ========================================
 function RecCount_(tcAlias) && {fr} RecCount() avec gestion des vues remote progressive fetch
 tcAlias = Iif(ga_Type_IsChar(m.tcAlias, .T.), m.tcAlias, Alias())
-return Iif(lViewRemote(m.tcAlias) and !CursorGetProp("FetchIsComplete", m.tcAlias);
-		, CursorGetProp("RecordsFetched", m.tcAlias);
-		, RecCount(m.tcAlias);
-		)
+return ICase(;
+	!Used(m.tcAlias),;
+		.null.,;
+	lViewRemote(m.tcAlias) and !CursorGetProp("FetchIsComplete", m.tcAlias),;
+		CursorGetProp("RecordsFetched", m.tcAlias),;
+		RecCount(m.tcAlias);
+	)
 endfunc
 
 * ========================================
@@ -7019,8 +7132,8 @@ endfunc
 * ========================================
 function lRecMod && {fr} Un enregistrement d'un curseur tamponné a été modifié && {fr} à modifier pour tampon d'enregistrement
 lparameters ;
-	tcAlias,; && [courant] {fr} Alias à examiner
-	tnRec && [courant] {fr} n° absolu de l'enregistrement a examiner
+  tcAlias; && [courant] {fr} Alias à examiner
+, tnRec && [courant] {fr} n° absolu de l'enregistrement a examiner
 local lnRec, llRec, lcRec, lcFldState, llResult
 
 tcAlias = iif(vartype(m.tcAlias) == 'C' and used(m.tcAlias), m.tcAlias, alias())
@@ -7079,9 +7192,9 @@ return m.llResult
 * ========================================
 function cSQLSelectClause && {fr} Clause d'une instruction SELECT-SQL
 lparameters ;
-	tcSQLSelect,; && @ {fr} Instruction SELECT-SQL (@ nécessaire si m.tlDelete)
-	tcClause,; && {fr} Clause à rechercher
-	tlDelete && [.F.] {fr} Supprimer la clause de l'instruction
+  tcSQLSelect; && @ {fr} Instruction SELECT-SQL (@ nécessaire si m.tlDelete)
+, tcClause; && {fr} Clause à rechercher
+, tlDelete && [.F.] {fr} Supprimer la clause de l'instruction
 local laClauses[1], lnClause, lcResult
 lcResult = ''
 
@@ -7221,7 +7334,7 @@ loTest = newobject('abUnitTest', 'abDev.prg')
 
 loTest.Test(4;
 	, @m.laParm;
-	, 'select someField from someTable where someKey = ? thisForm.someProperty and someKey like ? m.someVariable.or.inlist(?m.someVariable, 1,2).or.isnull(?alias.Field) and somefield like ?thisform.pgf.pag.txt.Value'; && {fr} string literal in where clause not supported!
+	, 'select someField from someTable where someKey = ? thisForm.someProperty and someKey like ? m.someVariable.or.inlist(?m.someVariable, 1,2).or.IsNull(?alias.Field) and somefield like ?thisform.pgf.pag.txt.Value'; && {fr} string literal in where clause not supported!
 	)
 loTest.assert(lower('thisForm.someProperty'), m.laParm[1])
 loTest.assert(lower('someVariable'), m.laParm[2])
@@ -7287,8 +7400,8 @@ endfunc
 * ========================================
 function aSQLSelectClauses && {fr} Clauses d'une instruction SELECT-SQL && {fr} d'après une fonction d'Anders Altberg http://www.foxite.com/archives/extract-a-clause-from-sql-0000195322.htm
 lparameters ;
-	taClauses,; && @ {fr} Clauses en retour [Clause, argument, position début]
-	tcSQLSelect && {fr} Instruction SELECT-SQL
+  taClauses; && @ {fr} Clauses en retour [Clause, argument, position début]
+, tcSQLSelect && {fr} Instruction SELECT-SQL
 external array taClauses
 local lcSQLSelect, lnClause, lcClause, lcDelim1, lcDelim2, lnResult && {fr} Nombre de clauses
 lnResult = 0
@@ -7345,9 +7458,9 @@ return loTest.Result()
 * ---------------------
 procedure lTableStruIdem && {fr} Deux tables ont une structure et des indexes identiques
 lparameters ;
-	tcTable1,;
-	tcTable2,;
-	tcResult && @ {fr} résultat
+  tcTable1;
+, tcTable2;
+, tcResult && @ {fr} résultat
 
 local lcAlias1, lcAlias2, llAlias1, llAlias2;
 , laField1[1], laField2[1];
@@ -7418,11 +7531,17 @@ define class abDataSyncVFP as custom && {fr} Synchronise deux tables ou deux bas
 * ========================================
 
 	* {fr} RÉGLAGES
-	cTimeStampField = 'tMOD' && {fr} clé & champ date et heure de dernière modification d'une table ; pris en compte dans le réglage de plSync && 'tMOD' est le standard FoxInCloud
-	clSyncField = 'lSYNC' && {fr} champ 'enregistrement modifié par synchronisation' normalement présent dans chaque table && 'lSYNC' est le standard FoxInCloud
+	&& {fr} Champ {date et heure de dernière modification} dans les tables du DBC - requis pour la synchronisation de base de données (avec la classe acDataSyncVFP) ; pris en compte dans le réglage de plSync
+	&& {en} Field {last modification Datetime} in DBC tables - required for database synchronisation
+	cTimeStampField = 'tMOD' && 'tMOD' {fr} est le standard FoxInCloud {en} is FoxInCloud standard
+
+	&& {fr} champ 'enregistrement modifié par synchronisation' normalement présent dans chaque table
+	&& {en} Field {record modified by synchronization} in DBC tables - required for database synchronisation
+	clSyncField = 'lSYNC' && 'lSYNC' {fr} est le standard FoxInCloud {en} is FoxInCloud standard
+
 	lTypesForce = .f. && {fr} Forcer les types des champs de la table source vers ceux de la table destination
 	lSyncDeleted = .t. && {fr} Synchroniser les enregistrements deletés
-	lModCheck = .f. && {fr} Vérifier que les données ont changé avant de remplacer && {fr} évite une mise à jour inutile de la date de modification
+	lModCheck = .f. && {fr} Vérifier que les données ont changé avant de remplacer (évite une mise à jour inutile de la date de modification)
 
 	lDebug = .f. && {fr} Enrichir les messages d'erreur
 	cErrorHeader = '/!\' && {fr} en-tête ajouté au résultat en cas d'erreur
@@ -7586,15 +7705,14 @@ define class abDataSyncVFP as custom && {fr} Synchronise deux tables ou deux bas
 	endif
 
 *---------------------------------------
-	protected procedure cResultAdd
-	lparameters tcResult
+protected procedure cResultAdd
+lparameters tcResult
 
-	local llResult
-
-	llResult = m.this.lResult
-	this.lResult = .f.
-	this.cResult = m.tcResult
-	this.lResult = m.llResult
+local llResult
+llResult = m.this.lResult
+this.lResult = .f.
+this.cResult = m.tcResult
+this.lResult = m.llResult
 
 *---------------------------------------
 	protected procedure oResultFinal && {fr} Objet résultat final
@@ -7717,8 +7835,8 @@ define class abDataSyncVFP as custom && {fr} Synchronise deux tables ou deux bas
 *---------------------------------------
 	protected function aTablesIgnore && {fr} Tables à ignorer
 	lparameters ;
-		taTablesIgnore,; && @ {fr} Tables à ignorer
-		tcTablesIgnore && {fr} Tables à ignorer
+		taTablesIgnore; && @ {fr} Tables à ignorer
+, 	tcTablesIgnore && {fr} Tables à ignorer
 	external array taTablesIgnore
 
 	tcTablesIgnore = iif(vartype(m.tcTablesIgnore) == 'C', m.tcTablesIgnore, '')
@@ -7730,12 +7848,12 @@ define class abDataSyncVFP as custom && {fr} Synchronise deux tables ou deux bas
 *---------------------------------------
 	procedure DBCSync && {fr} Synchronise deux bases de données VFP
 	lparameters ;
-		tcDBCdest,; && [this.cDBCdest] {fr} Adresse de la base de données destination
-		tcDBCsrce,; && [this.cDBCsrce] {fr} Adresse de la base de données source
-		tcTablesIgnore,; && [this.cTablesIgnore] {fr} Tables à ignorer
-		tuFieldsIgnore,; && ['WARNING'] {fr} Ignorer si ces champs de la table destination sont absents de la table source ; .T.: aucune vérification de structure
-		tlReplace,; && [.F.] {fr} Remplacer toute la table destination
-		tlCKmatch && [.F.] {fr} Matcher les enregistrements sur la première clé candidate de la table destination
+		tcDBCdest; && [this.cDBCdest] {fr} Adresse de la base de données destination
+, 	tcDBCsrce; && [this.cDBCsrce] {fr} Adresse de la base de données source
+, 	tcTablesIgnore; && [this.cTablesIgnore] {fr} Tables à ignorer
+, 	tuFieldsIgnore; && ['WARNING'] {fr} Ignorer si ces champs de la table destination sont absents de la table source ; .T.: aucune vérification de structure
+, 	tlReplace; && [.F.] {fr} Remplacer toute la table destination
+, 	tlCKmatch && [.F.] {fr} Matcher les enregistrements sur la première clé candidate de la table destination
 
 	this.ResultClear
 	this.cDBCdest = evl(m.tcDBCdest, m.this.cDBCdest) && {fr} cf. this.cDBCdest_assign()
@@ -7820,16 +7938,16 @@ define class abDataSyncVFP as custom && {fr} Synchronise deux tables ou deux bas
 *---------------------------------------
 	protected procedure DBCSync_Table_Ante && {fr} méthode shell avant synchronisation
 	lparameters ;
-		tcTable,; && {fr} Table sur le point d'être synchronisée
-		tuFieldsIgnore,; && @ {fr} Ignorer si ces champs de la table destination sont absents de la table source ; .T.: aucune vérification de structure
-		tlReplace,; && @ {fr} Remplacer toute la table destination
-		tlCKmatch && @ {fr} Matcher les enregistrements sur la première clé candidate de la table destination
+		tcTable; && {fr} Table sur le point d'être synchronisée
+, 	tuFieldsIgnore; && @ {fr} Ignorer si ces champs de la table destination sont absents de la table source ; .T.: aucune vérification de structure
+, 	tlReplace; && @ {fr} Remplacer toute la table destination
+, 	tlCKmatch && @ {fr} Matcher les enregistrements sur la première clé candidate de la table destination
 
 *---------------------------------------
 	protected procedure DBCSync_Table_Post && {fr} méthode shell après synchronisation
 	lparameters ;
-		tcTable,; && {fr} Table qui vient d'être synchronisée
-		toResult && {fr} Résultat de la synchronisation
+		tcTable; && {fr} Table qui vient d'être synchronisée
+, 	toResult && {fr} Résultat de la synchronisation
 
 	local llResult
 	llResult = dodefault(m.tcTable, m.toResult)
@@ -7853,15 +7971,15 @@ define class abDataSyncVFP as custom && {fr} Synchronise deux tables ou deux bas
 
 	return m.llResult
 
-*---------------------------------------
+	* ---------------------------------------
 	procedure TableSync && {fr} Synchronise deux tables VFP
 	lparameters ;
-		tcTableDest,; && {fr} Table destination (Adresse || Alias || db!Table)
-		tcTableSrce,; && {fr} Table source  (Adresse || Alias || db!Table)
-		tuFieldsIgnore,; && ['WARNING'] {fr} Ignorer si ces champs de la table destination sont absents de la table source ; .T.: aucune vérification de structure
-		tlReplace,; && [.F.] {fr} Remplacer toute la table destination
-		tlCKmatch,; && [.F.] {fr} Matcher les enregistrements sur la première clé candidate de la table destination
-		tnRecs && [all] {fr} Nombre d'enregistrements à synchroniser
+		tcTableDest; && {fr} Table destination (Adresse || Alias || db!Table)
+, 	tcTableSrce; && {fr} Table source  (Adresse || Alias || db!Table)
+, 	tuFieldsIgnore; && ['WARNING'] {fr} Ignorer si ces champs de la table destination sont absents de la table source ; .T.: aucune vérification de structure
+, 	tlReplace; && [.F.] {fr} Remplacer toute la table destination
+, 	tlCKmatch; && [.F.] {fr} Matcher les enregistrements sur la première clé candidate de la table destination
+, 	tnRecs && [all] {fr} Nombre d'enregistrements à synchroniser
 
 	this.ResultClear
 
@@ -7941,9 +8059,9 @@ define class abDataSyncVFP as custom && {fr} Synchronise deux tables ou deux bas
 *---------------------------------------
 	hidden function lFieldsMatch && {fr} Les champs des tables source et destination sont cohérents
 	lparameters ;
-		tcAliasDest,; && {fr} Alias de la table destination
-		tcAliasSrce,; && {fr} Alias de la table source
-		tcFieldsIgnore && {fr} Champs à ignorer
+		tcAliasDest; && {fr} Alias de la table destination
+, 	tcAliasSrce; && {fr} Alias de la table source
+, 	tcFieldsIgnore && {fr} Champs à ignorer
 
 	local llFieldsSrce, llFieldsDest
 
@@ -7985,11 +8103,11 @@ define class abDataSyncVFP as custom && {fr} Synchronise deux tables ou deux bas
 *---------------------------------------
 	protected procedure TableSync_ && {fr} Réalise la synchronisation des tables
 	lparameters ;
-		tcAliasDest,; && {fr} Alias de la table destination
-		tcAliasSrce,; && {fr} Alias de la table source
-		tlReplace,; && [.F.] {fr} Remplacer toute la table destination
-		tlCKmatch,; && [.F.] {fr} Matcher les enregistrements sur la première clé candidate de la table destination
-		tnRecs && [all] {fr} Nombre d'enregistrements à synchroniser
+		tcAliasDest; && {fr} Alias de la table destination
+, 	tcAliasSrce; && {fr} Alias de la table source
+, 	tlReplace; && [.F.] {fr} Remplacer toute la table destination
+, 	tlCKmatch; && [.F.] {fr} Matcher les enregistrements sur la première clé candidate de la table destination
+, 	tnRecs && [all] {fr} Nombre d'enregistrements à synchroniser
 	tlReplace = lTrue(m.tlReplace)
 	tlCKmatch = lTrue(m.tlCKmatch)
 	tnRecs = iif(vartype(m.tnRecs) == 'N' and m.tnRecs > 0, int(m.tnRecs), 0)
@@ -8315,11 +8433,11 @@ define class abDataSyncVFP as custom && {fr} Synchronise deux tables ou deux bas
 *---------------------------------------
 	protected procedure TableSync_Rec && {fr} Exécuté à chaque enregistrement
 	lparameters ;
-		tcAliasDest,; && {fr} Alias de la table destination
-		tlReplaced,; && {fr} L'enregistrement a été remplacé
-		tnAdded,; && {fr} Nombre d'enregistrements ajoutés
-		tnReplaced,; && {fr} Nombre d'enregistrements remplacés
-		tcAliasSrce && {fr} Alias de la table source
+		tcAliasDest; && {fr} Alias de la table destination
+, 	tlReplaced; && {fr} L'enregistrement a été remplacé
+, 	tnAdded; && {fr} Nombre d'enregistrements ajoutés
+, 	tnReplaced; && {fr} Nombre d'enregistrements remplacés
+, 	tcAliasSrce && {fr} Alias de la table source
 
 && {fr} Implémenter en sous-classe
 
@@ -8444,3 +8562,30 @@ return upper(icase(;
 	))
 endfunc
 
+* =============================================
+function cCursorSchema && {en} .CursorSchema of an alias (intended for converting a view to a cursorAdapter)
+lparameters cAlias && [Alias()]
+&& 2016-01-22 thn -- {en} created
+
+cAlias = cAlias(m.cAlias)
+
+local result, iField, aa[1]
+result = ''
+if Used(m.cAlias)
+	for iField = 1 to AFields(aa, m.cAlias)
+		result = m.result + ', ' + cFieldExp(;
+			  m.aa[m.iField, 01];
+			, m.aa[m.iField, 02];
+			, m.aa[m.iField, 03];
+			, m.aa[m.iField, 04];
+			, m.aa[m.iField, 05];
+			, m.aa[m.iField, 07]; && [''] aField(7) {en} Field validation expression
+			, m.aa[m.iField, 08]; && [''] aField(8) {en} Field validation text
+			, m.aa[m.iField, 09]; && [''] aField(9) {en} Field default value
+			, m.aa[m.iField, 17]; && [none] aField(17) {en} NextValue for autoincrementing
+			, m.aa[m.iField, 18]; && [none] aField(18) {en} Step for autoincrementing
+			)
+	endfor
+endif
+return Ltrim(m.result, ',', ' ')
+endfunc
