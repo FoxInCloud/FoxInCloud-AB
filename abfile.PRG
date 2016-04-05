@@ -967,7 +967,7 @@ result = nFileSize(@m.tcFile, @m.tlMemo, @m.tlCDX)
 
 return icase(;
 	not vartype(m.result) == 'N',;
-		m.result,;
+		'N/A',;
 	m.result >= 1024^3,;
 		ltrim(transform(m.result/1024^3, '9,999.9 GB')),;
 	m.result >= 1024^2,;
@@ -1033,7 +1033,7 @@ function nFileSize && {fr} Taille d'un fichier en octets
 lparameters ;
   tcFile; && {fr} Fichier
 , tlMemo; && @ [.F.] {fr} Ajouter la taille du fichier memo associé éventuel @ le fichier memo existe
-, tlCDX && @ [.F.] {fr} Ajouter la taille du fichier CDX associé éventuel @ le fichier CDX existe
+, tlCDX; && @ [.F.] {fr} Ajouter la taille du fichier CDX associé éventuel @ le fichier CDX existe
 
 local lnResult; &&  && {fr} Taille du fichier en octets
 , lcMemo;
@@ -1241,7 +1241,7 @@ lparameters ;
 , tcSubFoldersExcl; && [''] {fr} Sous-dossiers à exclure de la recherche (séparés par ',')
 , tlRecycle; && [.F.] {fr} Placer les fichiers supprimés dans la corbeille
 , tlDirsEmptyDel; && [.F.] {fr} Supprimer les dossiers vides
-, tcError && @ [''] {fr} Détail de l'erreur éventuelle
+, tcError; && @ [''] {fr} Détail de l'erreur éventuelle
 
 return FilesDel(;
 		m.tcFileSkels;
@@ -1831,7 +1831,7 @@ return loTest.result()
 function cFileCased && {fr} Adresse d'un fichier || dossier avec sa casse originale && {fr} Tracy Pearson / http://fox.wikis.com/wc.dll?Wiki~MixedCaseFilePath~VFP
 lparameters ;
   tcFile; && {fr} Adresse du fichier
-, tlFullPath && [.F.] {fr} Donner l'adresse complète
+, tlFullPath; && [.F.] {fr} Donner l'adresse complète
 
 local lcResult;
 , llResult;
@@ -1840,6 +1840,7 @@ local lcResult;
 , lcFile, laFiles[1]
 
 lcResult = ''
+
 if vartype(m.tcFile) == 'C' and (file(m.tcFile) or directory(m.tcFile))
 
 	llBS = rightc(rtrim(m.tcFile), 1) == '\'
@@ -2398,27 +2399,34 @@ return m.lcResult
 
 * ========================================
 function lFileWritable && {en} Wait for a given delay until a file can be accessed
-lparameters cFile, nMS && [Between(m.nMS, 50 ms, 5000 ms)]
+lparameters ;
+	cFile; && {en} file to be accessed exclusively
+, nMS; && [Between(m.nMS, 50 ms, 5000 ms)] {en} wait delay
+, nAttempt; && [10] {en} number of attempts to access
 
 local success;
 , nSeconds;
-, handle
+, handle;
+, nSleepMS;
 
 if file(m.cFile)
-	declare Sleep in win32API Integer nMS
+	nMS = min(max(Iif(ga_Type_isPositiveInteger(m.nMS), m.nMS, 0), 50), 5000)
+	nAttempt = Iif(ga_Type_isPositiveInteger(m.nAttempt), m.nAttempt, 10)
+	nSleepMS = Max(Int(m.nMS / m.nAttempt), 10) && minimum 10 ms between attempts
 	nSeconds = seconds()
-	nMS = min(max(evl(m.nMS, 0), 50), 5000)
 	do while nMS(m.nSeconds) < m.nMS
 		handle = fopen(m.cFile)
 		if m.handle > -1
 			success = fclose(m.handle)
+			assert m.success
 			exit
 		else
-			Sleep(m.nMS / 10)
+			Sleep(m.nSleepMS) && modify command ab
 		endif
 	enddo
-	nMS = nMS(m.nSeconds) && {fr} feedback
+	nMS = nMS(m.nSeconds) && feedback
 	return m.success
 else
 	return .t.
 endif
+endfunc

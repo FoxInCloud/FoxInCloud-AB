@@ -872,7 +872,7 @@ lcResult = ''
 if file(m.tcTable) and aused(laUsed, .null., m.tcTable) > 0
 
 	lcResult = laUsed[1]
-	tlExclusive = isexclusive(m.lcResult)
+	tlExclusive = IsExclusive(m.lcResult)
 endif
 
 return m.lcResult
@@ -960,7 +960,7 @@ if used(m.tcAlias)
 		lcField = set("Fields")
 		lcFields = set("Fields", 1)
 
-		lcMode = icase(isexclusive(), 'EXCLUSIVE', isreadonly(), 'READONLY', 'SHARED')
+		lcMode = icase(IsExclusive(), 'EXCLUSIVE', isreadonly(), 'READONLY', 'SHARED')
 		llAgain = aused(laUsed, .null., m.lcTable) > 1 && {fr} et encore il faudrait vérifier chaque session de données !
 		lcAgain = iif(m.llAgain, 'AGAIN', '')
 
@@ -1040,9 +1040,9 @@ enddefine && {fr} CLASS abExclusive
 * ========================================
 function lExclusiveForce && {fr} Tente d'ouvrir ou réouvrir une table en exclusif
 lparameters ;
-  tcAlias; && @ {fr} Alias
+  tcAlias as String; && @ {fr} Alias sous lequel la table est ouverte en exclusif
 , tuTable; && [Alias()] {fr} Alias, zone ou adresse d'une table
-, tlExcl && @ {fr} L'alias était déjà ouvert en exclusif
+, tlExcl as Boolean; && @ {fr} L'alias était déjà ouvert en exclusif
 
 tcAlias = ExclusiveForce(m.tuTable, @m.tlExcl)
 return used(m.tcAlias)
@@ -1052,7 +1052,8 @@ endfunc
 procedure ExclusiveForce && {fr} Tente d'ouvrir ou réouvrir une table en exclusif
 lparameters ;
   tuTable; && [Alias()] {fr} Alias, zone ou adresse d'une table
-, tlExcl && @ {fr} L'alias était déjà ouvert en exclusif
+, tlExcl as Boolean; && @ {fr} L'alias était déjà ouvert en exclusif
+
 tlExcl = .f.
 
 local lcAlias, llAlias, lcResult && {fr} Alias sous lequel la table est ouverte en exclusif, vide si impossible d'ouvrir en exclusif
@@ -1061,13 +1062,17 @@ lcResult = ''
 
 * {fr} Si l'alias de la table existe
 lcAlias = cAlias(m.tuTable, @m.llAlias)
-if used(m.lcAlias)
+if Used(m.lcAlias)
 
-	tlExcl = not m.llAlias and isexclusive(m.lcAlias) && {fr} L'alias était déjà ouvert et en exclusif
-	lcResult = iif(isexclusive(m.lcAlias) or AliasReuse(m.lcAlias, 'EXCLUSIVE'), m.lcAlias, '')
+	tlExcl = not m.llAlias and IsExclusive(m.lcAlias) && {fr} L'alias était déjà ouvert et en exclusif
+	lcResult = iif(IsExclusive(m.lcAlias) or AliasReuse(m.lcAlias, 'EXCLUSIVE');
+		, m.lcAlias;
+		, '';
+		)
 endif
 
 return m.lcResult
+endproc
 
 * ========================================
 procedure HeaderFieldsCarry && {fr} Copie le contenu des champs d'entête dans l'enr. suivant
@@ -1653,7 +1658,7 @@ endif
 return m.lcResult
 
 * ========================================
-function TableOfArray_cField && [privée de TableOfArray()] {fr} Champ standard
+function TableOfArray_cField && {fr} Champ standard [privée de TableOfArray()]
 lparameters tnCol
 return 'C' + transform(m.tnCol, '@L 999')
 
@@ -2977,7 +2982,7 @@ if used(m.lcAlias)
   	lcField = field(m.liField, m.lcAlias)
   	if lenc(m.lcField) > 10
 		  if empty(m.lcFields)
-		  	if isexclusive(m.lcAlias)
+		  	if IsExclusive(m.lcAlias)
 		  		cResultAdd(@m.Result, textmerge([Can't get the short field name of '<<m.lcField>>' in '<<m.tcDBF>>' because it's used Exclusive]))
 		  		lnResult = 0
 		  		exit
@@ -3464,7 +3469,7 @@ if used(m.lcAlias)
 	go m.lnNoEnrCour + 1 && {fr} se positionner sur le nouvel enregistrement
 	select (m.lnSelect)
 	llResult = .t.
-endif && {fr} isExclusive (lcAlias)
+endif && {fr} IsExclusive (lcAlias)
 
 return m.llResult
 
@@ -3888,7 +3893,7 @@ if m.llResult
 	lcTableAddr = iif(used(m.tuTable), cTableAddress(m.tuTable), m.tuTable)
 	* {fr} ASSERT m.llResult MESSAGE cAssertMsg(Textmerge('Table can't be found: <<cLitteral(m.lcTableAddr)>>'))
 	if file(m.lcTableAddr);
-	 and not isexclusive(m.tuTable) && 'File access is denied' si la table ouverte en exclusif (curseur, vue, etc.)
+	 and not IsExclusive(m.tuTable) && 'File access is denied' si la table ouverte en exclusif (curseur, vue, etc.)
 
 		* {fr} Calculer le checksum des données seules
 		lcData = FileMemo(m.lcTableAddr)
@@ -4780,7 +4785,7 @@ if used(m.lcAlias)
 		set safety off
 	endif
 
-	lcFile = addbs(sys(2023)) + 'temp' + transform(_vfp.processid)+ '.mem' && {fr} multi-serveur
+	lcFile = addbs(sys(2023)) + 'temp' + transform(_vfp.processID) + '.mem' && {fr} multi-serveur
 
 	save to (m.lcFile) all like laField
 
@@ -4798,6 +4803,7 @@ if used(m.lcAlias)
 endif
 
 return m.lcResult
+endfunc
 
 * ========================================
 function lRelationTrgt && {fr} Un alias est cible d'une relation
@@ -5135,7 +5141,7 @@ case RecCount(m.tcAlias) < 1000
 	select max(&tcField) from (m.tcAlias) into array laResult && 50 ms pour 14.000 enr.
 	liResult = evl(laResult[1], 0)
 
-case isexclusive(m.tcAlias) or used('_iAutoInc')
+case IsExclusive(m.tcAlias) or used('_iAutoInc')
 
 		loRecno = abRecno(m.tcAlias)
 		lcFilter = filter(m.tcAlias)
@@ -7190,16 +7196,16 @@ endtry
 return m.llResult
 
 * ========================================
-function cSQLSelectClause && {fr} Clause d'une instruction SELECT-SQL
+function cSQLselectClause && {fr} Clause d'une instruction SELECT-SQL
 lparameters ;
-  tcSQLSelect; && @ {fr} Instruction SELECT-SQL (@ nécessaire si m.tlDelete)
+  tcSQLselect; && @ {fr} Instruction SELECT-SQL (@ nécessaire si m.tlDelete)
 , tcClause; && {fr} Clause à rechercher
 , tlDelete && [.F.] {fr} Supprimer la clause de l'instruction
 local laClauses[1], lnClause, lcResult
 lcResult = ''
 
 * {fr} Si l'instruction présumée contient des clauses
-if aSQLSelectClauses(@m.laClauses, m.tcSQLSelect) > 0
+if aSQLselectClauses(@m.laClauses, m.tcSQLselect) > 0
 
 	tcClause = cRepCharDel(m.tcClause)
 	lnClause = ascan(laClauses, space(1) + upper(alltrim(m.tcClause)) + space(1), 1, -1, 1, 2+4+8)
@@ -7208,7 +7214,7 @@ if aSQLSelectClauses(@m.laClauses, m.tcSQLSelect) > 0
 		lcResult = laClauses[m.lnClause, 1] + laClauses[m.lnClause, 2]
 		if lTrue(m.tlDelete)
 
-			tcSQLSelect = strtran(m.tcSQLSelect, m.lcResult, '')
+			tcSQLselect = strtran(m.tcSQLselect, m.lcResult, '')
 		endif
 	endif
 endif
@@ -7216,10 +7222,10 @@ endif
 return m.lcResult
 
 * ---------------------
-procedure cSQLSelectClause_Test && {fr} Teste cSQLSelectClause
+procedure cSQLselectClause_Test && {fr} Teste cSQLselectClause
 
-local lcSQLSelect, loTest as abUnitTest of abDev.prg
-text TO lcSQLSelect NOSHOW PRETEXT 15
+local lcSQLselect, loTest as abUnitTest of abDev.prg
+text TO lcSQLselect NOSHOW PRETEXT 15
 	SELECT *, SUM(gg) AS SUM_GG FROM TableBidon
 	WHERE xx = 1 AND yy = 'ff'
 	GROUP BY 2, name, 4
@@ -7229,7 +7235,7 @@ text TO lcSQLSelect NOSHOW PRETEXT 15
 ENDTEXT
 loTest = newobject('abUnitTest', 'abDev.prg')
 
-loTest.Test(' ORDER BY NAME, CITY', m.lcSQLSelect, 'ORDER  BY')
+loTest.Test(' ORDER BY NAME, CITY', m.lcSQLselect, 'ORDER  BY')
 
 return loTest.Result()
 
@@ -7347,7 +7353,7 @@ endproc
 * ========================================
 function uSQLparmValueDefault && {fr} Valeur par défaut d'un paramètre d'une instruction SQL-select selon son opérateur
 lparameters ;
-  lcSQLSelect; && {fr} instruction SQL-select obtenue par CursorGetProp("SQL"), sur une seule ligne
+  lcSQLselect; && {fr} instruction SQL-select obtenue par CursorGetProp("SQL"), sur une seule ligne
 , liParm; && {fr} index du paramètre
 
 #if .f.
@@ -7364,9 +7370,9 @@ local Result as string;
 
 Result = ''
 
-for I = at_c('?', m.lcSQLSelect, m.liParm) - 1 to 1 step -1
+for I = at_c('?', m.lcSQLselect, m.liParm) - 1 to 1 step -1
 
-	C = upper(substrc(m.lcSQLSelect, m.I, 1))
+	C = upper(substrc(m.lcSQLselect, m.I, 1))
 	do case
 
 	case m.C $ VFPOPCARS + ',' && {fr} opérateur ou séparateur
@@ -7398,21 +7404,21 @@ return icase(;
 endfunc
 
 * ========================================
-function aSQLSelectClauses && {fr} Clauses d'une instruction SELECT-SQL && {fr} d'après une fonction d'Anders Altberg http://www.foxite.com/archives/extract-a-clause-from-sql-0000195322.htm
+function aSQLselectClauses && {fr} Clauses d'une instruction SELECT-SQL && {fr} d'après une fonction d'Anders Altberg http://www.foxite.com/archives/extract-a-clause-from-sql-0000195322.htm
 lparameters ;
   taClauses; && @ {fr} Clauses en retour [Clause, argument, position début]
-, tcSQLSelect && {fr} Instruction SELECT-SQL
+, tcSQLselect && {fr} Instruction SELECT-SQL
 external array taClauses
-local lcSQLSelect, lnClause, lcClause, lcDelim1, lcDelim2, lnResult && {fr} Nombre de clauses
+local lcSQLselect, lnClause, lcClause, lcDelim1, lcDelim2, lnResult && {fr} Nombre de clauses
 lnResult = 0
-if type('taClauses', 1) == 'A' and vartype(m.tcSQLSelect) == 'C'
+if type('taClauses', 1) == 'A' and vartype(m.tcSQLselect) == 'C'
 
 	* {fr} Tabuler les clauses dans leur ordre d'occurence dans l'instruction
 	lnResult = alines(taClauses, ' WHERE , ORDER BY , GROUP BY , HAVING , INTO ', 0, ',')
 	aColsIns(@m.taClauses, 1, 2)
-	lcSQLSelect = upper(m.tcSQLSelect)
+	lcSQLselect = upper(m.tcSQLselect)
 	for lnClause = m.lnResult to 1 step -1
-		taClauses(m.lnClause, 3) = atc(taClauses(m.lnClause, 1), m.lcSQLSelect)
+		taClauses(m.lnClause, 3) = atc(taClauses(m.lnClause, 1), m.lcSQLselect)
 		if taClauses(m.lnClause, 3) = 0
 			lnResult = m.lnResult - 1
 			adel(taClauses, m.lnClause)
@@ -7427,7 +7433,7 @@ if type('taClauses', 1) == 'A' and vartype(m.tcSQLSelect) == 'C'
 		for lnClause = 1 to m.lnResult
 			lcDelim1 = taClauses(m.lnClause, 1)
 			lcDelim2 = iif(m.lnClause < m.lnResult, taClauses(m.lnClause+1, 1), '')
-			taClauses(m.lnClause,2) = strextract(m.tcSQLSelect, m.lcDelim1, m.lcDelim2, 1, 3)
+			taClauses(m.lnClause,2) = strextract(m.tcSQLselect, m.lcDelim1, m.lcDelim2, 1, 3)
 		next
 	endif
 endif
@@ -7435,11 +7441,11 @@ endif
 return m.lnResult
 
 * ---------------------
-procedure aSQLSelectClauses_Test && {fr} Teste aSQLSelectClauses
+procedure aSQLselectClauses_Test && {fr} Teste aSQLselectClauses
 
-local lcSQLSelect, laClauses[1], loTest as abUnitTest of abDev.prg
+local lcSQLselect, laClauses[1], loTest as abUnitTest of abDev.prg
 
-text TO lcSQLSelect NOSHOW PRETEXT 15
+text TO lcSQLselect NOSHOW PRETEXT 15
 	SELECT *, SUM(gg) AS SUM_GG FROM TableBidon
 	WHERE xx = 1 AND yy = 'ff'
 	GROUP BY 2, name, 4
@@ -7449,7 +7455,7 @@ text TO lcSQLSelect NOSHOW PRETEXT 15
 ENDTEXT
 loTest = newobject('abUnitTest', 'abDev.prg')
 
-loTest.Test(5, @m.laClauses, m.lcSQLSelect)
+loTest.Test(5, @m.laClauses, m.lcSQLselect)
 loTest.assert('2, name, 4', laClauses[2, 2])
 loTest.assert('ARRAY cc', laClauses[5, 2])
 

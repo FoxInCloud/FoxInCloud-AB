@@ -391,7 +391,7 @@ lparameters ;
 , tuContent; && [''] {fr} Contenu à placer dans la colonne
 , tlExpand; && [.F.] {fr} Si le contenu est plus large que la colonne, déborder sur les colonnes de droite
 , tlNoDisplay; && [.F.] {fr} Différer l'affichage de la ligne (pour gagner du temps lorsque plusieurs modifications successives de la ligne)
-, tcFormat && [''] {fr} Format d'affichage
+, tcFormat; && [''] {fr} Format d'affichage
 
 local lnCols, lcType, lnCol, llResult
 
@@ -460,7 +460,8 @@ lparameters ;
   tuContent; && {fr} Contenu à placer dans la colonne
 , tnColWidth; && {fr} Largeur de la colonne en foxels
 , tlExpand; && [.F.] {fr} Si le contenu est plus large que la colonne, déborder sur les colonnes de droite
-, tcFormat && [''] {fr} Format de présentation
+, tcFormat; && [''] {fr} Format de présentation
+
 tlExpand = lTrue(m.tlExpand)
 tcFormat = evl(m.tcFormat, '')
 
@@ -575,7 +576,6 @@ tlHeader = lTrue(m.tlHeader)
 local lcLineOut, lnDisplayWidth;
 , lnCol, lnColsWidth, lnColWidth;
 , lcCellDisplay, llLeftBar, llResult
-
 
 * {fr} Pour chaque colonne
 lcLineOut = ''
@@ -3182,7 +3182,9 @@ return loUnitTest.result()
 function cException && {fr} Message d'exception standard
 lparameters toException as exception && {fr} Objet exception
 
-local lcResult, luUserValue
+local lcResult;
+, luUserValue;
+, lcMessage;
 
 lcResult = ''
 
@@ -3198,15 +3200,23 @@ if vartype(m.toException) == 'O' and type('m.toException.BaseClass') == 'C' and 
 				));
 			, '';
 			)
-		luUserValue = iif(loClass(.userValue, 'Exception'), cException(.userValue), .userValue)
+		luUserValue = ICase(;
+			loClass(.userValue, 'Exception'),;
+				cException(.userValue),;
+			Vartype(.userValue) == 'C' and CR $ .userValue,;
+				CRLF + Ltrim(.userValue, ' ', CR, LF),;
+				.userValue;
+			)
+		lcMessage = Trim(.Message, ' ', '.', ',') && "Erreur levée par l'utilisateur, ."
 		lcResult = textmerge(icase(;
-			cLangUser() = 'fr',	[Méthode ou procédure <<.Procedure>>() : erreur n° <<.ErrorNo>> ("<<c2Words(.Message,' - ', m.luUserValue)>>") à la ligne n° <<.LineNo>><<m.lcResult>>],; && copy-paste this line to add another language support
-													[Method or procedure <<.Procedure>>(): error #<<.ErrorNo>> ("<<c2Words(.Message,' - ', m.luUserValue)>>") at code line #<<.LineNo>><<m.lcResult>>]; && default: English
+			cLangUser() = 'fr',	[Méthode ou procédure <<.Procedure>>() : erreur n° <<.ErrorNo>> ("<<c2Words(m.lcMessage,' - ', m.luUserValue)>>") à la ligne n° <<.LineNo>><<m.lcResult>>],; && copy-paste this line to add another language support
+													[Method or procedure <<.Procedure>>(): error #<<.ErrorNo>> ("<<c2Words(m.lcMessage,' - ', m.luUserValue)>>") at code line #<<.LineNo>><<m.lcResult>>]; && default: English
 			))
 	endwith
 endif
 
 return m.lcResult
+endfunc
 
 * ------------------------------------
 procedure cException_Test && {fr} Teste cException()
@@ -3469,17 +3479,17 @@ lparameters ;
   tcPJX; && {fr} Adresse du projet
 , tcResult && @ {fr} Résultat en cas d'échec
 
-local llOpened, llResult
+local lOpened
 
-this.oProject = oProject(m.tcPJX, @m.tcResult, @m.llOpened)
-this.lOpened = m.llOpened
+this.oProject = oProject(m.tcPJX, @m.tcResult, @m.lOpened)
+this.lOpened = m.lOpened
 
 return vartype(m.this.oProject) == 'O'
 
 * ----------------
 protected procedure destroy
 
-if m.this.lOpened or isNull(m.this.lOpened)
+if Nvl(m.this.lOpened, .T.)
 	this.oProject.close
 endif
 
@@ -3510,7 +3520,7 @@ function oProject && {fr} Référence à un projet (ouvert ou créé)
 lparameters ;
   tcPJX; && {fr} Adresse du projet
 , result; && @ {fr} Résultat (cumulatif)
-, tlOpened && @ [.F.] {fr} Le projet a été ouvert - .NULL. le projet a été créé
+, tlOpened; && @ [.F.] {fr} Le projet a été ouvert - .NULL. le projet a été créé
 
 tlOpened = .f.
 
@@ -3542,7 +3552,12 @@ if vartype(m.tcPJX) == 'C'
 				endfor
 			endif
 	 	else
-	 		tlOpened = .null.
+	 		create project (m.tcPJX) nowait noshow noprojecthook save
+	 		if Type('_VFP.ActiveProject') == 'O'
+	 			loResult = _VFP.ActiveProject
+		 		llResult = .T.
+		 		tlOpened = .null.
+		 	endif
 	 	endif
 		if not m.llResult
 
@@ -3570,6 +3585,7 @@ else
 endif
 
 return m.loResult
+endproc
 
 * ========================================
 procedure IgnoreAll && {fr} sélectionne automatiquement l'option 'tout' dans un dialogue tel que ASSERT
@@ -6176,15 +6192,17 @@ endfunc
 
 * =============================================
 function lTrue && {en} a value is .T.
-lparameters value && {fr} if @, .T./.F.
-value = vartype(m.value) == 'L' and m.value
-return m.value
+lparameters value 
+return vartype(m.value) == 'L' and m.value
 endfunc
+#if .F. && regexp to replace in code
+/vartype\s*\(\s*((?:m\.)?\w+)\s*\)\s*=(?:=)?\s*['"]L['"]\s+\.?and\.?\s+$1\1/gim
+lTrue($1)
+#endif
 * =============================================
 function lFalse && {en} a value is .F.
-lparameters value && {fr} if @, .T./.F.
-value = vartype(m.value) == 'L' and !m.value
-return m.value
+lparameters value
+return vartype(m.value) == 'L' and !m.value
 endfunc
 
 #if .f. && {fr} https://raw.githubusercontent.com/npm/node-semver/master/semver.js
@@ -7189,8 +7207,7 @@ try && 2016-01-25 thn -- {en} added to prevent bugs when "file can't be opened"
 	if Vartype(m.oProcessor) == 'O' && 2016-01-15 thn -- {en} protection
 		nN1 = Val(m.oProcessor.PercentProcessorTime)
 		nD1 = Val(m.oProcessor.TimeStamp_Sys100NS)
-		declare Sleep in kernel32 integer dwMilliseconds
-		Sleep(100)
+		Sleep(100) && modify command ab
 		oProcessor = m.oWmi.Get("Win32_PerfRawData_PerfOS_Processor.Name='_Total'")
 		nN2 = Val(m.oProcessor.PercentProcessorTime)
 		nD2 = Val(m.oProcessor.TimeStamp_Sys100NS)

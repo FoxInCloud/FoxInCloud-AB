@@ -3198,8 +3198,13 @@ endfunc
 *----------------------------------------------------
 function addFS && {en} adds a forward Slash if none
 lparameters tcChain
-
 return trim(m.tcChain, ' ', '/') + '/'
+endfunc
+
+*----------------------------------------------------
+function alltrim_ && {en} alltrim() including CR, LF and TABUL
+lparameters tcChain
+return Alltrim(Alltrim(m.tcChain), CR, LF, TABUL)
 endfunc
 
 *----------------------------------------------------

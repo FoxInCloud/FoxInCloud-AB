@@ -858,18 +858,36 @@ return m.lcResult
 function DtocSep && {fr} Dtoc(, 1) avec an, mois, jour, etc. séparés
 lparameters ;
   tt;
-, tcSep && ['.'] {fr} séparateur entre an, mois, jour, etc.
+, tcSep; && ['.'] {fr} séparateur entre an, mois, jour, etc.
 
 return left(TtocSep(m.tt, m.tcSep), 10)
+endfunc
 
 * ================================================
 function cSeconds && {fr} Secondes écoulées tenant compte du passage par minuit pour affichage
 lparameters tnSeconds && {fr} Seconds() au début, si @, Seconds() en retour
 
-local lnResult
+local lnResult, cLangUser
 lnResult = nSeconds(@m.tnSeconds)
 
-return iif(m.lnResult < 60, transform(m.lnResult) + ' sec', cHHMMSS(m.lnResult))
+return iif(m.lnResult < 60 and varSet(@m.cLangUser, cLangUser()); && 2016-03-23 thn -- {en} {FiC V 2.21.0-beta.11} don't prepend a space for use in ? command
+	, transform(m.lnResult, ICase(;
+			m.lnResult > 10,;
+				'99',;
+			m.lnResult > 1,;
+				'9.9',;
+			m.lnResult > .1,;
+				'9.99',;
+				'9.999';
+			));
+			+ ' ' + icase(;
+				m.cLangUser = 'fr',	'sec',; && copy-paste this line to add another language support
+				m.cLangUser = 'de',	'sek',; && copy-paste this line to add another language support
+														'sec'; && default: English
+				) + '.';
+	, cHHMMSS(m.lnResult);
+	)
+endfunc
 
 * ================================================
 function nSeconds && {fr} Secondes écoulées tenant compte du passage par minuit
@@ -906,7 +924,7 @@ return int(nSeconds(@m.tnSeconds) * 1000)
 function cMS && {fr} Millisecondes écoulées tenant compte du passage par minuit
 lparameters tnSeconds && {fr} Seconds() au début, si @, Seconds() en retour
 
-return transform(nMS(@m.tnSeconds)) + ' ms'
+return transform(nMS(@m.tnSeconds)) + ' ms.'
 
 * ================================================
 function cDateTimeSep && {fr} Date et heure avec séparateurs compatibles pour nom de fichier
@@ -1051,6 +1069,7 @@ lparameters ;
   ttd; && {en} date or datetime
 , lShort; && [.F.] {en} use abbreviations whenever possible
 , lAgoNo; && [.F.] {en} do not mention 'ago' {fr} pas de 'il y a'
+, lGMT; && [.F.] {en} GMT time {fr} heures GMT
 
 local cAgo as string;
 , cType as string;
@@ -1070,7 +1089,11 @@ if !m.cType $ 'DT' or Empty(m.ttd)
 else
 
 	lDate = m.cType == 'D'
-	ltdNow = iif(m.lDate, date(), datetime())
+	ltdNow = Datetime() + Iif(lTrue(m.lGMT) and Upper('wwAPI.fxp') $ Set("Procedure");
+		, GetTimeZone()*60; && modify command wwAPI
+		, 0;
+		)
+	ltdNow = iif(m.lDate, Ttod(m.ltdNow), m.ltdNow)
 	nAgo = m.ltdNow - m.ttd && > 0 if ttd is past
 	nAgoS = abs(m.nAgo) && {fr} seconds
 	nAgoS = m.nAgoS * iif(m.lDate, 60*60*24, 1)
@@ -1269,7 +1292,7 @@ return transform(m.tu) + ' (' + cDateLong(m.tu, m.tlNoDay) + ')'
 function ctRFC822 && {fr} Date et heure selon la norme RFC822
 lparameters ;
   tt; && [datetime()] {fr} date-heure
-, tlGMT && [.F.] {fr} GMT
+, tlGMT; && [.F.] {fr} GMT
 
 local lcType, laDays[7], laMonths[12], lnOffset, lcDate, lcSeconds, lcHours, lcTime, lcResult
 

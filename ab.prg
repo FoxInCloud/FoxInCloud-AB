@@ -96,6 +96,8 @@ ELSE
 			SET CLASSLIB TO (m.lcAW) ADDITIVE
 		ENDIF
 	ENDIF
+
+	declare Sleep in win32API Integer && 2016-03-24 thn -- {en} added
 	
 	SET COMPATIBLE OFF && {fr} Très important pour array = <value> (abArray.prg et autres)
 ENDIF

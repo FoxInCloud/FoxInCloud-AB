@@ -384,9 +384,11 @@ lparameters ;
   toCont; && {fr} Objet supposé contenant
 , tiObject; && {fr} N° d'objet dans la collection
 
-local loResult; && {fr} Objet contenu
+local loResult as Object; && {fr} Objet contenu
 , llResult as Boolean;
 , loException as Exception;
+, loForm as awFrm of aw;
+, liDS as Integer;
 
 loResult = .null.
 llResult = Vartype(m.tiObject) == 'N' and Between(m.tiObject, 1, nObjectsCont(m.toCont))
@@ -412,17 +414,44 @@ if m.llResult
 		catch to loException && 2016-03-14 thn -- {en} {FiC V 2.21.0-beta.10} track the "columns is not an object" Error #1924 && Visual FoxPro disregards any THROW statements appearing in a CATCH WHEN lExpression clause.
 
 			if loClass(m.toCont, 'awGrd') && of aw.vcx
+
+				loForm = oFormIn(m.toCont)
+				if Vartype(m.loForm) == 'O'
+					liDS = Set("Datasession")
+					set datasession to m.loForm.DataSessionID
+				endif
+				
 				text to loException.userValue textmerge noshow flags 1 pretext 3
 			 		.Name: <<.Name>>
 			 		.wcID: <<.wcID>>
-			 		.RecordSource: <<cL(.recordSource)>> (used: <<used(.recordSource)>>)
-			 		ColumnID/.ColumnCount: <<m.tiObject>> / <<.ColumnCount>>
+			 		.RecordSource: <<cL(.recordSource)>> (used: <<used(.recordSource)>>, dataSession: <<Set("Datasession")>>)
+			 		columnID/.ColumnCount: <<m.tiObject>> / <<.ColumnCount>>
 			 		.wcRScursor: <<cL(.wcRScursor)>>
 			 		.wcPKexpr: <<cL(.wcPKexpr)>>
 			 		call stack: <<cCallingModules()>>
 				endtext
+				
+				if !Empty(m.liDS)
+					set datasession to m.liDS
+				endif
+				
+				#if .F. && 2016-03-25 thn -- {fr} {FiC V 2.21.0-beta.11}
+					L'erreur columns est due à un bug/instabilité dans la vue distante : par ex.  elle est dans aUsed() mais pas Used()
+					Je ne sais pas ce qui produit cette instabilité car impossible de reproduire en IDE.
+					Ma seule piste pour l'instant est 2 requery() simultanés de la même vue pour le même utilisateur par 2 serveurs ; restent des points inexpliqués :
+					- pourquoi dans cette version et pas dans la précédente ? Ce genre de requery() simultanés était déjà possible
+					- pourquoi pour le même utilisateur et pas pour des utilisateurs différents (ce qui se produit en permanence)
+					Je vais tâcher de contourner comme suit : pendant une requête AJAX,
+					- désactiver F5
+					- envoyer un avertissement - le temps que l'utilisateur réponde le risque devrait avoir disparu
+				#endif
+				
+				assert .F. message cAssertMsg(cException(m.loException))
 			endif
-			throw loException
+
+			* ---------------
+			THROW loException
+			* ---------------
 		 
 		endtry
 	endwith
@@ -2617,7 +2646,7 @@ loTest.Test(oClone(m.loObj);
 ? m.lcResult
 
 
-loObj = newobject('objectOfXML_Test_towBus', 'abOOP.prg') && 2015-03-19 http://www.west-wind.com/wwThreads/default.asp?Thread=4B00KYJP3&MsgId=4B00KYJP4
+loObj = newobject('objectOfXML_Test_towBus', 'abOOP.prg') && 2015-03-19 http://support.west-wind.com/default.asp?Thread=4B00KYJP3&MsgId=4B00KYJP4
 lcResult = ''
 loTest.Test(oClone(m.loObj), cXMLofObject(m.loObj), m.loObj, @m.lcResult)
 ? m.lcResult
@@ -2626,7 +2655,7 @@ return m.loTest.Result()
 endproc
 
 * -----------------------------------------
-define class objectOfXML_Test_towBus as custom && 2015-03-19 http://www.west-wind.com/wwThreads/default.asp?Thread=4B00KYJP3&MsgId=4B00KYJP4
+define class objectOfXML_Test_towBus as custom && 2015-03-19 http://support.west-wind.com/default.asp?Thread=4B00KYJP3&MsgId=4B00KYJP4
 		cLoggedInUser = "Fred"
 		cConnectString = "SQLSTRINGCONNECT('DRIVER=SQL Server Native Client 11.0;SERVER=10.2.50.13;UID=lott;PWD=*******')"
 		cMultiDataSet = ''
