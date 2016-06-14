@@ -54,8 +54,8 @@ return m.lnResult
 * ===================================================================
 function aAppend && {fr} Ajoute les lignes d'un tableau à un autre {en} Appends line from an array to another
 lparameters ;
-  taDest; && @ {fr} Résultat {en} REsult array
-, taSrce; && @ {fr} SOurce des lignes ajoutées à tadEst {en} array to append to tadEst
+  taDest; && @ {fr} Résultat {en} Result array
+, taSrce; && @ {fr} Source des lignes ajoutées à tadEst {en} array to append to tadEst
 , tlUnique; && [.F.] {fr} ne pas ajouter les lignes existantes {en} don't append lines that already exists in the result array
 , tlPrepend && [.F.] {fr} ajouter en début de tableau {en} append at the beginning of the array
 
@@ -175,7 +175,7 @@ return m.loUnitTest.Result()
 * ===================================================================
 function aSubstract && {fr} Soustrait les éléments d'un tableau à un autre {en} remove some elements from an array to another
 lparameters ;
-  taDest; && @ {fr} Résultat {en} REsult
+  taDest; && @ {fr} Résultat {en} Result
 , taSrce && @ {fr} Tableau contenant les lignes à soustraire de taDest {fr} array with lines to remove from taDest
 external array taDest, taSrce
 
@@ -466,7 +466,7 @@ return loUnitTest.Result()
 * ===================================================================
 function aColDel && {fr} Supprime physiquement une colonne d'un tableau {en} remove one column from an array
 lparameters ;
-  taResult; && @ {fr} Résultat {en} REsult
+  taResult; && @ {fr} Résultat {en} Result
 , tnCol && {fr} n° de colonne à supprimer {en} number of the column to remove
 external array taResult
 
@@ -572,7 +572,7 @@ return aLinesCols(@m.laTest, m.lcTest, TABUL, 'ILCD')
 * ===================================================================
 function aColsDel && {fr} Supprime physiquement plusieurs colonnes d'un tableau {en} remove many columns from an array
 lparameters ;
-  taResult; && @ {fr} Résultat {en} REsult
+  taResult; && @ {fr} Résultat {en} Result
 , tnCol1; && {fr} n° de la première colonne à supprimer {en} index of the first column to remove
 , tnCol2 && {fr} [dernière] N° de la dernière colonne à supprimer {en} [last] index of the last column to remove
 external array taResult
@@ -648,7 +648,7 @@ return loUnitTest.Result()
 * ===================================================================
 function aVarType && {fr} Vartypes d'après un tableau ou une liste délimitée ou non {en} Vartypes from an array or a list delimited or not
 lparameters ;
-  taResult; && @ {fr} Résultat {en} REsult
+  taResult; && @ {fr} Résultat {en} Result
 , tuTypes && @ {fr} (Var)types (array ou cListe) {en} (Var)types (array or cListe)
 external array taResult, tuTypes
 
@@ -675,7 +675,7 @@ return icase(;
 * ===================================================================
 function aColsIns && {fr} Insère physiquement une ou plusieurs colonne(s) dans un tableau {en} Insert one or many columns inside an array
 lparameters ;
-  taResult; && @ {fr} Résultat {en} REsult
+  taResult; && @ {fr} Résultat {en} Result
 , tnColBef; && {fr} [dernière] n° de colonne APRÈS laquelle insérer la(es) nouvelle(s) colonne(s), 0 pour ajouter au début {en} [last] index of column AFTER we insert the new column(s), 0 to insert at the beginning
 , tnColsIns; && {fr} [1] NOmbre de colonnes à insérer {en} [1] number of column to insert
 , tuVal; && {fr} [.F. ou ueMpty(tutYpes)] VAleur des cellules ajoutées {en} [.F. or ueMpty(tutYpes)] VAlue of cells to insert
@@ -1078,7 +1078,7 @@ llResult = type('taSrce', 1) == 'A';
  and not m.tnColIn = m.tnColOut
 assert m.llResult message cAssertMsg(textmerge(icase(;
 	cLangUser() = 'fr',	"Au moins un paramètre invalide",; && copy-paste this line to add another language support
-											"At least one parameter is not conform"; && Default: English
+											"At least one parameter is invalid"; && Default: English
 	)))
 if m.llResult
 	liResult = ascan(taSrce, m.tuVal, 1, -1, m.tnColIn, m.tnFlags)
@@ -1110,7 +1110,7 @@ llResult = type('taSrce', 1) == 'A';
  and between(m.tnCol, 1, alen(taSrce, 2))
 assert m.llResult message cAssertMsg(textmerge(icase(;
 	cLangUser() = 'fr',	"Au moins un paramètre invalide",; && copy-paste this line to add another language support
-						"At least one parameter is not conform"; && Default: English
+						"At least one parameter is invalid"; && Default: English
 	)))
 if m.llResult
 
@@ -1171,7 +1171,7 @@ return loUnitTest.Result()
 * ===================================================================
 function aRowCopyIns && {fr} Copie une ligne d'un tableau et l'insère dans un autre à une position donnée {en} Copy one line from an array and insert it in another array at a specific position
 lparameters ;
-  taDest; && @ {fr} Résultat {en} REsult
+  taDest; && @ {fr} Résultat {en} Result
 , taSrce; && @ {fr} tableau source des lignes copiées dans tadEst {en} array source from where one line is inserted in tadEst
 , tiDest; && [dernière] {fr} N° de ligne APRÈS laquelle insérer la ligne copiée, 0 pour insérer au début {en} index of line AFTER the line is inserted
 , tiSrce   && [1] {fr} n° de la ligne du tableau source à copier dans la destination {en} index of line from source array to be copied in taDest
@@ -1221,10 +1221,11 @@ return m.lnResult
 * ===================================================================
 function aAdd && {fr} Ajoute un élément à un tableau à UNE dimension {en} Add one element to an array with one dimension
 lparameters ;
-  taResult; && @ {fr} Résultat {en} REsult
+  taResult; && @ {fr} Résultat {en} Result
 , tuElt; && {fr} élément à ajouter {en} element to append
 , tlUnique; && [.F.] {fr} ne pas ajouter l'élément s'il existe déjà {en} don't append it if it exists already
-, tlPush && [.F.] {fr} Ajouter au début {en} Append at the beginning
+, tlPush; && [.F.] {fr} Ajouter au début {en} Append at the beginning
+
 external array taResult && {fr} pour le gestionnaire de projet {en} for the project manager
 
 local llResult, lu, lnResult && {fr} nombre de lignes du Résultat {en} number of line of Result
@@ -1286,7 +1287,7 @@ llResult = type('taResult', 1) == 'A';
  and alen(taResult, 2) = 0 && {fr} une dimension
 assert m.llResult message cAssertMsg(textmerge(icase(;
 	cLangUser() = 'fr',	[paramètres invalides ou incomplets],; && copy-paste this line to add another language support
-						[parameters not conform or unusable]; && Default: English
+						[parameters invalid or unusable]; && Default: English
 	)))
 if m.llResult
 
@@ -1304,7 +1305,7 @@ return m.lnResult
 * ===================================================================
 function aPush && {fr} Ajoute un élément à la fin d'un tableau à UNE dimension {en} Append an element at the bottom of an array with dimension ONE
 lparameters ;
-  taResult; && @ {fr} Résultat {en} REsult
+  taResult; && @ {fr} Résultat {en} Result
 , tuElt; && {fr} élément à ajouter {en} element to add
 , tlUnique && [.F.] {fr} Ne pas ajouter l'élément au tableau s'il y est déjà {en} don't add it, if it exists already
 external array taResult
@@ -1318,7 +1319,7 @@ llResult = type('taResult', 1) == 'A';
  and pcount() >= 2
 assert m.llResult message cAssertMsg(textmerge(icase(;
 	cLangUser() = 'fr',	[paramètres invalides ou incomplets],; && copy-paste this line to add another language support
-						[parameters not conform or unusable]; && Default: English
+						[parameters invalid or unusable]; && Default: English
 	)))
 
 if .t.;
@@ -1478,7 +1479,7 @@ return loUnitTest.Result()
 * ===================================================================
 function aLitteral && {fr} Tableau d'après une liste de litteraux {en} Array from a list of strings
 lparameters ;
-  taResult; && @ {fr} Résultat {en} REsult
+  taResult; && @ {fr} Résultat {en} Result
 , tc; && {fr} COnstantes séparées par une ',' ou un point ',' {en} STrings delimited by coma or dot.
 , tiCols && [0] {fr} Nombre de colonnes {en} Number of columns
 external array taResult
@@ -1490,7 +1491,7 @@ lnResult = 0
 llResult = type('taResult', 1) == 'A' and vartype(m.tc) == 'C' and not empty(m.tc)
 assert m.llResult message cAssertMsg(textmerge(icase(;
 	cLangUser() = 'fr',	[au moins un paramètre invalide],; && copy-paste this line to add another language support
-						[at least one parameter not conform]; && Default: English
+											[at least one parameter invalid]; && Default: English
 	)))
 if m.llResult
 
@@ -1618,7 +1619,7 @@ external array taSep
 * ===================================================================
 function aLinesCols && {fr} Tableau à 2 dim d'après un texte multiligne délimité {en} Array with 2 dimensions from a delimited multiline text
 lparameters ;
-  taResult; && @ {fr} Résultat {en} REsult
+  taResult; && @ {fr} Résultat {en} Result
 , tcTxt; && {fr} TExte multiligne tabulé {en} TAbulated multiline text
 , tcSep; && [,;<CHr(9)>|] {fr} Séparateur de colonnes (plus rapide en le précisant) {en} COlumn separator (faster when specified)
 , tuTypes && {fr} Types des colonnes (array ou liste) in 'CDGLNOQTUXYI' - les colonnes non précisées restent en caractères {en} Columns type (array or list) in 'CDGLNOQTUXYI' - when not indicated stay in character

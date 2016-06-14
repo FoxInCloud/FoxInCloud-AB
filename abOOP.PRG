@@ -1063,7 +1063,6 @@ if m.llResult
 
 	return m.lnResult
 else
-
 	return 0
 endif
 
@@ -1484,10 +1483,12 @@ return ascan(laClass, m.tcClass, 1, -1, 1, 7) > 0
 * ========================================
 function lBaseClassVisual && {fr} Une classe est une classe de base visuelle VFP
 lparameters ;
-  tcClass; && {fr} Classe de base
-, tlFormMemberClass && @ {fr} Classe non visuelle qui peut être membre d'un formulaire ou d'un conteneur membre d'un formulaire
+  tcBaseClass; && {fr} Classe de base
+, tlBaseClassMember; && @ {fr} Classe non visuelle qui peut être membre d'un formulaire ou d'un conteneur membre d'un formulaire
 
-local lcBaseClass, lcFormMemberClass, llResult
+local llResult;
+, lcBaseClass;
+, lcBaseClassMember;
 
 text TO lcBaseClass NOSHOW FLAGS 1
 CheckBox
@@ -1519,7 +1520,7 @@ TextBox
 ToolBar
 ENDTEXT
 
-text TO lcFormMemberClass NOSHOW FLAGS 1
+text TO lcBaseClassMember NOSHOW FLAGS 1
 Collection
 Custom
 DataEnvironment
@@ -1532,10 +1533,11 @@ XMLField
 XMLTable
 ENDTEXT
 
-llResult = lInList(m.tcClass, strtran(m.lcBaseClass, CRLF, ','))
-tlFormMemberClass = m.llResult or lInList(m.tcClass, strtran(m.lcFormMemberClass, CRLF, ','))
+llResult = lInList(m.tcBaseClass, strtran(m.lcBaseClass, CRLF, ','))
+tlBaseClassMember = m.llResult or lInList(m.tcBaseClass, strtran(m.lcBaseClassMember, CRLF, ','))
 
 return m.llResult
+endfunc
 
 * ========================================
 function oClone && /!\ recursive {en} Clones an object {fr} Clone un objet
@@ -1570,17 +1572,18 @@ if vartype(m.toObj) == 'O'
 
 			do case
 
-			case varSet(@m.llUserDef, pemstatus(m.toObj, m.lcProp, 4)) and (.f.;
+			case varSet(@m.llUserDef, pemstatus(m.toObj, m.lcProp, 4)); && user defined
+			and (.f.;
 			 or pemstatus(m.toObj, m.lcProp, 1); && {fr} read-only
 			 or pemstatus(m.toObj, m.lcProp, 2); && {fr} protected
 			 or m.llClass and !m.llUserDef and ',' + m.lcProp + ',' $ ',BASECLASS,CLASS,CLASSLIBRARY,CONTROLCOUNT,CONTROLS,NAME,OBJECTS,OBJECT,PARENT,PARENTCLASS,';
 			 )
 
 			case .t.;
-			 and varSet(@m.llUserDef, m.llUserDef and !pemstatus(m.toObj, m.lcProp, 6)); && {fr} user defined in object and not in parent class if any
+			 and varSet(@m.llUserDef, m.llUserDef and !pemstatus(m.toObj, m.lcProp, 6)); && {en} property is user defined in object and not in parent class if any
 			 and varSet(@m.llModif, pemstatus(m.toObj, m.lcProp, 0)); && {fr} propriété modifiée
 			 and varSet(@m.llArray, type('m.toObj.' + m.lcProp, 1) == 'A');
-			 and varSet(@m.luProp, iif(m.llArray, .null., evaluate('m.toObj.' + m.lcProp))); && {fr} and setStepOn(Vartype(m.luProp) == 'O')
+			 and varSet(@m.luProp, iif(m.llArray, .null., evaluate('m.toObj.' + m.lcProp))); && and setStepOn(Vartype(m.luProp) == 'O')
 			 and m.llUserDef;
 			 and m.llArray;
 			 and .t.
@@ -1958,7 +1961,7 @@ lcProp = ',' + lower(m.tcProp) + ','
 return .t.;
  and !pemstatus(m.toObj, m.tcProp, 1); && {fr} Read-only
  and !m.lcProp $ ',' + chrtran(lower('wcPropSave,_MemberData,Name'), ' ', '') + ','; && ,dataSession,dataSessionID
- and (!m.llFIC or m.lcProp $ ',' + chrtran(nvl(m.toObj.wcPropSave, ''), ' ', '') + ',');
+ and (!m.llFIC or m.lcProp $ ',' + Lower(chrtran(nvl(m.toObj.wcPropSave, ''), ' ', '')) + ',');
 
 endfunc
 
@@ -2091,17 +2094,11 @@ function objectOfXML as object && {en} Object from its linearized XML produced b
 && /!\ récursive
 lparameters ;
   tcXML as string; && {en} XML produced by cXMLofObject() {fr} XML produit par cXMLofObject()
-, toResult as object; && [NewObject(class, classlib)] {en} Object to populate {fr} Objet à peupler
+, toResult as object; && [NewObject(class, classlib)] {en} Result object to populate {fr} Objet résultat à peupler
 , tcResult as string; && @ {en} Cumulative result {fr} Résultat (cumulatif)
 
-&& {en} Support scope: see abOOP.prg!cXMLofObject()
-&& {fr} Détails du support : voir abOOP.prg!cXMLofObject()
-
-if empty(m.tcXML)
-	return
-endif
-
-local toResult as object; && {fr} object, .null. if error
+local ;
+  toResult as object; && {fr} object, .null. if error
 , llResult as Boolean;
 , lcResult as string;
 , llChild as Boolean;
@@ -2110,6 +2107,13 @@ local toResult as object; && {fr} object, .null. if error
 , loChild as collection; && {fr} objets enfants éventuels
 , llObject as Boolean; && @ {en} an object was passed in toResult {fr} Un objet a été passé dans toResult
 , llFIC as Boolean; && @ {en} object derives from a FoxinCloud class {fr} L'objet a d'une classe FoxinCloud
+
+&& {en} Support scope: see abOOP.prg!cXMLofObject()
+&& {fr} Détails du support : voir abOOP.prg!cXMLofObject()
+
+if empty(m.tcXML)
+	return
+endif
 
 store 0 to liChild, lnChild
 
@@ -2304,10 +2308,10 @@ local llResult as Boolean;
 lnChild = occurs('<#o#>', m.tcXML) && {fr} au moins une des propriétés de l'objet contient un objet
 llChild = m.lnChild > 0
 llResult = not m.llChild or m.lnChild = occurs('</#o#>', m.tcXML)
-lcResult = textmerge(icase(;
+= m.llResult or varSet(@m.lcResult, textmerge(icase(;
 	cLangUser() = 'fr',	[Ce XML comporte des balises '<#o#>|</#o#>' dépareillées : <<m.tcXML>>],; && copy-paste this line to add another language support
 											[Mismatched '<#o#>|</#o#>' delimiter(s) in XML: <<m.tcXML>>]; && default: English
-	))
+	)))
 assert m.llResult message cAssertMsg(m.lcResult)
 if m.llResult and m.llChild
 
@@ -2468,10 +2472,10 @@ for each lcProp in laProp
 	otherwise
 
 		llResult = m.luValue == [#object#] and m.llChild
-		lcResult = textmerge(icase(;
+		= m.llResult or varSet(@m.lcResult, textmerge(icase(;
 			cLangUser() = 'fr',	[La propriété de type objet '<<m.lcProp>>' n'a pas pu être restaurée],; && copy-paste this line to add another language support
 													[Object property '<<m.lcProp>>' could not be restored]; && default: English
-			))
+			)))
 		assert m.llResult message cAssertMsg(m.lcResult)
 		if m.llResult
 			liChild = m.liChild + 1
@@ -2504,7 +2508,7 @@ endproc
 procedure objectOfXML_colItems as Boolean && {en} restores collection items from XML from cXMLofObject() {fr} restaure les éléments d'une collection d'après le XML de cXMLofObject()
 lparameters ;
   tcXML as string; && {en} XML produced by cXMLofObject() {fr} XML produit par cXMLofObject()
-, toResult as object; && {en} Object to populate {fr} Objet à peupler
+, toResult as object; && {en} Collection Object to populate {fr} Objet Collection à peupler
 , tcResult as string; && @ {en} Cumulative result {fr} Résultat (cumulatif)
 , llChild as Boolean; && [compute] {en} object has direct child(ren) {fr} L'objet a des objets enfants
 , liChild as Integer; && @ [compute] {en} Index of current child object {fr} Index de l'objet enfant courant
@@ -2534,7 +2538,6 @@ case varSet(@m.llChild_, Pcount() <= 3);
 otherwise
 
 	local llResult as Boolean;
-	, lcResult as string;
 	, loRegExpOpen as abRegExp of abTxt.prg;
 	, loRegExpClose as abRegExp of abTxt.prg;
 	;
@@ -2548,11 +2551,10 @@ otherwise
 	 and m.loRegExpOpen.setup('<#item#>', .f., .t., .f.);
 	 and m.loRegExpClose.setup('</#item#>', .f., .t., .f.);
 	 and m.loRegExpOpen.Execute(m.tcXML) = m.loRegExpClose.Execute(m.tcXML)
-	lcResult = textmerge(icase(;
+	assert m.llResult message cAssertMsg(textmerge(icase(;
 		cLangUser() = 'fr',	[Ce XML comporte des balises '<#item#>|</#item#>' dépareillées : <<m.tcXML>>],; && copy-paste this line to add another language support
 												[Mismatched '<#item#>|</#item#>' delimiter(s) in XML: <<m.tcXML>>]; && default: English
-		))
-	assert m.llResult message cAssertMsg(m.lcResult)
+		)))
 	if m.llResult
 
 	 	toResult.remove(-1) && {fr} If you pass a value of -1, Visual FoxPro removes all items in the collection.
@@ -2571,11 +2573,10 @@ otherwise
 			if m.lcType == 'O'
 
 				llResult = m.luValue == [#object#] and m.llChild
-				lcResult = textmerge(icase(;
+				assert m.llResult message cAssertMsg(textmerge(icase(;
 					cLangUser() = 'fr',	[Erreur d'encodage XML d'un objet dans la collection '<<m.toResult.Name>>', clé : '<<m.lcKey>>', index : '<<m.liItem>>'],; && copy-paste this line to add another language support
 															[XML encoding error for an object in collection '<<m.toResult.Name>>', key: '<<m.lcKey>>', index: '<<m.liItem>>']; && default: English
-					))
-				assert m.llResult message cAssertMsg(m.lcResult)
+					)))
 				if m.llResult
 					liChild = m.liChild + 1
 					luValue = objectOfXML(m.loChild.item(m.liChild)) && /!\ récursion
@@ -2589,11 +2590,10 @@ otherwise
 				, m.toResult.add(m.luValue);
 				, m.toResult.add(m.luValue, m.lcKey);
 				)
-			lcResult = textmerge(icase(;
+			assert m.llResult message cAssertMsg(textmerge(icase(;
 				cLangUser() = 'fr',	[La valeur <<cLitteral(m.luValue)>> ne peut être ajoutée à la collection '<<m.toResult.Name>>' avec le clé '<<m.lcKey>>'],; && copy-paste this line to add another language support
 														[Could not add <<cLitteral(m.luValue)>> to collection '<<m.toResult.Name>>' with key '<<m.lcKey>>']; && default: English
-				))
-			assert m.llResult message cAssertMsg(m.lcResult)
+				)))
 			if not m.llResult
 				exit
 			endif

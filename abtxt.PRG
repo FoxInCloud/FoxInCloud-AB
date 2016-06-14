@@ -774,7 +774,7 @@ lparameters ;
   tuData; && @ {fr} Valeur à convertir en littéral (type supportés : tous soit CDGLNOQTUXY)
 , tlRTrim; && [.F.] {fr} si type C, ôter les espaces à droite
 , tnTronc; && [aucun] {fr} si type C, nombre de caractères de troncature
-, tlXML && [.F.] {fr} Encoder pour XML
+, tlXML; && [.F.] {fr} Encoder pour XML
 
 #if .f. && {fr} Vartype VFP9
 	C && {fr} Character, Memo, Varchar, Varchar (Binary)
@@ -807,7 +807,7 @@ return icase(;
 	M.lcVarType == 'X',;
 		'.NULL.',;
 	M.lcVarType == 'O',;
-		cLitteral_O(m.tuData),;
+		cLitteral_O(m.tuData, m.tlRTrim, m.tnTronc, m.tlXML),;
 	M.lcVarType == 'G',;
 		'General',;
 	M.lcVarType == 'Q',;
@@ -823,50 +823,63 @@ lparameters ;
 , tnTronc; && [aucun] {fr} si type C, nombre de caractères de troncature
 , tlXML && [.F.] {fr} Encoder pour support XML
 
+tlRTrim = lTrue(m.tlRTrim)
+tlXML   = lTrue(m.tlXML)
 
 local lcResult as string;
+, llTronc as Boolean;
 , aa[1] as string;
 , s as string;
-, lcData as string;
 , lnData as integer;
+, lnData_ as integer;
 , lcLine as string;
-, lnTronc as integer;
 
 lcResult = ''
-lnTronc = iif(vartype(m.tnTronc) == 'N' and between(m.tnTronc, 1, 255), int(m.tnTronc), 255) && {fr} Maximum length of a string literal : 255
+
+llTronc = Vartype(m.tnTronc) == 'N'
+tnTronc = iif(m.llTronc and between(m.tnTronc, 1, 255); && {fr} Maximum length of a string literal : 255
+	, int(m.tnTronc);
+	, 255;
+	)
 
 if alines(m.aa, m.tcData) > 0
 
+	lnData_ = 0
 	for each s in m.aa
 
+		s = iif(m.tlRTrim, rtrim(m.s), m.s)
+		s = iif(m.tlXML, cEscaped_XML(m.s), m.s)
+
 		lnData = lenc(m.s)
+		lnData_ = m.lnData_ + m.lnData
 
-		s = iif(lTrue(m.tlRTrim), rtrim(m.s), m.s)
-		s = iif(lTrue(m.tlXML), cEscaped_XML(m.s), m.s)
+		do case
+		case m.llTronc
+			lcLine = cLitteral_C_(iif(m.lnData > m.tnTronc, cTronc(m.s, m.tnTronc), m.s))
 
-		if vartype(m.tnTronc) == 'N'
-			s = iif(m.lnData > m.lnTronc, cTronc(m.s, m.lnTronc), m.s)
+		case m.lnData > 255 && {fr} limite d'un littéral caractère
+			lcLine = ''
+			do while m.lnData > 0
+				lcLine = m.lcLine + '+' + cLitteral_C_(leftc(m.s, 255))
+				s = substrc(m.s, 256)
+				lnData = m.lnData - 255
+			enddo
+			lcLine = substrc(m.lcLine, 2)
+
+		otherwise
 			lcLine = cLitteral_C_(m.s)
-		else
-			if m.lnData > 255 && {fr} limite d'un littéral caractère
-				lcLine = ''
-				lcData = m.s
-				do while m.lnData > 0
-					lcLine = m.lcLine + '+' + cLitteral_C_(leftc(m.lcData, 255))
-					lcData = substrc(m.lcData, 256)
-					lnData = m.lnData - 255
-				enddo
-				lcLine = substr(m.lcLine, 2)
-			else
-				lcLine = cLitteral_C_(m.s)
-			endif
-		endif
+		endcase
 
 		lcResult = c2Words(m.lcResult, '+Chr(13)+Chr(10)+', m.lcLine)
+
+		if m.llTronc and m.lnData_ > m.tnTronc
+			exit
+		endif
 	endfor
 endif
 
 return m.lcResult
+endfunc
 
 * -----------------------------------------------------------------
 function cLitteral_C_(tcData)
@@ -940,7 +953,11 @@ return chrtran(;
 
 * -----------------------------------------------------------------
 function cLitteral_O && {fr} Littéral VFP de type objet
-lparameters toObject && {fr} Objet à convertir en littéral
+lparameters ;
+  toObject; && {fr} Objet à convertir en littéral
+, tlRTrim; && [.F.] {fr} si type C, ôter les espaces à droite
+, tnTronc; && [aucun] {fr} si type C, nombre de caractères de troncature
+, tlXML; && [.F.] {fr} Encoder pour XML
 
 local lcResult;
 , loObject;
@@ -951,18 +968,23 @@ local lcResult;
 
 lcResult = ''
 
-
-* {fr} Class
-
 do case
 
 case type('m.toObject.class') == 'C' and type('m.toObject.classLibrary') == 'C' && {fr} FoxPro Object
 
+	&& All Visual FoxPro base classes except the Empty class have the following minimum set of properties: 
+	&& - Class Property 
+	&& - BaseClass Property 
+	&& - ClassLibrary Property 
+	&& - ParentClass Property 
+	
 	lcResult = cWords(', ';
-		, 'class: ' + cL(m.toObject.class);
-		, nEvl(m.toObject.classlibrary, 'classLibrary:' + cL(m.toObject.classlibrary));
+		, 'BaseClass: ' + cL(m.toObject.BaseClass);
+		, nEvl(m.toObject.ParentClass, 'ParentClass: ' + cL(m.toObject.ParentClass));
+		, 'Class: ' + cL(m.toObject.class);
+		, nEvl(m.toObject.ClassLibrary, 'ClassLibrary:' + cL(m.toObject.ClassLibrary));
 		, iif(type('m.toObject.Parent') == 'O', 'location: ' + sys(1272, m.toObject), '');
-		, cLitteral_O_cProps(m.toObject);
+		, cLitteral_O_cProps(m.toObject, m.tlRTrim, m.tnTronc, m.tlXML);
 		)
 
 case type('m.toObject.Application') == 'O' and type('m.toObject.Application.Name') == 'C' && {fr} and ! 'foxpro' $ Lower(m.toObject.Application.Name) && {fr} COM object? eg 'Microsoft Excel'
@@ -975,7 +997,7 @@ otherwise && {fr} Empty Object
 
 	lcResult = cWords(', ';
 		, 'class: "Empty"';
-		, cLitteral_O_cProps(m.toObject);
+		, cLitteral_O_cProps(m.toObject, m.tlRTrim, m.tnTronc, m.tlXML);
 		)
 endcase
 
@@ -984,7 +1006,11 @@ endfunc
 
 * -----------------------------------------------------------------
 function cLitteral_O_cProps && {fr} Propriétés d'un objet modifiées par rapport à sa classe
-lparameters toObject && {fr} Objet à convertir en littéral
+lparameters ;
+  toObject; && {fr} Objet à convertir en littéral
+, tlRTrim; && [.F.] {fr} si type C, ôter les espaces à droite
+, tnTronc; && [aucun] {fr} si type C, nombre de caractères de troncature
+, tlXML; && [.F.] {fr} Encoder pour XML
 
 local lcResult as string;
 , aProp[1];
@@ -998,8 +1024,10 @@ lcResult = ''
 if amembers(aProp, m.toObject) > 0 && {fr} can be an empty object without properties
 
 	for each cProp in m.aProp
+
 		lProp = !pemstatus(m.toObject, m.cProp, 2) && {fr} protected
 		lArray = m.lProp and type('m.toObject.' + m.cProp, 1) == 'A'
+
 		do case
 		case !m.lArray
 		case alen(m.toObject.&cProp, 2) > 0
@@ -1007,16 +1035,18 @@ if amembers(aProp, m.toObject) > 0 && {fr} can be an empty object without proper
 		otherwise
 			dimension aa[Alen(m.toObject.&cProp, 1)]
 		endcase
+
 		if m.lArray
 			acopy(m.toObject.&cProp, m.aa)
 		endif
-		lcResult = m.lcResult + iif(pemstatus(m.toObject, m.cProp, 0); && {fr} modified
+		lcResult = m.lcResult + iif(.T.; && and !pemstatus(m.toObject, m.cProp, 6); && {en} not inherited
+			and pemstatus(m.toObject, m.cProp, 0); && {fr} modified
 			, ', ' + lower(m.cProp) + ': ' + iif(m.lProp;
 				, iif(m.lArray;
-					, cL(@m.aa);
-					, cL(evaluate('m.toObject.' + m.cProp));
+					, cL(@m.aa, m.tlRTrim, m.tnTronc, m.tlXML);
+					, cL(evaluate('m.toObject.' + m.cProp), m.tlRTrim, m.tnTronc, m.tlXML);
 					);
-				, '[hidden or protected]';
+				, '[protected or hidden]';
 				);
 			, '';
 			)
@@ -1087,18 +1117,33 @@ loTest.Test(m.luExpected, m.luTest)
 return loTest.Result()
 
 * ===================================================================
-function cLitterals && {fr} Constantes
-lparameters tu01,tu02, tu03, tu04, tu05, tu06, tu07, tu08, tu09, tu10, tu11, tu12, tu13, tu14, tu15 && {fr} Variables
+function cLitterals && {fr} Littéraux
+lparameters tu01, tu02, tu03, tu04, tu05, tu06, tu07, tu08, tu09, tu10, tu11, tu12, tu13, tu14, tu15, tu16, tu17, tu18, tu19, tu20 && {fr} Variables
 
-local lnParm, lcResult
-lcResult = space(0)
-if pcount() > 0
-	for lnParm = 1 to pcount()
-		lcResult = m.lcResult + cLitteral(evaluate(textmerge([m.tu<<Transform(m.lnParm, '@L 99')>>]))) + ','
-	endfor
-	lcResult = left(m.lcResult, len(m.lcResult)-1) && {fr} supprime la dernière ','
-endif
-return m.lcResult
+local lcResult;
+, liParm;
+, luParm;
+
+lcResult = ''
+for liParm = 1 to pcount()
+	luParm = evaluate(textmerge([m.tu<<Transform(m.liParm, '@L 99')>>]))
+	lcResult = m.lcResult + Iif(Vartype(m.luParm) == 'C' and ',' $ m.luParm;
+		, cLitterals_List(m.luParm);
+		, cLitteral(m.luParm);
+		) + ','
+endfor
+return left(m.lcResult, len(m.lcResult)-1) && {fr} supprime la dernière ','
+endfunc
+
+* -----------------------------------------------------------------
+function cLitterals_List
+lparameters cList
+local aa[1]
+return Iif(alines(aa, m.cList, 5, ',') > 0;
+	, cListOfArray(@m.aa,,,.T.);
+	, cL(m.cList);
+	)
+endfunc
 
 * -----------------------------------------------------------------
 procedure cLitterals_Test && {fr} teste cLitteral
@@ -1107,6 +1152,7 @@ local loTest as abUnitTest of abDev.prg, lcTest
 loTest = newobject('abUnitTest', 'abDev.prg')
 
 loTest.Test(["toto",2.5,.F.,{^2009-03-10}], 'toto', 2.5, .f., date(2009,3,10))
+loTest.Test(["toto","tutu"], 'toto, tutu')
 
 return loTest.Result()
 
@@ -3240,7 +3286,7 @@ return loTest.Result()
 * =================================
 function chunked
 lparameters ;
-  raw; && {fr} raw text
+  raw; && {en} raw text
 , chunkLen && [76]
 
 chunkLen = evl(m.chunkLen, 76)
@@ -3670,7 +3716,7 @@ LOCAL lnResult && {fr} Longueur de la Tête en mm
 lnResult = -1
 
 *================================================================
-* {fr} Date			Par		Action
+* {fr} Date	Par		Action
 * --------	---		-----------------------------------------------
 * 06/06/01	SR		Création
 * 07/06/01	SR+TN Test au moyen de 'utilitaires\testenContCh.prg' : OK
@@ -3680,11 +3726,9 @@ lnResult = -1
 
 IF  .T.;
  AND Vartype(m.tcChain) = 'C';
- AND Vartype(m.tnJustif) = 'N' ;
- AND m.tnJustif > 0 ;
- AND Vartype(m.tcPolice) = 'C' ;
- AND Vartype(m.tnCorps) = 'N' ;
- AND m.tnCorps >= 1
+ AND Vartype(m.tnJustif) = 'N'  AND m.tnJustif > 0;
+ AND Vartype(m.tcPolice) = 'C';
+ AND Vartype(m.tnCorps) = 'N' AND m.tnCorps >= 1
 
 	LOCAL lcChain, llForce, lnEncTot, lnJustif
 	lcChain = Rtrim(m.tcChain)

@@ -34,6 +34,6 @@
 #DEFINE _EURO '&euro;'
 #DEFINE _ENSP '&ensp;'
 #DEFINE _MDASH '&mdash;'
-#DEFINE BRK [<br />]
+#DEFINE BRK [<br>]
 #DEFINE BRK2 BRK + BRK
 #DEFINE BRKCRLF BRK + CRLF

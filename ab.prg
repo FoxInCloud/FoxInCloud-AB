@@ -27,7 +27,7 @@ local lcFXPs
 lcFXPs = cABprgs(.T.)
 
 * {fr} Si suppression des ressources
-IF (Vartype(m.tlClear) == 'L' AND m.tlClear)
+IF Vartype(m.tlClear) == 'L' and m.tlClear && lTrue() indisponible
 
 	IF '\ab.fxp' $ Lower(Set("Procedure"))
 		RELEASE PROCEDURE &lcFXPs
@@ -40,7 +40,7 @@ IF (Vartype(m.tlClear) == 'L' AND m.tlClear)
 * {fr} Sinon, installation des ressources
 ELSE
 	
-	IF NOT (Vartype(m.tlAppExe) == 'L' AND m.tlAppExe)
+	IF NOT (Vartype(m.tlAppExe) == 'L' and m.tlAppExe) && lTrue() indisponible
 		local lcDirAB, lcDirA_
 		set path to (Home(1)) additive && {fr} VFP
 		set path to (Home(1) + 'FFC\') additive
@@ -67,7 +67,7 @@ ELSE
 
 		SET PROCEDURE TO &lcFXPs ADDITIVE
 			
-		IF Vartype(m.tlGAno) == 'L' AND m.tlGAno
+		IF lTrue(m.tlGAno)
 			RELEASE PROCEDURE abGA
 		ENDIF
 
@@ -332,41 +332,35 @@ ENDIF
 RETURN m.lnResult
 
 * ========================================
-PROCEDURE PathAdd && {fr} Ajoute un dossier à Set('Path') - 8 ms
+PROCEDURE PathAdd && {fr} Set('Path') : ajoute / supprime un dossier - 1-3 ms
 LPARAMETERS ;
   tcFolder; && {fr} Dossier @: Addbs(FullPath(m.tcFolder)) si existant
 , tlRemove; && [.F.] {fr} Supprimer du path
 , tlRelative; && [.F.] {fr} Ajouter en relatif au dossier par défaut
-, tlPrepend && [.F.] {fr} Ajouter au début de Set('PATH')
+, tlPrepend; && [.F.] {fr} Ajouter au début de Set('PATH')
 
-LOCAL llResult; && {fr} Le dossier existe et a été ajouté à Set('Path')
-, llFolder, lcPath, laPath[1], lnPath
+LOCAL llResult; && {fr} Le dossier a été ajouté/retiré à Set('Path')
+, llFolder;
+, lcPath, laPath[1], lnPath
 
-llResult = Vartype(m.tcFolder) == 'C' AND Directory(m.tcFolder)
-IF m.llResult
+IF Vartype(m.tcFolder) == 'C'
+	tlRemove = lTrue(m.tlRemove) && AND m.llFolder && 2016-05-27 thn -- {FiC V 2.21.1-beta.6} {en} 
 
-	* {fr} Tabuler les dossier dans le Set("Path")
-	lcPath = Set("Path")
-	ALines(laPath, m.lcPath, 1, ';')
-*!*			FOR lnPath = 1 TO Alen(laPath)
-*!*				laPath[m.lnPath] = Addbs(laPath[m.lnPath])
-*!*			NEXT
-
-	* {fr} Voir si le dossier demandé est dans le PATH
-	tcFolder = Addbs(Iif(Vartype(m.tlRelative) == 'L' AND m.tlRelative;
+	tcFolder = Addbs(Iif(lTrue(m.tlRelative);
 			, '.\' + Sys(2014, m.tcFolder); && {fr} Minimum Path to current directory
 			, FullPath(m.tcFolder);
 			))
-	llFolder = Ascan(laPath, m.tcFolder, 1, -1, 1, 6) > 0
-	tlRemove = Vartype(m.tlRemove) == 'L' AND m.tlRemove AND m.llFolder
-	tlPrepend = Vartype(m.tlPrepend) == 'L' AND m.tlPrepend
-	IF m.tlRemove OR !m.llFolder
+
+	ALines(laPath, Set("Path"), 1, ';')
+	llFolder = Ascan(laPath, m.tcFolder, 1, -1, 1, 6) > 0 && {fr} le dossier demandé est dans Set('Path') && tous upper()
+
+	IF m.tlRemove and m.llFolder OR !m.llFolder and Directory(m.tcFolder)
 
 		lcPath = cListOfArray(@m.laPath, ';',,,,,,.T.) + ';'
 		lcPath = ICase(;
 			m.tlRemove,;
-				Strtran(m.lcPath, m.tcFolder + ';', Space(0)),;
-			m.tlPrepend,;
+				Strtran(m.lcPath, m.tcFolder + ';'),;
+			lTrue(m.tlPrepend),;
 				m.tcFolder + ';' + m.lcPath,;
 				m.lcPath + m.tcFolder + ';';
 			)
@@ -377,9 +371,10 @@ IF m.llResult
 													[Path is too long (<<m.lnPath>> characters > 4095 limitation), cannot SET PATH TO <<cTronc(m.lcPath)>>];
 			)))
 		IF m.llResult
-
-assert !'"' $ m.lcPath
-			SET PATH TO (Substr(m.lcPath, 1, Lenc(m.lcPath)-1)) && {fr} ôte le ';' final
+* assert !'"' $ m.lcPath
+			SET PATH TO (Leftc(m.lcPath, Lenc(m.lcPath)-1)) && {fr} ôte le ';' final
+		ELSE
+			llResult = .null.
 		ENDIF
 	ENDIF
 ENDIF
@@ -392,7 +387,7 @@ PROCEDURE PathAdd_test && {fr} teste PathAdd()
 LOCAL loTest as abUnitTest OF abDev.prg
 loTest = NewObject('abUnitTest', 'abDev.prg')
 
-loTest.Test(.T., cModuleInfo(Sys(16), 'Path'))
+loTest.Test(.F., cModuleInfo(Sys(16), 'Path'))
 loTest.Test(.F., 'toto')
 
 RETURN loTest.Result()
@@ -407,21 +402,25 @@ LPARAMETERS ;
 , tlRelative && [.F.] {fr} Ajouter en relatif au dossier par défaut
 tnLevel = Evl(m.tnLevel, 1)
 
-LOCAL laFolder[1], lcFolder, llResult
+LOCAL llResult, laFolder[1], lcFolder
 
-llResult = PathAdd(@tcFolder, m.tlRemove, m.tlRelative)
-IF m.llResult AND aSubFolders(@laFolder, m.tcFolder, m.tcFoldersExcl, m.tnLevel, .T.) > 0
-
+llResult = !IsNull(PathAdd(@m.tcFolder, m.tlRemove, m.tlRelative))
+IF m.llResult and aSubFolders(@m.laFolder, m.tcFolder, m.tcFoldersExcl, m.tnLevel, .T.) > 0
 	FOR EACH lcFolder IN laFolder
-		llResult = PathAdd(m.lcFolder, m.tlRemove, m.tlRelative) AND m.llResult
-	NEXT
-
-	ASSERT m.llResult MESSAGE cAssertMsg(Textmerge(ICase(;
-		cLangUser() = 'fr',	[Echec, la profondeur de l'arborescence (<<m.tnLevel>>) est peut-être trop élevée],; && copy-paste this line to add another language support
-												[Failure, directory depth (<<m.tnLevel>>) may be too high])))
+		if IsNull(PathAdd(m.lcFolder, m.tlRemove, m.tlRelative))
+			llResult = .F.
+			exit
+		endif
+	ENDFOR
 ENDIF
 
+ASSERT m.llResult MESSAGE cAssertMsg(Textmerge(ICase(;
+	cLangUser() = 'fr',	[Echec, la profondeur de l'arborescence (<<m.tnLevel>>) est peut-être trop élevée],; && copy-paste this line to add another language support
+											[Failure, directory depth (<<m.tnLevel>>) may be too high];
+	)))
+
 RETURN m.llResult
+endproc
 
 * =================================
 FUNCTION abPathesAdd && {fr} Ajoute des dossiers à Set('Path') et rétablit Set('Path') au .Destroy()
@@ -910,7 +909,7 @@ success = .T.;
  and .T.
 if m.success && {fr} and m.tnWidth < m.oImage.ImageWidth
 	
-	if Vartype(m.tlBox) == 'L' and m.tlBox
+	if lTrue(m.tlBox)
 		
 		success = .F.;
 			or Vartype(m.tnHeight) == 'N' and m.tnHeight > 0;

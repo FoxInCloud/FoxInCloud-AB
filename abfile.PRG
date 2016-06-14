@@ -58,7 +58,7 @@ return m.lnResult
 * =============================================================
 function tFileSet_ && {fr} change la date-heure d'un fichier
 lparameters ;
-  result as String; && @ {en} result
+  result as String; && @ {en} result (cumulative)
 , cFile as String; && {fr} fichier
 , tFile as DateTime; && [datetime()] {fr} nouvelle date-heure
 , iType as Integer; && [1] {fr} type de date-heure (additive): 1 dernière modification, 2 dernier accès, 4 création
@@ -173,7 +173,7 @@ ENDFUNC
 * ========================================
 procedure tFileSet && {fr} règle la date et heure d'un fichier
 lparameters ;
-  result as String; && @ {en} result
+  result as String; && @ {en} result (cumulative)
 , cFile as String; && {en} file full address
 , tFile as datetime; && @ [datetime()] {en} date-time to be set
 , iType as Integer; && [1] {fr} type de date-heure (additive): 1 dernière modification, 2 dernier accès, 4 création
@@ -272,7 +272,7 @@ lparameters ;
   tcFileSkels; && {fr} Masques de fichiers à traiter
 , tcFolderSrce; && {fr} Adresse du dossier oû sont les fichiers
 , tcFolderDest; && {fr} Adresse du dossier destination
-, tlSubFolders; && [.F.] {fr} Chercher dans les sous-dossiers source
+, tlSubFolders; && [.F.] {fr} Traiter les fichiers dans les sous-dossiers source
 , tcSubFoldersExcl; && [''] {fr} Sous-dossiers source à exclure de la recherche (séparés par ',')
 , tlKeepExisting; && [.F.] {fr} Ne pas remplacer si existe déjà - .NULL. ou autre, ignorer
 , tcResult; && @ [''] {fr} Détail de l'erreur éventuelle
@@ -287,8 +287,8 @@ tnResult = FilesProc(;
 	  m.tcFolderSrce; && {fr} Adresses des dossiers oû les fichiers sont à chercher
 	, 'FileCopy'; && {fr} Procédure à appliquer à chaque fichier trouvé (son premier paramètre est l'adresse du fichier)
 	, m.tcFileSkels; && ['*.*'] {fr} Masques de fichiers à traiter (séparés par ',')
-	, m.tlSubFolders; && [.F.] {fr} Chercher dans les sous-dossiers
-	, m.tcSubFoldersExcl; && [''] {fr} Sous-dossiers à exclure de la recherche (séparés par ',')
+	, m.tlSubFolders; && [.F.] {fr} Traiter les fichiers dans les sous-dossiers
+	, m.tcSubFoldersExcl; && [m.tlSubFolders, ''] {fr} Sous-dossiers à exclure (séparés par ',')
 	, textmerge([Stuffc(m.tcFileSrce, 1, Lenc(<<cL(m.tcFolderSrce)>>), <<cL(m.tcFolderDest)>>)]); && {fr} Nouvelle adresse (can contain wildcard characters) && @ 2ème paramètre à passer à la procédure (le premier est l'adresse du fichier)
 	, @m.lcResult; && @ [''] {fr} Détails de l'erreur éventuelle && @ 3ème paramètre à passer à la procédure
 	, ; && @ [''] {fr} Message d'erreur éventuel && @ 4eme paramètre à passer à la procédure
@@ -496,17 +496,26 @@ lparameters ;
   tcFileAddr; && {fr} Adresse du fichier dont il faut vérifier l'existence, complète ou dans Curdir()
 , tnSize; && @ [0] {fr} Taille en octets - .T.: identifier fichiers multiples
 , ttModified; && @ [Datetime(1900,1,1,0,0,0)] {fr} Date et Heure de Dernière modification
-, tcAttribs && @ [''] {fr} Attributs
+, tcAttribs; && @ [''] {fr} Attributs
+, tcFound; && @ [''] {fr} Fichier trouvé (tcFileAddr est un squelette de fichier)
 
-local llResult, laFile[1], lnFile, llFiles
+local llResult;
+, laFile[1];
+, lnFile;
+, llFiles;
 
-if ga_Type_IsChar(m.tcFileAddr, .t.) && {fr} Vartype(m.tcFileAddr) == 'C'
+if ga_Type_IsChar(m.tcFileAddr, .t.)
 
 	lnFile = adir(laFile, m.tcFileAddr, 'HS') && , 1 inutile && ? ADir(aa, '..\*.prg') fonctionne
-	llFiles = lTrue(m.tnSize)
-	llResult = iif(m.llFiles, m.lnFile > 0, m.lnFile = 1)
-	if m.llResult and not m.llFiles and pcount() > 1
 
+	llFiles = lTrue(m.tnSize)
+	llResult = iif(m.llFiles;
+		, m.lnFile > 0;
+		, m.lnFile = 1;
+		)
+	if m.llResult and not m.llFiles and Pcount() > 1
+
+		tcFound = m.laFile[1, 1]
 		tnSize = m.laFile[1, 2]
 		ttModified = tDateCTime(m.laFile[1, 3], m.laFile[1, 4])
 		tcAttribs = m.laFile[1, 5]
@@ -514,6 +523,7 @@ if ga_Type_IsChar(m.tcFileAddr, .t.) && {fr} Vartype(m.tcFileAddr) == 'C'
 endif
 
 if not (m.llResult or m.llFiles)
+	tcFound = .null.
 	tnSize = 0
 	ttModified = datetime(1900,1,1,0,0,0)
 	tcAttribs = ''
@@ -545,7 +555,7 @@ endfunc
 function aFiles && {fr} Fichiers selon un squelette d'adresse
 lparameters ;
   taFiles; && @ {fr} Noms des Fichiers
-, tcFileAddrSkeleton && {fr} squelette de l'adresse des fichiers
+, tcFileAddrSkeleton; && {fr} squelette de l'adresse des fichiers
 
 local llResult, lnResult && {fr} Nombre de fichiers trouvés
 
@@ -569,11 +579,11 @@ external array taFiles
 * ========================================
 function aFiles_ && {fr} Fichiers selon un ou plusieurs squelette dans un dossier [et ses sous-dossiers]
 lparameters ;
-  taFiles; && @ {fr} Addresses des Fichiers
+  taFiles; && @ {fr} Adresses des Fichiers
 , tcFileSkels; && {fr} Masques de fichiers à traiter
 , tcFolder; && {fr} Adresse du dossier oû les fichiers sont à chercher
-, tlSubFolders; && [.F.] {fr} Chercher dans les sous-dossiers
-, tcSubFoldersExcl && [''] {fr} Sous-dossiers à exclure de la recherche (séparés par ',')
+, tlSubFolders; && [.F.] {fr} Traiter les fichiers dans les sous-dossiers
+, tcSubFoldersExcl && [m.tlSubFolders, ''] {fr} Sous-dossiers à exclure (séparés par ',')
 
 local lnResult as Integer;
 , llResult as Boolean;
@@ -619,6 +629,26 @@ if .t.;
 endif
 
 return m.lnResult
+endfunc
+
+* ----------------------------------------------
+procedure aFiles__Test && {fr} Teste aFiles_()
+
+local loTest as abUnitTest of abDev.prg, aa[1]
+loTest = newobject('abUnitTest', 'abDev.prg')
+
+loTest.Test(7, @m.aa, '*.pjx', DOS_AWSAMPLES, .T.)
+&& FIC\FicDemo\ficdemo.pjx
+&& FIC\FicTuto\fictuto.pjx
+&& TASTRADE\Adapted\fttprod.pjx
+&& TASTRADE\Adapted\ftttest.pjx
+&& TASTRADE\Adapted\tastradeFIC.pjx
+&& TASTRADE\Sandbox\tastradefic.pjx
+&& TASTRADE\_Original\tastradeFIC.pjx
+
+_cliptext = '&' + '& ' + Strtran(cListOfArray(@m.aa, CRLF + '&' + '& '), DOS_AWSAMPLES,'',1,-1,1)
+
+return loTest.result()
 
 * ========================================
 function lFileAddrSkeleton && {fr} Squelette d'adresse de fichier valide
@@ -646,8 +676,8 @@ endif
 
 * ========================================
 function lFileExclusive && {fr} Un fichier peut être ouvert en exclusif
-lparameters ;
-  tcFileAddr && {fr} Adresse du fichier dont il faut vérifier l'accès exclusif
+lparameters tcFileAddr && {fr} Adresse du fichier dont il faut vérifier l'accès exclusif
+
 local lnHandle, llResult
 
 if vartype(m.tcFileAddr) == 'C' and not empty(m.tcFileAddr)
@@ -687,8 +717,8 @@ procedure FilesDir && {fr} Répertorie des fichiers dans un dossier [et ses sous-
 lparameters ;
   tcFileSkels; && {fr} Masques de fichiers à traiter
 , tcFolders; && {fr} Adresse du dossier oû les fichiers sont à chercher
-, tlSubFolders; && [.F.] {fr} Chercher dans les sous-dossiers
-, tcSubFoldersExcl; && [''] {fr} Sous-dossiers à exclure de la recherche (séparés par ',')
+, tlSubFolders; && [.F.] {fr} Traiter les fichiers dans les sous-dossiers
+, tcSubFoldersExcl; && [m.tlSubFolders, ''] {fr} Sous-dossiers à exclure (séparés par ',')
 , tcTable; && @ {fr} Répertoire de fichiers : table ou curseur ; si vide, nouveau curseur ; Alias en retour
 , tcFieldsExtra; && [aucun] {fr} spécifications de champs à ajouter à la table
 , tcTagsExtra && [aucun] {fr} spécifications d'index à ajouter à la table (cf. aTagInfo_())
@@ -765,7 +795,7 @@ return textmerge([Padr(Upper(Rtrim(<<m.tcAddr>>)), 200)])
 * ========================================
 procedure FileDir && {fr} Répertorie un fichier
 lparameters ;
-  tcFile; && {fr} Addresse du fichier
+  tcFile; && {fr} Adresse du fichier
 , tcAlias; && {fr} Répertoire de fichiers
 , tcError && @ {fr} Erreur en retour (cumulative)
 tcFile = alltrim(m.tcFile)
@@ -981,13 +1011,14 @@ return icase(;
 function cMB && {fr} Valeur en Méga Octets
 lparameters ;
   tnSize;
-, tcLangUser && [cLangUser()] {fr} Langue de l'utilisateur
+, tcLangUser; && [cLangUser()] {fr} Langue de l'utilisateur
+, tlHTML; && [.F.] {en} to be included in HTML
 
 tcLangUser = cLangUser(m.tcLangUser)
 
 return '';
 	+ ltrim(transform(m.tnSize/2^20, '999.99'));
-	+ ' ';
+	+ Iif(lTrue(m.tlHTML), '&nbsp;', ' ');
 	+ icase(;
 		m.tcLangUser = 'fr', 	'MO',; && copy-paste this line to add another language support
 													'MB'; && default: English
@@ -997,13 +1028,14 @@ return '';
 function cGB && {fr} Valeur en Giga Octets
 lparameters ;
   tnSize;
-, tcLangUser && [cLangUser()] {fr} Langue de l'utilisateur
+, tcLangUser; && [cLangUser()] {fr} Langue de l'utilisateur
+, tlHTML; && [.F.] {en} to be included in HTML
 
 tcLangUser = cLangUser(m.tcLangUser)
 
 return '';
 	+ ltrim(transform(m.tnSize/2^30, '999.99'));
-	+ ' ';
+	+ Iif(lTrue(m.tlHTML), '&nbsp;', ' ');
 	+ icase(;
 		m.tcLangUser = 'fr', 	'GO',; && copy-paste this line to add another language support
 													'GB'; && default: English
@@ -1208,8 +1240,8 @@ lparameters ;
   tcFileSkels; && {fr} Masques de fichiers à traiter (séparés par ',')
 , tcFileNew; && {fr} Nouveau nom
 , tcFolders; && {fr} Adresses des dossiers oû les fichiers sont à chercher
-, tlSubFolders; &&	[.F.] {fr} Chercher dans les sous-dossiers
-, tcSubFoldersExcl && [''] {fr} Sous-dossiers à exclure de la recherche (séparés par ',')
+, tlSubFolders; &&	[.F.] {fr} Traiter les fichiers dans les sous-dossiers
+, tcSubFoldersExcl && [m.tlSubFolders, ''] {fr} Sous-dossiers à exclure (séparés par ',')
 
 return iif(lFileSkeleton(m.tcFileSkels) and m.tcFileSkels # [*.*];
 	, FilesProc(m.tcFolders, 'FileRename', m.tcFileSkels, m.tlSubFolders, m.tcSubFoldersExcl, m.tcFileNew);
@@ -1218,13 +1250,13 @@ return iif(lFileSkeleton(m.tcFileSkels) and m.tcFileSkels # [*.*];
 * ========================================
 procedure FileRename && {fr} Renomme un fichier
 lparameters ;
-  tcFile; && {fr} Addresse du fichier à renommer
+  tcFile; && {fr} Adresse du fichier à renommer
 , tcFileNew && {fr} Nouveau nom
 tcFileNew = forcepath(m.tcFileNew, justpath(m.tcFile))
 
 local llResult
 
-llResult = not lFile(m.tcFileNew)
+llResult = lFileSkeleton(m.tcFileNew) or !lFile(m.tcFileNew)
 assert m.llResult message cAssertMsg(textmerge([<<Program()>> - Impossible de renommer <<m.tcFile>> en <<m.tcFileNew>> car ce fichier existe déjà]))
 if m.llResult
 	rename (m.tcFile) to (m.tcFileNew)
@@ -1237,10 +1269,10 @@ procedure FilesDelete && {fr} Alias de FilesDel()
 lparameters ;
   tcFileSkels; && {fr} Masques de fichiers à traiter
 , tcFolders; && {fr} Adresses des dossiers oû sont les fichiers
-, tlSubFolders; && [.F.] {fr} Chercher dans les sous-dossiers
-, tcSubFoldersExcl; && [''] {fr} Sous-dossiers à exclure de la recherche (séparés par ',')
+, tlSubFolders; && [.F.] {fr} Traiter les fichiers dans les sous-dossiers
+, tcSubFoldersExcl; && [m.tlSubFolders, ''] {fr} Sous-dossiers à exclure de la recherche (séparés par ',')
 , tlRecycle; && [.F.] {fr} Placer les fichiers supprimés dans la corbeille
-, tlDirsEmptyDel; && [.F.] {fr} Supprimer les dossiers vides
+, tlFolderEmptyDel; && [.F.] {fr} Supprimer les dossiers vides
 , tcError; && @ [''] {fr} Détail de l'erreur éventuelle
 
 return FilesDel(;
@@ -1249,7 +1281,7 @@ return FilesDel(;
 	, m.tlSubFolders;
 	, m.tcSubFoldersExcl;
 	, m.tlRecycle;
-	, m.tlDirsEmptyDel;
+	, m.tlFolderEmptyDel;
 	, @m.tcError;
 	)
 
@@ -1258,17 +1290,19 @@ procedure FilesDel && {fr} Supprime des fichiers dans un dossier [et ses sous-do
 lparameters ;
   tcFileSkels; && {fr} Masques de fichiers à traiter
 , tcFolders; && {fr} Adresses des dossiers oû sont les fichiers
-, tlSubFolders; && [.F.] {fr} Chercher dans les sous-dossiers
-, tcSubFoldersExcl; && [''] {fr} Sous-dossiers à exclure de la recherche (séparés par ',')
+, tlSubFolders; && [.F.] {fr} Traiter les fichiers dans les sous-dossiers
+, tcSubFoldersExcl; && [m.tlSubFolders, ''] {fr} Sous-dossiers à exclure (séparés par ',')
 , tlRecycle; && [.F.] {fr} Placer les fichiers supprimés dans la corbeille
-, tlDirsEmptyDel; && [.F.] {fr} Supprimer les dossiers vides
+, tlFolderEmptyDel; && [.F.] {fr} Supprimer les dossiers vides
 , tcResult; && @ [''] {fr} Détail de l'erreur éventuelle
 , tnResult; && @ [0] {fr} Nombre de fichiers copiés
 
+tlSubFolders = lTrue(m.tlSubFolders)
 tlRecycle = lTrue(m.tlRecycle)
 
 local llResult as Boolean;
-, lcResult as String
+, lcResult as String;
+, laFolders[1], lcFolder, laSubFolders[1], lcSubFolder
 
 tnResult = FilesProc(;
 	  m.tcFolders;
@@ -1277,17 +1311,15 @@ tnResult = FilesProc(;
 	, m.tlSubFolders;
 	, m.tcSubFoldersExcl;
 	, m.tlRecycle;
-	, m.tlDirsEmptyDel;
-	, @m.lcResult;
+	, m.tlFolderEmptyDel;
+	,@m.lcResult;
 	)
 
 llResult = empty(m.lcResult) or cResultAdd(@m.tcResult, m.lcResult)
 
-* {fr} Supprimer les répertoires vides résiduels
-if m.llResult and lTrue(m.tlDirsEmptyDel)
+* {fr} Supprimer les répertoires vides résiduels (Windows cache les fichiers / dossiers: FileDel() ne voit pas toujours bien si le dossier est vide)
+if m.llResult and lTrue(m.tlFolderEmptyDel) and alines(laFolders, m.tcFolders, 1, ',', ';') > 0
 
-	local laFolders[1], lcFolder, laSubFolders[1], lcSubFolder
-	alines(laFolders, m.tcFolders, 1, ',', ';')
 	for each lcFolder in m.laFolders
 		if m.tlSubFolders and aSubFolders(@m.laSubFolders, m.lcFolder, m.tcSubFoldersExcl, .t., .t.) > 0
 			for each lcSubFolder in m.laSubFolders
@@ -1297,7 +1329,7 @@ if m.llResult and lTrue(m.tlDirsEmptyDel)
 			endfor
 		endif
 		try
-			if lDirEmpty(m.lcFolder)
+			if lDirEmpty(m.lcFolder) && !m.tlFolderEmptyRootKeep and && [.F.] {fr} Garder les dossiers racines même si vides && impossible de 
 				rd (m.lcFolder)
 			endif
 		catch
@@ -1306,29 +1338,30 @@ if m.llResult and lTrue(m.tlDirsEmptyDel)
 endif
 
 return m.llResult
+endproc
 
 *!*		* ========================================
 *!*		PROCEDURE FileDelete && {fr} Supprime un fichier && {fr} alias de FileDel() && {fr} abandonné à cause d'un conflit avec FileDelete.exe de web connect
 *!*		LPARAMETERS ;
-*!*			tcFile,; && {fr} Addresse du fichier à supprimer
+*!*			tcFile,; && {fr} Adresse du fichier à supprimer
 *!*			tlRecycle,; && [.F.] {fr} Placer les fichiers dans la corbeille
-*!*			tlDirsEmptyDel,; && [.F.] {fr} Supprimer les dossiers vides
+*!*			tlFolderEmptyDel,; && [.F.] {fr} Supprimer les dossiers vides
 *!*			tcError && @ [''] {fr} Détail de l'erreur éventuelle
 *!*
-*!*		RETURN FileDel(m.tcFile, m.tlRecycle, m.tlDirsEmptyDel, @m.tcError)
+*!*		RETURN FileDel(m.tcFile, m.tlRecycle, m.tlFolderEmptyDel, @m.tcError)
 
 * ========================================
 procedure FileDel && {fr} Supprime un fichier
 lparameters ;
-  tcFile; && {fr} Addresse du fichier à supprimer
+  tcFile; && {fr} Adresse du fichier à supprimer
 , tlRecycle; && [.F.] {fr} Placer les fichiers dans la corbeille
-, tlDirsEmptyDel; && [.F.] {fr} Supprimer les dossiers vides
+, tlFolderEmptyDel; && [.F.] {fr} Supprimer les dossiers vides
 , tcResult && @ [''] {fr} Détail de l'erreur éventuelle, cumulative
 
-local lcRecycle;
+local llResult;
+, lcRecycle;
 , lcPath;
 , loException as exception;
-, llResult
 
 try
 
@@ -1340,8 +1373,8 @@ try
 
 	delete file (m.tcFile) &lcRecycle
 
-	lcPath = justpath(m.tcFile)
-	if lTrue(m.tlDirsEmptyDel) and lDirEmpty(m.lcPath)
+	lcPath = JustPath(m.tcFile)
+	if lTrue(m.tlFolderEmptyDel) and lDirEmpty(m.lcPath)
 		rd (m.lcPath)
 	endif
 
@@ -1364,8 +1397,8 @@ lparameters ;
   tcFolders; && {fr} Adresses des dossiers oû les fichiers sont à chercher
 , tcProc; && {fr} Procédure à appliquer à chaque fichier trouvé (son premier paramètre est l'adresse du fichier)
 , tcFileSkels; && ['*.*'] {fr} Masques de fichiers à traiter (séparés par ',')
-, tlSubFolders; &&	[.F.] {fr} Chercher dans les sous-dossiers
-, tcSubFoldersExcl; && [''] {fr} Sous-dossiers à exclure de la recherche (séparés par ',')
+, tlSubFolders; &&	[.F.] {fr} Traiter les fichiers dans les sous-dossiers
+, tcSubFoldersExcl; && [m.tlSubFolders, ''] {fr} Sous-dossiers à exclure (séparés par ',')
 , tuProcParm02; && @ 2ème paramètre à passer à la procédure (le premier est l'adresse du fichier)
 , tuProcParm03; && @ 3ème paramètre à passer à la procédure
 , tuProcParm04; && @ 4eme paramètre à passer à la procédure
@@ -1680,7 +1713,7 @@ return .F.
 endfunc
 
 * ========================================
-function cFolder && {fr} Dossier d'une addresse
+function cFolder && {fr} Dossier d'une Adresse
 lparameters tcAddress && {fr} adresse
 
 local lcPath, lcResult
@@ -1695,15 +1728,15 @@ return m.lcResult
 endfunc
 
 * ========================================
-function cFolders && {fr} Dossiers d'une liste d'addresses
-lparameters tcAddresses && {fr} Adresses
+function cFolders && {fr} Dossiers d'une liste d'Adresses
+lparameters tcAdresses && {fr} Adresses
 
 local laAddress[1], lnAddress, lcResult
 
 lcResult = ''
-if vartype(m.tcAddresses) == 'C' and not empty(m.tcAddresses)
+if vartype(m.tcAdresses) == 'C' and not empty(m.tcAdresses)
 
-	for lnAddress = 1 to alines(laAddress, m.tcAddresses, 1, ',', ';', CRLF, CR, LF)
+	for lnAddress = 1 to alines(laAddress, m.tcAdresses, 1, ',', ';', CRLF, CR, LF)
 		laAddress[m.lnAddress] = cFolder(laAddress[m.lnAddress])
 	endfor
 	lcResult = cListOfArray(@m.laAddress)
@@ -1805,19 +1838,18 @@ lcResult = ''
 if vartype(m.tcFileName) == 'C'
 
 	lnPeriod = ratc('.', m.tcFileName)
-	lcExt = iif(m.lnPeriod > 0, substr(m.tcFileName, m.lnPeriod + 1), '')
-	lcStem = iif(m.lnPeriod > 0, substr(m.tcFileName, 1, m.lnPeriod-1), m.tcFileName)
+	lcExt = iif(m.lnPeriod > 0, Substrc(m.tcFileName, m.lnPeriod + 1), '')
+	lcStem = iif(m.lnPeriod > 0, Leftc(m.tcFileName, m.lnPeriod-1), m.tcFileName)
 	if not empty(m.lcStem)
 
-		lcStem = chrtran(m.lcStem, CAR_INT_DS_NOM_FICH, replicate('_', len(CAR_INT_DS_NOM_FICH)))
-		lcStem = cRepCharDel(m.lcStem, '_')
-		lcResult = forceext(m.lcStem, m.lcExt)
+		lcResult = cRepCharDel(chrtran(m.lcStem, CAR_INT_DS_NOM_FICH, replicate('_', len(CAR_INT_DS_NOM_FICH))), '_');
+			+ nEvl(m.lcExt, '.' + m.lcExt)
 	endif
 endif
 
 return m.lcResult
 
-* ========================================
+* ----------------------------------------------
 procedure cFileName_Test && {fr} Teste cFileName()
 
 local loTest as abUnitTest of abDev.prg
@@ -1875,6 +1907,8 @@ if vartype(m.tcFile) == 'C' and (file(m.tcFile) or directory(m.tcFile))
 		endif
 		if m.llBS
 			lcResult = addbs(m.lcResult)
+		else
+			lcResult = ForceExt(m.lcResult, Lower(JustExt(m.lcResult))) && {fr} force l'extension en minuscules
 		endif
 	else
 		lcResult = m.lcFile
@@ -1891,10 +1925,10 @@ local loTest as abUnitTest of abDev.prg
 loTest = newobject('abUnitTest', 'abDev.prg')
 
 loTest.Test("AB\abFile.PRG", "ab\abFile.prg")
-loTest.Test("C:\Program Files\VFP9\Tools\AB\abFile.PRG", "ab\abFile.prg", .t.)
-loTest.Test("C:\Program Files\VFP9\Tools", DOS_AB + "..", .t.)
-loTest.Test("C:\Program Files\VFP9\Tools\", DOS_AB + "..\", .t.)
-loTest.Test("C:\Program Files\VFP9\", DOS_AB + "..\..\", .t.)
+loTest.Test(Home(1) + "Tools\AB\abFile.PRG", "ab\abFile.prg", .t.)
+loTest.Test(Home(1) + "Tools", DOS_AB + "..", .t.)
+loTest.Test(Home(1) + "Tools\", DOS_AB + "..\", .t.)
+loTest.Test(Home(1) + "", DOS_AB + "..\..\", .t.)
 
 return loTest.result()
 
@@ -2182,7 +2216,7 @@ return m.llResult
 *==============================================
 function nFileLines && {fr} Nombre de lignes dans un fichier
 lparameters ;
-  tcFileAddr && {fr} Addresse du fichier
+  tcFileAddr && {fr} Adresse du fichier
 local llResult, lnResult &&  && {fr} Taille du fichier en octets
 lnResult = 0
 
@@ -2200,8 +2234,8 @@ return m.lnResult
 function nFileSize_Folder && Taille des fichiers dans un dossier
 lparameters ;
   tcFolders; && {fr} Adresses des dossiers oû les fichiers sont à chercher
-, tlSubFolders; && [.F.] {fr} Chercher dans les sous-dossiers
-, tcSubFoldersExcl; && [''] {fr} Sous-dossiers à exclure de la recherche (séparés par ',')
+, tlSubFolders; && [.F.] {fr} Traiter les fichiers dans les sous-dossiers
+, tcSubFoldersExcl; && [m.tlSubFolders, ''] {fr} Sous-dossiers à exclure (séparés par ',')
 , tcFileSkels; && ['*.*'] {fr} Masques de fichiers à traiter (séparés par ',')
 , tnFile; && @ {fr} nombre de fichiers trouvés
 
@@ -2222,8 +2256,8 @@ else
 		  m.tcFolders; && tcFolders {fr} Adresses des dossiers oû les fichiers sont à chercher
 		, 'nFileSize_Folder_File'; && tcProc {fr} Procédure à appliquer à chaque fichier trouvé (son premier paramètre est l'adresse du fichier)
 		, m.tcFileSkels; && tcFileSkels ['*.*'] {fr} Masques de fichiers à traiter (séparés par ',')
-		, m.tlSubFolders; &&	tlSubFolders [.F.] {fr} Chercher dans les sous-dossiers
-		, m.tcSubFoldersExcl; && tcSubFoldersExcl [''] {fr} Sous-dossiers à exclure de la recherche (séparés par ',')
+		, m.tlSubFolders; &&	tlSubFolders [.F.] {fr} Traiter les fichiers dans les sous-dossiers
+		, m.tcSubFoldersExcl; && tcSubFoldersExcl [m.tlSubFolders, ''] {fr} Sous-dossiers à exclure (séparés par ',')
 		,@m.result; && tuProcParm02 @ 2ème paramètre à passer à la procédure (le premier est l'adresse du fichier)
 		,@m.tnFile; && tuProcParm03 @ 3ème paramètre à passer à la procédure
 		)
@@ -2251,7 +2285,7 @@ lparameters ;
 , tcExtOld; && {fr} Ancienne extension
 , tcExtNew; && {fr} Nouvelle extention
 , tlSubFolders; && [.F.] {fr} Chercher aussi dans les sous-dossiers
-, tcSubFoldsExcl && [''] {fr} Sous-dossiers à exclure de la recherche (séparés par ',')
+, tcSubFoldsExcl && [m.tlSubFolders, ''] {fr} Sous-dossiers à exclure (séparés par ',')
 local lnResult && {fr} nombre de fichiers traités
 lnResult = 0
 

@@ -1,33 +1,50 @@
 * {fr} Constantes de développement
-#DEFINE VFPOPCARS	'!$+-/*%^<>=#' && {fr} opérateurs
-#DEFINE VFPSEPCARS	' .,()[]!' + Chr(9) && {fr} Caractères de séparation (avec tabulateur)
-#DEFINE VFPOPSEPCARS	VFPOPCARS + VFPSEPCARS
-#DEFINE VFPOPSEPCARSLIST	"'!','$','+','-','/','*','%','^','<','>','=','#',' ',',','(',')','[',']'"
+#define VFPOPCARS	'!$+-/*%^<>=#' && {fr} opérateurs
+#define VFPSEPCARS	' .,()[]!' + Chr(9) && {fr} Caractères de séparation (avec tabulateur)
+#define VFPOPSEPCARS	VFPOPCARS + VFPSEPCARS
+#define VFPOPSEPCARSLIST	"'!','$','+','-','/','*','%','^','<','>','=','#',' ',',','(',')','[',']'"
 
-#DEFINE VFP_VAR_SIZE_MAX	16777184
+#define VFP_VAR_SIZE_MAX	16777184
 
 * {en} Tools Folders
-#DEFINE DOS_TOOLS			Home(1) + 'Tools\'
-#DEFINE DOS_AB			DOS_TOOLS + 'AB\'
-&& {fr} Iif(File('ab.prg'), addbs(justpath(fullpath('ab.prg'))), Home(1) + 'Tools\AB\')
-#DEFINE DOS_ABGRAPHICS  DOS_AB + 'Graphics\'
-#DEFINE DOS_AB_TEMP		DOS_AB + '_Temp\'
-#DEFINE DOS_AC			DOS_AB + 'AC\'
-#DEFINE DOS_AT			DOS_AB + 'AT\'
+#define DOS_TOOLS			Home(1) + 'Tools\'
+#define DOS_AB			DOS_TOOLS + 'AB\'
+#define DOS_ABGRAPHICS  DOS_AB + 'Graphics\'
+#define DOS_AB_TEMP		DOS_AB + '_Temp\'
+#define DOS_AC			DOS_AB + 'AC\'
+#define DOS_AT			DOS_AB + 'AT\'
+#define DOS_AW			DOS_AB + 'AW\'
+#define DOS_AZ			DOS_AB + 'AZ\'
 
-#DEFINE DOS_AW			DOS_AB + 'AW\'
-#DEFINE DOS_AWAPP		DOS_AW + 'App\'
-#DEFINE DOS_AWSCRIPTS	DOS_AW + 'Scripts\'
-#DEFINE DOS_AWSAMPLES	DOS_AW + 'Samples\'
-#DEFINE DOS_AWSAMPLES_	DOS_AW + 'Samples_\'
+#define DOS_AWAPP		DOS_AW + 'App\'
+#define DOS_AWSCRIPTS	DOS_AW + 'Scripts\'
+#define DOS_AW_SOURCE	DOS_AW + '_Source\'
 
-#DEFINE DOS_WC			DOS_AB + 'WC\'
-#DEFINE DOS_WC_CLASSES	DOS_WC + 'Classes\'
-#DEFINE DOS_FFC			Home(1) + 'FFC\'
+#define DOS_AWSAMPLES	DOS_AW + 'Samples\'
+
+#define DOS_AWSAMPLES_TASTRADE DOS_AWSAMPLES + 'Tastrade\'
+#define DOS_AWSAMPLES_TASTRADE_ADAPTED	DOS_AWSAMPLES + 'Tastrade\Adapted\'
+
+#define DOS_AWSAMPLES_DATA	 DOS_AWSAMPLES + '_Data\'
+#define DOS_AWSAMPLES_FIC_CLASS	 DOS_AWSAMPLES + 'FIC\classe\'
+
+#define DOS_AWSAMPLES_FIC_TUTO	DOS_AWSAMPLES + 'FIC\FICtuto\'
+#define DOS_AWSAMPLES_FIC_TUTO_FORM 	DOS_AWSAMPLES_FIC_TUTO + 'progs\forms'
+
+#define DOS_AWSAMPLES_FIC_DEMO	DOS_AWSAMPLES + 'FIC\FICdemo\'
+
+#define DOS_AWSAMPLES_	DOS_AW + 'Samples_\' && GLS
+
+#define DOS_WC			DOS_AB + 'WC\'
+#define DOS_WC_CLASSES	DOS_WC + 'Classes\'
+#define DOS_FFC			Home(1) + 'FFC\'
+
+#define DOS_USER_APPDATA_AB			home(7) + 'AB\'
+#define DOS_USER_APPDATA_AW			DOS_USER_APPDATA_AB + 'AW\'
 
 * {fr} Dossiers à exclure des traitements batch
-#DEFINE FOLDERS_EXCLUDE	'save,_save,old,_old,bak,back,_back,tmp,_tmp,temp,_temp,ancien,_ancien,anciens,_anciens,sauve,_sauve';
-	 + ',source,_source,script,scripts,image,images,screenshots,doc,docs,test'
+#define FOLDERS_EXCLUDE	'save,_save,old,_old,bak,back,_back,tmp,_tmp,temp,_temp,ancien,_ancien,anciens,_anciens,sauve,_sauve';
+	 + ',source,_source,script,scripts,image,images,screenshots,doc,docs,test,_gsData_,.git,test,tests'
 
 *!*	declare integer ShellExecute IN Shell32.dll; && {fr} If the function succeeds, it returns a value greater than 32
 *!*		  integer nWinHandle; && {fr} A handle to the parent window used for displaying a UI or error messages. This value can be NULL if the operation is not associated with a window.
@@ -42,17 +59,17 @@
 *!*		, string cParameters; && {en} parameters to be passed to the application
 *!*		, string cDirectory; && {en} default (working) directory for the action. If this value is NULL, the current working directory is used
 *!*		, integer nShowWindow && {en} how an application is to be displayed when it is opened (see abDev.h)
-#DEFINE SW_HIDE 0
-#DEFINE SW_SHOWNORMAL 1
-#DEFINE SW_SHOWMINIMIZED 2
-#DEFINE SW_SHOWMAXIMIZED 3
-#DEFINE SW_SHOWNOACTIVATE 4
-#DEFINE SW_SHOW 5
-#DEFINE SW_MINIMIZE 6
-#DEFINE SW_SHOWMINNOACTIVE 7
-#DEFINE SW_SHOWNA 8
-#DEFINE SW_RESTORE 9
-#DEFINE SW_SHOWDEFAULT 10
+#define SW_HIDE 0
+#define SW_SHOWNORMAL 1
+#define SW_SHOWMINIMIZED 2
+#define SW_SHOWMAXIMIZED 3
+#define SW_SHOWNOACTIVATE 4
+#define SW_SHOW 5
+#define SW_MINIMIZE 6
+#define SW_SHOWMINNOACTIVE 7
+#define SW_SHOWNA 8
+#define SW_RESTORE 9
+#define SW_SHOWDEFAULT 10
 
 
 && {fr} contribution Gregory Adam : http://www.atoutfox.org/nntp.asp?ID=0000015802

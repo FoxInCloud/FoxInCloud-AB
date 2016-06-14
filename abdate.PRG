@@ -77,7 +77,7 @@ if vartype(m.tnSecs) == 'N' ;
 	endif
 
 	lcResult = ;
-		iif(vartype(m.tlLtrim) == 'L' and m.tlLtrim and m.lnHours = 0;
+		Iif(lTrue(m.tlLtrim) and m.lnHours = 0;
 			, space(iif(m.tlFixedLen, 3, 0));
 			, padl(ltrim(str(m.lnHours)), 2, '0') + ':');
 	+	padl(ltrim(str(m.lnMins)), 2, '0') + ':';
@@ -148,7 +148,7 @@ local luDate, lcType, liJS, lcResult
 
 luDate = iif(vartype(m.tuDate) $ 'DT', m.tuDate, datetime())
 lcType = vartype(m.luDate)
-liJS = iif(vartype(m.tlJS) == 'L' and m.tlJS, -1, 0) && {fr} base 0 en javascript
+liJS = iif(lTrue(m.tlJS), -1, 0) && {fr} base 0 en javascript
 
 lcResult = cWords(',' ;
 	, ltrim(str(year(m.luDate)));
@@ -596,7 +596,7 @@ if m.llResult
 	lcResult = proper(iif(m.lcType == 'T', ttoc(m.tu), dtoc(m.tu)))
 	set date &lcDate
 
-	if vartype(m.tlNoDay) == 'L' and m.tlNoDay
+	if lTrue(m.tlNoDay)
 		lcResult = '';
 			+ getwordnum(m.lcResult, 2) + space(1);
 			+ getwordnum(m.lcResult, 3) + space(1);
@@ -864,19 +864,19 @@ return left(TtocSep(m.tt, m.tcSep), 10)
 endfunc
 
 * ================================================
-function cSeconds && {fr} Secondes écoulées tenant compte du passage par minuit pour affichage
-lparameters tnSeconds && {fr} Seconds() au début, si @, Seconds() en retour
+function cSecs && {en} number of seconds with unit formatted in current user language
+lparameters tnSecs && {en} number of seconds
 
-local lnResult, cLangUser
-lnResult = nSeconds(@m.tnSeconds)
-
-return iif(m.lnResult < 60 and varSet(@m.cLangUser, cLangUser()); && 2016-03-23 thn -- {en} {FiC V 2.21.0-beta.11} don't prepend a space for use in ? command
-	, transform(m.lnResult, ICase(;
-			m.lnResult > 10,;
-				'99',;
-			m.lnResult > 1,;
+local cLangUser
+cLangUser = cLangUser()
+return Ltrim(transform(m.tnSecs, ICase(; && 2016-03-23 thn -- {en} lTrim(): don't prepend a space for use in ? command
+			!Vartype(m.tnSecs) == 'N',;
+				'',;
+			m.tnSecs >= 10 or ga_Type_IsInteger(m.tnSecs),;
+				'9999',;
+			m.tnSecs >= 1,;
 				'9.9',;
-			m.lnResult > .1,;
+			m.tnSecs >= .1,;
 				'9.99',;
 				'9.999';
 			));
@@ -884,7 +884,18 @@ return iif(m.lnResult < 60 and varSet(@m.cLangUser, cLangUser()); && 2016-03-23 
 				m.cLangUser = 'fr',	'sec',; && copy-paste this line to add another language support
 				m.cLangUser = 'de',	'sek',; && copy-paste this line to add another language support
 														'sec'; && default: English
-				) + '.';
+				) + iif(m.tnSecs >= 2, 's', '') + '.')
+endfunc
+
+* ================================================
+function cSeconds && {fr} Secondes écoulées tenant compte du passage par minuit pour affichage
+lparameters tnSeconds && {fr} Seconds() au début, si @, Seconds() en retour
+
+local lnResult, cLangUser
+lnResult = nSeconds(@m.tnSeconds)
+
+return iif(m.lnResult < 60 and varSet(@m.cLangUser, cLangUser()); && 2016-03-23 thn -- {en} {FiC V 2.21.0-beta.11} don't prepend a space for use in ? command
+	, cSecs(m.lnResult);
 	, cHHMMSS(m.lnResult);
 	)
 endfunc
@@ -929,7 +940,7 @@ return transform(nMS(@m.tnSeconds)) + ' ms.'
 * ================================================
 function cDateTimeSep && {fr} Date et heure avec séparateurs compatibles pour nom de fichier
 lparameters tt && [Datetime()] {fr} Date et heure
-return chrtran(ttoc(evl(m.tt, datetime()), 3), ':', '.')
+return chrtran(ttoc(evl(m.tt, datetime()), 3), ':', '-')
 
 * ================================================
 function DtocXL && {fr} Date formatée selon masque de type Excel
@@ -1090,7 +1101,7 @@ else
 
 	lDate = m.cType == 'D'
 	ltdNow = Datetime() + Iif(lTrue(m.lGMT) and Upper('wwAPI.fxp') $ Set("Procedure");
-		, GetTimeZone()*60; && modify command wwAPI
+		, Evaluate("GetTimeZone()*60"); && modify command wwAPI
 		, 0;
 		)
 	ltdNow = iif(m.lDate, Ttod(m.ltdNow), m.ltdNow)
@@ -1300,7 +1311,7 @@ lcType = vartype(m.tt)
 tt = icase(m.lcType == 'T', m.tt;
 		, m.lcType == 'D', dtot(m.tt);
 		, datetime())
-tlGMT = vartype(m.tlGMT) == 'L' and m.tlGMT
+tlGMT = lTrue(m.tlGMT)
 
 laDays[1] = "Mon" && {fr} Dow(, 2)
 laDays[2] = "Tue"

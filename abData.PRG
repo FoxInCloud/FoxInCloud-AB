@@ -130,7 +130,6 @@ loTest.Test('', m.lcChain, @m.lcAlias)
 
 return loTest.Result()
 
-
 * ========================================
 function JustTable && {fr} Table dans une chaîne de type "Base de données!table"
 lparameters ;
@@ -775,6 +774,60 @@ enddefine && {fr} CLASS abAlias
 * ========================================
 
 * ========================================
+function abTableUseIn && {fr} Referme les alias d'une table temporairement
+lparameters tcTable
+return CreateObject('abTableUseIn', m.tcTable)
+endfunc
+
+* =================================================
+define class abTableUseIn as GA_LIGHTWEIGHT_CLASS && {fr} Referme les alias d'une table temporairement
+* =================================================
+protected aAlias[1]
+* ---------------------------------------------------
+procedure init
+lparameters tcTable
+
+local success as Boolean;
+, aa[1];
+, nAlias;
+, iAlias;
+, cAlias;
+
+tcTable = Evl(m.tcTable, '')
+if File(m.tcTable)
+	tcTable = FullPath(m.tcTable)
+	nAlias = 0
+	for iAlias = 1 to AUsed(m.aa)
+		cAlias = m.aa[m.iAlias, 1]
+		if dbf(m.cAlias) == m.tcTable
+			nAlias = m.nAlias + 1
+			dimension this.aAlias[m.nAlias]
+			this.aAlias[m.nAlias] = oAlias(m.cAlias)
+			success = Vartype(this.aAlias[m.nAlias]) == 'O'
+			if m.success
+				use in (m.cAlias)
+			else
+				exit
+			endif
+		endif
+	endfor
+endif
+return m.success
+endproc
+
+* ---------------------------------------------------
+procedure destroy
+local oAlias as oAlias of abdata.prg
+for each oAlias in this.aAlias foxobject
+	m.oAlias.swap
+endfor
+endproc
+
+* =================================================
+enddefine && class abTableUseIn
+* =================================================
+
+* ========================================
 function oAlias && {fr} Caractéristiques d'un alias
 lparameters ;
   tcAlias; && [Alias()] {fr} Alias à analyser
@@ -804,6 +857,7 @@ local success as Boolean;
 
 with m.this as oAlias of abData.prg
 
+	tcDBF = Evl(m.tcDBF, .cDBF)
 	if file(m.tcDBF)
 
 		success = used(.cAlias) and .cDBF == fullpath(m.tcDBF) && {fr} fichier inchangé, inutile de changer

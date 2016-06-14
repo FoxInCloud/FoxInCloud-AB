@@ -67,12 +67,12 @@ alDataSession = .f.
 alProjectManager = .f.
 
 * -------------------------------------------------
-procedure init && {fr} Ouvre les fichiers de compte-rendu et vide la fenêtre VFP
+procedure Init && {fr} Ouvre les fichiers de compte-rendu et vide la fenêtre VFP
 lparameters ;
   tuTxtLog; && [.T.] {fr} Nom, dossier ou adresse du fichier de compte-rendu texte, .T. : automatique
 , tuDBFlog; && [.T.] {fr} Nom, dossier ou adresse du fichier de la table de compte-rendu, .T. : automatique
 , tlFooter; && [.T.] {fr} Produire une ligne de totaux / moyennes en fin de CR
-, tlConsole && [.T.] {fr} Afficher le compte rendu à l'écran (s'il est visible)
+, tlConsole; && [.T.] {fr} Afficher le compte rendu à l'écran s'il est visible
 
 local lnParms, luTxtLog, luDBFlog, llResult
 
@@ -111,8 +111,8 @@ return m.llResult
 * -------------------------------------------------
 procedure init_Logs && {fr} Ouvre les fichiers de compte-rendu
 lparameters ;
-  tuTxtLog ; && [.T.] {fr} Nom ou adresse du fichier de compte-rendu texte, .T. pour automatique
-, tuDBFlog && [.T.] {fr} Nom ou adresse du fichier de la table de compte-rendu, .T. pour automatique
+  tuTxtLog; && [.T.] {fr} Nom ou adresse du fichier de compte-rendu texte, .T. pour automatique
+, tuDBFlog; && [.T.] {fr} Nom ou adresse du fichier de la table de compte-rendu, .T. pour automatique
 
 local lcLogAddr, lcResult, llResultTXT, llResultDBF
 
@@ -238,16 +238,16 @@ if file(m.tcLogAddr)
 endif
 
 * -------------------------------------------------
-procedure cLogPathStem && {fr} Adresse d'un fichier de compte-rendu sans l'extension
-lparameters tuLog && [.T.] {fr} Nom ou adresse du fichier de compte-rendu texte, .T. pour automatique
+protected procedure cLogPathStem && {fr} Adresse d'un fichier de compte-rendu sans l'extension
+lparameters tuLog; && [.T.] {fr} Nom ou adresse du fichier de compte-rendu, .T. pour automatique
 
-local lcSys16, lcResult
+local lcResult, lcSys16;
+, lcLogPath, lcLogPathAuto;
+, lcLogStem, lcLogStemAuto
 
 lcResult = ''
-lcSys16 = sys(16,0)
-if not empty(m.lcSys16)
-
-	local lcLogPathAuto, lcLogStemAuto, lcLogPath, lcLogStem
+lcSys16 = sys(16,1)
+if !empty(m.lcSys16)
 
 	lcLogPathAuto = addbs(cModuleInfo(m.lcSys16, 'Path'))
 	lcLogStemAuto = cModuleInfo(m.lcSys16, 'Name')
@@ -255,16 +255,15 @@ if not empty(m.lcSys16)
 
 	do case
 
-	case vartype(m.tuLog) = 'C' and ! empty(m.tuLog)
+	case ga_Type_IsChar(m.tuLog, .T.)
 
 		lcLogPath = addbs(justpath(m.tuLog))
 		lcLogPath = iif(directory(m.lcLogPath), m.lcLogPath, m.lcLogPathAuto)
 
-		lcLogStem = juststem(m.tuLog)
-		lcLogStem = cFileName(m.lcLogStem)
+		lcLogStem = cFileName(juststem(m.tuLog))
 		lcLogStem = iif(lFileName(m.lcLogStem), m.lcLogStem, m.lcLogStemAuto)
 
-	case vartype(m.tuLog) = 'L' and m.tuLog
+	case lTrue(m.tuLog)
 		lcLogPath = lcLogPathAuto
 		lcLogStem = lcLogStemAuto
 
@@ -942,7 +941,7 @@ enddefine && {fr} CLASS cusBatchLog as Custom
 * -----------------------------------------------------
 procedure cusBatchLog_Test
 local lcSys16
-lcSys16 = sys(16,0)
+lcSys16 = sys(16,1)
 ? m.lcSys16
 local loBatchLog, lnPos
 loBatchLog = createobject('cusBatchLog', addbs(sys(2023)) + 'test')
@@ -1208,7 +1207,8 @@ return m.llResult
 function lCallingModules && {fr} Plusieurs modules appellent le module appelant cette fonction
 lparameters ;
   tcModules; && {fr} Modules
-, tlOR && [.F.] {fr} Au moins un module appelle le module
+, tlOR; && [.F.] {fr} Au moins un module appelle le module
+
 tlOR = lTrue(m.tlOR)
 
 local laModules[1], lcModule, llResult
@@ -1417,6 +1417,16 @@ cUniqueId = ''
 nUpgradeMethod = 0
 cVersion = ''
 nVoltageCaps = 0
+
+* ------------------------------------
+procedure Init
+lparameters tlAllInfo
+if lTrue(m.tlAllInfo)
+	this.SystemInfo
+	this.ProcessorInfo
+	this.MemoryInfo
+endif
+return DoDefault()
 
 * ------------------------------------
 procedure SystemInfo && {fr} Peuple les informations système
@@ -1638,7 +1648,8 @@ procedure ProjectFilesInclude && {fr} Change l'inclusion de fichiers dans le pro
 lparameters ;
   tcFileMask; && [*.*] {fr} Expression régulière indiquant le masque de fichier à traiter
 , tlInclude; && [.T.] .T.: Inclure, .F.: Exclure, .NULL. : Inverser
-, tnResult && @ {fr} Nombre de fichiers traités
+, tnResult; && @ {fr} Nombre de fichiers traités
+
 tnResult = 0
 
 local loProject, loProjectFiles, loRegExp as abRegExp of abTxt.prg, llResult
@@ -1686,10 +1697,15 @@ return m.llResult
 procedure ProjectFilesRemove && {fr} Ôte des fichiers du projet courant
 lparameters ;
   tcFileMask; && [*.*] {fr} Expression régulière indiquant le masque de fichier à traiter
-, tnResult && @ {fr} Nombre de fichiers traités
+, tnResult; && @ {fr} Nombre de fichiers traités
+, tcFileType; && [''] {fr} déplacer vers cette section
+
 tnResult = 0
 
-local loProject, loProjectFiles, loRegExp as abRegExp of abTxt.prg, llResult
+local llResult;
+, loProject as Project, loProjectFiles;
+, loRegExp as abRegExp of abTxt.prg;
+, lcCarsNot, lcFileMask, llInclude, loFile as file
 
 * {fr} Si un projet est actif
 loProject = _vfp.activeproject
@@ -1702,15 +1718,18 @@ if m.llResult
 	if m.llResult
 
 		* {fr} Créer un objet 'Regular Expression'
-		loRegExp = createobject('abRegExp')
+		loRegExp = abRegExp()
 		llResult = vartype(m.loRegExp) == 'O'
 		if m.llResult
 
 			* {fr} Donner leur valeur par défaut aux paramètres
-			local lcCarsNot, lcFileMask, llInclude, loFile as file
 			lcCarsNot = CAR_INT_DS_NOM_FICH
 			lcFileMask = alltrim(uDefault(m.tcFileMask, textmerge('[^<<m.lcCarsNot>>]+\.[^<<m.lcCarsNot>>]+')))
 			llInclude = iif(pcount() >=2 and vartype(m.tlInclude) $ 'LX', m.tlInclude, .t.)
+			tcFileType = Iif(ga_Type_IsChar(tcFileType, .T.) and varSet(@m.tcFileType, Alltrim(m.tcFileType)) and InList(m.tcFileType, FILETYPE_DATABASE,FILETYPE_FREETABLE,FILETYPE_QUERY,FILETYPE_FORM,FILETYPE_REPORT,FILETYPE_LABEL,FILETYPE_CLASSLIB,FILETYPE_PROGRAM,FILETYPE_APILIB,FILETYPE_APPLICATION,FILETYPE_MENU,FILETYPE_TEXT,FILETYPE_OTHER); && see foxpro.h
+				, m.tcFileType;
+				, .null.;
+				)
 
 			* {fr} Pour chaque fichier
 			loRegExp.setup(m.lcFileMask, .t.)
@@ -1719,8 +1738,12 @@ if m.llResult
 				* {fr} Si le nom du fichier correspond au masque
 				if loRegExp.Test(justfname(m.loFile.name))
 
-					* {fr} öter le fichier
-					loFile.remove
+					if IsNull(m.tcFileType)
+						* {fr} ôter le fichier
+						loFile.remove
+					else
+						loFile.Type = m.tcFileType
+					endif
 					tnResult = m.tnResult + 1
 				endif
 			endfor
@@ -1736,6 +1759,7 @@ function cVFPname	&& {fr} Nom valide pour VFP, avec longueur limitée si nécessai
 lparameters ;
   tcVFPname ; && {fr} Nom VFP à valider
 , tnLength && [len(tcVFPname)] {fr} Longueur maximale du nom (par ex. 10 pour un nom de champ de table libre)
+
 local lcResult
 lcResult = ''
 
@@ -3188,30 +3212,32 @@ local lcResult;
 
 lcResult = ''
 
-if vartype(m.toException) == 'O' and type('m.toException.BaseClass') == 'C' and m.toException.baseclass == 'Exception'
+if type('m.toException.BaseClass') == 'C';
+	and m.toException.BaseClass == 'Exception'
 
 	with m.toException as exception
 
-		lcResult = cLitteral(.lineContents)
+		lcResult = '"' + .LineContents + '"'
 		lcResult = iif(_vfp.startmode = 0;
 			, textmerge(icase(;
-					cLangUser() = 'fr',	[ (<<Iif('...' $ .LineContents, 'code source N/D', m.lcResult)>>)],; && copy-paste this line to add another language support
-															[ (<<Iif('...' $ .LineContents, 'source code N/A', m.lcResult)>>)]; && default: English
+					cLangUser() = 'fr',	[(<<Iif('...' $ .LineContents, 'code source N/D', m.lcResult)>>)],; && copy-paste this line to add another language support
+															[(<<Iif('...' $ .LineContents, 'source code N/A', m.lcResult)>>)]; && default: English
 				));
 			, '';
 			)
 		luUserValue = ICase(;
-			loClass(.userValue, 'Exception'),;
+			type('.userValue.BaseClass') == 'C' and .userValue.BaseClass == 'Exception',;
 				cException(.userValue),;
 			Vartype(.userValue) == 'C' and CR $ .userValue,;
-				CRLF + Ltrim(.userValue, ' ', CR, LF),;
+				CRLF + Ltrim(.userValue, CR, LF, ' '),;
 				.userValue;
 			)
-		lcMessage = Trim(.Message, ' ', '.', ',') && "Erreur levée par l'utilisateur, ."
+		lcMessage = Trim(.Message, ',', ' ', '.') && "Erreur levée par l'utilisateur, ."
+
 		lcResult = textmerge(icase(;
-			cLangUser() = 'fr',	[Méthode ou procédure <<.Procedure>>() : erreur n° <<.ErrorNo>> ("<<c2Words(m.lcMessage,' - ', m.luUserValue)>>") à la ligne n° <<.LineNo>><<m.lcResult>>],; && copy-paste this line to add another language support
-													[Method or procedure <<.Procedure>>(): error #<<.ErrorNo>> ("<<c2Words(m.lcMessage,' - ', m.luUserValue)>>") at code line #<<.LineNo>><<m.lcResult>>]; && default: English
-			))
+			cLangUser() = 'fr',	[Méthode ou procédure <<.Procedure>>() : erreur n° <<.ErrorNo>> ("<<c2Words(m.lcMessage,' - ', m.luUserValue)>>") à la ligne n° <<.LineNo>>],; && copy-paste this line to add another language support
+													[Method or procedure <<.Procedure>>(): error #<<.ErrorNo>> ("<<c2Words(m.lcMessage,' - ', m.luUserValue)>>") at code line #<<.LineNo>>]; && default: English
+			)) + ' ' + m.lcResult
 	endwith
 endif
 
@@ -3221,7 +3247,10 @@ endfunc
 * ------------------------------------
 procedure cException_Test && {fr} Teste cException()
 
-local loUnitTest as abUnitTest of abDev.prg, lcCmd, loException as exception, lcResult
+local loUnitTest as abUnitTest of abDev.prg;
+, lcCmd;
+, loException as exception;
+, lcResult
 
 loUnitTest = newobject('abUnitTest', 'abDev.prg')
 try
@@ -3588,26 +3617,48 @@ return m.loResult
 endproc
 
 * ========================================
-procedure IgnoreAll && {fr} sélectionne automatiquement l'option 'tout' dans un dialogue tel que ASSERT
+procedure IgnoreAll && {fr} pré-sélectionne l'option 'tout' dans un dialogue à venir tel que ASSERT ou la localisation d'un fichier à l'ouverture d'un projet
+lparameters tlWarning as Boolean && [.F.] {fr} au cas où la pré-sélection automatique ne fonctionne pas, demander à l'utilisateur de le faire lui-même
 && {en} contribution by Bob Pierce during FoxInCloud training '15 at Phoenix AZ
 
-&& 2016-02-08 thn -- {en} in interactive scenario, always clear the keyboard buffer when no longer useful, eg:
-&& keyboard '' clear
+if lTrue(m.tlWarning)
+	MessageBox(ICase(;
+		cLangUser() = 'fr',;
+			''; && copy-paste this line to add another language support
+			        + [Le programme va maintenant réaliser une action pouvant provoquer une ou plusieurs erreurs ...];
+			+ CRLF2 + [Le programme va tenter de prévenir ces erreurs ...];
+			+ CRLF2 + [Toutefois, si un message d'erreur s'ouvre, tel qu'une recherche de fichier manquant, ou un dialogue de type ASSERT,];
+			+ CRLF2 + [merci de cliquer :] + Replicate(Chr(160), 5) + ['IGNORER TOUT'] + Replicate(Chr(160), 5) + [Merci];
+			,;
+			''; && default: English
+			        + [Program will now perform a task that can raise some error(s) ...];
+			+ CRLF2 + [Program will try to avoid/prevent those errors...];
+			+ CRLF2 + [However, if an error message pops up, such as 'Locate File' or ASSERT type error box,];
+			+ CRLF2 + [please click:] + Replicate(Chr(160), 5) + ['IGNORE ALL'] + Replicate(Chr(160), 5) + [Thank you];
+	), 64;
+	, ICase(;
+		cLangUser() = 'fr',	'Ignorer toutes les erreurs à venir',; && copy-paste this line to add another language support
+												'Ignore all coming errors'; && default: English
+		);
+	, 20000;
+	)
+endif
 
 local lcVersion3 as String
 
 lcVersion3 = Version(3)
 
-keyboard ''; && {en} You can fill the keyboard buffer with up to 128 characters. Once the keyboard buffer is full, additional characters are ignored.
-	+ '{alt+';
+keyboard '{alt+'; && {en} You can fill the keyboard buffer with up to 128 characters. Once the keyboard buffer is full, additional characters are ignored.
 	+ ICase(;
 		m.lcVersion3 == '33',	't',; && {fr} French - 'tout'
 		m.lcVersion3 == '34',	't',; && {fr} Spanish - 'todas'
 		m.lcVersion3 == '49',	'a',; && {fr} German - 'alle'
-			'a'; && Default: English - 'all'
+			'a'; && English - 'all' (Default)
 		);
-		+ '}'
+	+ '}' plain clear
 
+&& 2016-02-08 thn -- {en} in interactive scenario, always clear the keyboard buffer when no longer useful, eg:
+&& keyboard '' clear
 endproc
 
 #if .F.
@@ -4121,6 +4172,7 @@ if m.tlSort
 endif
 
 return cListOfArray(@m.laResult, CRLF)
+endfunc
 
 * =================================================
 function cSetProc(tlSort) && {fr} Set("Procedure") bien présenté
@@ -5575,7 +5627,7 @@ procedure setProcedure && {en} Restores previous Set("Procedure")
 lparameters ;
   tcSetPro_; && {fr} Set("Procedure") antérieur
 , tlCheck; && [.F.] {fr} Vérifier si Set("Procedure") antérieur est dans Set("Procedure") courant
-, tlAdditive && [.F.] {fr} Ajouter tcSetPro_ à Set("Procedure") courant
+, tlAdditive; && [.F.] {fr} Ajouter tcSetPro_ à Set("Procedure") courant
 
 tlCheck = lTrue(m.tlCheck)
 tlAdditive = lTrue(m.tlAdditive)
@@ -5785,7 +5837,7 @@ return '';
 		+ [() - ]
 
 * =============================================
-function lUserAnAdmin as Variant && {en} Current user is a member of the Administrators group
+function lUserAnAdmin as Variant && {en} Current user is a member of the Administrators group (does not mean user has elevated priviledges)
 lparameters result as string && @
 
 local success as Variant
@@ -5866,26 +5918,25 @@ lparameters ;
   tcPrg; && {fr} fichier prg
 , tlRemove; && [.F.] {fr} Ôter de Set("Procedure")
 
-local llResult && {fr} le fichier a été ajouté ou ôté selon la demande
+local llResult; && {fr} le fichier a été ajouté ou ôté selon la demande
+, llProc;
+
 if vartype(m.tcPrg) == 'C' and file(m.tcPrg) and inlist(upper(justext(m.tcPrg)), 'PRG', 'FXP')
 
-	tcPrg = fullpath(forceext(m.tcPrg, 'FXP'))
 	tlRemove = lTrue(m.tlRemove)
+	tcPrg = fullpath(forceext(m.tcPrg, 'FXP'))
+	llProc = '"' + m.tcPrg + '"' $ set("Procedure")
 
-	if '"' + m.tcPrg + '"' $ set("Procedure")
-		if m.tlRemove
-			release procedure (m.tcPrg)
-			llResult = .t.
-		endif
-	else
-		if not m.tlRemove
-			set procedure to (m.tcPrg) additive
-			llResult = .t.
-		endif
-	endif
+	do case
+	case !m.tlRemove and !m.llProc
+		set procedure to (m.tcPrg) additive
+		return .T.
+	case m.tlRemove and m.llProc
+		release procedure (m.tcPrg)
+		return .T.
+	endcase
 endif
-
-return m.llResult
+return .F.
 endproc
 
 * ========================================
@@ -6009,7 +6060,7 @@ if .t.;
 	local lcFile as string
 
 	lcFile = '';
-		+ lower(cModuleInfo(sys(16,0), 'Address')); && {fr} root program
+		+ lower(cModuleInfo(sys(16,1), 'Address')); && {fr} main program
 		+ '_' + lower(cModuleInfo(sys(16, program(-1)-1), 'Name'));
 		+ iif(m.lAdditive;
 			, '';
@@ -6193,20 +6244,21 @@ endfunc
 * =============================================
 function lTrue && {en} a value is .T.
 lparameters value 
-return vartype(m.value) == 'L' and m.value
+return Vartype(m.value) == 'L' and m.value
 endfunc
+
 #if .F. && regexp to replace in code
-/vartype\s*\(\s*((?:m\.)?\w+)\s*\)\s*=(?:=)?\s*['"]L['"]\s+\.?and\.?\s+$1\1/gim
-lTrue($1)
+/\(?vartype\s*\(\s*((?:m\.)?\w+)\s*\)\s*=(?:=)?\s*['"]L['"]\s+\.?and\.?\s+\1\)?/gim > lTrue($1)
+iiflTrue > iif(lTrue
 #endif
+
 * =============================================
 function lFalse && {en} a value is .F.
 lparameters value
 return vartype(m.value) == 'L' and !m.value
 endfunc
 
-#if .f. && {fr} https://raw.githubusercontent.com/npm/node-semver/master/semver.js
-
+#if .f. && https://raw.githubusercontent.com/npm/node-semver/master/semver.js
 #endif
 
 * =============================
@@ -7241,3 +7293,40 @@ function DwordOfInt && DWORD from an integer
 lparameters nValue && integer (unsigned)
 return Chr(Mod(m.nValue,256)) + Chr(Int(m.nValue/256)) && binary string
 endfunc
+
+* -----------------
+function abPathAdd(cPath)
+return CreateObject('abPathAdd', m.cPath)
+* -----------------
+define class abPathAdd as GA_LIGHTWEIGHT_CLASS of abGA.prg && {fr} ajoute un élément à Set('Path') et l'ôte au .destroy()
+hidden cPath
+procedure init(cPath)
+this.cPath = FullPath(m.cPath)
+return Nvl(PathAdd(this.cPath), .F.)
+procedure destroy
+return PathRemove(this.cPath)
+enddefine
+
+* -----------------
+function abProcAdd(cProc)
+return CreateObject('abProcAdd', m.cProc)
+* -----------------
+define class abProcAdd as GA_LIGHTWEIGHT_CLASS of abGA.prg && {fr} ajoute un élément à Set('Procedure') et l'ôte au .destroy()
+hidden cProc
+procedure init(cProc)
+this.cProc = FullPath(ForceExt(m.cProc, 'fxp'))
+return Nvl(ProcedureAdd(this.cProc), .F.)
+procedure destroy
+return ProcedureRemove(this.cProc)
+enddefine
+
+* -----------------
+function abWait(cMsg)
+return CreateObject('abWait', m.cMsg)
+* -----------------
+define class abWait as GA_LIGHTWEIGHT_CLASS of abGA.prg
+procedure init(cMsg)
+return wWAIT(Evl(m.cMsg, ''), 'window nowait noclear')
+procedure destroy
+wWAIT('', 'clear')
+enddefine && class abWait
