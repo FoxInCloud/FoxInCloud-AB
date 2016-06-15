@@ -74,4 +74,5 @@ graphics/**/
 /aw*.*
 !/aw.vc2
 !/awPublic.prg
+!/awPublic.h
 awPublic_override_ab.h
