@@ -1287,7 +1287,7 @@ endfunc
 	, oImg as awImg of aw.vcx;
 
 	loTest = newobject('abUnitTest', 'abDev.prg')
-	oFrm = newobject('awFrm', 'aw.vcx')
+	oFrm = newobject('awFrm', 'aw'+'.vcx')
 	if vartype(m.oFrm) == 'O'
 
 		loTest.Test(.t., m.oFrm, 'WaitPic', @m.oImg)
