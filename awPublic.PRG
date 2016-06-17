@@ -3114,3 +3114,125 @@ ENDPROC
 * ============================================
 ENDDEFINE && {fr} CLASS awSes
 * ============================================
+
+* -----------------------------------------------------
+function cawUserAction && {en} FoxInCloud user action linearized from Request data
+lparameters reqData, lError
+
+&& 2016-06-16 thn -- {FiC V 2.21.1-beta.6} {en} created
+local result;
+, piece;
+, iSep
+
+result = ''
+
+if !m.lError
+
+	piece = cawUserAction_strExtract(m.reqData, '&ObjAddr=', '&', 1, 3)
+	iSep = Atc('-', m.piece)
+	piece = Iif(Empty(m.iSep), '', '.' + Chrtran(Substr(m.piece, m.iSep + 1), '-', '.'))
+	result = c2Words(m.result, ' ', m.piece)
+
+	piece =  Evl(Evl(Evl(Evl('';
+		, Proper(cawUserAction_strExtract(m.reqData, '&Event=', '&', 1, 3)));
+		, cawUserAction_strExtract(m.reqData, '&Prop=', '&', 1, 3));
+		, cawUserAction_strExtract(m.reqData, '&MethAddr=', '&', 1, 3));
+		, '')
+
+	piece = ICase(;
+		Lower(m.piece) == Lower('InitControlsInet'),;
+			'Init',;
+		Lower(m.piece) == Lower('focus'),;
+			'GotFocus',;
+		Lower(m.piece) == Lower('blur'),;
+			'Valid',;
+		Lower(m.piece) == Lower('change'),;
+			'InteractiveChange',;
+			m.piece;
+		)
+
+	result = m.result + nEvl(m.piece, '.' + m.piece)
+
+	piece = Strtran(URLDecode(cawUserAction_strExtract(m.reqData, '&ValueType=', '&', 1, 3)), 'undefined')
+	piece = Iif(Empty(m.piece);
+		, '';
+		, cL(uValueJS(;
+			  URLDecode(cawUserAction_strExtract(m.reqData, '&Value=', '&', 1, 3));
+			, m.piece;
+			));
+		)
+	result = c2Words(m.result, '(', nEvl(m.piece, m.piece + ')'))
+
+endif
+
+return Padr(m.result, 100)
+
+* -----------------------------------------------------
+function cawUserAction_strExtract
+lparameters cSearchExpression, cBeginDelim, cEndDelim, nOccurrence, nFlag 
+return Trim(StrExtract(m.cSearchExpression, m.cBeginDelim, Evl(m.cEndDelim, ''), Evl(m.nOccurrence, 1), Evl(m.nFlag, 0)), ' ', CR, LF)
+
+* -----------------------------------------------------
+function cawErrorDetail && {en} Error details extracted from user report in the request log
+lparameters ;
+  error as Boolean;
+, queryStr as String;
+, nError as Integer; && @ [.null.]
+
+nError = .null.
+
+local result, oRegExp as abRegExp, iMatch, oSubMatch, aa[1]
+result = ''
+if m.error
+	oRegExp = abRegExp('err[^\d]{5,10}(\d{1,4})', 'gi')
+	for iMatch = 1 to oRegExp.execute(m.queryStr)
+		nError = Cast(m.oRegExp.Matches[m.iMatch, 3].Item(1) as Integer)
+		if m.nError # 2071 && Erreur levée par l'utilisateur
+			result = GetWordNum(cawUserAction_strExtract(Ltrim(Substr(m.queryStr, m.oRegExp.Matches[m.iMatch, 1] + m.oRegExp.Matches[m.iMatch, 4])), '("', '")'), 1, '-')
+			exit
+		endif
+	endfor
+	if Empty(m.result)
+		for iMatch = 2 to ALines(aa, m.queryStr)
+			if Empty(m.aa[m.iMatch])
+				exit
+			else
+				result = c2Words(m.result, ' - ', cOfLitteral(m.aa[m.iMatch]))
+			endif
+		endfor
+	endif
+	if Empty(m.result)
+		#if .F.
+		 Error:          7
+		 Message: Le fichier existe d?j?.
+		 Code: 
+		 Program: propsreplace
+		 Line No:      13235
+		 Client: 41.188.43.37
+		#endif
+		m.oRegExp.setup('^\s*message\s*:\s*(.+)$', 'im')
+		if oRegExp.execute(m.queryStr) = 1
+			result = m.oRegExp.Matches[1, 3].Item(1)
+			m.oRegExp.setup('^\s*error\s*:\s*(\d{1,4})\s*$', 'im')
+			if oRegExp.execute(m.queryStr) = 1
+				nError = Cast(m.oRegExp.Matches[1, 3].Item(1) as I)
+			endif
+		endif
+	endif
+	result = Evl(m.result, m.queryStr)
+endif
+return Padr(Trim(m.result, CR, LF, ' '), 100)
+endfunc
+
+* -----------------------------------------------------
+function nawError && {en} Error number extracted from user report in the request log
+lparameters ;
+  error as Boolean;
+, queryStr as String;
+
+local nawError as Integer
+
+cawErrorDetail(m.error, m.queryStr, @m.nawError)
+
+return m.nawError
+endfunc
