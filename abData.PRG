@@ -911,6 +911,15 @@ enddefine && {fr} CLASS oAlias
 * ========================================
 
 * ========================================
+function cAliasesUsed && {fr} Alias ouverts dans la session de données courante
+local array aa[1]
+return Iif(AUsed(m.aa) > 0 and Asort(m.aa) > 0;
+	, Lower(cListOfArray(@m.aa,', ',1));
+	, '';
+	)
+endfunc
+
+* ========================================
 function cAliasUsed && {fr} Alias sous lequel une table est ouverte (le premier si plusieurs)
 lparameters ;
   tcTable; && {fr} Adresse de la table
@@ -923,7 +932,7 @@ local lcResult; && {fr} Alias
 lcResult = ''
 
 * {fr} Si la table existe et est ouverte
-if file(m.tcTable) and aused(laUsed, .null., m.tcTable) > 0
+if file(m.tcTable) and AUsed(laUsed, .null., m.tcTable) > 0
 
 	lcResult = laUsed[1]
 	tlExclusive = IsExclusive(m.lcResult)
@@ -949,7 +958,7 @@ if aClear(@m.taUsed)
 		try
 
 			aClear(@m.laResult)
-			lnResult = aused(m.laResult, m.lnDS)
+			lnResult = AUsed(m.laResult, m.lnDS)
 			if m.lnResult > 0
 
 				set datasession to m.lnDS && {fr} pour dbf()
