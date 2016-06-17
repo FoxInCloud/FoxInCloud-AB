@@ -3126,7 +3126,7 @@ local result;
 
 result = ''
 
-if !m.lError
+if .T. && !m.lError
 
 	piece = cawUserAction_strExtract(m.reqData, '&ObjAddr=', '&', 1, 3)
 	iSep = Atc('-', m.piece)
@@ -3239,5 +3239,5 @@ endfunc
 
 * -----------------------------------------------------
 function lLocalHost(cURL) && {en} URL run on localhost
-return InList(allTrim(Evl(m.cURL, '')), '120.0.0.1', '::1')
+return InList(allTrim(Evl(m.cURL, '')), '127.0.0.1', '::1')
 endfunc
