@@ -3053,98 +3053,99 @@ if vartype(m.tcUA) == 'C' and !empty(m.tcUA)
 	tcUA = lower(m.tcUA)
 
 	return .f.; && {fr} pour placer facilement les plus fréquents en tête && {fr} http://www.botsVSbrowsers.com/
-	or	'googlebot' $ m.tcUA;
-	or	'west wind' $ m.tcUA; && {fr} West Wind Internet Protocols x,xx
-	or	'/slurp' $ m.tcUA; && "Mozilla/5.0 (compatible; Yahoo! Slurp; http://help.yahoo.com/help/us/ysearch/slurp)" - https://help.yahoo.com/kb/search/SLN22600.html?impressions=true
-	or	'/bot' $ m.tcUA;
-	or	'bot/' $ m.tcUA;
-	or 	' bot ' $ m.tcUA;
-	or	'adsbot' $ m.tcUA; && {fr} AdsBot-Google (+http://www.google.com/adsbot.html) 15/6/15
-	or	'zgrab' $ m.tcUA; && 2015-12-31 16:14:19 thn -- {en} https://en.wikipedia.org/wiki/Banner_grabbing Banner grabbing is a technique used to glean information about a computer system on a network and the services running on its open ports. Administrators can use this to take inventory of the systems and services on their network. However, an intruder can use banner grabbing in order to find network hosts that are running versions of applications and operating systems with known exploits.
-	or	'crawl' $ m.tcUA;
-	or	'spider' $ m.tcUA;
-	or 	'robot' $ m.tcUA;
-	or	'yahoo!+slurp' $ m.tcUA;
-	or	'msnbot' $ m.tcUA;
-	or	'bingbot' $ m.tcUA;
-	or	'exabot' $ m.tcUA;
-	or	'voilabot' $ m.tcUA;
-	or 	'alexa.com' $ m.tcUA;
-	or 	'ccbot' $ m.tcUA;
-	or 	'catchbot' $ m.tcUA;
-	or 	'proximic' $ m.tcUA;
-	or 	'jooblebot' $ m.tcUA;
-	or 	'linkedinbot' $ m.tcUA;
-	or 	'surveybot' $ m.tcUA;
-	or 	'careerbot' $ m.tcUA;
-	or 	'comspybot' $ m.tcUA;
-	or 	'ezooms.bot' $ m.tcUA;
-	or 	'komodiabot' $ m.tcUA;
-	or 	'paperlibot' $ m.tcUA;
-	or 	'facebookexternalhit' $ m.tcUA;
-	or 	'procogseobot' $ m.tcUA; && {fr} ProCogSEOBot
-	or 	'coccoc' $ m.tcUA; && {fr} Mozilla/5.0 (compatible; coccoc/1.0; +http://help.coccoc.com/) && {fr} Coccoc bot is a web crawling bot made by Coc Coc search engine. The bot will discover new and updated pages to be added to Coc Coc search engine index. By allowing Coccoc Bot to index your website, the number of users who are able to find your content will increase and make your site more popular on the search engine. Coccoc bot supports robot exclusion standard (robots.txt)
-	or 	'linkchecker' $ m.tcUA; && {fr} LinkChecker/7.4 (+http://linkchecker.sourceforge.net/)
-	or 	'replazbot' $ m.tcUA; && {fr} ReplazBot
-	or 	'semrushbot' $ m.tcUA; && {fr} SemrushBot
-	or 	'tweetedtimes bot' $ m.tcUA; && {fr} TweetedTimes Bot
-	or 	'tweetmemebot' $ m.tcUA; && {fr} TweetmemeBot
-	or 	'urlappendbot' $ m.tcUA; && {fr} URLAppendBot
-	or 	'wasalive-bot' $ m.tcUA; && {fr} WASALive-Bot
-	or 	'yodaobot' $ m.tcUA; && {fr} YodaoBot
-	or 	'aihitbot' $ m.tcUA; && {fr} aiHitBot
-	or 	'discoverybot' $ m.tcUA; && {fr} discoverybot
-	or 	'ltbot' $ m.tcUA; && {fr} ltbot
-	or 	'news bot' $ m.tcUA; && {fr} news bot
-	or 	'ncbot' $ m.tcUA; && {fr} NCBot (http://netcomber.com : tool for finding true domain owners) Queries/complaints: bot@netcomber.com
-	or 	'seznambot' $ m.tcUA; && {fr} SeznamBot/3.0 (+http://fulltext.sblog.cz/)
-	or 	'twitterbot' $ m.tcUA; && {fr} Twitterbot
-	or 	'wotbox' $ m.tcUA; && {fr} Wotbox/2.01 (+http://www.wotbox.com/bot/) nrsbot
-	or 	'nrsbot' $ m.tcUA; && {fr} nrsbot
-	or 	'yandex.com' $ m.tcUA;
-	or 	'python-urllib' $ m.tcUA;
-	or 	'synomia' $ m.tcUA;
-	or 	'gigabot' $ m.tcUA;
-	or 	'ocelli' $ m.tcUA;
-	or 	'dcbot.html' $ m.tcUA;
-	or 	'pompos.html' $ m.tcUA;
-	or 	'aipbot.com' $ m.tcUA;
-	or 	'shopwiki.com' $ m.tcUA;
-	or 	'ia_archiver' $ m.tcUA;
-	or 	'bingbot' $ m.tcUA;
-	or 	'mj12bot' $ m.tcUA;
-	or 	'openisearch' $ m.tcUA;
-	or 	'seekbot' $ m.tcUA;
-	or 	'jyxobot' $ m.tcUA;
-	or 	'biglotron' $ m.tcUA;
-	or 	'psbot' $ m.tcUA;
-	or 	'dumbot' $ m.tcUA;
-	or 	'clicksense' $ m.tcUA;
-	or 	'sondeur' $ m.tcUA;
-	or 	'naverbot' $ m.tcUA;
-	or 	'spyder+' $ m.tcUA;
-	or 	'convera' $ m.tcUA;
-	or 	'misesajour' $ m.tcUA;
-	or 	'updated' $ m.tcUA;
-	or 	'infoseek' $ m.tcUA;
-	or 	'envolk' $ m.tcUA;
-	or 	'twiceler' $ m.tcUA;
-	or 	'snap.com' $ m.tcUA;
-	or 	'netresearchserver' $ m.tcUA;
-	or 	'gaisbot' $ m.tcUA;
-	or 	'antibot' $ m.tcUA;
-	or 	'lexxebot' $ m.tcUA;
-	or 	'ask+jeeves' $ m.tcUA;
-	or 	'dotbot' $ m.tcUA;
-	or 	'chainn.com' $ m.tcUA;
-	or 	'seoprofiler.com' $ m.tcUA;
-	or 	'sbider' $ m.tcUA;
-	or 	'soso.com' $ m.tcUA;
-	or 	'antibot' $ m.tcUA;
-	or 	'siteexplorer' $ m.tcUA;
-	or 	'compspybot' $ m.tcUA;
-	or 	'meanpathbot' $ m.tcUA;
-	or 	'lipperhey' $ m.tcUA;
+	or 'googlebot' $ m.tcUA;
+	or 'west wind' $ m.tcUA; && {fr} West Wind Internet Protocols x,xx
+	or '/slurp' $ m.tcUA; && "Mozilla/5.0 (compatible; Yahoo! Slurp; http://help.yahoo.com/help/us/ysearch/slurp)" - https://help.yahoo.com/kb/search/SLN22600.html?impressions=true
+	or '/bot' $ m.tcUA;
+	or 'bot/' $ m.tcUA;
+	or ' bot ' $ m.tcUA;
+	or 'adsbot' $ m.tcUA; && {fr} AdsBot-Google (+http://www.google.com/adsbot.html) 15/6/15
+	or 'zgrab' $ m.tcUA; && 2015-12-31 16:14:19 thn -- {en} https://en.wikipedia.org/wiki/Banner_grabbing Banner grabbing is a technique used to glean information about a computer system on a network and the services running on its open ports. Administrators can use this to take inventory of the systems and services on their network. However, an intruder can use banner grabbing in order to find network hosts that are running versions of applications and operating systems with known exploits.
+	or 'crawl' $ m.tcUA;
+	or 'clients.your-server.de' $ m.tcUA;
+	or 'spider' $ m.tcUA;
+	or 'robot' $ m.tcUA;
+	or 'yahoo!+slurp' $ m.tcUA;
+	or 'msnbot' $ m.tcUA;
+	or 'bingbot' $ m.tcUA;
+	or 'exabot' $ m.tcUA;
+	or 'voilabot' $ m.tcUA;
+	or 'alexa.com' $ m.tcUA;
+	or 'ccbot' $ m.tcUA;
+	or 'catchbot' $ m.tcUA;
+	or 'proximic' $ m.tcUA;
+	or 'jooblebot' $ m.tcUA;
+	or 'linkedinbot' $ m.tcUA;
+	or 'surveybot' $ m.tcUA;
+	or 'careerbot' $ m.tcUA;
+	or 'comspybot' $ m.tcUA;
+	or 'ezooms.bot' $ m.tcUA;
+	or 'komodiabot' $ m.tcUA;
+	or 'paperlibot' $ m.tcUA;
+	or 'facebookexternalhit' $ m.tcUA;
+	or 'procogseobot' $ m.tcUA; && {fr} ProCogSEOBot
+	or 'coccoc' $ m.tcUA; && {fr} Mozilla/5.0 (compatible; coccoc/1.0; +http://help.coccoc.com/) && {fr} Coccoc bot is a web crawling bot made by Coc Coc search engine. The bot will discover new and updated pages to be added to Coc Coc search engine index. By allowing Coccoc Bot to index your website, the number of users who are able to find your content will increase and make your site more popular on the search engine. Coccoc bot supports robot exclusion standard (robots.txt)
+	or 'linkchecker' $ m.tcUA; && {fr} LinkChecker/7.4 (+http://linkchecker.sourceforge.net/)
+	or 'replazbot' $ m.tcUA; && {fr} ReplazBot
+	or 'semrushbot' $ m.tcUA; && {fr} SemrushBot
+	or 'tweetedtimes bot' $ m.tcUA; && {fr} TweetedTimes Bot
+	or 'tweetmemebot' $ m.tcUA; && {fr} TweetmemeBot
+	or 'urlappendbot' $ m.tcUA; && {fr} URLAppendBot
+	or 'wasalive-bot' $ m.tcUA; && {fr} WASALive-Bot
+	or 'yodaobot' $ m.tcUA; && {fr} YodaoBot
+	or 'aihitbot' $ m.tcUA; && {fr} aiHitBot
+	or 'discoverybot' $ m.tcUA; && {fr} discoverybot
+	or 'ltbot' $ m.tcUA; && {fr} ltbot
+	or 'news bot' $ m.tcUA; && {fr} news bot
+	or 'ncbot' $ m.tcUA; && {fr} NCBot (http://netcomber.com : tool for finding true domain owners) Queries/complaints: bot@netcomber.com
+	or 'seznambot' $ m.tcUA; && {fr} SeznamBot/3.0 (+http://fulltext.sblog.cz/)
+	or 'twitterbot' $ m.tcUA; && {fr} Twitterbot
+	or 'wotbox' $ m.tcUA; && {fr} Wotbox/2.01 (+http://www.wotbox.com/bot/) nrsbot
+	or 'nrsbot' $ m.tcUA; && {fr} nrsbot
+	or 'yandex.com' $ m.tcUA;
+	or 'python-urllib' $ m.tcUA;
+	or 'synomia' $ m.tcUA;
+	or 'gigabot' $ m.tcUA;
+	or 'ocelli' $ m.tcUA;
+	or 'dcbot.html' $ m.tcUA;
+	or 'pompos.html' $ m.tcUA;
+	or 'aipbot.com' $ m.tcUA;
+	or 'shopwiki.com' $ m.tcUA;
+	or 'ia_archiver' $ m.tcUA;
+	or 'bingbot' $ m.tcUA;
+	or 'mj12bot' $ m.tcUA;
+	or 'openisearch' $ m.tcUA;
+	or 'seekbot' $ m.tcUA;
+	or 'jyxobot' $ m.tcUA;
+	or 'biglotron' $ m.tcUA;
+	or 'psbot' $ m.tcUA;
+	or 'dumbot' $ m.tcUA;
+	or 'clicksense' $ m.tcUA;
+	or 'sondeur' $ m.tcUA;
+	or 'naverbot' $ m.tcUA;
+	or 'spyder+' $ m.tcUA;
+	or 'convera' $ m.tcUA;
+	or 'misesajour' $ m.tcUA;
+	or 'updated' $ m.tcUA;
+	or 'infoseek' $ m.tcUA;
+	or 'envolk' $ m.tcUA;
+	or 'twiceler' $ m.tcUA;
+	or 'snap.com' $ m.tcUA;
+	or 'netresearchserver' $ m.tcUA;
+	or 'gaisbot' $ m.tcUA;
+	or 'antibot' $ m.tcUA;
+	or 'lexxebot' $ m.tcUA;
+	or 'ask+jeeves' $ m.tcUA;
+	or 'dotbot' $ m.tcUA;
+	or 'chainn.com' $ m.tcUA;
+	or 'seoprofiler.com' $ m.tcUA;
+	or 'sbider' $ m.tcUA;
+	or 'soso.com' $ m.tcUA;
+	or 'antibot' $ m.tcUA;
+	or 'siteexplorer' $ m.tcUA;
+	or 'compspybot' $ m.tcUA;
+	or 'meanpathbot' $ m.tcUA;
+	or 'lipperhey' $ m.tcUA;
 	or .f. && {fr} pour placer facilement les plus fréquents en tête
 
 endif
