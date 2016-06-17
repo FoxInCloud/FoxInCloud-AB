@@ -424,7 +424,7 @@ if m.llResult
 				text to loException.userValue textmerge noshow flags 1 pretext 3
 			 		.Name: <<.Name>>
 			 		.wcID: <<.wcID>>
-			 		.RecordSource: <<cL(.recordSource)>> (used: <<used(.recordSource)>>, dataSession: <<Set("Datasession")>>)
+			 		.RecordSource: <<cL(.recordSource)>> (used: <<used(.recordSource)>>, aliases used in dataSession #<<Set("Datasession")>>: <<cAliasesUsed()>>)
 			 		columnID/.ColumnCount: <<m.tiObject>> / <<.ColumnCount>>
 			 		.wcRScursor: <<cL(.wcRScursor)>>
 			 		.wcPKexpr: <<cL(.wcPKexpr)>>
