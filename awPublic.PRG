@@ -3236,3 +3236,8 @@ cawErrorDetail(m.error, m.queryStr, @m.nawError)
 
 return m.nawError
 endfunc
+
+* -----------------------------------------------------
+function lLocalHost(cURL) && {en} URL run on localhost
+return InList(allTrim(Evl(m.cURL, '')), '120.0.0.1', '::1')
+endfunc
