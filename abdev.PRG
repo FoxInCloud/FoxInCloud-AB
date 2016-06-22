@@ -281,7 +281,7 @@ lparameters ;
 , tlNoLeftBar;	 && [.F.] {fr} Ne pas délimiter les colonnes par une barre verticale
 , tcID; && [tcHeader] {fr} Identifiant de la colonne
 , tlSum; && [.F.] {fr} Si la donnée est numérique, en fin d'état : .T.: Sommer, .F.: Moyenner, .NULL.: ne rien faire
-, tcFormat && [''] {fr} Format pour Transform()
+, tcFormat; && [''] {fr} Format pour Transform()
 
 local lnResult && {fr} Numéro de la colonne ajoutée
 lnResult = 0
@@ -700,11 +700,15 @@ this.acLine = ''
 * -------------------------------------------------
 procedure Warning && {fr} Affiche un avertissement dans une fenêtre "WAIT WINDOW", ajoute au compte-rendu des avertissements si nouveau
 lparameters ;
-  tcWarning; && {fr} Avertissement, vide pour nouvelle ligne
-, lAppendNot; && [.F.] {fr} Ne pas ajouter l'avertissement au compte-rendu
+  tcWarning as String; && {en} warning, empty for a new line {fr} Avertissement, vide pour nouvelle ligne
+, lAppendNot as Boolean; && [.F.] {en} do not log warning {fr} Ne pas ajouter l'avertissement au compte-rendu
 , lCallingAddNot as Boolean; && [.F.] {en} do not add calling program name as header {fr} ne pas ajouter le nom du programme appelant en-tête
 
-local llWarnNew, lcWarning, lcCallingModule, llResult
+local llResult as Boolean;
+, llWarnNew;
+, lcWarning;
+, lcCallingModule;
+
 
 * {fr} Si avertissement non vide
 if .t.;

@@ -3154,6 +3154,7 @@ if .T. && !m.lError
 	result = m.result + nEvl(m.piece, '.' + m.piece)
 
 	piece = Strtran(URLDecode(cawUserAction_strExtract(m.reqData, '&ValueType=', '&', 1, 3)), 'undefined')
+	piece = Trim(Leftc(m.piece, Evl(Atcc(CR, m.piece), Lenc(m.piece))), CR, LF)
 	piece = Iif(Empty(m.piece);
 		, '';
 		, cL(uValueJS(;
