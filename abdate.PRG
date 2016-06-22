@@ -167,6 +167,11 @@ endif
 return m.lcResult
 
 * ================================================
+function cY_M_D_H_M_S(tt)
+return stuffc(stuffc(stuffc(stuffc(stuffc(Ttoc(Evl(m.tt, Datetime()), 1), 13, 0, '-'), 11, 0, '-'), 9, 0, '_'), 7, 0, '-'), 5, 0, '-')
+endfunc
+
+* ================================================
 function nYear && {fr} Année avec ou sans siècle, -1 si invalide
 lparameters tuYear && {fr} Contient l'année présumée (CNDT)
 

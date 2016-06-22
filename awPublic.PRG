@@ -3184,7 +3184,7 @@ nError = .null.
 local result, oRegExp as abRegExp, iMatch, oSubMatch, aa[1]
 result = ''
 if m.error
-	oRegExp = abRegExp('err[^\d]{5,10}(\d{1,4})', 'gi')
+	oRegExp = abRegExp('err[^\d]{4,10}(\d{1,4})', 'gi')
 	for iMatch = 1 to oRegExp.execute(m.queryStr)
 		nError = Cast(m.oRegExp.Matches[m.iMatch, 3].Item(1) as Integer)
 		if m.nError # 2071 && Erreur levée par l'utilisateur
