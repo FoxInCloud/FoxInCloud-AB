@@ -1907,7 +1907,7 @@ if m.this.lDevMode
 	this.Set('ASSERTS', 'ON')
 	this.Set('CONSOLE', 'OFF')
 	this.Set('HELP', Set('HELP')) && 'OFF'
-	push menu _mSysMenu  && {fr} set sysmenu save
+	push menu _mSysMenu  && set sysmenu save
 	push key
 endif
 
@@ -1938,7 +1938,7 @@ IF m.this.lDevMode
 	cError = this.cError
 	on error &cError
 
-	pop menu _mSysMenu && {fr} set sysmenu to default
+	pop menu _mSysMenu && set sysmenu to default
 	pop key
 
 	_Screen.Icon = m.this.cIcon
