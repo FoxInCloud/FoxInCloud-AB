@@ -3710,45 +3710,55 @@ return m.lcResult
 
 * ========================================
 function abProjectsClose as abProjectsClose of abDev.prg && {fr} Ferme les projets à .Init(), les rouvre à .Destroy()
-return createobject('abProjectsClose')
+lparameters tuFolderExclude && {en} Folders where projects should remain open, .T.: leave projects in curdir() open
+return createobject('abProjectsClose', m.tuFolderExclude)
 
 * ========================================
 define class abProjectsClose as GA_LIGHTWEIGHT_CLASS of abGA.prg && {fr} Ferme les projets à .Init(), les rouvre à .Destroy()
 * ========================================
 
-	hidden aProjects[1], nProjects
+	hidden aProject[1]
 
-* ---------------
+	* ---------------
 	procedure init
+	lparameters tuFolderExclude && {en} Folders where projects should remain open, .T.: leave projects in curdir() open
 
-	this.nProjects = iif(lDevMode();
-		, _vfp.projects.count;
-		, 0;
-		)
-
-	if empty(m.this.nProjects)
-		return .f.
-	endif
-
-	local lnProject, loProject as project
-
-	dimension this.aProjects[m.this.nProjects]
-
-	for lnProject = m.this.nProjects to 1 step -1
-		loProject = _vfp.projects(m.lnProject)
-		this.aProjects[m.lnProject] = m.loProject.name
-		loProject.close
+	local result, iProject, oProject as project, cProject, aFolderExclude[1]
+	
+	for iProject = 1 to ALines(aFolderExclude, ICase(lTrue(m.tuFolderExclude), Sys(5) + Curdir(), ga_Type_IsChar(m.tuFolderExclude, .T.), m.tuFolderExclude, ''), 5, ',')
+		m.aFolderExclude[m.iProject] = Addbs(m.aFolderExclude[m.iProject])
 	endfor
 
-* ---------------
+	for iProject = iif(lDevMode(), _vfp.projects.count, 0) to 1 step -1
+		oProject = _vfp.projects(m.iProject)
+		cProject = m.oProject.name
+		if Empty(Ascan(m.aFolderExclude, Addbs(JustPath(m.cProject)), 1, -1, 1, 7))
+
+			result = Evl(m.result, 0) + 1
+			dimension this.aProject[m.result]
+			this.aProject[m.result] = m.cProject
+			oProject.close
+		endif
+	endfor
+
+	return m.result
+	endproc
+
+	* ---------------
 	procedure destroy
 
-	if m.this.nProjects > 0
-		local lnProject
-		for lnProject = m.this.nProjects to 1 step -1
-			modify project (this.aProjects[m.lnProject]) nowait
-		endfor
+	local iProject, oProject as Project
+
+	oProject = Iif(Type('_VFP.ActiveProject') == 'O', _VFP.ActiveProject, .null.)
+
+	for iProject = Alen(this.aProject) to 1 step -1 && 1 to Alen(this.aProject) && 
+		modify project (this.aProject[m.iProject]) nowait
+	endfor
+
+	if !IsNull(m.oProject)
+		m.oProject.refresh
 	endif
+	endproc
 
 * ========================================
 enddefine && {fr} CLASS abProjectsClose
@@ -7334,3 +7344,51 @@ return wWAIT(Evl(m.cMsg, ''), 'window nowait noclear')
 procedure destroy
 wWAIT('', 'clear')
 enddefine && class abWait
+
+* ========================================
+function tProjectVCXlastModified && {en} most recent last modification date of vcx in a project
+lparameters ;
+  cPJX; && [_VFP.ActiveProject] {en} project
+, lExcluded; && [.F.] {en} also take into account excluded vcx
+, cFileLastModified; && @ [.null.] {en} file that was last modified in the whole project (taking *.?ct into account)
+
+local tResult as datetime;
+, lActiveProject as Boolean;
+, lProjectOpen as Boolean;
+, oFile as File;
+, tFile as datetime;
+
+store .null. to tResult, cFileLastModified
+
+lActiveProject = Type('_VFP.ActiveProject') == 'O'
+
+lProjectOpen = ga_Type_IsChar(m.cPJX, .T.);
+	and File(m.cPJX);
+	and Lower(JustExt(m.cPJX)) == Lower('pjx');
+	and !(m.lActiveProject and Lower(_VFP.ActiveProject.Name) == Lower(FullPath(m.cPJX)))
+if m.lProjectOpen
+	ignoreAll() && modify command abDev
+	modify project (m.cPJX) nowait noshow noprojecthook
+	keyboard '' clear
+	lActiveProject = .T.
+endif
+
+if m.lActiveProject
+	lExcluded = lTrue(m.lExcluded)
+	for each oFile in _VFP.ActiveProject.Files foxobject
+		if (m.lExcluded or !m.oFile.Exclude);
+		 and Lower(JustExt(m.oFile.Name)) == Lower('vcx');
+		 and varSet(@m.tFile, tFile(m.oFile.Name, .T.));
+		 and m.tFile > Nvl(m.tResult, {/:})
+			tResult = m.tFile
+			cFileLastModified = m.oFile.Name
+		endif
+	endfor
+endif
+
+if m.lProjectOpen
+	_VFP.ActiveProject.Close
+endif
+
+return m.tResult
+endfunc
