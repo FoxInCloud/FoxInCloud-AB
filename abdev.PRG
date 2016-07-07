@@ -5574,6 +5574,7 @@ lparameters ;
   tcCode; && {fr} Instruction(s)
 , tcCom; && [* ] {fr} caractère de commentaire
 , tlEmptyDel && [.F.] {fr} Supprimer les lignes vides
+
 tcCom = evl(m.tcCom, '* ')
 tlEmptyDel = lTrue(m.tlEmptyDel)
 

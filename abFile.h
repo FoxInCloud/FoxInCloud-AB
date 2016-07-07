@@ -6,7 +6,7 @@
 
 * {fr} Caractères interdits dans le système de fichiers
 #DEFINE	CAR_INT_DS_ADR_FICH		"*?<>|"
-#DEFINE	CAR_INT_DS_NOM_FICH		CAR_INT_DS_ADR_FICH + "/\:"
+#DEFINE	CAR_INT_DS_NOM_FICH		CAR_INT_DS_ADR_FICH + ":/\"
 
 * {en} Special Folder Constants
 #DEFINE CSIDL_PROGRAMS					02 && {fr} Program Groups

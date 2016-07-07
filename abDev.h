@@ -7,6 +7,7 @@
 #define VFP_VAR_SIZE_MAX	16777184
 
 * {en} Tools Folders
+#define DOS_FFC			Home(1) + 'FFC\'
 #define DOS_TOOLS			Home(1) + 'Tools\'
 #define DOS_AB			DOS_TOOLS + 'AB\'
 #define DOS_ABGRAPHICS  DOS_AB + 'Graphics\'
@@ -37,7 +38,6 @@
 
 #define DOS_WC			DOS_AB + 'WC\'
 #define DOS_WC_CLASSES	DOS_WC + 'Classes\'
-#define DOS_FFC			Home(1) + 'FFC\'
 
 #define DOS_USER_APPDATA_AB			home(7) + 'AB\'
 #define DOS_USER_APPDATA_AW			DOS_USER_APPDATA_AB + 'AW\'

@@ -107,7 +107,8 @@ return loTest.Result()
 function cJustified && {fr} Chaîne justifiée
 lparameters ;
   tcChain; && {fr} Chaîne à justifier
-, tnCols && [80] {fr} Nombre de colonnes
+, tnCols; && [80] {fr} Nombre de colonnes
+
 tcChain = iif(vartype(m.tcChain) == 'C', m.tcChain, '')
 tnCols = evl(m.tnCols, 80)
 
@@ -118,7 +119,7 @@ if m.lnLine > 0
 
 	for liLine = 1 to m.lnLine
 		lcLine = laLine[m.liLine]
-		laLine[m.liLine] = space(0)
+		laLine[m.liLine] = ''
 		do while not empty(m.lcLine)
 			laLine[m.liLine] = c2Words(laLine[m.liLine], CRLF, cTronc(m.lcLine, m.tnCols, .t., @m.lcLine, .t.))
 		enddo
@@ -2447,23 +2448,92 @@ lparameters ;
   tcPattern; && [''] {fr} Expression régulière de recherche
 , tcFlags; && [''] {fr} commutateurs (igm)
 
-local loResult as abRegExp of abTxt.prg
+local abRegExp as abRegExp of abTxt.prg
 
-loResult = createobject('abRegExp') && # 5 ms
-if vartype(m.loResult) == 'O' and ga_Type_IsChar(m.tcPattern, .t.)
-	m.loResult.setup(m.tcPattern, evl(m.tcFlags, ''))
+abRegExp = createobject('abRegExp') && # 5 ms
+if vartype(m.abRegExp) == 'O' and ga_Type_IsChar(m.tcPattern, .t.)
+	m.abRegExp.setup(m.tcPattern, evl(m.tcFlags, ''))
 endif
 
-return m.loResult
+return m.abRegExp
 endfunc
 
 * ----------------------
-function abRegExp_Test
+procedure abRegExp_Test
 
 local loTest as abUnitTest of abDev.prg
 loTest = newobject('abUnitTest', 'abDev.prg')
 loTest.Test
 return loTest.Result()
+
+* ===================================================================
+function abRegExpTest && {fr} Une chaîne satisfait un RegExp
+lparameters ;
+  tcString; && [''] {fr} Chaîne à tester
+, tcPattern; && [''] {fr} Expression régulière de recherche
+, tcFlags; && [''] {fr} commutateurs (igm)
+
+local abRegExp as abRegExp of abTxt.prg
+abRegExp = abRegExp(m.tcPattern, m.tcFlags)
+return Vartype(m.abRegExp) == 'O' and ga_Type_IsChar(m.tcString, .T.) and m.abRegExp.test(m.tcString)
+endfunc
+
+* ===================================================================
+function cRegExpTestedOK && {fr} Chaîne(s) filtrées par test OK sur un RegExp
+lparameters ;
+  tcStrings; && [''] {fr} Chaîne à tester
+, tcPattern; && [''] {fr} Expression régulière de recherche
+, tcFlags; && [''] {fr} commutateurs (igm)
+, tlKO; && [.F.] {fr} test KO
+
+local abRegExp as abRegExp of abTxt.prg, aa[1], nString, iString
+
+abRegExp = abRegExp(m.tcPattern, m.tcFlags)
+if  Vartype(m.abRegExp) == 'O' and ga_Type_IsChar(m.tcStrings, .T.)
+	tlKO = lTrue(m.tlKO)
+	nString = ALines(m.aa, m.tcStrings, 5, ',')
+	for iString = m.nString to 1 step -1
+		if m.abRegExp.test(m.aa[m.iString]) = m.tlKO
+			nString = m.nString - 1
+			Adel(m.aa, m.iString)
+		endif
+	endfor
+	if m.nString > 0
+		dimension m.aa[m.nString]
+		tcStrings = cListOfArray(@m.aa)
+	else
+		tcStrings = ''
+	endif
+endif
+return m.tcStrings
+endfunc
+
+* ----------------------
+procedure cRegExpTestedOK_Test
+
+local loTest as abUnitTest of abDev.prg
+loTest = newobject('abUnitTest', 'abDev.prg')
+loTest.Test('awrlr', 'awrlr, awtoto, awOLEpdfAcro', 'aw(\w{3}|olepdfxc|ole(?!pdf)\w+)\b', 'i')
+return loTest.Result()
+
+* ===================================================================
+function cRegExpTestedKO && {fr} Chaîne(s) filtrées par test KO sur un RegExp
+lparameters ;
+  tcStrings; && [''] {fr} Chaîne à tester
+, tcPattern; && [''] {fr} Expression régulière de recherche
+, tcFlags; && [''] {fr} commutateurs (igm)
+
+return cRegExpTestedOK(m.tcStrings, m.tcPattern, m.tcFlags, .T.)
+endfunc
+
+* ----------------------
+procedure cRegExpTestedKO_Test
+
+local loTest as abUnitTest of abDev.prg
+loTest = newobject('abUnitTest', 'abDev.prg')
+loTest.Test('awtoto,awOLEpdfAcro', 'awrlr, awtoto, awOLEpdfAcro', 'aw(\w{3}|olepdfxc|ole(?!pdf)\w+)\b', 'i')
+return loTest.Result()
+
 
 * ===================================================================
 define class abRegExp as GA_LIGHTWEIGHT_CLASS && {fr} Expression régulière ; Implements VBScript.RegExp
@@ -3315,6 +3385,7 @@ lparameters ;
   cTxt; && {en} Text to localize (source code in general) {fr} Texte à localiser (code source en général)
 , cLangUser; && [cLangUser()] {en} user's preferred language as ISO 639-1 code {fr} langue préférée de l'utilisateur selon code ISO 639-1
 , cCommentStrings; && ['*|&&|note'] {en} strings beginning a comment line in code source {fr} chaîne de caractère commençant une ligne de commentaires dans le code source
+, tlCRLFend; && [.F.] {en} always end by CRLF {fr} terminer par CRLF
 
 cLangUser = evl(evl(m.cLangUser, cLangUser()), 'en')
 cLangUser = lower(left(alltrim(m.cLangUser), 2))
@@ -3322,20 +3393,13 @@ cLangUser = iif('{' + m.cLangUser + '}' $ m.cTxt, m.cLangUser, 'en')
 
 with newobject('abRegExp', 'abTxt.prg') as abRegExp of abTxt.prg
 
-	.setup(;
-		  abLocalized_cPattern1(m.cLangUser);
-		, 'gmi';
-		)
-
+	.setup(abLocalized_cPattern1(m.cLangUser), 'gmi')
 	cTxt = .replace(m.cTxt, ' ') && {fr} supprime les mentions des autres langues
 
 	cLangUser = '{' + m.cLangUser + '}'
 	cTxt = strtran(strtran(m.cTxt, m.cLangUser + ' '), m.cLangUser) && {fr} supprime les balises de la langue demandée
 
-	.setup(;
-		  abLocalized_cPattern2(m.cCommentStrings);
-		, 'gmi';
-		)
+	.setup(abLocalized_cPattern2(m.cCommentStrings), 'gmi')
 	cTxt = .replace(m.cTxt) && {fr} supprime les lignes de commentaire vides
 endwith
 
@@ -3343,7 +3407,7 @@ do while replicate(CRLF, 3) $ m.cTxt
 	cTxt = strtran(m.cTxt, replicate(CRLF, 3), replicate(CRLF, 2))
 enddo
 
-return m.cTxt
+return m.cTxt + Iif(lTrue(m.tlCRLFend) and Trim(m.cTxt, CR, LF) # m.cTxt, CRLF, '')
 endfunc
 
 * --------------------------
@@ -3352,18 +3416,18 @@ lparameters cLangUser && [cLangUser()] {en} user's preferred language as ISO 639
 
 && modify command c:\test\test\regexp_clanguser.prg
 
-&& '{' non suivi de la langue de l'utilisateur
+&& {fr} '{' non suivi de la langue de l'utilisateur
 && {fr} puis 2 caractères alphabétiques
 && {fr} puis '}'
 && {fr} puis toute suite de caractères suivie de : '{\w\w}' ou '<' ou la fin de ligne
 
-return '\s*{(?!' + m.cLangUser + ')\w\w}[^\u002A\r\n]+?(?=(?:{\w\w})|<|\u002A|$)'
+return '\s*{(?!' + m.cLangUser + ')\w\w}[^\u002A\r\n]+?(?=(?:{\w\w})|<|\u002A|$)' && \n\r && [ \f\t\u00a0\u2028\u2029]
 endfunc
 
 * --------------------------
 function abLocalized_cPattern2 && {en} empty comment lines {fr} lignes de commentaire vide
 lparameters cCommentStrings && ['*|&&|note'] {en} strings beginning a comment line in code source {fr} chaîne de caractère commençant une ligne de commentaires dans le code source
-return '^\s*?(?:' + strtran(strtran(evl(m.cCommentStrings, '*|&'+'&|note'), '*', '\u002A'), '/', '\/') + ')\s*?$\r?\n?'
+return '^\s*?(?:' + strtran(strtran(evl(m.cCommentStrings, '*|&'+'&|note'), '*', '\u002A'), '/', '\/') + ')\s*?$\r?\n?' && [ \f\t\u00a0\u2028\u2029]
 endfunc
 
 * --------------------------

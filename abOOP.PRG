@@ -777,7 +777,7 @@ return .t.;
 function loClass && {fr} Un objet hérite d'au moins une classe dans une liste
 lparameters ;
   toObject; && {fr} Objet supposé
-, tcClasses && {fr} Classe(s) à satisfaire (ou) ; -class ne doit pas appartenir à cette classe
+, tcClasses && {fr} Classe(s) à satisfaire (ou) -class: ne doit pas appartenir à cette classe
 
 local loClass[1], laClass[1], lcClass
 
@@ -789,8 +789,8 @@ if .t.;
 
 	for each lcClass in laClass
 		if iif(leftc(m.lcClass, 1) == '-';
-			, empty(ascan(loClass, ltrim(m.lcClass, '-'), 1, -1, 1, 7)); && 1+2+4 = case insensitive, exact on
-			, ascan(loClass, m.lcClass, 1, -1, 1, 7) > 0;
+			, 0 = ascan(loClass, ltrim(m.lcClass, '-'), 1, -1, 1, 7); && 1+2+4 = case insensitive, exact on
+			, 0 < ascan(loClass, m.lcClass, 1, -1, 1, 7);
 			)
 			return .t.
 		endif
@@ -802,6 +802,8 @@ endfunc
 
 * ------------------------------------------
 function loClass_test
+
+&& .1 ms
 
 local loTest as abUnitTest of abDev.prg
 

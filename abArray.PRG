@@ -668,7 +668,7 @@ return icase(;
 			vartype(m.tuTypes) == 'C', iif(;
 				',' $ m.tuTypes or ';' $ m.tuTypes or TABUL $ m.tuTypes or '|' $ m.tuTypes;
 									, alines(taResult, upper(m.tuTypes), 1+4, ',', ';', TABUL, '|'),;
-				aChars(@m.taResult, upper(chrtran(m.tuTypes, space(1), space(0))))),;
+				aChars(@m.taResult, upper(chrtran(m.tuTypes, space(1), '')))),;
 			0)
 
 
@@ -1543,12 +1543,12 @@ if m.llResult
 
 	* {fr} Calculer le nombre de colonnes et le séparateur s'il est ambigu
 	lnCol = 0
-	lcSep = iif(m.llSep, m.tcSeps, space(0))
+	lcSep = iif(m.llSep, m.tcSeps, '')
 	for each lcRow in taRow
 		lnCol = max(m.lnCol, 1 + iif(m.llSep;
-							, occurs(m.lcSep, m.lcRow);
-							, aColsDelim_nColsSep(m.lcRow, @m.laSep, @m.lcSep);
-							))
+				, occurs(m.lcSep, m.lcRow);
+				, aColsDelim_nColsSep(m.lcRow, @m.laSep, @m.lcSep);
+				))
 	endfor
 * {fr} ASSERT Lenc(m.lcSep) = 1 MESSAGE cAssertMsg(Textmerge([<<Proper(Program())>>() n'a trouvé aucun séparateur, le tableau aura une seule colonne]))
 
@@ -1559,7 +1559,7 @@ if m.llResult
 
 	* {fr} Tabuler à deux dimensions
 	dimension laRow[m.lnResult, m.lnCol]
-	laRow = space(0)
+	laRow = ''
 	for liRow = 1 to m.lnResult
 		alines(laCol, taRow[m.liRow], 1, m.lcSep)
 		for liCol = 1 to alen(laCol)

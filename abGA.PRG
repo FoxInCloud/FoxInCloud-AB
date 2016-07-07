@@ -1,4 +1,3 @@
-* abGA.prg
 * =====================================================
 * (c) Abaque SARL, 66 rue Michel Ange - 75016 Paris - France
 * contact@FoxInCloud.com - http://foxincloud.com/ - +33 9 53 41 90 90
@@ -14,7 +13,7 @@
 * {en} This permission notice shall be entirely included in all copies or substantial portions of the Software
 * =====================================================
 * (c) Gregory Adam 
-* Last build: 10/05/2015 12:58:46 by ThierryNivelet
+* Last build: 07/06/2016 19:00:01 by ThierryNivelet
 
 && ga_Collection
 * Gregory Adam 2010
@@ -861,10 +860,10 @@ enddefine
 *_______________________________________________________________________________
 FUNCTION ga_DBCTablesTree && Tables d'une base de données dans l'ordre de parenté
 	LPARAMETERS ;
-		taTable; && @ Tables en retour
-, 	tcDBC; && Base de données
-, 	tcExcludes;  && Table(s) à exclure
-, 	tlAsc && [.F.] /!\ à developper /!\ Ordonner les tables selon les parentés ascendantes
+		taTable,; && @ Tables en retour
+		tcDBC,; && Base de données
+		tcExcludes,;  && Table(s) à exclure
+		tlAsc && [.F.] /!\ à developper /!\ Ordonner les tables selon les parentés ascendantes
 	EXTERNAL ARRAY taTable
 	
 	LOCAL llResult, lnResult && nombre de tables
@@ -1591,6 +1590,7 @@ define class GA_LIGHTWEIGHT_CLASS as Relation
 	protected junk;
 	; && native properties
 	, Application;
+	, BaseClass;
 	, ChildAlias;
 	, ChildOrder;
 	, Comment;
@@ -2032,10 +2032,10 @@ function ga_Object_Create_np(obj, classname, np, GA_PARAMETERLIST_08)
 endfunc
 *_______________________________________________________________________________
 function ga_Object_Create_Property()
-	lparameters	parentObj ;
-, 			propertyname ;
-, 			classname ;
-, 			GA_PARAMETERLIST_08
+	lparameters	parentObj, ;
+				propertyname, ;
+				classname, ;
+				GA_PARAMETERLIST_08
 	
 	local obj, success
 	success = true
@@ -2067,10 +2067,10 @@ function ga_Empty_Object(obj)
 endfunc
 *_______________________________________________________________________________
 function ga_Empty_Object_PropertyList
-		lparameters	obj ;
-, 				propertyList ;
-, 				propertySeparator ;
-, 				GA_PARAMETERLIST_16
+		lparameters	obj, ;
+					propertyList, ;
+					propertySeparator, ;
+					GA_PARAMETERLIST_16
 
 	local success
 	success = true
@@ -2101,11 +2101,11 @@ function ga_Empty_Object_PropertyList
 endfunc
 *_______________________________________________________________________________
 function ga_Object_AddPropertyList
-		lparameters	obj ;
-, 				propertyList ;
-, 				propertySeparator ;
-, 				nValues ;
-, 				GA_PARAMETERLIST_16
+		lparameters	obj, ;
+					propertyList, ;
+					propertySeparator, ;
+					nValues, ;
+					GA_PARAMETERLIST_16
 					
 	local success
 	success = true
@@ -2859,14 +2859,14 @@ function ga_String_SplitToArray(aa, naa, s, separator, nflags)
 		
 	otherwise
 		naa = alines( ;
-					aa ;
-, 				m.s, ;
+					aa, ;
+					m.s, ;
 					bitand( ;
 							m.nflags, ;
 							bitnot( ;
 								bitor( ;
-										ga_STRING_SPLIT_FLAG_TOLOWERCASE ;
-, 									ga_STRING_SPLIT_FLAG_EVALELEMENTS ;
+										ga_STRING_SPLIT_FLAG_TOLOWERCASE, ;
+										ga_STRING_SPLIT_FLAG_EVALELEMENTS ;
 									) ;
 								) ;
 						), ;
@@ -3019,8 +3019,8 @@ function ga_String_FirstWhiteSpaceCharIndex(s)
 	return at(' ',  ;
 			chrtran( ;
 					m.s, ;
-					ga_STRING_WHITESPACE ;
-, 				replicate(' ', len(ga_STRING_WHITESPACE)) ;
+					ga_STRING_WHITESPACE, ;
+					replicate(' ', len(ga_STRING_WHITESPACE)) ;
 					) ;
 			)
 endfunc
@@ -3386,8 +3386,8 @@ function AddArc(successor, predecessor)
 			success = false
 		
 		case indexseek(	bintoc(m.predecessorId) + bintoc(m.successorId), ;
-						false ;
-, 					'RelationCursor', ;
+						false, ;
+						'RelationCursor', ;
 						'Id' ;
 					)
 		
@@ -3434,8 +3434,8 @@ protected function GetId(node, id)
 	otherwise
 		insert into NodeCursor ;
 		(	Visited, ;
-			Id ;
-, 		InDegree ;
+			Id, ;
+			InDegree ;
 		) values ;
 		(	false, ;
 			.Nodes.Count, ;
@@ -4396,8 +4396,8 @@ function	fgetc_at(fd, Offset)
 		vartype(m.fd) == T_CHARACTER,;
 			asc(substr(m.fd, m.Offset+1, 1)),;
 		m.Offset <> fseek(m.fd, m.Offset, 0),;
-			FAILURE;
-, 		asc(fread(m.fd, 1));
+			FAILURE,;
+			asc(fread(m.fd, 1));
 		)
 	
 endfunc
@@ -4409,8 +4409,8 @@ function	fread_at(fd, Offset, nBytes)
 		vartype(m.fd) == T_CHARACTER,;
 			substr(m.fd, m.Offset+1, m.nBytes),;
 		m.Offset <> fseek(m.fd, m.Offset, 0),;
-			FAILURE;
-, 		fread(m.fd, m.nBytes);
+			FAILURE,;
+			fread(m.fd, m.nBytes);
 		)
 
 endfunc
@@ -4443,8 +4443,8 @@ function ga_Regex_Object(obj, global, ignoreCase, pattern, multiLine)
 
 	return ga_Object_Create(;
 					@m.obj, ;
-					GA_REGEX_CLASS ;
-, 				m.global, ;
+					GA_REGEX_CLASS, ;
+					m.global, ;
 					m.ignoreCase, ;
 					m.pattern, ;
 					m.multiLine ;
