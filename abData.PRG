@@ -7617,12 +7617,12 @@ define class abDataSyncVFP as custom && {fr} Synchronise deux tables ou deux bas
 
 	cDBCdest = '' && {fr} Adresse de la base de données destination
 	cDBCsrce = '' && {fr} Adresse de la base de données source
-&& {fr} les base de données source et destination peuvent porter le même nom ... l'adresse est nécessaire
+	&& {fr} les base de données source et destination peuvent porter le même nom ... l'adresse est nécessaire
 	cTablesIgnore = '' && {fr} tables à ignorer (cf. this.DBCSync())
 
 	* {fr} RÉSULTATS EN LECTURE SEULE
 	lResult = .t. && {fr} Succès / Échec
-	cResult = '' && Texte résultat
+	cResult = '' && {fr} Texte résultat
 	oResult = .null. && {fr} Objet résultat (par table)
 	dimension aResults[1]; && {fr} Objets résultats (tables)
 		, aResultItems[1] && {fr} éléments de l'objet résultat : cf. this.Init_aResultItems()
@@ -7631,7 +7631,7 @@ define class abDataSyncVFP as custom && {fr} Synchronise deux tables ou deux bas
 	* {fr} INTERNES
 	protected lErrorFatal, aDBCdestTables[1], cLangUser
 
-*---------------------------------------
+	*---------------------------------------
 	procedure init
 	lparameters ;
 	  Result; && @
@@ -7670,7 +7670,7 @@ define class abDataSyncVFP as custom && {fr} Synchronise deux tables ou deux bas
 
 	return m.llResult
 
-*---------------------------------------
+	*---------------------------------------
 	hidden function Init_aResultItems && {fr} 1-Nom | 2-Valeur par défaut | 3-Type de champ | 4 Description localisée
 
 	local llResult;
@@ -7682,7 +7682,7 @@ define class abDataSyncVFP as custom && {fr} Synchronise deux tables ou deux bas
 	, liLangUser;
 	, llLangUser;
 
-&& /!\ la Description ne doit pas contenir '|'
+	&& /!\ la Description ne doit pas contenir '|'
 	text TO lcResultItem NOSHOW FLAGS 1 PRETEXT 1+2 && {fr} Field | default value | Type | en | fr | de | es | it | pt
 		lResult | .T. | L | Success | Succès
 		cResult | '' | M | Result | Résultat
@@ -7739,12 +7739,12 @@ define class abDataSyncVFP as custom && {fr} Synchronise deux tables ou deux bas
 	dimension this.aResultItems[m.lnResultItem, 4]
 	acopy(m.laResultItem, this.aResultItems)
 
-*---------------------------------------
+	*---------------------------------------
 	protected procedure destroy
 
 	use in select(m.this.cResultCursor)
 
-*---------------------------------------
+	*---------------------------------------
 	protected procedure ResultClear && {fr} Raze l'objet résultat
 
 	this.cErrorHeader = alltrim(evl(m.this.cErrorHeader, '/!\'))
@@ -7757,7 +7757,7 @@ define class abDataSyncVFP as custom && {fr} Synchronise deux tables ou deux bas
 		store this.aResultItems[m.liResultItem, 2] to ('m.this.oResult.' + this.aResultItems[m.liResultItem, 1])
 	endfor
 
-*---------------------------------------
+	*---------------------------------------
 	protected procedure cResult_Assign
 	lparameters tcResult
 
@@ -7773,23 +7773,23 @@ define class abDataSyncVFP as custom && {fr} Synchronise deux tables ou deux bas
 			)
 	endif
 
-*---------------------------------------
-protected procedure cResultAdd
-lparameters tcResult
+	*---------------------------------------
+	protected procedure cResultAdd
+	lparameters tcResult
 
-local llResult
-llResult = m.this.lResult
-this.lResult = .f.
-this.cResult = m.tcResult
-this.lResult = m.llResult
+	local llResult
+	llResult = m.this.lResult
+	this.lResult = .f.
+	this.cResult = m.tcResult
+	this.lResult = m.llResult
 
-*---------------------------------------
+	*---------------------------------------
 	protected procedure oResultFinal && {fr} Objet résultat final
 	this.oResult.lResult = m.this.lResult
 	this.oResult.cResult = m.this.cResult
 	return m.this.oResult
 
-*---------------------------------------
+	*---------------------------------------
 	procedure cResultFinal && {fr} résultat final
 	lparameters ;
 	  tlSuccess; && [.F.] {fr} en cas de succès, seulement le résultat
@@ -7820,7 +7820,7 @@ this.lResult = m.llResult
 
 	return substr(m.lcResult, len(m.tlPipe) + 1)
 
-*---------------------------------------
+	*---------------------------------------
 	hidden procedure cDBCdest_Assign
 	lparameters tcDBC && {fr} nom | adresse de la base de données destination
 
@@ -7849,7 +7849,7 @@ this.lResult = m.llResult
 
 	this.lResult = m.this.lResult and this.oResult.lDBCdest
 
-*---------------------------------------
+	*---------------------------------------
 	hidden procedure cDBCsrce_Assign
 	lparameters tcDBC && {fr} nom | adresse de la base de données source
 
@@ -7861,7 +7861,7 @@ this.lResult = m.llResult
 
 	this.lResult = m.this.lResult and this.oResult.lDBCsrce
 
-*---------------------------------------
+	*---------------------------------------
 	hidden procedure lDBC as Boolean && {fr} base de données ouverte
 	lparameters tcDBC && @ {fr} nom | adresse de la base de données
 
@@ -7901,11 +7901,11 @@ this.lResult = m.llResult
 
 	return m.llResult
 
-*---------------------------------------
+	*---------------------------------------
 	protected function aTablesIgnore && {fr} Tables à ignorer
 	lparameters ;
-		taTablesIgnore; && @ {fr} Tables à ignorer
-, 	tcTablesIgnore && {fr} Tables à ignorer
+	  taTablesIgnore; && @ {fr} Tables à ignorer
+	, tcTablesIgnore && {fr} Tables à ignorer
 	external array taTablesIgnore
 
 	tcTablesIgnore = iif(vartype(m.tcTablesIgnore) == 'C', m.tcTablesIgnore, '')
@@ -7914,15 +7914,15 @@ this.lResult = m.llResult
 
 	return alines(taTablesIgnore, m.tcTablesIgnore, 1, ',', ';') && {fr} peu importent les doublons !
 
-*---------------------------------------
+	*---------------------------------------
 	procedure DBCSync && {fr} Synchronise deux bases de données VFP
 	lparameters ;
-		tcDBCdest; && [this.cDBCdest] {fr} Adresse de la base de données destination
-, 	tcDBCsrce; && [this.cDBCsrce] {fr} Adresse de la base de données source
-, 	tcTablesIgnore; && [this.cTablesIgnore] {fr} Tables à ignorer
-, 	tuFieldsIgnore; && ['WARNING'] {fr} Ignorer si ces champs de la table destination sont absents de la table source ; .T.: aucune vérification de structure
-, 	tlReplace; && [.F.] {fr} Remplacer toute la table destination
-, 	tlCKmatch && [.F.] {fr} Matcher les enregistrements sur la première clé candidate de la table destination
+	  tcDBCdest; && [this.cDBCdest] {fr} Adresse de la base de données destination
+	, tcDBCsrce; && [this.cDBCsrce] {fr} Adresse de la base de données source
+	, tcTablesIgnore; && [this.cTablesIgnore] {fr} Tables à ignorer
+	, tuFieldsIgnore; && ['WARNING'] {fr} Ignorer si ces champs de la table destination sont absents de la table source ; .T.: aucune vérification de structure
+	, tlReplace; && [.F.] {fr} Remplacer toute la table destination
+	, tlCKmatch && [.F.] {fr} Matcher les enregistrements sur la première clé candidate de la table destination
 
 	this.ResultClear
 	this.cDBCdest = evl(m.tcDBCdest, m.this.cDBCdest) && {fr} cf. this.cDBCdest_assign()
@@ -8004,19 +8004,19 @@ this.lResult = m.llResult
 
 	return m.this.lResult
 
-*---------------------------------------
+	*---------------------------------------
 	protected procedure DBCSync_Table_Ante && {fr} méthode shell avant synchronisation
 	lparameters ;
-		tcTable; && {fr} Table sur le point d'être synchronisée
-, 	tuFieldsIgnore; && @ {fr} Ignorer si ces champs de la table destination sont absents de la table source ; .T.: aucune vérification de structure
-, 	tlReplace; && @ {fr} Remplacer toute la table destination
-, 	tlCKmatch && @ {fr} Matcher les enregistrements sur la première clé candidate de la table destination
+	  tcTable; && {fr} Table sur le point d'être synchronisée
+	, tuFieldsIgnore; && @ {fr} Ignorer si ces champs de la table destination sont absents de la table source ; .T.: aucune vérification de structure
+	, tlReplace; && @ {fr} Remplacer toute la table destination
+	, tlCKmatch && @ {fr} Matcher les enregistrements sur la première clé candidate de la table destination
 
-*---------------------------------------
+	*---------------------------------------
 	protected procedure DBCSync_Table_Post && {fr} méthode shell après synchronisation
 	lparameters ;
-		tcTable; && {fr} Table qui vient d'être synchronisée
-, 	toResult && {fr} Résultat de la synchronisation
+	  tcTable; && {fr} Table qui vient d'être synchronisée
+	, toResult && {fr} Résultat de la synchronisation
 
 	local llResult
 	llResult = dodefault(m.tcTable, m.toResult)
@@ -8043,12 +8043,12 @@ this.lResult = m.llResult
 	* ---------------------------------------
 	procedure TableSync && {fr} Synchronise deux tables VFP
 	lparameters ;
-		tcTableDest; && {fr} Table destination (Adresse || Alias || db!Table)
-, 	tcTableSrce; && {fr} Table source  (Adresse || Alias || db!Table)
-, 	tuFieldsIgnore; && ['WARNING'] {fr} Ignorer si ces champs de la table destination sont absents de la table source ; .T.: aucune vérification de structure
-, 	tlReplace; && [.F.] {fr} Remplacer toute la table destination
-, 	tlCKmatch; && [.F.] {fr} Matcher les enregistrements sur la première clé candidate de la table destination
-, 	tnRecs && [all] {fr} Nombre d'enregistrements à synchroniser
+	  tcTableDest; && {fr} Table destination (Adresse || Alias || db!Table)
+	, tcTableSrce; && {fr} Table source  (Adresse || Alias || db!Table)
+	, tuFieldsIgnore; && ['WARNING'] {fr} Ignorer si ces champs de la table destination sont absents de la table source ; .T.: aucune vérification de structure
+	, tlReplace; && [.F.] {fr} Remplacer toute la table destination
+	, tlCKmatch; && [.F.] {fr} Matcher les enregistrements sur la première clé candidate de la table destination
+	, tnRecs; && [all] {fr} Nombre d'enregistrements à synchroniser
 
 	this.ResultClear
 
@@ -8125,12 +8125,12 @@ this.lResult = m.llResult
 
 	return m.this.lResult
 
-*---------------------------------------
+	* ---------------------------------------
 	hidden function lFieldsMatch && {fr} Les champs des tables source et destination sont cohérents
 	lparameters ;
-		tcAliasDest; && {fr} Alias de la table destination
-, 	tcAliasSrce; && {fr} Alias de la table source
-, 	tcFieldsIgnore && {fr} Champs à ignorer
+	  tcAliasDest; && {fr} Alias de la table destination
+	, tcAliasSrce; && {fr} Alias de la table source
+	, tcFieldsIgnore && {fr} Champs à ignorer
 
 	local llFieldsSrce, llFieldsDest
 
@@ -8138,7 +8138,7 @@ this.lResult = m.llResult
 	llFieldsSrce = empty(m.this.oResult.cFieldsMissingSrce)
 
 	this.oResult.cFieldsMissingDest = nvl(cFieldsNotIn(m.tcAliasSrce, m.tcAliasDest, m.tcFieldsIgnore), '?')
-	llFieldsDest = .t. && {fr} Empty(m.this.oResult.cFieldsMissingDest)
+	llFieldsDest = .t. && Empty(m.this.oResult.cFieldsMissingDest)
 
 	this.lResult = m.llFieldsDest and m.llFieldsSrce
 
@@ -8169,14 +8169,15 @@ this.lResult = m.llResult
 
 	return m.this.lResult
 
-*---------------------------------------
+	*---------------------------------------
 	protected procedure TableSync_ && {fr} Réalise la synchronisation des tables
 	lparameters ;
-		tcAliasDest; && {fr} Alias de la table destination
-, 	tcAliasSrce; && {fr} Alias de la table source
-, 	tlReplace; && [.F.] {fr} Remplacer toute la table destination
-, 	tlCKmatch; && [.F.] {fr} Matcher les enregistrements sur la première clé candidate de la table destination
-, 	tnRecs && [all] {fr} Nombre d'enregistrements à synchroniser
+	  tcAliasDest; && {fr} Alias de la table destination
+	, tcAliasSrce; && {fr} Alias de la table source
+	, tlReplace; && [.F.] {fr} Remplacer toute la table destination
+	, tlCKmatch; && [.F.] {fr} Matcher les enregistrements sur la première clé candidate de la table destination
+	, tnRecs && [all] {fr} Nombre d'enregistrements à synchroniser
+
 	tlReplace = lTrue(m.tlReplace)
 	tlCKmatch = lTrue(m.tlCKmatch)
 	tnRecs = iif(vartype(m.tnRecs) == 'N' and m.tnRecs > 0, int(m.tnRecs), 0)
@@ -8208,7 +8209,7 @@ this.lResult = m.llResult
 			endif
 		endif
 
-		* {fr} Définir si les enr. sont comparés sur clé candidate
+		* {fr} Définir si les enr. sont comparés sur leur clé candidate
 		this.oResult.lcTag = not m.llPtag or m.tlCKmatch && {fr} les enregistrements sont comparés selon un index candidat
 		this.oResult.cPCtag = iif(m.this.oResult.lcTag, m.lcPCtag, m.lcPtag) && {fr} nom de l'index primaire ou candidat de la table destination
 		this.oResult.cPCexp = iif(m.this.oResult.lcTag, m.lcPCexp, m.lcPexp) && {fr} expression de l'index primaire ou candidat de la table destination
@@ -8260,9 +8261,18 @@ this.lResult = m.llResult
 		endif
 		if m.this.lResult
 
+			* {fr} si une seule des tables est dans une base de données, tabuler les correspondances entre champs longs et courts (10 caractères)
+			local llDBCsrce, llDBCdest, lnFieldLong10, laFieldLong10[1]
+			llDBCsrce = !Empty(CursorGetProp("Database", m.tcAliasSrce))
+			llDBCdest = !Empty(CursorGetProp("Database", m.tcAliasDest))
+			lnFieldLong10 = Iif(m.llDBCsrce # m.llDBCdest;
+				, aFieldLong10(@m.laFieldLong10, Iif(m.llDBCsrce, m.tcAliasSrce, m.tcAliasDest));
+				, 0;
+				)
+
 			* {fr} Créer une variable par champ de la table source
-			local lcFields
-			lcFields = cFields(m.tcAliasSrce)
+			local lcFields, laField[1], lnField, liField, lcField
+			lcFields = c2Words(cFields(m.tcAliasSrce), ',', iif(Empty(m.lnFieldLong10), '', cListOfArray(@m.laFieldLong10,, Iif(m.llDBCsrce, 2, 1))))
 			local &lcFields
 
 			* {fr} Si forçage des types ou vérification des modifications
@@ -8270,10 +8280,8 @@ this.lResult = m.llResult
 			 or m.this.lTypesForce;
 			 or m.this.lModCheck
 
-				local laField[1], lnField, liField, lcField
-
 				* {fr} Tabuler les champs de la table source présents dans la table destination, et leurs types
-				lnField = alines(laField, strtran(m.lcFields, ',', ','+',') + ',', 1+2, ',') && {fr} un élément vide après chaque champ
+				lnField = alines(laField, strtran(m.lcFields, ',', ','+',') + ',', 1+2, ',') && {fr} un élément vide après chaque champ pour la 2ème colonne
 				dimension laField[m.lnField, 2]
 				for liField = m.lnField to 1 step -1
 					lcField = laField[m.liField, 1]
@@ -8288,15 +8296,16 @@ this.lResult = m.llResult
 			endif
 
 			* {fr} Créer les variables privées standard FoxInCloud / ZenBuyer
-			private plSync, pltModKeep, plPKGen
+			private plSync, pltModKeep, plPKgen
 			plSync = .t. && {fr} Inhibe le contrôle des droits dans la base zenbuyer
 			pltModKeep = .t.; && {fr} Inhibe la mise à jour automatique de la date de modification
-				 and vartype(m.this.cTimeStampField) == 'C';
-				 and lField(m.this.cTimeStampField, m.tcAliasDest);
-				 and lField(m.this.cTimeStampField, m.tcAliasSrce)
-			plPKGen = m.tlReplace or not m.llPtag && {fr} Générer la PK
+			 and vartype(m.this.cTimeStampField) == 'C';
+			 and lField(m.this.cTimeStampField, m.tcAliasDest);
+			 and lField(m.this.cTimeStampField, m.tcAliasSrce)
+			plPKgen = m.tlReplace or not m.llPtag && {fr} Générer la PK
 
 			local loDeleted, loExact, loException as exception, llSyncField
+
 			loDeleted = abSet('DELETED', iif(m.this.lSyncDeleted, 'OFF', 'ON'))
 			loExact = abSet('EXACT', 'ON')
 			llSyncField = .t.;
@@ -8308,9 +8317,9 @@ this.lResult = m.llResult
 			 and !this.oResult.lPCtag;
 			 and m.tnRecs = 0
 
+				* ==============
 				* {fr} Ajouter tout simplement
 				select (m.tcAliasDest)
-* ==============
 				try
 					append from dbf(m.tcAliasSrce)
 					if m.llSyncField
@@ -8321,7 +8330,7 @@ this.lResult = m.llResult
 				finally
 					this.oResult.nRecsAdded = _tally
 				endtry
-* ==============
+				* ==============
 
 			* {fr} Sinon (matching sur clé primaire ou candidate)
 			else
@@ -8333,27 +8342,31 @@ this.lResult = m.llResult
 
 					llRec = .t. && {fr} Résultat de l'enregistrement
 					lcRec = '' && {fr} Résultat de l'enregistrement
-					lcRecNo = transform(recno(m.tcAliasSrce))
-					scatter memvar memo && {fr} FIELDS &lcFields
+					lcRecNo = cast(recno(m.tcAliasSrce) as M)
+					scatter memvar memo && FIELDS &lcFields
+					
+					* {fr} si noms longs, copier dans nom court ou réciproquement
+					for liField = 1 to m.lnFieldLong10
+						store Evaluate('m.' + m.laFieldLong10[m.liField, Iif(m.llDBCsrce, 1, 2)]) to (m.laFieldLong10[m.liField, Iif(m.llDBCsrce, 2, 1)])
+					endfor
 
 					* {fr} Si forçage demandé, ajuster les types des champs en mémoire
-					if m.this.lTypesForce
-						for liField = 1 to m.lnField
-							luValue = evaluate('m.' + laField[m.liField, 1])
-							if not vartype(m.luValue, .t.) == laField[m.liField, 2]
-								store uValue(m.luValue, laField[m.liField, 2]) to ('m.' + laField[m.liField, 1])
-							endif
-						endfor
-					endif
+					for liField = 1 to Iif(m.this.lTypesForce, m.lnField, 0)
+						luValue = evaluate('m.' + laField[m.liField, 1])
+						if not vartype(m.luValue, .t.) == laField[m.liField, 2]
+							store uValue(m.luValue, laField[m.liField, 2]) to ('m.' + laField[m.liField, 1])
+						endif
+					endfor
 
-* ==============
+					* ==============
 					try
 
 						* {fr} Si clé primaire non automatique, chercher l'enregistrement correspondant dans la table destination
 						llReplace = this.oResult.lPCtag;
 							and iif(this.oResult.lcTag;
 								, seek(evaluate(m.lcPCexpMem), m.tcAliasDest, m.lcPCtag);
-								, seek(evaluate(m.lcPexpMem), m.tcAliasDest, m.lcPtag))
+								, seek(evaluate(m.lcPexpMem), m.tcAliasDest, m.lcPtag);
+								)
 						llInsert = not m.llReplace
 
 						* {fr} Si l'enregistrement existe
@@ -8385,9 +8398,8 @@ this.lResult = m.llResult
 										if m.llReplace
 											exit
 										endif
-									next
+									endfor
 								endif
-
 								if m.llReplace
 
 									* {fr} Charger l'enregistrement dans la table destination
@@ -8427,7 +8439,7 @@ this.lResult = m.llResult
 																				[Error <<cException(m.loException)>> on source record # <<m.lcRecno>>]; && Default: English
 							))
 					endtry
-* ==============
+					* ==============
 
 					if m.llRec
 
@@ -8499,14 +8511,14 @@ this.lResult = m.llResult
 
 	return m.this.lResult
 
-*---------------------------------------
+	*---------------------------------------
 	protected procedure TableSync_Rec && {fr} Exécuté à chaque enregistrement
 	lparameters ;
-		tcAliasDest; && {fr} Alias de la table destination
-, 	tlReplaced; && {fr} L'enregistrement a été remplacé
-, 	tnAdded; && {fr} Nombre d'enregistrements ajoutés
-, 	tnReplaced; && {fr} Nombre d'enregistrements remplacés
-, 	tcAliasSrce && {fr} Alias de la table source
+	  tcAliasDest; && {fr} Alias de la table destination
+	, tlReplaced; && {fr} L'enregistrement a été remplacé
+	, tnAdded; && {fr} Nombre d'enregistrements ajoutés
+	, tnReplaced; && {fr} Nombre d'enregistrements remplacés
+	, tcAliasSrce && {fr} Alias de la table source
 
 && {fr} Implémenter en sous-classe
 
@@ -8657,4 +8669,131 @@ if Used(m.cAlias)
 	endfor
 endif
 return Ltrim(m.result, ',', ' ')
+endfunc
+
+* =============================================
+function aFieldLong10 && {fr} noms de champs de plus de 10 caractères dans une copie libre d'une table ou curseur
+lparameters ;
+  laField; && @ {en} result [long field name, 10-chars field name]
+, lcTable; && {en} Table
+
+local result as Integer; && {en} number of fields with a name longer than 10 characters (column # 1 of result array)
+, cAlias as String;
+, lAlias as Boolean;
+, aa[1] as String;
+, iField as Integer;
+, cField as String;
+
+external array laField
+
+result = 0
+cAlias = cAlias(m.lcTable, @m.lAlias)
+if Used(m.cAlias)
+	result = AFields(aa, m.cAlias)
+	for iField = 1 to m.result
+		cField = aFieldLong10_cField(@m.laField, m.aa[m.iField, 1])
+	endfor
+	for iField = m.result to 1 step -1
+		if Lenc(m.laField[m.iField, 1]) <= 10
+			result = m.result - 1
+			Adel(laField, m.iField)
+		endif
+	endfor
+	if m.result > 0
+		dimension laField[m.result, 2]
+	else
+		aClear(@m.laField)
+	endif
+	if m.lAlias
+		use in (m.cAlias)
+	endif
+endif
+
+return m.result
+endfunc
+
+* ---------------------------------------------
+procedure aFieldLong10_test && {en} aFieldLong10() unit test
+
+local loTest, aa[1], bb[1] 
+loTest = CreateObject('aFieldLong10_test')
+dimension bb[Alen(m.loTest.aField10)]
+Acopy(m.loTest.aField10, bb)
+
+loTest.test(12, @m.aa)
+aColDel(@m.aa, 1)
+loTest.assert(@m.aa, @m.bb)
+
+	* ------------------------------
+	define class aFieldLong10_test as abUnitTest of abDev.prg
+	dimension aField10[1]
+	procedure init
+	lparameters ;
+	  tcModule; && [Module appelant sans le suffixe '_test'] {fr} Nom du module à tester
+	, tcAddress; && [Adresse du code source du module appelant] {fr} Adresse contenant le répertoire où créer le Compte-rendu de test
+
+		create cursor TestCursor(;
+		  F123456789 I;   && {en} = 10 chars
+		, F123456789_01 I; && {en} > 10 chars
+		, F123456789_02 I;
+		, F123456789_03 I;
+		, F123456789_04 I;
+		, F123456789_05 I;
+		, F123456789_06 I;
+		, F123456789_07 I;
+		, F123456789_08 I;
+		, F123456789_09 I;
+		, F123456789_10 I;
+		, F123456789_11 I;
+		, F123456789_12 I;
+		)
+		* ------------
+		copy to test && table libre
+		* ------------
+		use test in 0 alias testTable
+		local aa[1]
+		AFields(aa, 'testTable')
+		aColsDel(@m.aa, 2)
+		Adel(aa, 1)
+		dimension aa[Alen(aa)-1]
+		dimension this.aField10[Alen(aa)]
+		Acopy(aa, this.aField10)
+		use in testTable
+*		erase test.dbf
+		return DoDefault(m.tcModule, m.tcAddress)
+
+	procedure test(expected, aa)
+		return DoDefault(m.expected, @m.aa, 'TestCursor')
+
+	enddefine
+
+* ---------------------------------------------
+function aFieldLong10_cField && {fr} nom d'un champ de plus de 10 caractères dans une table libre ou libérée
+lparameters ;
+  laField; && @ {en} result [long field name, 10-chars field name]
+, lcField; && {en} Field to add
+
+&& {fr} utilisé par awHTML
+
+external array laField
+
+local result, lnField, iSuffix, cSuffix
+
+lcField = Upper(m.lcField)
+result = Leftc(m.lcField, 10) && Leftc('toto', 10) == 'toto'
+lnField = Iif(laEmpty(@m.laField), 0, Alen(laField, 1)) + 1
+if m.lnField > 1
+	iSuffix = 1 && {en} strange that it's not 0, but it seems that VFP starts this way and uses '2' as the first suffix
+	do while Ascan(laField, m.result, 1, -1, 1, 15) + Ascan(laField, m.result, 1, -1, 2, 15) > 0
+		iSuffix = m.iSuffix + 1
+		cSuffix = Cast(m.iSuffix as M)
+		result  = Left(m.result, 10-Lenc(m.cSuffix)) + m.cSuffix
+	enddo
+endif
+
+dimension laField[m.lnField, 2]
+laField[m.lnField, 1] = m.lcField && {fr} nom du champ dans .RecordSource (toute longueur)
+laField[m.lnField, 2] = m.result && {fr} nom du champ dans la table copiée (10 caractères max)
+
+return m.result
 endfunc
