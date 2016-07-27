@@ -93,16 +93,15 @@ lparameters toAppHost as awAppHost of awAppHost.fxp && @ {en} FoxInCloud Applica
 local loServer as awServer of awServer.prg && {fr} FoxInCloud / wConnect server object
 
 toAppHost = ICase(;
-	!wlWeb(@m.loServer),;
-		m.toAppHost,;
-	Vartype(m.loServer.oAppHost) == 'O',; && {fr} and loClass(m.loServer.oAppHost, 'awAppHost')
-		m.loServer.oAppHost,;
-	Vartype(m.awAppHost) == 'O',; && {fr} and loClass(m.awAppHost, 'awAppHost')
+	Vartype(m.awAppHost) == 'O',;
 		m.awAppHost,;
+	wlWeb(@m.loServer) and Vartype(m.loServer.oAppHost) == 'O',;
+		m.loServer.oAppHost,;
 		m.toAppHost;
 	)
 
 return loClass(m.toAppHost, 'awAppHost')
+endfunc
 
 * =============================================================
 function wlSession && {fr} Une session est ouverte pour l'utilisateur courant
@@ -1242,6 +1241,7 @@ case wlLAN() && {fr} desktop mode
 	if m.llSCX && .scx
 		lcParms = wcParms(m.lnParms, .T.)
 		do form (m.tcForm) name loForm &lcParms noshow
+		store m.loForm to (chrtran(JustStem(m.tcForm), ' -', '__')) && 2016-07-07 thn -- {FiC V 2.22.0-beta.1} {en} added for vh
 	else
 		lcParms = wcParms(m.lnParms)
 		loForm = CreateObject(m.tcForm &lcParms)
