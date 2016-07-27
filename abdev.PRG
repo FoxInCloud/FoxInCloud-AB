@@ -4551,12 +4551,11 @@ define class abUnitTest as session
 
 lSingleTest = .f. && {fr} exécuter seulement une fois && {fr} cas où la fonction à tester produit un résultat cumulatif et/ou des tableaux
 
-protected nTest, lResult
-nTest = 0 && {fr} Nombre de tests réalisés
-lResult = .t. && {fr} Résultat des testes (.T. tant qu'aucun test n'est réalisé)
-
-hidden ;
-	cModule; && {fr} Nom du module à tester
+protected ;
+  lResult;
+, nTest; && {fr} Nombre de tests réalisés sur le module
+, aTest[1,1]; && {fr} Résultats des tests
+, cModule; && {fr} Nom du module à tester
 , cAddress; && {fr} Adresse du fichier contenant le module à tester
 , oObject; && {fr} Référence à l'objet si le module est une méthode
 , lResult; && {fr} Résultat des tests ; .T. si tous réussis
@@ -4564,14 +4563,15 @@ hidden ;
 , cResultAddr; && {fr} Adresse du fichier de résultats
 , lCoverage; && {fr} Enclenche le Coverage lors du test
 , cCoverageAddr; && {fr} Adresse du Fichier de Coverage
-, nTest; && {fr} Nombre de tests réalisés sur le module
-, aTest[1,1] && {fr} Résultats des tests
+
+nTest = 0 && {fr} Nombre de tests réalisés
+lResult = .t. && {fr} Résultat des testes (.T. tant qu'aucun test n'est réalisé)
 
 * -----------------------------------
 procedure init
 lparameters ;
   tcModule; && [Module appelant sans le suffixe '_test'] {fr} Nom du module à tester
-, tcAddress && [Adresse du code source du module appelant] {fr} Adresse contenant le répertoire où créer le Compte-rendu de test
+, tcAddress; && [Adresse du code source du module appelant] {fr} Adresse contenant le répertoire où créer le Compte-rendu de test
 
 set sysformats on
 set multilocks on
@@ -4793,15 +4793,15 @@ return m.luResult
 procedure assert && {fr} Teste une valeur (par exemple élément d'un tableau résultat)
 lparameters ;
   tuExpected; && @ {fr} Résultat attendu
-, tuValue && @ {fr} Valeur à tester
+, tuObtained; && @ {fr} Valeur obtenue
 
 if pcount() >= 2
 
-	this.aTest[m.this.nTest, 3] = luEqual(@m.tuExpected, @m.tuValue) && {fr} Valeur produite == valeur attendue
+	this.aTest[m.this.nTest, 3] = luEqual(@m.tuExpected, @m.tuObtained) && {fr} Valeur produite == valeur attendue
 
 	assert m.this.aTest[m.this.nTest, 3] message cAssertMsg(textmerge(icase(;
-		cLangUser() = 'fr',	[Échec d'assertion au test n° <<m.this.nTest>> - résultat attendu: <<cL(m.tuExpected)>>, obtenu: <<cL(m.tuValue)>>],; && copy-paste this line to add another language support
-		 										[Assertion failed at test # <<m.this.nTest>> - result expected: <<cL(m.tuExpected)>>, obtained: <<cL(m.tuValue)>>]; && Default: English
+		cLangUser() = 'fr',	[Échec d'assertion au test n° <<m.this.nTest>> - résultat attendu: <<cL(m.tuExpected)>>, obtenu: <<cL(m.tuObtained)>>],; && copy-paste this line to add another language support
+		 										[Assertion failed at test # <<m.this.nTest>> - result expected: <<cL(m.tuExpected)>>, obtained: <<cL(m.tuObtained)>>]; && Default: English
 		)))
 
 else
