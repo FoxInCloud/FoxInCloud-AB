@@ -299,7 +299,7 @@ return m.lcResult
 * ========================================
 function cAlias && {fr} Alias d'une table
 lparameters ;
-  tuTable; && [Alias()] {fr} Table : Alias | Zone | Adresse | [DB!]Table
+  tuTable; && [Alias()] {en} Table : Alias | Work area | Address | [DB!]Table
 , tlOpened; && @ {fr} La table a été ouverte, penser à la refermer
 , tlExclusive; && [.F.] {fr} Ouvrir la table en exclusif
 , tcError; && @ [''] {fr} Erreur éventuelle
@@ -8672,12 +8672,12 @@ return Ltrim(m.result, ',', ' ')
 endfunc
 
 * =============================================
-function aFieldLong10 && {fr} noms de champs de plus de 10 caractères dans une copie libre d'une table ou curseur
+function aFieldLong10 && {en} long field names in a free copy of a table or cursor && {fr} noms de champs de plus de 10 caractères dans une copie libre d'une table ou curseur
 lparameters ;
   laField; && @ {en} result [long field name, 10-chars field name]
-, lcTable; && {en} Table
+, lcTable; && [Alias()] {en} Table : Alias | Work area | Address | [DB!]Table
 
-local result as Integer; && {en} number of fields with a name longer than 10 characters (column # 1 of result array)
+local result as Integer; && {en} number of fields with a name longer than 10 characters (as of  column # 1 of result array)
 , cAlias as String;
 , lAlias as Boolean;
 , aa[1] as String;
