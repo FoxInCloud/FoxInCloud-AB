@@ -2504,7 +2504,7 @@ lparameters ;
 , tlCAD; && @ [.NULL.] {en} View should be linked to a CursorAdapter ; .NULL.: don't care and feedback
 , tlRemote; && @ [.NULL.] {en} View is remote ; .NULL.: not a view
 
-tcAlias = iif(vartype(m.tcAlias) == 'C' and not empty(m.tcAlias), m.tcAlias, alias())
+tcAlias = iif(ga_Type_IsChar(m.tcAlias, .T.), m.tcAlias, alias())
 
 tlUpdateable = iif(pcount() < 2 or IsNull(m.tlUpdateable), .null., lTrue(m.tlUpdateable))
 tlCAD = iif(pcount() < 4 or IsNull(m.tlCAD), .null., lTrue(m.tlCAD))
@@ -2526,7 +2526,7 @@ if m.llDS
 	set datasession to m.tiDS
 endif
 
-#if .f. && {fr} CursorGetProp("SourceType")
+#if .f. && CursorGetProp("SourceType")
 
 1 – The data source is a local sql view.
 101 (1 + 100) - cursor is created by The cursorfill method.
@@ -2549,10 +2549,10 @@ endif
 lView = .t.;
  and used(m.tcAlias);
  and varSet(@m.lnSourceType, CursorGetProp("SourceType", m.tcAlias));
- and !(InList(m.lnSourceType, 1, 2) and Empty(CursorGetProp("SQL", m.tcAlias))); && {fr} SQL pass-through cursors
+ and !(InList(m.lnSourceType, 1, 2) and Empty(CursorGetProp("SQL", m.tcAlias))); && SQL pass-through cursors
  and varSet(@m.lnSourceType_, m.lnSourceType%100);
  and inlist(m.lnSourceType_, 1, 2, 4); && 1 - local SQL view ; 2 - remote SQL view ; 3 – table ; 4 - ADO Recordset attached to a CursorAdapter object
- and varSet(@m.llUpdateable, not empty(CursorGetProp("KeyFieldList", m.tcAlias))); && {fr} IsReadonly(m.tcAlias)
+ and varSet(@m.llUpdateable, not empty(CursorGetProp("KeyFieldList", m.tcAlias))); && IsReadonly(m.tcAlias)
  and iif(IsNull(m.tlUpdateable), varSet(@m.tlUpdateable, m.llUpdateable), m.tlUpdateable = m.llUpdateable);
  and varSet(@m.llCAD, int(m.lnSourceType / 100) > 0);
  and iif(IsNull(m.tlCAD), varSet(@m.tlCAD, m.llCAD), m.tlCAD = m.llCAD);
@@ -2601,10 +2601,10 @@ if m.llResult
 	tiDS = iif(vartype(m.tiDS) == 'N' and m.tiDS > 0, m.tiDS, set("Datasession"))
 	lnResult = aUsed(taView, m.tiDS)
 	llResult = m.lnResult > 0
-	* {fr} ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([Aucun alias trouvé dans la session de données <<m.tiDS>>]))
+	* ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([Aucun alias trouvé dans la session de données <<m.tiDS>>]))
 	if m.llResult
 
-		asort(m.taView, 2) && {fr} sort on work areas
+		asort(m.taView, 2) && sort on work areas
 		aColDel(@m.taView, 2) && {fr} zones de travail inutiles
 		dimension taView[m.lnResult] && {fr} une seule dimension suffit
 		for liAlias = m.lnResult to 1 step -1
@@ -2644,7 +2644,7 @@ lparameters ;
 , tlReadWrite; && [.NULL.] {en} updateable cursor (READWRITE); .NULL.: don't care and feedback
 , tiDS && [session de données courante] {fr} identifiant de la session de données
 
-tcAlias = iif(vartype(m.tcAlias) == 'C' and not empty(m.tcAlias), m.tcAlias, alias())
+tcAlias = iif(ga_Type_IsChar(m.tcAlias, .T.), m.tcAlias, alias())
 tlReadWrite = iif(pcount() < 2 or IsNull(m.tlReadWrite), .null.,  lTrue(m.tlReadWrite))
 
 local llResult;
@@ -2669,17 +2669,17 @@ lcDBF = iif(m.llAlias, dbf(m.tcAlias), '')
 
 llResult = m.llAlias;
 	and;
-	  (m.lnSourceType = 2; && {fr} remote SQL view
-		 		and empty(CursorGetProp("SQL", m.tcAlias)); && {fr} NO SQL
+	  (m.lnSourceType = 2; && remote SQL view
+		 		and empty(CursorGetProp("SQL", m.tcAlias)); && NO SQL
  		or;
-	 		m.lnSourceType = 3; && {fr} Table
+	 		m.lnSourceType = 3; && Table
 	 			and (not file(m.lcDBF); && {en} No table on disk
 	 				or lower(justext(m.lcDBF)) == 'tmp'; && {fr} Spécial Win2k : apparemment CREATE CURSOR crée une table sur disque
 	 				);
 	 		);
 	and (IsNull(m.tlReadWrite) or iif(m.tlReadWrite, m.llReadWrite, not m.llReadWrite))
 
-tlReadWrite = iif(IsNull(m.tlReadWrite) and m.llResult, m.llReadWrite, m.tlReadWrite) && {fr} FeedBack
+tlReadWrite = iif(IsNull(m.tlReadWrite) and m.llResult, m.llReadWrite, m.tlReadWrite) && FeedBack
 
 if m.llDS
 	set datasession to m.liDS
@@ -2704,7 +2704,7 @@ endif
 return loTest.Result()
 
 * ------------------------------
-define class lCursor_Test as abUnitTest of abDev.prg && {fr} AS session
+define class lCursor_Test as abUnitTest of abDev.prg && AS session
 
 	procedure dataopen
 		local lcDir
@@ -2712,7 +2712,7 @@ define class lCursor_Test as abUnitTest of abDev.prg && {fr} AS session
 		open database (m.lcDir + 'testData')
 		use testData!customer in 0
 		use testData!invoice in 0 nodata
-		do (m.lcDir + 'innerJ.qpr') && {fr} into cursor innerJ
+		do (m.lcDir + 'innerJ.qpr') && into cursor innerJ
 	enddefine
 
 * ========================================
@@ -2756,7 +2756,7 @@ if m.llResult
 		tiDS = iif(vartype(m.tiDS) == 'N' and m.tiDS > 0, m.tiDS, set("Datasession"))
 		lnResult = aused(taCursor, m.tiDS)
 		llResult = m.lnResult > 0
-		* {fr} ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([Aucun alias trouvé dans la session de données <<m.tiDS>>]))
+		* ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([Aucun alias trouvé dans la session de données <<m.tiDS>>]))
 		if m.llResult
 			aColDel(@m.taCursor, 2) && {fr} zones de travail inutiles
 			dimension taCursor[m.lnResult] && {fr} une seule dimension suffit
@@ -2824,7 +2824,7 @@ local lcAlias, llAlias, llResult
 
 if vartype(m.tcField) == 'C'
 	lcAlias = iif(empty(m.tuTable), alias(), cAlias(m.tuTable, @m.llAlias)) && {fr} optimisation
-	if used(m.lcAlias) && {fr} AND lVFPName(m.tcField)
+	if used(m.lcAlias) && AND lVFPName(m.tcField)
 		llResult = !empty(field(m.tcField, m.lcAlias))
 		if m.llAlias
 			use in (m.lcAlias)
@@ -2954,7 +2954,7 @@ procedure dataopen
 create cursor TMP1 (AAA I, BBB D null, CCC n(2))
 create cursor TMP2 (AAA I, BBB D not null, CCC n(2))
 
-enddefine && {fr} CLASS lFields_Test
+enddefine && CLASS lFields_Test
 
 * ========================================
 function cFieldsNotIn && {fr} Champs d'une table ne se trouvant pas dans une autre (utile en cas d'APPEND FROM)
@@ -4134,7 +4134,7 @@ if m.llResult
 
 		if m.llCursor
 			tcAlias = evl(m.tcTable, m.tcAlias)
-			tcAlias = iif(vartype(m.tcAlias) == 'C' and not empty(m.tcAlias), cVFPName(m.tcAlias), sys(2015))
+			tcAlias = iif(ga_Type_IsChar(m.tcAlias, .T.), cVFPName(m.tcAlias), sys(2015))
 			create cursor (m.tcAlias) from array laFields
 		else
 			create table (m.tcTable) free from array laFields && {en} Tables in Visual FoxPro are tagged with the code page that was in use when the table was created
@@ -8262,17 +8262,17 @@ define class abDataSyncVFP as custom && {fr} Synchronise deux tables ou deux bas
 		if m.this.lResult
 
 			* {fr} si une seule des tables est dans une base de données, tabuler les correspondances entre champs longs et courts (10 caractères)
-			local llDBCsrce, llDBCdest, lnFieldLong10, laFieldLong10[1]
-			llDBCsrce = !Empty(CursorGetProp("Database", m.tcAliasSrce))
-			llDBCdest = !Empty(CursorGetProp("Database", m.tcAliasDest))
-			lnFieldLong10 = Iif(m.llDBCsrce # m.llDBCdest;
-				, aFieldLong10(@m.laFieldLong10, Iif(m.llDBCsrce, m.tcAliasSrce, m.tcAliasDest));
+			local llFieldLongSrce, llFieldLongDest, lnFieldLong10, laFieldLong10[1]
+			llFieldLongSrce = CursorGetProp("SourceType", m.tcAliasSrce)%100 # 3 or !Empty(CursorGetProp("Database", m.tcAliasSrce))
+			llFieldLongDest = CursorGetProp("SourceType", m.tcAliasDest)%100 # 3 or !Empty(CursorGetProp("Database", m.tcAliasDest))
+			lnFieldLong10 = Iif(m.llFieldLongSrce # m.llFieldLongDest;
+				, aFieldLong10(@m.laFieldLong10, Iif(m.llFieldLongSrce, m.tcAliasSrce, m.tcAliasDest));
 				, 0;
 				)
 
 			* {fr} Créer une variable par champ de la table source
 			local lcFields, laField[1], lnField, liField, lcField
-			lcFields = c2Words(cFields(m.tcAliasSrce), ',', iif(Empty(m.lnFieldLong10), '', cListOfArray(@m.laFieldLong10,, Iif(m.llDBCsrce, 2, 1))))
+			lcFields = c2Words(cFields(m.tcAliasSrce), ',', iif(Empty(m.lnFieldLong10), '', cListOfArray(@m.laFieldLong10,, Iif(m.llFieldLongSrce, 2, 1))))
 			local &lcFields
 
 			* {fr} Si forçage des types ou vérification des modifications
@@ -8347,7 +8347,7 @@ define class abDataSyncVFP as custom && {fr} Synchronise deux tables ou deux bas
 					
 					* {fr} si noms longs, copier dans nom court ou réciproquement
 					for liField = 1 to m.lnFieldLong10
-						store Evaluate('m.' + m.laFieldLong10[m.liField, Iif(m.llDBCsrce, 1, 2)]) to (m.laFieldLong10[m.liField, Iif(m.llDBCsrce, 2, 1)])
+						store Evaluate('m.' + m.laFieldLong10[m.liField, Iif(m.llFieldLongSrce, 1, 2)]) to (m.laFieldLong10[m.liField, Iif(m.llFieldLongSrce, 2, 1)])
 					endfor
 
 					* {fr} Si forçage demandé, ajuster les types des champs en mémoire

@@ -1206,6 +1206,12 @@ otherwise
 
 	return m.loAJAX.dialogAdd(m.loForm) && {fr} a ses assert
 
+*!*		to do
+*!*		return Iif(m.loAJAX.dialogAdd(m.loForm); && {fr} a ses assert
+*!*			, m.loForm;
+*!*			, .null.;
+*!*			)
+
 endcase
 
 * =============================================================
