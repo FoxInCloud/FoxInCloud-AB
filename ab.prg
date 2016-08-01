@@ -2,16 +2,21 @@
 * =====================================================
 * (c) Abaque SARL, 66 rue Michel Ange - 75016 Paris - France
 * contact@FoxInCloud.com - http://foxincloud.com/ - +33 9 53 41 90 90
-* {fr} -----------------------------------------------------
+*  -----------------------------------------------------
 * {fr} Ce logiciel est distribué sous GNU General Public License, tel quel, sans aucune garantie
 * {fr} Il peut être utilisé et/ou redistribué sans restriction
 * {fr} Toute modification doit être reversée à la communauté
 * {fr} La présente mention doit être intégralement reproduite dans toute copie même partielle
-* {en} -----------------------------------------------------
+*  -----------------------------------------------------
 * {en} This software is distributed under the terms of GNU General Public License, AS IS, without any warranty
 * {en} It can be used and/or distributed without restriction
 * {en} Any modification or improvement must be given for free to the community
 * {en} This permission notice shall be entirely included in all copies or substantial portions of the Software
+* =====================================================
+
+* =====================================================
+* {fr} Pour disposer des modules inclus dans ab*.prg, exécuter ce programme
+* {en} To use modules in ab*.prg from your app, just execute this program
 * =====================================================
 
 #if File('AB.h') && 2016-02-25 thn -- {en} after FAA adapt, compilation must succeed although pathes are not yet set
@@ -21,7 +26,7 @@
 LPARAMETERS ;
   tlClear; && [.F.] {fr} Supprimer les références de Set("Procedure") et Set("Classlib")
 , tlAppExe; && [.F.] {fr} Le programme principal est un app ou un exe
-, tlGAno && [.F.] {fr} RELEASE PROCEDURE abga
+, tlGAno && [.F.] RELEASE PROCEDURE abga
 
 local lcFXPs
 lcFXPs = cABprgs(.T.)
