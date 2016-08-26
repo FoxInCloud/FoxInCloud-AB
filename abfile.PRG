@@ -1530,7 +1530,7 @@ return loTest.result()
 	procedure FilesProc_Test_Proc && {fr} Procédure appelée par FilesProc_Test()
 	lparameters ;
 		tcFile;
-, 	tuParm
+, tuParm
 
 	* {fr} Afficher l'adresse du fichier et le paramètre
 	? cFileCased(m.tcFile), ' -- paramètre :', transform(m.tuParm)

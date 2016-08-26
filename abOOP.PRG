@@ -466,7 +466,7 @@ lparameters tuObject && {fr} Objet à analyser ou son adresse
 
 local lcType, lnPeriod, lcResult, llResult
 
-lcResult = space(0)
+lcResult = ''
 lcType = vartype(m.tuObject)
 llResult = m.lcType $ 'CO'
 assert m.llResult message cAssertMsg(textmerge("Invalid parameter : <<cLitteral(m.tuObject)>>"))
@@ -650,7 +650,7 @@ lparameters ;
 , tcResult && @ {fr} Si la classe ne peut être instanciée, raison de l'échec
 
 toClass = .null.
-tcClassLib = evl(m.tcClassLib, space(0))
+tcClassLib = evl(m.tcClassLib, '')
 tcClassLib = iif(lower(justext(m.tcClassLib)) == 'prg', forceext(m.tcClassLib, 'fxp'), m.tcClassLib) && {fr} When possible, specify the compiled program name (.fxp) when a class is stored in a program file (.prg)
 tiResult = 0
 
@@ -702,7 +702,7 @@ if m.llResult
 	endtry
 
 	tiResult = icase(m.llResult, 0, m.loException.errorno = 2071, m.loException.uservalue.errorno, m.loException.errorno)
-	tcResult = iif(m.llResult, space(0), cException(iif(m.loException.errorno = 2071, m.loException.uservalue, m.loException)))
+	tcResult = iif(m.llResult, '', cException(iif(m.loException.errorno = 2071, m.loException.uservalue, m.loException)))
 
 else
 	tcResult = textmerge(icase(;
@@ -1085,7 +1085,7 @@ function coFontStyle && {fr} Style de police d'après les propriétés 'Font...' d'
 lparameters toObject && {fr} Objet
 
 local llResult, lcResult
-lcResult = space(0)
+lcResult = ''
 
 llResult = .t.;
  and vartype(m.toObject) == 'O';
@@ -1094,12 +1094,12 @@ if m.llResult
 
 	with m.toObject as label
 		lcResult = ;
-			iif(.fontbold, 'B', space(0));
-			+ iif(.fontitalic, 'I', space(0));
-			+ iif(.fontoutline, 'O', space(0));
-			+ iif(.fontshadow, 'S', space(0));
-			+ iif(.fontstrikethru, '-', space(0));
-			+ iif(.fontunderline, 'U', space(0))
+			iif(.fontbold, 'B', '');
+			+ iif(.fontitalic, 'I', '');
+			+ iif(.fontoutline, 'O', '');
+			+ iif(.fontshadow, 'S', '');
+			+ iif(.fontstrikethru, '-', '');
+			+ iif(.fontunderline, 'U', '')
 	endwith
 endif
 

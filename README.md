@@ -1,7 +1,7 @@
 # FoxInCloud-AB
 FoxInCloud public layer for Visual FoxPro 9+
 
-About 1,000 general-purpose procedures and functions that any VFP deleloper can use for his/her own application(s).
+Over 1,000 general-purpose procedures and functions that any VFP deleloper can use for his/her own application(s).
 
 Categorized by scope: Array, Data, Date, Development, Text, etc.
 

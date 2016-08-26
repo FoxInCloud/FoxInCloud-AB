@@ -1163,11 +1163,21 @@ lparameters ;
 , tlModal AS Boolean; && [.F.] {en} render as a modal form (returned value not supported)
 , t01,t02,t03,t04,t05,t06,t07,t08,t09,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19,t20 && @ {en} parameters to be passed to Form.Init()
 
-LOCAL lcParms as String
+LOCAL result as Variant; && {en} failure: .null., modeless: reference to form object, modal: .T.
+, loForm as awFrm of aw.vcx;
+, lcParms as String;
 
 lcParms = wcParms(Pcount() - 2)
 
-return wFormShow(wFormNoShow(m.tcForm, @m.tlModal &lcParms), m.tlModal)
+loForm = wFormNoShow(m.tcForm, @m.tlModal &lcParms)
+
+return ICase(;
+	!wFormShow(m.loForm, m.tlModal),;
+		.null.,; && {en} failure
+	!m.tlModal,;
+		m.loForm,; && {en} modeless & success
+		.T.; && {en} modal & success: as of standard VFP behavior, reference to the form is lost after form closes
+	)
 
 * =============================================================
 procedure wFormShow && {en} Shows form in Web and LAN modes after wFormNoShow() {fr} Affiche un formulaire en modes Web ou desktop après wFormNoShow()
@@ -1176,41 +1186,42 @@ procedure wFormShow && {en} Shows form in Web and LAN modes after wFormNoShow() 
 && {fr} En mode Web, le formulaire est affiché dans une fenêtre à l'intérieur de la page courante
 && {fr}   pour l'afficher dans une pleine page Web, utiliser awPublic.prg!wFormMaster()
 lparameters ;
-  loForm as awFrm of aw.vcx;
+  toForm as awFrm of aw.vcx;
 , tlModal AS Boolean; && [.F.] {en} render as a modal form (returned value not supported)
 
 LOCAL success as Boolean;
 , loAJAX as awAJAX of awServer.prg; && {en} FoxInCloud AJAX request processing Object
+, lcSCX as String;
 
 do case
 
-case !loClass(m.loForm, 'awFrm')
+case !loClass(m.toForm, 'awFrm')
 	return .f.
 
-case wlLAN() && {fr} desktop mode
+case wlLAN() && {en} desktop mode
 
-	return Iif(lTrue(m.tlModal);
-		, m.loForm.Show(1);
-		, m.loForm.Show();
-		)
+	tlModal = lTrue(m.tlModal)
 
-case !wlAJAX(@m.loAJAX)
+	if m.tlModal and varSet(@m.lcSCX, Sys(1271, m.toForm)) and ga_Type_IsChar(m.lcSCX, .T.)
+		lcSCX = Chrtran(JustStem(m.lcSCX), '- ', '__')
+		private (m.lcSCX)
+		store m.toForm to (m.lcSCX)
+	endif
+	
+	return Cast(Iif(m.tlModal;
+		, m.toForm.Show(1);
+		, m.toForm.Show();
+		) as L)
 
+case wlAJAX(@m.loAJAX) && {en} web mode, AJAX request
+	return m.loAJAX.dialogAdd(m.toForm) && {fr} a ses assert
+
+otherwise
 	assert .F. message cAssertMsg(Textmerge(ICase(;
 		cLangUser() = 'fr',	[En mode Web, cette fonction ne peut être utilisée que pendant une requête, après que l'application a démarré],; && copy-paste this line to add another language support
 												[In web mode, this function can only be called within a request, after application has started]; && Default: English
 		)))
 	return .f.
-
-otherwise
-
-	return m.loAJAX.dialogAdd(m.loForm) && {fr} a ses assert
-
-*!*		to do
-*!*		return Iif(m.loAJAX.dialogAdd(m.loForm); && {fr} a ses assert
-*!*			, m.loForm;
-*!*			, .null.;
-*!*			)
 
 endcase
 
@@ -1247,12 +1258,13 @@ case wlLAN() && {fr} desktop mode
 	if m.llSCX && .scx
 		lcParms = wcParms(m.lnParms, .T.)
 		do form (m.tcForm) name loForm &lcParms noshow
-		store m.loForm to (chrtran(JustStem(m.tcForm), ' -', '__')) && 2016-07-07 thn -- {FiC V 2.22.0-beta.1} {en} added for vh
+*		store m.loForm to (chrtran(JustStem(m.tcForm), ' -', '__')) && 2016-07-07 thn -- {FiC V 2.22.0-beta.1} {en} added for vh
 	else
 		lcParms = wcParms(m.lnParms)
 		loForm = CreateObject(m.tcForm &lcParms)
 		m.loForm.Hide
 	endif
+
 	success = .T.
 
 case !(wlProcess(@m.loProcess) and wlSession(@m.loSession) and wlAppHost(@m.loAppHost))
@@ -1860,39 +1872,50 @@ oConfigApp = .null. && {en} App configuration object - see xxxServer.prg!xxxAppC
 oAppConfig = .null. && {en} App configuration object - see xxxServer.prg!xxxAppConfig {fr} Objet de configuration de l'application - voir xxxServer.prg!xxxAppConfig
 
 hidden ;
-  cPath;
-, cDefault;
-, cProc;
-, cClas;
+  cPath; && 2016-08-19 thn -- {FiC V 2.22.0-beta.3} {en} deprecated
+, cDefa; && 2016-08-19 thn -- {FiC V 2.22.0-beta.3} {en} deprecated
+, cProc; && 2016-08-19 thn -- {FiC V 2.22.0-beta.3} {en} deprecated
+, cClas; && 2016-08-19 thn -- {FiC V 2.22.0-beta.3} {en} deprecated
 , cError;
 , oISX;
 , cIcon;
 , cCaption;
 , iWindowState;
-, oKey as Collection
+, oKey; &&  as Collection
+, oSets; && as abSetsMaintain of abDev.prg
 
-cDefault = Addbs(Sys(5)) + Curdir()
-cPath = Set("Path")
-* {fr} cProc = Set("Procedure")
-cClas = Set("Classlib")
 cError = On('Error')
 
 * ---------------------
 procedure Init
-lparameters result && @ {en} error if any {fr} erreur éventuelle
+lparameters result as String && @ {en} error if any {fr} erreur éventuelle
 
 on error
-
-* {fr} this.cProc = Strtran(m.this.cProc, cModuleInfo(Sys(16, Program(-1)-1), 'Address'))
-&& {fr} NewObject() l'ajoute automatiquement à Set("Procedure")
-&& {fr} il faut le garder pour les définitions des classes de colonne et d'en-tête de colonne
-set procedure to (m.this.classLibrary) additive
-this.cProc = Set("Procedure")
 
 this.wlWeb = wlWeb()
 this.wlLAN = not m.this.wlWeb
 this.lDevMode = lDevMode()
 this.lAutomation = wlAutomation()
+
+* {fr} this.cProc = Strtran(m.this.cProc, cModuleInfo(Sys(16, Program(-1)-1), 'Address'))
+&& {fr} NewObject() l'ajoute automatiquement à Set("Procedure")
+&& {fr} il faut le garder pour les définitions des classes de colonne et d'en-tête de colonne
+if !this.lAutomation
+	set procedure to (m.this.classLibrary) additive
+endif
+
+this.oSets = abSetsMaintain(; && 2016-08-18 thn -- {FiC V 2.22.0-beta.3} {en} added
+	  .T.; && [.F.] {en} also save Set("Procedure") & Set("Classlib")
+	, this.wlWeb; && [.F.] {en} only save SETs not scoped to the dataSession
+	)
+
+if Vartype(this.oSets) # 'O'
+	assert .F. && 2016-08-19 thn -- {FiC V 2.22.0-beta.3} {en} should no longer execute
+	this.cDefa = Addbs(Sys(5)) + Curdir()
+	this.cPath = Set("Path")
+	this.cProc = Set("Procedure")
+	this.cClas = Set("Classlib")
+endif
 
 this.oISX = abISX()
 
@@ -1912,7 +1935,6 @@ if m.this.lDevMode
 	this.iWindowState = _Screen.WindowState
 	this.Set('ASSERTS', 'ON')
 	this.Set('CONSOLE', 'OFF')
-	this.Set('HELP', Set('HELP')) && 'OFF'
 	push menu _mSysMenu  && set sysmenu save
 	push key
 endif
@@ -1920,8 +1942,38 @@ endif
 return DoDefault(@m.result)
 endproc
 
+*---------------------------------------------------------------------------
+protected procedure set && {fr} Effectue un réglage d'environnement
+lparameters ;
+  tcSetting; && {fr} Nom du SET à régler
+, tvValueNew; && {fr} Valeur à régler
+, tnSetting; && {en} Setting number when appropriate for tcSetting, as of 2nd parameter of set()
+, tlChangeAlways; && [.T.] {en} Change setting even if required value is current
+, tlSupported; && [this.lSupported] {en} assume abSet() supports this setting
+
+&& 2016-08-18 thn -- {FiC V 2.22.0-beta.3} {en} added
+
+* set step on 
+
+local abSet as abSet of abDev.prg
+
+return Iif(Vartype(this.oSets) == 'O';
+	, varSet(@m.abSet, abSet(.null.)) and abSet.Set(m.tcSetting, m.tvValueNew);
+	, DoDefault(;
+		  m.tcSetting; && {fr} Nom du SET à régler
+		, m.tvValueNew; && {fr} Valeur à régler
+		, m.tnSetting; && {en} Setting number when appropriate for tcSetting, as of 2nd parameter of set()
+		, m.tlChangeAlways; && [.T.] {en} Change setting even if required value is current
+		, m.tlSupported; && [this.lSupported] {en} assume abSet() supports this setting
+		);
+	)
+
+endproc
+
 * ---------------------
 procedure Destroy
+
+* set step on 
 
 IF m.this.lDevMode
 
@@ -1930,15 +1982,19 @@ IF m.this.lDevMode
 												[is restoring your Interactive Development Environment, please wait …]; && default: English
 		) WINDOW NOCLEAR NOWAIT
 
-	set default to (this.cDefault)
-	
-	if not m.this.cPath == Set('Path')
-		set path to (m.this.cPath)
+* set step on && 2016-08-19 thn -- {FiC V 2.22.0-beta.4} {en} debug abSetsMaintain (modify command abDev)
+
+	if Vartype(this.oSets) == 'O'
+		this.oSets = .null. && 2016-08-18 thn -- {FiC V 2.22.0-beta.3} {en} added
+	else
+		assert .F. && 2016-08-19 thn -- {FiC V 2.22.0-beta.3} {en} should no longer execute
+		set default to (this.cDefa)
+		if not m.this.cPath == Set('Path')
+			set path to (m.this.cPath)
+		endif
+		SetProcClassRestore(m.this.cProc, .F.) && modify command abDev
+		SetProcClassRestore(m.this.cClas, .T.) && modify command abDev
 	endif
-
-	SetProcClassRestore(m.this.cProc, .F.) && modify command abDev
-
-	SetProcClassRestore(m.this.cClas, .T.) && modify command abDev
 	
 	local cError
 	cError = this.cError
@@ -1952,7 +2008,6 @@ IF m.this.lDevMode
 	_Screen.WindowState = m.this.iWindowState
 
 	wait clear
-	
 endif
 
 return DoDefault()
@@ -3248,3 +3303,152 @@ endfunc
 function lLocalHost(cURL) && {en} URL run on localhost
 return InList(allTrim(Evl(m.cURL, '')), '127.0.0.1', '::1')
 endfunc
+
+
+#if .F.
+Position  Bit value  Bit number  Conflicting values  Description  
+Top Absolute 		1 0 016, 512 Anchors control to top border of container and does not change the distance between the top border.
+Left Absolute 	2 1 032, 256 Anchors control to left border of container and does not change the distance between the left border.
+Bottom Absolute 4 2 064, 512 Anchors control to bottom border of container and does not change the distance between the bottom border.
+Right Absolute 	8 3 128, 256 Anchors control to right border of container and does not change the distance between the right border.
+ 
+Top Relative 		016 4 1, 512 Anchors control to top border of container and maintains relative distance between the top border.
+Left Relative 	032 5 2, 256 Anchors control to left border of container and maintains relative distance between the left border.
+Bottom Relative 064 6 4, 512 Anchors control to bottom border of container and maintains relative distance between the bottom border.
+Right Relative 	128 7 8, 256 Anchors control to right border of container and maintains relative distance between the right border.
+ 
+Horizontal Fixed Size 	256 8 2, 8, 32, 128 Anchors center of control relative to left and right borders but remains fixed in size.
+Vertical Fixed Size 		512 9 1, 4, 16, 64 Anchors center of control relative to top and bottom borders but remains fixed in size.
+#endif
+
+* -----------------------------------------------------
+procedure wAnchorResizeHeight && {en} Resizes and replaces contained objects upon .Height change
+&& called by awFrm.Height_Assign() && /!\ recursive
+lparameters ;
+  toCont as awFrm of aw.vcx; && {en} Object of a Visual Container class
+, tHeightAnte;
+, tHeightPost;
+
+local success as Boolean;
+, aCntl[1];
+, oCntl as awTxt of aw.vcx;
+, delta as Number;
+, ratio as Number;
+, nAnchor as Number;
+, Top_ as Number;
+, Height_ as Number;
+
+if aoClassCont(@m.aCntl, m.toCont,, .F.) > 0
+
+	delta = m.tHeightPost - m.tHeightAnte
+	ratio = m.tHeightPost / m.tHeightAnte
+
+	for each oCntl in m.aCntl foxobject
+		if lProperty(m.oCntl, 'Anchor') and m.oCntl.Anchor > 0
+			with m.oCntl as awTxt of aw.vcx
+
+				nAnchor = .Anchor && optimization
+				Top_ = .Top
+				Height_ = .Height
+
+				.Top = Round(ICase(;
+					BitTest(m.nAnchor, 4),; && Top Relative 32 5 2, 256 Anchors control to Top border of container and maintains relative distance between the Top border.
+						.Top * m.ratio,;
+					!BitTest(m.nAnchor, 0) and BitTest(m.nAnchor, 2),; && Bottom Absolute 8 3 128, 256 Anchors control to Bottom border of container and does not change the distance between the Bottom border.
+						.Top + m.delta,;
+					BitTest(m.nAnchor, 9),; && Vertical Fixed Size 		512 9 1, 4, 16, 64 Anchors center of control relative to top and bottom borders but remains fixed in size.
+						.Top + m.delta/2,;
+						.Top; && Top absolute
+					), 0)
+
+				if (.F.;
+				 or BitTest(m.nAnchor, 2); && Bottom absolute
+				 or BitTest(m.nAnchor, 6); && Bottom relative
+				 ) and !BitTest(m.nAnchor, 9); && Vertical Fixed Size 		512 9 1, 4, 16, 64 Anchors center of control relative to top and bottom borders but remains fixed in size.
+				 
+					.Height = Round(m.tHeightPost - .Top - (m.tHeightAnte - m.Top_ - m.Height_) * Iif(BitTest(m.nAnchor, 6); && Bottom relative
+						, m.ratio;
+						, 1;
+						), 0)
+				endif
+			endwith
+
+			if !InList(m.oCntl.BaseClass, 'Optiongroup', 'Commandgroup'); && 2016-08-05 thn -- {FiC V 2.22.0-beta.2} {en} .Anchor works even with !Form.Visible
+			 and loCont(m.oCntl)
+				wAnchorResizeHeight(; && /!\ recursion
+					  m.oCntl;
+					, m.Height_;
+					, m.oCntl.Height;
+					)
+			endif
+		endif
+	endfor
+endif
+endproc
+
+* -----------------------------------------------------
+procedure wAnchorResizeWidth && {en} Resizes and replaces contained objects upon .Width change
+&& called by awFrm.Width_Assign() && /!\ recursive
+lparameters ;
+  toCont as awFrm of aw.vcx; && {en} Object of a Visual Container class
+, tWidthAnte;
+, tWidthPost;
+
+local success as Boolean;
+, aCntl[1];
+, oCntl as awTxt of aw.vcx;
+, delta as Number;
+, ratio as Number;
+, nAnchor as Number;
+, Left_ as Number;
+, Width_ as Number;
+
+if aoClassCont(@m.aCntl, m.toCont,, .F.) > 0
+
+	delta = m.tWidthPost - m.tWidthAnte
+	ratio = m.tWidthPost / m.tWidthAnte
+
+	for each oCntl in m.aCntl foxobject
+		if lProperty(m.oCntl, 'Anchor') and m.oCntl.Anchor > 0
+			with m.oCntl as awTxt of aw.vcx
+
+* setStepOn(.wcID = 'event_scx-tutoinfoboxclient')
+
+				nAnchor = .Anchor && optimization
+				Left_ = .Left
+				Width_ = .Width
+
+				.Left = Round(ICase(;
+					BitTest(.Anchor, 5),; && Left Relative 32 5 2, 256 Anchors control to left border of container and maintains relative distance between the left border.
+						.Left * m.ratio,;
+					!BitTest(.Anchor, 1) and BitTest(.Anchor, 3),; && Right Absolute 8 3 128, 256 Anchors control to right border of container and does not change the distance between the right border.
+						.Left + m.delta,;
+					BitTest(.Anchor, 8),; && Horizontal Fixed Size 256 8 2, 8, 32, 128 Anchors center of control relative to left and right borders but remains fixed in size.
+						.Left + m.delta/2,;
+						.Left; && Left absolute
+					), 0)
+
+				if (.F.;
+				 or BitTest(m.nAnchor, 3); && Right absolute
+				 or BitTest(m.nAnchor, 7); && Right relative
+				 ) and !BitTest(m.nAnchor, 8); && Horizontal Fixed Size 		512 9 1, 4, 16, 64 Anchors center of control relative to Left and Right borders but remains fixed in size.
+				 
+					.Width = Round(m.tWidthPost - .Left - (m.tWidthAnte - m.Left_ - m.Width_) * Iif(BitTest(m.nAnchor, 7); && Right relative
+						, m.ratio;
+						, 1;
+						), 0)
+				endif
+			endwith
+
+			if !InList(m.oCntl.BaseClass, 'Optiongroup', 'Commandgroup'); && 2016-08-05 thn -- {FiC V 2.22.0-beta.2} {en} .Anchor works even with !Form.Visible
+			 and loCont(m.oCntl)
+				wAnchorResizeWidth(; && /!\ recursion
+					  m.oCntl;
+					, m.Width_;
+					, m.oCntl.Width;
+					)
+			endif
+		endif
+	endfor
+endif
+endproc

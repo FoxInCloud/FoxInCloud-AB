@@ -789,7 +789,7 @@ LOCAL lcResult
 lcResult = "Type d'image non numérique"
 
 IF Vartype(m.tnImgType) == 'N'
-	lcResult = ICase(.F., Space(0); && modify file Home(1) + "ffc\gdiplus.h"
+	lcResult = ICase(.F., ''; && modify file Home(1) + "ffc\gdiplus.h"
 		, m.tnImgType =	GDIplus_pixelFormat_Indexed, 'Indexé avec palette';
 		, m.tnImgType =	GDIplus_pixelFormat_GDI, 'GDI';
 		, m.tnImgType =	GDIplus_pixelFormat_Alpha, 'Couche Alpha';

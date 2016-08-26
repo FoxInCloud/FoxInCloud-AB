@@ -88,7 +88,7 @@ local llResult as Boolean; && {fr} La feuille a été traitée
 , laTypes[1];
 
 * {fr} Si la feuille excel peut être ouverte
-loXLWS = oXLWS(@m.tuXLWS, @llOpened)
+loXLWS = oXLWS(@m.tuXLWS, @m.llOpened)
 llResult = vartype(m.loXLWS)=='O' and not isnull(m.loXLWS)
 if m.llResult
 
@@ -109,7 +109,7 @@ if m.llResult
 		if m.lnRow > 1 and m.lnCol > 0
 
 			* {fr} Empty 0-cells
-			.UsedRange.replace(0, space(0), 1)
+			.UsedRange.replace(0, '', 1)
 
 			llTypes = .f.;
 				or type('tcTypes', 1) == 'A' and !laEmpty(@m.tcTypes) and acopy(m.tcTypes, m.laTypes) > 0;
@@ -273,7 +273,7 @@ local llResult
 
 * {fr} Si on peut accéder à la feuille Excel
 local loXLWS as Excel.WorkSheet, llOpened
-loXLWS = oXLWS(@m.tuXLWS, @llOpened)
+loXLWS = oXLWS(@m.tuXLWS, @m.llOpened)
 llResult = vartype(m.loXLWS) == 'O'
 assert m.llResult message program() + ": impossible d'accéder à la feuille Excel sépcifiée " + cLitteral(m.tuXLWS)
 if m.llResult
@@ -348,7 +348,7 @@ local llResult && {fr} La feuille a été traitée
 
 * {fr} Si la feuille excel peut être ouverte
 local llOpened, loXLWS as Excel.WorkSheet
-loXLWS = oXLWS(@m.tuXLWS, @llOpened)
+loXLWS = oXLWS(@m.tuXLWS, @m.llOpened)
 llResult = vartype(m.loXLWS)=='O' and not isnull(m.loXLWS)
 if m.llResult
 
@@ -404,7 +404,7 @@ lparameters ;
 local loXLWSCol as Excel.range, llOpened, llResult
 
 * {fr} Si on peut accéder à la colonne de la feuille Excel
-loXLWSCol = oXLWSCol(m.tuXLWS, m.tuCol, @llOpened)
+loXLWSCol = oXLWSCol(m.tuXLWS, m.tuCol, @m.llOpened)
 llResult = not isnull(m.loXLWSCol)
 if m.llResult
 
@@ -412,7 +412,7 @@ if m.llResult
 	loWB = m.loXLWSCol.parent.parent
 
 	* {fr} Si un format est spécifié
-	lcFormat = uDefault(m.tcNumberFormat, space(0))
+	lcFormat = uDefault(m.tcNumberFormat, '')
 	llResult = not empty(m.lcFormat)
 	assert m.llResult message program() + " - Spécification de format invalide " + cLitteral(m.tcNumberFormat)
 	if m.llResult
@@ -442,7 +442,7 @@ lparameters ;
 local loXLWSCol as Excel.range, llOpened, llResult
 
 * {fr} Si on peut accéder à la colonne de la feuille Excel
-loXLWSCol = oXLWSCol(m.tuXLWS, m.tuCol, @llOpened)
+loXLWSCol = oXLWSCol(m.tuXLWS, m.tuCol, @m.llOpened)
 llResult = not isnull(m.loXLWSCol)
 if m.llResult
 
@@ -523,7 +523,7 @@ local llResult
 
 * {fr} Si on peut sélectionner les rangées de la feuille Excel
 local loXLWSRows as Excel.range, llOpened
-loXLWSRows = oXLWSRowsFilter(m.tuXLWS, m.tuCol, m.tcCrit, m.tlOpLeft, @llOpened)
+loXLWSRows = oXLWSRowsFilter(m.tuXLWS, m.tuCol, m.tcCrit, m.tlOpLeft, @m.llOpened)
 llResult = not isnull(m.loXLWSRows)
 if m.llResult
 		local loWB as Excel.Workbook
@@ -591,7 +591,7 @@ if m.llResult
 
 				* {fr} Si le critère est précisé
 				local lcCrit
-				lcCrit = alltrim(uDefault(m.tcCrit, space(0)))
+				lcCrit = alltrim(uDefault(m.tcCrit, ''))
 				llResult = not empty(m.lcCrit)
 				if m.llResult
 
@@ -728,7 +728,7 @@ else
 
 	lcWindow = woutput()
 	try
-		loResult = getobject(space(0), 'Excel.Application') && {fr} le premier paramètre est requis
+		loResult = getobject('', 'Excel.Application') && {fr} le premier paramètre est requis
 		loResult = iif(vartype(m.loResult) == 'O', m.loResult, createobject('Excel.Application'))
 	catch
 	endtry
@@ -752,9 +752,13 @@ lparameters ;
   tuXLWB; && {fr} Référence ou adresse d'un classeur Excel
 , tlOpened; && @ {fr} le classeur a été ouvert
 , tlCreated && @ {fr} le classeur a été créé
+
 store .f. to tlOpened, tlCreated
 
-local loResult as Excel.Workbook
+local loResult as Excel.Workbook;
+, llResult;
+, loXL as Excel.application;
+
 loResult = .null.
 
 do case
@@ -770,7 +774,6 @@ case vartype(m.tuXLWB)=='C' ;
  and upper(justext(m.tuXLWB)) == EXT_XLS
 
 	* {fr} Démarrer Excel
-	local loXL as Excel.application
 	loXL = oXL()
 
 	* {fr} Si le classeur existe
@@ -784,7 +787,6 @@ case vartype(m.tuXLWB)=='C' ;
 	else
 
 		* {fr} Si l'adresse du classeur est valide
-		local llResult
 		llResult = lDir(justpath(m.tuXLWB), .T.)
 		assert m.llResult message program() + " - Invalid Excel Workbook specification : " + cLitteral(m.tuXLWB)
 		if m.llResult
@@ -1014,7 +1016,7 @@ if type('taWBWSSrce', 1) == 'A'
 				loWBSrce = m.loXL.Workbooks.open(fullpath(m.lcWBSrce))
 
 				* {fr} Si une feuille source a été indiquée
-				lcWSSrce = iif(m.llWSSrce, m.taWBWSSrce[m.lnWBSrce, 2], space(0))
+				lcWSSrce = iif(m.llWSSrce, m.taWBWSSrce[m.lnWBSrce, 2], '')
 				laResult[m.lnWBSrce] = .t.
 				if vartype(m.lcWSSrce) == 'C' ;
 				 and not empty(m.lcWSSrce)
@@ -1168,32 +1170,44 @@ if directory(m.lcDos)
 endif
 
 return loTest.Result()
+endproc
+
 *========================================
 procedure XLWSofTableMemo && {fr} feuille Excel d'après une table FoxPro avec les champs MEMO (impossible avec COPY TO)
 lparameters ;
   tuTable; && [Alias()] {fr} Alias, zone ou adresse de la table source
-, tcXLWBAddr && [forceExt(tuTable, 'XLS'] {fr} Adresse du classeur XL cible
-local llResult
+, tcXLWBAddr; && [forceExt(tuTable, 'XLS'] {fr} Adresse du classeur XL cible
+
+local llResult;
+, lcAlias;
+, llDBFOpened;
+, lcTableAddr, lcXLWBAddr;
+, loXL as Excel.Application;
+, loXLWB as Excel.Workbook;
+, loXLWS as Excel.WorkSheet;
+, llXLSOpened, llXLScreated;
+, lcXLWS;
+, liRow, liCol, lnCol;
+, loSelect, loRecno;
+, luValue;
+
 llResult = .t.
 
 * {fr} Si la table existe
-local lcAlias, llDBFOpened
-lcAlias = cAlias(m.tuTable, @llDBFOpened)
+lcAlias = cAlias(m.tuTable, @m.llDBFOpened)
 llResult = used(m.lcAlias)
 assert m.llResult message program() + " - Invalid table specification : " + cLitteral(m.tuTable)
 if m.llResult
 
 	* {fr} Si le classeur peut être ouvert ou créé
-	local lcTableAddr, lcXLWBAddr, loXLWB as Excel.Workbook, llXLSOpened, llCreated
 	lcTableAddr = cTableAddress(m.lcAlias)
 	lcXLWBAddr = uDefault(m.tcXLWBAddr, forceext(m.lcTableAddr, EXT_XLS))
-	loXLWB = oXLWB(m.lcXLWBAddr, @llXLSOpened, @llCreated)
+	loXLWB = oXLWB(m.lcXLWBAddr, @m.llXLSOpened, @m.llXLScreated)
 	llResult = loXLWB(m.loXLWB)
 	if m.llResult
 		with m.loXLWB as Excel.Workbook
 
 			* {fr} Si la feuille existe,
-			local lcXLWS, loXLWS as Excel.WorkSheet
 			lcXLWS = juststem(m.lcTableAddr)
 			if lXLWS(m.lcXLWS, m.loXLWB)
 
@@ -1215,45 +1229,57 @@ if m.llResult
 			with m.loXLWS as Excel.WorkSheet
 
 				* {fr} Copier les noms des champs dans la première ligne
-				local lnRow, lnCol, lnCols
-				lnRow = 1
-				lnCols = fcount(m.lcAlias)
-				for m.lnCol = 1 to m.lnCols
-					.Cells(m.lnRow, m.lnCol).value = field(m.lnCol, m.lcAlias)
+				liRow = 1
+				lnCol = fcount(m.lcAlias)
+				for m.liCol = 1 to m.lnCol
+					.Cells(m.liRow, m.liCol).value = field(m.liCol, m.lcAlias)
+					if type(field(m.liCol, m.lcAlias)) == 'M'
+						.Range(.Cells(2, m.liCol), .Cells(.Rows.Count, m.liCol)).Style.WrapText = .T.
+						.Columns(m.liCol).ColumnWidth = 50
+					endif
 				endfor
 
 				* {fr} Copier les données de la table dans les lignes suivantes
-				local lnSelect, luValue
-				lnSelect = select(0)
-				select (m.lcAlias)
+				loSelect = abSelect(m.lcAlias)
+				loRecno = abRecno()
 				scan
-					lnRow = m.lnRow + 1
-					for m.lnCol = 1 to m.lnCols
-						luValue = evaluate(field(m.lnCol, m.lcAlias))
-						luValue = iif(vartype(m.luValue) == 'C', rtrim(m.luValue), m.luValue)
-						.Cells(m.lnRow, m.lnCol).value = m.luValue
+					liRow = m.liRow + 1
+					for m.liCol = 1 to m.lnCol
+						luValue = evaluate(field(m.liCol, m.lcAlias))
+						.Cells(m.liRow, m.liCol).value = icase(;
+							type(field(m.liCol, m.lcAlias)) == 'M',;
+								Strtran(Strtran(m.luValue, CR+LF, LF), CR, LF),;
+							vartype(m.luValue) == 'C',;
+								rtrim(m.luValue),;
+							vartype(m.luValue) $ 'DT' and Empty(m.luValue),;
+								.null.,;
+								m.luValue;
+								)
 					endfor
 				endscan
-				select (m.lnSelect)
 			endwith
 
 			* {fr} Sauver le classeur et fermer Excel
-			if m.llCreated
+			if m.llXLScreated
 				.saveas(m.lcXLWBAddr, xlWorkbookNormal)
 			else
-				.save()
+				.save
 			endif
 			if m.llXLSOpened
-				.parent.quit()
+				loXL = .Application
+				.close
+				m.loXL.Quit
 			endif
 		endwith
 	endif
+	store .null. to loSelect, loRecno
 	if m.llDBFOpened
 		use in (m.lcAlias)
 	endif
 endif
 
 return m.llResult
+endproc
 
 *========================================
 procedure TableMemoOfXLWS && {fr} Table FoxPro avec les champs MEMO d'après une feuille Excel (impossible avec Import ou append from)
@@ -1267,7 +1293,7 @@ llResult = .t.
 
 * {fr} Si la table existe
 local lcAlias, llOpened
-lcAlias = cAlias(m.tuTable, @llOpened)
+lcAlias = cAlias(m.tuTable, @m.llOpened)
 llResult = used(m.lcAlias)
 assert m.llResult message cAssertMsg(textmerge("<<Program()>> - Invalid table specification : <<cLitteral(m.tuTable)>>"))
 if m.llResult
@@ -1276,14 +1302,14 @@ if m.llResult
 	local lcTableAddr, lcXLWBAddr, loXLWB as Excel.Workbook, llOpened, llCreated
 	lcTableAddr = cTableAddress(m.lcAlias)
 	lcXLWBAddr = uDefault(m.tcXLWBAddr, forceext(m.lcTableAddr, EXT_XLS))
-	loXLWB = oXLWB(m.lcXLWBAddr, @llOpened, @llCreated)
+	loXLWB = oXLWB(m.lcXLWBAddr, @m.llOpened, @m.llCreated)
 	llResult = loXLWB(m.loXLWB) and not m.llCreated
 	if m.llResult
 		with m.loXLWB as Excel.Workbook
 
 			* {fr} Sélectionner la feuille indiquée, la première par défaut
 			local lcXLWS, loXLWS as Excel.WorkSheet
-			lcXLWS = uDefault(m.tcXLWS, space(0))
+			lcXLWS = uDefault(m.tcXLWS, '')
 			loXLWS = .Worksheets(iif(lXLWS(m.lcXLWS, m.loXLWB), m.lcXLWS, 1))
 			with m.loXLWS as Excel.WorkSheet
 				lcXLWS = .name
@@ -1302,7 +1328,7 @@ if m.llResult
 					else
 						llResult = not m.llFieldsCheck
 						if m.llResult
-							laFields[m.lnCol] = space(0)
+							laFields[m.lnCol] = ''
 						else
 							exit
 						endif
@@ -1384,11 +1410,11 @@ lparameters ;
 , tcFieldsAdd; && [aucun] {fr} Champs à ajouter à la table ou au curseur résultat (définition type ALTER TABLE)
 , tlAutomation && [.F.] {fr} Toujours importer par automation Excel
 
-tcSheet = upper(uDefault(m.tcSheet, space(0)))
+tcSheet = upper(uDefault(m.tcSheet, ''))
 tlNonVerifDernVers = lTrue(m.tlNonVerifDernVers)
 tlImportForce = lTrue(m.tlImportForce)
 tlCursor = lTrue(m.tlCursor)
-tcFieldsAdd = evl(m.tcFieldsAdd, space(0))
+tcFieldsAdd = evl(m.tcFieldsAdd, '')
 tlAutomation = lTrue(m.tlAutomation)
 
 && {fr} La première ligne de la feuille doit contenir les noms des champs
@@ -1412,7 +1438,7 @@ local llResult, lcResult && {fr} Adresse de la table créée OU nom du curseur OU 
 * 26/11/02	TN		Optimisation et restructuration
 *================================================================
 
-lcResult = space(0)
+lcResult = ''
 llResult = vartype(m.tcXLWBAddr) == 'C'
 if m.llResult
 
@@ -1428,7 +1454,7 @@ if m.llResult
 		lcDBFAddr = forcepath(m.lcDBFStem + '.' + EXT_DBF, m.lcXLWBPath)
 
 		* {fr} Si la table est ouverte, la fermer
-		lcAliasUsed = iif(file(m.lcDBFAddr), cAliasUsed(m.lcDBFAddr, @llExclusive), '')
+		lcAliasUsed = iif(file(m.lcDBFAddr), cAliasUsed(m.lcDBFAddr, @m.llExclusive), '')
 		llAliasUsed = used(m.lcAliasUsed)
 		if m.llAliasUsed
 			use in (m.lcAliasUsed)
@@ -1462,7 +1488,7 @@ if m.llResult
 				local loDefault, loSelect, lcSheet, loException as exception, llSheetError, llFormatError
 				loDefault = abSet('Default', m.lcXLWBPath) && {fr} IMPORT crée la table dans le dossier par défaut
 				loSelect = abSelect(0)
-				lcSheet = iif(empty(m.tcSheet), space(0), textmerge([SHEET <<m.tcSheet>>]))
+				lcSheet = iif(empty(m.tcSheet), '', textmerge([SHEET <<m.tcSheet>>]))
 				llResult = m.tlAutomation
 				if not m.llResult
 					try
@@ -1581,7 +1607,7 @@ loXL = oXL()
 loWB = loXL.Workbooks.open(m.tcXLWBAddr, .f., .t.)
 loWS = loWB.Worksheets(iif(vartype(m.tcSheet) == 'C' and not empty(m.tcSheet), m.tcSheet, 1))
 loWF = m.loXL.WorksheetFunction
-lcResult = space(0)
+lcResult = ''
 if !m.loXL.Calculation = -4105  && {fr} xlCalculationAutomatic
 	m.loWS.calculate
 endif
@@ -1735,17 +1761,17 @@ llResult = used(m.lcResult)
 if m.llResult
 
 	local loSelect;
-, 	lnFields;
-, 	laFields[1],;
-		lnField; && {fr} ne pas utiliser 'i' qui est un nom de colonne XL
-, 	lcField;
-, 	laFieldsNew[1],;
-		lcFieldNew;
-, 	lnSuffix;
-, 	lcSuffix;
-, 	lcAlter;
-, 	lcDelete;
-, 	lcAddr
+	, lnFields;
+	, laFields[1];
+	, lnField; && {fr} ne pas utiliser 'i' qui est un nom de colonne XL
+	, lcField;
+	, laFieldsNew[1];
+	, lcFieldNew;
+	, lnSuffix;
+	, lcSuffix;
+	, lcAlter;
+	, lcDelete;
+	, lcAddr
 
 	* {fr} Lire la structure de la table
 	loSelect = abSelect(m.lcResult)
@@ -1758,13 +1784,13 @@ if m.llResult
 	pack
 
 	* {fr} Pour chaque champ de la table
-	store space(0) to lcAlter, lcDelete
+	store '' to lcAlter, lcDelete
 	for m.lnField = m.lnFields to 1 step -1
 		lcField = laFields[m.lnField, 1]
 
 		* {fr} Si le nouveau nom est vide
 		lcFieldNew = laFieldsNew[m.lnField]
-		lcFieldNew = iif(vartype(m.lcFieldNew) == 'C', upper(alltrim(m.lcFieldNew)), space(0)) && {fr} toujours vrai en principe
+		lcFieldNew = iif(vartype(m.lcFieldNew) == 'C', upper(alltrim(m.lcFieldNew)), '') && {fr} toujours vrai en principe
 		if empty(m.lcFieldNew)
 
 			* {fr} Supprimer le champ
@@ -1898,7 +1924,7 @@ if m.llResult
 
 				* {fr} Si la feuille peut être importée dans une table
 				llUpdate = .f.
-				lcDBFAdr = XL8table(m.lcXLWBAddr, m.lcXLWS, @llUpdate, m.tlImportForce)
+				lcDBFAdr = XL8table(m.lcXLWBAddr, m.lcXLWS, @m.llUpdate, m.tlImportForce)
 				if file(m.lcDBFAdr)
 
 					* {fr} Mémoriser l'adresse de la table
@@ -2019,7 +2045,7 @@ lparameters ;
   tcFileSrce; && {fr} Document source
 , tcClassSrce; && {fr} Classe de conversion si l'extension est ambiguÃ«
 , tcPassWord && [''] {fr} mot de passe à l'ouverture
-tcPassWord = iif(vartype(m.tcPassWord) == 'C', m.tcPassWord, space(0))
+tcPassWord = iif(vartype(m.tcPassWord) == 'C', m.tcPassWord, '')
 
 local llResult, lnFormat, loExcept as exception, loResult as word.document
 loResult = .null.
@@ -2077,7 +2103,7 @@ lparameters ;
 , tcClassDest; && {fr} Classe de conversion si l'extension est ambiguÃ«
 , tcPassWord; && [''] {fr} mot de passe
 , toDoc && [Documents(1)] {fr} Référence au document source
-tcPassWord = iif(vartype(m.tcPassWord) == 'C', m.tcPassWord, space(0))
+tcPassWord = iif(vartype(m.tcPassWord) == 'C', m.tcPassWord, '')
 local loException, lnFormat, llResult
 
 toDoc = this.oDocDefault(m.toDoc)

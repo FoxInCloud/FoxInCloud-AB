@@ -607,7 +607,7 @@ return createobject('abAlias', m.tcAlias, @m.tcResult)
 * ========================================
 define class abAlias as relation && {en} Alias settings {fr} Caractéristiques d'un alias
 * ========================================
-&& {fr} as GA_LIGHTWEIGHT_CLASS (GA_LIGHTWEIGHT_CLASS protects this.cResult)
+&& as GA_LIGHTWEIGHT_CLASS (GA_LIGHTWEIGHT_CLASS protects this.cResult)
 
 cDBF = .null.
 cAlias = .null.
@@ -747,6 +747,11 @@ try
 				lcValue2 = .aRelationTrgt[2] && {fr} Source Alias
 				set relation to &lcValue1 into (.cAlias) in (m.lcValue2)
 			endif
+
+			success = m.success; && 2016-08-02 thn -- {FiC V 2.22.0-beta.1} {en} moved up from define class oAlias as abAlias method swap
+			 and (CursorSetProp("Buffering", .iBuffering, .cAlias) or cResultAdd(@m.tcResult, [could not restore buffering]));
+			 and RecnoSet(.iRecno, .cAlias, @m.tcResult)
+
 		else
 			result = textmerge(icase(;
 				cLangUser() = 'fr',	[L'index '<<.cOrder>>' est introuvable dans la table '<<m.tcDBF>>'],; && copy-paste this line to add another language support
@@ -880,9 +885,7 @@ with m.this as oAlias of abData.prg
 				lcValue2 = iif(.lReadonly, ' NOUPDATE', '')
 				use (m.tcDBF) in 0 alias (.cAlias) &lcValue1 &lcValue2
 
-				success = .reset(@m.tcResult);
-					and (CursorSetProp("Buffering", .iBuffering, .cAlias) or cResultAdd(@m.tcResult, [could not restore buffering]));
-					and RecnoSet(.iRecno, .cAlias, @m.tcResult)
+				success = .reset(@m.tcResult)
 
 			catch to loException
 				success = .f.
@@ -6404,13 +6407,16 @@ skip 10
 ? cRecContent('FoxCodeTest')
 use in FoxCodeTest
 
+
 * ========================================
-function cTableComment && {fr} Désignation d'une table d'une base de données
-lparameters tcTable && {fr} table
+function cTableDBgetProp && {fr} Propriété d'une table d'une base de données
+lparameters ;
+  tcTable; && {fr} table
+, tcProp; && {fr} propriété
 
 local lcAlias, llAlias, lcDBC, llDBC, lcDBC_, lcResult
 
-lcResult = transform(m.tcTable)
+lcResult = ''
 
 lcAlias = cAlias(m.tcTable, @m.llAlias)
 if used(m.lcAlias)
@@ -6429,7 +6435,7 @@ if used(m.lcAlias)
 		endif
 		if indbc(m.tcTable,"TABLE")
 
-			lcResult = evl(dbgetprop(m.tcTable, "TABLE", "Comment"), m.lcResult)
+			lcResult = dbgetprop(m.tcTable, "TABLE", m.tcProp)
 		endif
 
 		if not m.llDBC
@@ -6443,6 +6449,13 @@ if used(m.lcAlias)
 endif
 
 return m.lcResult
+endfunc
+
+* ========================================
+function cTableComment && {fr} Désignation d'une table d'une base de données
+lparameters tcTable && {fr} table
+return Evl(cTableDBgetProp(m.tcTable, 'comment'), Transform(m.tcTable))
+endfunc
 
 * ========================================
 function nRecsAcc && {fr} Nombre d'enregistrement couramment accessibles dans un alias
@@ -7669,6 +7682,27 @@ define class abDataSyncVFP as custom && {fr} Synchronise deux tables ou deux bas
 	endif
 
 	return m.llResult
+	endproc
+	
+	*---------------------------------------
+	procedure cTimeStampField_get && {en} Field {last modification Datetime} in DBC tables - required for database synchronisation {fr} Champ {date et heure de dernière modification} dans les tables du DBC - requis pour la synchronisation de base de données (avec la classe acDataSyncVFP) ; pris en compte dans le réglage de plSync
+	lparameters tcTable && upper(table currently synchronized)
+
+	&& {en} implement in your sub-class if (this.cTimeStampField) differs across tables
+	&& {fr} implémenter en sous-classe si (this.cTimeStampField) dépend de la table
+	
+	return this.cTimeStampField
+	endproc
+
+	*---------------------------------------
+	procedure clSyncField_get && {en} Field {record modified by synchronization} in DBC tables - required for database synchronisation {fr} champ 'enregistrement modifié par synchronisation' normalement présent dans chaque table
+	lparameters tcTable && upper(table currently synchronized)
+
+	&& {en} implement in your sub-class if (this.clSyncField) differs across tables
+	&& {fr} implémenter en sous-classe si (this.clSyncField) dépend de la table
+
+	return this.clSyncField
+	endproc
 
 	*---------------------------------------
 	hidden function Init_aResultItems && {fr} 1-Nom | 2-Valeur par défaut | 3-Type de champ | 4 Description localisée
@@ -8176,7 +8210,7 @@ define class abDataSyncVFP as custom && {fr} Synchronise deux tables ou deux bas
 	, tcAliasSrce; && {fr} Alias de la table source
 	, tlReplace; && [.F.] {fr} Remplacer toute la table destination
 	, tlCKmatch; && [.F.] {fr} Matcher les enregistrements sur la première clé candidate de la table destination
-	, tnRecs && [all] {fr} Nombre d'enregistrements à synchroniser
+	, tnRecs; && [all] {fr} Nombre d'enregistrements à synchroniser
 
 	tlReplace = lTrue(m.tlReplace)
 	tlCKmatch = lTrue(m.tlCKmatch)
@@ -8296,20 +8330,25 @@ define class abDataSyncVFP as custom && {fr} Synchronise deux tables ou deux bas
 			endif
 
 			* {fr} Créer les variables privées standard FoxInCloud / ZenBuyer
+			local cTimeStampField
 			private plSync, pltModKeep, plPKgen
+			cTimeStampField = this.cTimeStampField_get(m.tcAliasSrce)
 			plSync = .t. && {fr} Inhibe le contrôle des droits dans la base zenbuyer
 			pltModKeep = .t.; && {fr} Inhibe la mise à jour automatique de la date de modification
-			 and vartype(m.this.cTimeStampField) == 'C';
-			 and lField(m.this.cTimeStampField, m.tcAliasDest);
-			 and lField(m.this.cTimeStampField, m.tcAliasSrce)
+			 and vartype(m.cTimeStampField) == 'C';
+			 and lField(m.cTimeStampField, m.tcAliasSrce);
+			 and lField(m.cTimeStampField, m.tcAliasDest);
+			 and .T.
 			plPKgen = m.tlReplace or not m.llPtag && {fr} Générer la PK
 
-			local loDeleted, loExact, loException as exception, llSyncField
+			local llDeletedOff, loDeleted, loExact, loException as exception, clSyncField, llSyncField
 
-			loDeleted = abSet('DELETED', iif(m.this.lSyncDeleted, 'OFF', 'ON'))
+			llDeletedOff = m.this.lSyncDeleted
+			loDeleted = abSet('DELETED', iif(m.llDeletedOff, 'OFF', 'ON'))
 			loExact = abSet('EXACT', 'ON')
+			clSyncField = this.clSyncField_get(m.tcAliasDest)
 			llSyncField = .t.;
-				and lField(m.this.clSyncField, m.tcAliasDest);
+				and lField(m.clSyncField, m.tcAliasDest);
 				and loClass(m.this, 'acDataSyncVFP') && {fr} seulement si synchronisation depuis une source distante
 
 			* {fr} Si remplacement sans clé unique dans la table destination
@@ -8323,7 +8362,7 @@ define class abDataSyncVFP as custom && {fr} Synchronise deux tables ou deux bas
 				try
 					append from dbf(m.tcAliasSrce)
 					if m.llSyncField
-						replace all (m.this.clSyncField) with .t.
+						replace all (m.clSyncField) with .t.
 					endif
 				catch to loException
 					throw m.loException
@@ -8427,7 +8466,13 @@ define class abDataSyncVFP as custom && {fr} Synchronise deux tables ou deux bas
 
 						else
 
+*!*								if m.llDeletedOff && 2016-08-12 thn -- {FiC V 2.22.0-beta.3} {en} added -- don't know if useful!
+*!*									set deleted on
+*!*								endif
 							insert into (m.tcAliasDest) from memvar
+*!*								if m.llDeletedOff && 2016-08-12 thn -- {FiC V 2.22.0-beta.3} {en} added
+*!*									set deleted off
+*!*								endif
 							this.oResult.nRecsAdded = m.this.oResult.nRecsAdded + 1
 						endif
 
@@ -8445,7 +8490,7 @@ define class abDataSyncVFP as custom && {fr} Synchronise deux tables ou deux bas
 
 						* {fr} Si remplacement ou insersion, indiquer que l'enregistrement a été mis à jour par synchronisation
 						if (m.llReplace or m.llInsert) and m.llSyncField
-							replace (m.this.clSyncField) with .t. in (m.tcAliasDest)
+							replace (m.clSyncField) with .t. in (m.tcAliasDest)
 						endif
 
 						* {fr} Exécuter la méthode "shell"
@@ -8672,10 +8717,12 @@ return Ltrim(m.result, ',', ' ')
 endfunc
 
 * =============================================
-function aFieldLong10 && {en} long field names in a free copy of a table or cursor && {fr} noms de champs de plus de 10 caractères dans une copie libre d'une table ou curseur
+function aFieldLong10 && {en} long field as renamed in a free copy of a table or cursor && {fr} noms de champs de plus de 10 caractères dans une copie libre d'une table ou curseur
 lparameters ;
   laField; && @ {en} result [long field name, 10-chars field name]
 , lcTable; && [Alias()] {en} Table : Alias | Work area | Address | [DB!]Table
+
+&& see in VFP help: "Field Creation" > "Considerations for Choosing Field Names"
 
 local result as Integer; && {en} number of fields with a name longer than 10 characters (as of  column # 1 of result array)
 , cAlias as String;

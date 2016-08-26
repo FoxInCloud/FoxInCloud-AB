@@ -2243,6 +2243,11 @@ lparameters ;
 , tlChangeAlways; && [.F.] {en} Change setting even if required value is current
 , tlSupported && [.F.] {en} assume setting is supported (optimization)
 
+if IsNull(m.tcSetting) && 2016-08-18 thn -- {en} added for just using this.set()
+	this.cSetting = m.tcSetting
+	return
+endif
+
 local success as Boolean;
 , lnSetting;
 , lvValueCur;
@@ -2340,15 +2345,17 @@ return !m.llError
 
 * ------------------------------------
 function set && {en} Saves current environment setting and changes to new value
-&& {fr} public car appelé par awSets.Set()
+&& {fr} public car appelé par abSets.Set()
 lparameters ;
   tcSetting; && {en} Setting to work on - upper case, trimmed
-, tvValueNew && {en} Value to set
+, tvValueNew; && {en} Value to set
 
 local llResult as Boolean;
-, lcSetting as string
+, lcResult as string;
+, lcSetting as string;
 
 llResult = .t.
+lcResult = ''
 lcSetting = upper(left(m.tcSetting, 4))
 
 do case
@@ -2367,21 +2374,24 @@ otherwise
 	llResult = this.Set_(;
 		  m.tcSetting;
 		, m.tvValueNew;
+		, @m.lcResult;
 		)
 
 endcase
 
-assert m.llResult message cAssertMsg(textmerge([Unable to do the following setting : SET <<m.tcSetting>> <<m.tvValueNew>>]))
+assert m.llResult message cAssertMsg(textmerge([Unable to do the following setting : SET <<m.tcSetting>> <<m.tvValueNew>><<nEvl(m.lcResult, ': ' + m.lcResult)>>]))
 
 this.vValueNew = iif(m.llResult, m.tvValueNew, .null.)
 
 return m.llResult
+endfunc
 
 * ------------------------------------
 hidden function Set_ && {en} Changes setting to new value
 lparameters ;
   tcSetting; && {en} Setting to work on
-, tvValueNew && {en} Value to set
+, tvValueNew; && {en} Value to set
+, result; && @ {en}
 
 local llResult as Boolean;
 , loResult as exception;
@@ -2425,10 +2435,12 @@ catch to m.loResult
 	endtry
 endtry
 
+result = Iif(m.llResult, m.result, cException(m.loResult))
 return m.llResult
+endfunc
 
 * ------------------------------------
-hidden function lSupported && {en} Requested environment setting is supported
+protected function lSupported && {en} Requested environment setting is supported
 lparameters ;
   tcSetting; && {en} Setting to work on
 , lcParm2 && {en} Second parameter of set()
@@ -2517,12 +2529,13 @@ hidden function destroy && {en} Restores setting to its original value
 
 local lvValue
 
-return .t.;
-	and this.get(@m.lvValue, m.this.cSetting, m.this.cParm2);
-	and (.f.;
-		or m.lvValue == m.this.vValueOld; && {fr} lvValue et this.vValueOld sont obtenus par this.Get() donc sont de même type et casse
-		or this.set(m.this.cSetting, m.this.vValueOld);
-		)
+return IsNull(m.this.cSetting); && 2016-08-18 thn -- {en} added for just using this.set()
+	or .t.;
+		and this.get(@m.lvValue, m.this.cSetting, m.this.cParm2);
+		and (.f.;
+			or m.lvValue == m.this.vValueOld; && {fr} lvValue et this.vValueOld sont obtenus par this.Get() donc sont de même type et casse
+			or this.set(m.this.cSetting, m.this.vValueOld);
+			)
 
 * =================================================
 enddefine
@@ -2852,7 +2865,7 @@ lparameters ;
 , tvValueNew; && {fr} Valeur à régler
 , tnSetting; && {en} Setting number when appropriate for tcSetting, as of 2nd parameter of set()
 , tlChangeAlways; && [.T.] {en} Change setting even if required value is current
-, tlSupported && [this.lSupported] {en} assume abSet() supports this setting
+, tlSupported; && [this.lSupported] {en} assume abSet() supports this setting
 
 local success as Boolean;
 , loExact as abSet of abDev.prg;
@@ -2914,7 +2927,12 @@ enddefine && {fr} CLASS abSets
 
 * ===========================================
 function abSetsMaintain && {fr} Sauve les sets critiques et les restore s'ils ont changé
-return createobject('abSetsMaintain')
+lparameters ;
+  tlProcClass; && [.F.] {en} also save Set("Procedure") & Set("Classlib")
+, tlGlobal; && [.F.] {en} only save SETs not scoped to the dataSession
+
+return createobject('abSetsMaintain', m.tlProcClass, m.tlGlobal)
+endfunc
 
 * ------------------------------------
 procedure abSetsMaintain_Test && {fr} Test abSetsMaintain()
@@ -2929,6 +2947,7 @@ loUnitTest.Test(.null.) && 1 ms
 * {fr} loUnitTest.coverageSet(.F.)
 
 return m.loUnitTest.result()
+endproc
 
 * ===========================================
 define class abSetsMaintain as GA_LIGHTWEIGHT_CLASS of abGA.prg && {fr} Sauve les sets critiques et les restore s'ils ont changé
@@ -2938,12 +2957,14 @@ hidden aSet[1], nSets
 
 *---------------------------------------------------------------------------
 protected procedure init
-lparameters tlProcClass && [.F.] {fr} also save Set("Procedure") & Set("Classlib")
+lparameters ;
+  tlProcClass; && [.F.] {en} also save Set("Procedure") & Set("Classlib")
+, tlGlobal; && [.F.] {en} only save SETs not scoped to the dataSession
 
 local success as Boolean;
 , lcSets, lnSets, laSet[1], liSet
 
-#if .f.
+#if .f. && not supported
 	compatible, 1
 	century, 2
 	reprocess, 1
@@ -2952,96 +2973,110 @@ local success as Boolean;
 	talk, 1
 	textmerge, 4
 	notify, 1
+	FIELDS, 1 && 2016-08-18 thn -- {en} removed http://support.west-wind.com/Thread4PC0SHQLT.wwt?rl=1#4PH0Q7H4B
+	NOCPTRANS && 2016-08-18 thn -- {en} removed http://support.west-wind.com/Thread4PC0SHQLT.wwt?rl=1#4PH0Q7H4B
+
 #endif
 
-text to lcSets noshow flags 1 pretext 3
-	ALTERNATE
+lcSets = ''
+
+if !lTrue(m.tlGlobal)
+text to lcSets textmerge noshow flags 1 pretext 3 && scoped to the datasession
+	<<m.lcSets>>
 	ANSI
-	ASSERTS
 	AUTOINCERROR
 	AUTOSAVE
 	BLOCKSIZE
-	BROWSEIME
 	CARRY
 	CENTURY
 	COLLATE
+	CURRENCY
+	DATABASE
+	DATE
+	DECIMALS
+	DELETED
+	EXACT
+	EXCLUSIVE
+	FIELDS
+	FIXED
+	HOURS
+	LOCK
+	MEMOWIDTH
+	MULTILOCKS && 2016-08-18 thn -- {en} add an option to save/restore only global SETs (not those scoped to datasession)
+	NEAR
+	NULL
+	POINT
+	REFRESH
+	REPROCESS
+	SAFETY
+	SECONDS
+	SYSFORMATS
+	TALK
+	UNIQUE
+
+	CENTURY, 1
+	CURRENCY, 1
+	FIELDS, 2
+	REFRESH, 1
+endtext
+endif
+
+text to lcSets textmerge noshow flags 1 pretext 3 && global, IOW not scoped to the datasession
+	<<m.lcSets>>
+	ALTERNATE
+	ASSERTS
+	BROWSEIME
+	CLOCK
 	COMPATIBLE
 	CONSOLE
 	COVERAGE
 	CPDIALOG
-	CURRENCY
-	DATABASE
 	DATASESSION
-	DATE
-	DECIMALS
 	DEFAULT
-	DELETED
 	DELIMITERS
 	ENGINEBEHAVIOR
 	ESCAPE
-	EXACT
-	EXCLUSIVE
 	FDOW
-	FIELDS
-	FIXED
 	FULLPATH
 	FWEEK
-	HOURS
+	HELP
 	LIBRARY
-	LOCK
-	MEMOWIDTH
 	MESSAGE
 	MOUSE
-	MULTILOCKS
-	NEAR
 	NOTIFY
-	NULL
 	NULLDISPLAY
 	ODOMETER
 	OPTIMIZE
 	PATH
-	POINT
 	PRINTER
-	REFRESH
 	REPORTBEHAVIOR
-	REPROCESS
 	RESOURCE
-	SAFETY
-	SECONDS
 	SEPARATOR
 	SPACE
 	SQLBUFFERING
 	STATUS
 	STRICTDATE
-	SYSFORMATS
 	SYSMENU
 	TABLEPROMPT
 	TABLEVALIDATE
-	TALK
 	TEXTMERGE
 	TEXTMERGE, 1
 	TEXTMERGE, 2
 	TEXTMERGE, 3
 	UDFPARMS
-	UNIQUE
-
-	CENTURY, 1
-	FIELDS, 1
-	MOUSE, 1
-	REFRESH, 1
-	NOCPTRANS
 
 	ALTERNATE, 1
 	BELL, 1
 	COVERAGE, 1
+	MOUSE, 1
 	RESOURCE, 1
-	CURRENCY, 1
 	DELIMITERS, 1
 	MESSAGE, 1
+	HELP, 1
 ENDTEXT
 
-lcSets = m.lcSets + iif(m.tlProcClass;
-	, CRLF;
+lcSets = m.lcSets + CRLF + iif(m.tlProcClass;
+	, '';
 		+ 'PROCEDURE' + CRLF;
 		+ 'CLASSLIB' + CRLF;
 	, '';
@@ -3055,9 +3090,9 @@ if m.success
 
 	for liSet = 1 to m.lnSets
 
-		laSet[m.liSet, 2] = evl(int(val(getwordnum(m.laSet[m.liSet, 1], 2, ','))), '')
+		laSet[m.liSet, 2] = evl(int(val(getwordnum(m.laSet[m.liSet, 1], 2, ','))), 0)
 		laSet[m.liSet, 1] = alltrim(getwordnum(m.laSet[m.liSet, 1], 1, ','))
-		laSet[m.liSet, 3] = this.uset(laSet[m.liSet, 1], laSet[m.liSet, 2])
+		laSet[m.liSet, 3] = this.uSet(laSet[m.liSet, 1], laSet[m.liSet, 2])
 
 	endfor
 
@@ -3067,9 +3102,10 @@ if m.success
 endif
 
 return m.success
+endproc
 
 *---------------------------------------------------------------------------
-protected procedure uset
+protected function uSet as Variant
 lparameters lcSet, lnSet
 
 return icase(;
@@ -3079,6 +3115,60 @@ return icase(;
 			set(m.lcSet),;
 			set(m.lcSet, m.lnSet);
 		)
+endfunc
+
+
+*---------------------------------------------------------------------------
+procedure Set as Boolean
+lparameters lcSet, lnSet, luSet
+
+&& {fr} Public car appelé par modify command awPublic > awSets.Set()
+
+do case
+
+case .F.;
+or empty(m.lnSet) and (.F.;
+ or .T.;
+   and vartype(m.luSet) == 'C';
+   and (.F.;
+	  or InList(m.luSet, 'ON', 'OFF', 'AUTOMATIC');
+	  or InList(m.lcSet, 'DATE', 'CLOCK');
+	  or m.lcSet == 'CURRENCY' and InList(m.luSet, 'RIGHT', 'LEFT');
+	  );
+ or InList(m.lcSet, 'ENGINEBEHAVIOR', 'REPORTBEHAVIOR') and varSet(@m.luSet, Cast(m.luSet as M));
+ );
+or m.lnSet = 2 and m.lcSet == 'FIELDS'
+	set &lcSet &luSet
+
+case m.lcSet == 'TEXTMERGE'
+	do case
+	case m.lnSet = 1 && {fr} cLeftDelimiter and cRightDelimiter
+		luSet = '"' + stuffc(m.luSet, len(m.luSet)/2 + 1, 0, '","') + '"'
+		set textmerge delimiters to &luSet
+	case m.lnSet = 2 and Empty(m.luSet) && {fr} cFileName
+		set textmerge to
+	case m.lnSet = 2 && {fr} cFileName
+		set textmerge to (m.luSet)
+	case m.lnSet = 3 && {fr} SHOW/NOSHOW
+		set textmerge to &luSet
+	endcase
+
+case inlist(m.lcSet, 'CENTURY', 'MOUSE', 'REFRESH', 'UDFPARMS') && 2016-08-18 thn -- {en} , 'FIELDS', 'NOCPTRANS' removed http://support.west-wind.com/Thread4PC0SHQLT.wwt?rl=1#4PH0Q7H4B
+	luSet = Cast(m.luSet as M)
+	set &lcSet to &luSet
+
+case inlist(m.lcSet, 'PROCEDURE', 'CLASSLIB') && 2016-08-18 thn -- {en} added
+	SetProcClassRestore(m.luSet, m.lcSet == 'CLASSLIB') && modify command abDev - see below
+
+case Empty(m.luSet) and Vartype(m.luSet) == 'C'
+	set &lcSet to
+
+otherwise
+	set &lcSet to (m.luSet)
+
+endcase
+
+endproc
 
 *---------------------------------------------------------------------------
 protected procedure destroy
@@ -3087,35 +3177,15 @@ local liSet, lcSet, luSet, lnSet
 
 for liSet = 1 to this.nSets
 
-	if !this.aSet[m.liSet, 3] == this.uset(this.aSet[m.liSet, 1], this.aSet[m.liSet, 2])
+	if !this.aSet[m.liSet, 3] == this.uSet(this.aSet[m.liSet, 1], this.aSet[m.liSet, 2]); && {en} restore only if different
+		or .F. && .T. tests all restores
 
-		lcSet = this.aSet[m.liSet, 1]
-		lnSet = this.aSet[m.liSet, 2]
-		luSet = this.aSet[m.liSet, 3]
+		this.set(;
+			this.aSet[m.liSet, 1];
+		, this.aSet[m.liSet, 2];
+		, this.aSet[m.liSet, 3];
+		)
 
-		do case
-
-		case empty(m.lnSet) and vartype(m.luSet) == 'C' and m.luSet $ 'ON,OFF'
-			set &lcSet &luSet
-
-		case m.lcSet == 'TEXTMERGE'
-			do case
-			case m.lnSet = 1 && {fr} cLeftDelimiter and cRightDelimiter
-				luSet = '"' + stuffc(m.luSet, len(m.luSet)/2 + 1, 0, '","') + '"'
-				set textmerge delimiters to &luSet
-			case m.lnSet = 2 && {fr} cFileName
-				set textmerge to (m.luSet)
-			case m.lnSet = 3 && {fr} SHOW/NOSHOW
-				set textmerge to &luSet
-			endcase
-
-		case inlist(m.lcSet, 'CENTURY', 'FIELDS', 'MOUSE', 'REFRESH', 'NOCPTRANS')
-			set &lcSet to &luSet
-
-		otherwise
-			set &lcSet to (m.luSet)
-
-		endcase
 	endif
 endfor
 
@@ -3873,7 +3943,7 @@ enddefine && {fr} CLASS abISX
 function uValue && {fr} Valeur convertie selon le varType spécifié (AKA coercition de type)
 lparameters ;
   tuValue; && {fr} Valeur source
-, 	tcTypeDest && {fr} Type de valeur attendu selon codification de la fonction VFP varType()
+, tcTypeDest && {fr} Type de valeur attendu selon codification de la fonction VFP varType()
 
 && /!\ pourrait être simplifiée et optimisée avec Cast()
 
@@ -4006,7 +4076,10 @@ tuValue = strtran(strtran(strtran(strtran(chrtran(cRepCharDel(alltrim(m.tuValue)
 	, ' :', ':');
 	, ': ', ':');
 
-lCentury = len(getwordnum(m.tuValue, 1, '/')) = 4 && {fr} YYYY/MM/DD assumed
+lCentury = 4 = Max(;
+	  len(getwordnum(m.tuValue, 1, m.cMark)); && YYYY/xx/xx
+	, len(getwordnum(m.tuValue, 3, m.cMark)); && xx/xx/YYYY
+	)
 
 do case
 
@@ -5711,7 +5784,7 @@ return m.llResult
 procedure SetProcClassRestore as Boolean && {en} restores Set("Classlib") or Set("Procedure") to a previous value
 lparameters ;
   tcSetAnte as string; && {en} previous Set("Classlib") or Set("Procedure")
-, tlClassLib as Boolean && [.F.] {en} tcSetAnte is Set("Classlib")
+, tlClassLib as Boolean; && [.F.] {en} tcSetAnte is Set("Classlib")
 
 tlClassLib = lTrue(m.tlClassLib)
 
@@ -5734,7 +5807,7 @@ if .t.;
 		try
 			do case
 			case ascan(m.laFileAnte, m.lcFile, 1, -1, 1, 7) > 0
-&& {fr} in previous Set()
+				&& {fr} in previous Set()
 			case m.tlClassLib
 				lcFile = iif(' IN ' $ m.lcFile;
 					, '';
@@ -5747,7 +5820,7 @@ if .t.;
 					)
 				release classlib &lcFile
 			case cOfLitteral(m.lcFile) == m.lcThisFile
-&& {fr} do not remove this file, we currently use it
+				&& {fr} do not remove this file, we currently use it
 			otherwise
 				release procedure &lcFile
 			endcase
@@ -5760,12 +5833,12 @@ if .t.;
 		try
 			do case
 			case ascan(m.laFilePost, m.lcFile, 1, -1, 1, 7) > 0
-&& {fr} already in Set()
+				&& {fr} already in Set()
 			case !file(alltrim(iif(m.tlClassLib;
 				, trim(substrc(m.lcFile, 1, at_c('ALIAS', m.lcFile)-1));
 				, m.lcFile;
 				), '"', "'"))
-&& {fr} File can't be found
+				&& {fr} File can't be found
 			case m.tlClassLib
 				set classlib to &lcFile additive
 			otherwise
@@ -7393,3 +7466,172 @@ endif
 
 return m.tResult
 endfunc
+
+*!*  Objet : Implémention en VisualFoxPro de l'algorithme de hachage SHA1
+*!*  Auteur : C.Chenavier
+*!*  Version : 1.00 - 15/11/2004
+*!*  Les tests ont été réalisés avec le programme HashCalc : http://www.slavasoft.com
+
+*!*  SHA signifie "Secure Hash Algorithm"
+*!*  On utilise souvent le terme SHA-1 pour noter la version
+*!*  SHA est une fonction de hachage qui produit des empreintes de 160 bits,
+*!*  contrairement à MD5 qui produit des empreintes de 128 bits.
+*!*  Cette fonction de hachage a été développée conjointement par la NSA et le NIST
+*!*  pour être le standard des fonctions de hachage (FIPS PUB 180-1).
+*!*  SHA est basé sur MD4 et est réputé plus sûr que MD5.
+*!*  SHA fonctionne sur des messages dont la taille est inférieure à 2^64 bits
+*!*  et travaille sur des blocs de 512 bits.
+
+*!* ---------- SHA-1 TEST SUITE ----------
+*!*  SHA-1("") = da39a3ee5e6b4b0d3255bfef95601890afd80709, ok
+*!*  SHA-1("a") = 86f7e437faa5a7fce15d1ddcb9eaeaea377667b8, ok
+*!*  SHA-1("abc") = a9993e364706816aba3e25717850c26c9cd0d89d, ok
+*!*  SHA-1("message digest") = c12252ceda8be8994d5fa0290a47231c1d16aae3, ok
+*!*  SHA-1(a..z) = 32d10c7b8cf96570ca04ce37f2a19d84240d3a89, ok
+*!*  SHA-1(A..Za..z0..9) = 761c457bf73b14d27e9e9265c46f4b4dda11f940, ok
+*!*  SHA-1(8 times "1234567890") = 50abf5706a150990a08b2c5ea40fa0e585554732, ok
+
+*!*  Exemples de test :
+*!*  MessageBox(SHA1("")="da39a3ee5e6b4b0d3255bfef95601890afd80709")
+*!*  MessageBox(SHA1("a")="86f7e437faa5a7fce15d1ddcb9eaeaea377667b8")
+*!*  MessageBox(SHA1("abc")="a9993e364706816aba3e25717850c26c9cd0d89d")
+*!*  MessageBox(SHA1("message digest")="c12252ceda8be8994d5fa0290a47231c1d16aae3")
+*!*  MessageBox(SHA1("abcdefghijklmnopqrstuvwxyz")="32d10c7b8cf96570ca04ce37f2a19d84240d3a89")
+*!*  MessageBox(SHA1("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")="761c457bf73b14d27e9e9265c46f4b4dda11f940")
+*!*  MessageBox(SHA1(REPLICATE("1234567890",8))="50abf5706a150990a08b2c5ea40fa0e585554732")
+*!*  MessageBox(SHA1("ceci est un test")="71438dc237b45f04759c41e1b2d34f42a46318f3")
+
+* ---------------------------------------------
+FUNCTION SHA1
+LPARAMETERS cMessage
+
+PRIVATE HO, H1, H2, H3, H4
+LOCAL nNbBlocs, nHigh, nLow
+
+H0 = 0x67452301
+H1 = 0xEFCDAB89
+H2 = 0x98BADCFE
+H3 = 0x10325476
+H4 = 0xC3D2E1F0
+
+nNbBlocs = LEN(m.cMessage) / 64
+
+** Si au départ, la taille du message n'est pas un multiple de 512,
+** alors l'algorithme complète le message en ajoutant un 1 et
+** autant de 0 que nécessaires et les 8 derniers octets servent
+** à stocker la longueur du message.
+
+nLen = LEN(m.cMessage)
+nReste = MOD(m.nLen, 64)
+IF m.nReste > 0 OR m.nLen = 0
+	nNbBlocs = m.nNbBlocs + 1
+	IF m.nReste > 55
+		cMessage = m.cMessage + CHR(2^7) + REPLICATE(CHR(0), (64 - m.nReste) + 55)
+		nNbBlocs = m.nNbBlocs + 1
+	ELSE
+		cMessage = m.cMessage + CHR(2^7) + REPLICATE(CHR(0), (55 - m.nReste))
+	ENDIF
+	nHigh = (m.nLen*8) / 2^32
+	nLow = MOD(m.nLen*8, 2^32)
+	cMessage = m.cMessage + CHR(BITAND(BITRSHIFT(m.nHigh, 24), 0xFF)) ; && 56
+		+ CHR(BITAND(BITRSHIFT(m.nHigh, 16), 0xFF)) ; && 57
+		+ CHR(BITAND(BITRSHIFT(m.nHigh, 8), 0xFF)) ; && 58
+		+ CHR(BITAND(m.nHigh, 0xFF)) ; && 59
+		+ CHR(BITAND(BITRSHIFT(m.nLow, 24), 0xFF)) ; && 60
+		+ CHR(BITAND(BITRSHIFT(m.nLow, 16), 0xFF)) ; && 61
+		+ CHR(BITAND(BITRSHIFT(m.nLow, 8), 0xFF)) ; && 62
+		+ CHR(BITAND(m.nLow, 0xFF)) && 63
+ENDIF
+
+FOR I = 1 TO m.nNbBlocs
+	DO SHA1_ProcessBloc WITH SUBSTR(m.cMessage, 1 + 64*(I-1), 64)
+ENDFOR
+
+RETURN Lower(SUBSTR(TRANSFORM(H0,"@0"),3) + ;
+		SUBSTR(TRANSFORM(H1,"@0"),3) + ;
+		SUBSTR(TRANSFORM(H2,"@0"),3) + ;
+		SUBSTR(TRANSFORM(H3,"@0"),3) + ;
+		SUBSTR(TRANSFORM(H4,"@0"),3);
+		)
+
+* ---------------------------------------------
+PROCEDURE SHA1_ProcessBloc
+LPARAMETERS cBloc
+
+LOCAL I, A, B, C, D, E, nTemp
+LOCAL ARRAY W[80]
+
+** Pour chaque bloc de 512 bits, on divise le bloc en 16 mots de 32 bits
+** et on les affecte respectivement à W1, W2...W16.
+FOR I = 1 TO 16
+		II = m.I - 1
+		W[I] = BITLSHIFT(ASC(SUBSTR(m.cBloc, m.II * 4 + 1, 1)), 24) + ;
+		BITLSHIFT(ASC(SUBSTR(m.cBloc, m.II * 4 + 2, 1)), 16) + ;
+		BITLSHIFT(ASC(SUBSTR(m.cBloc, m.II * 4 + 3, 1)), 8) + ;
+		ASC(SUBSTR(m.cBloc, m.II * 4 + 4, 1))
+ENDFOR
+
+** Pour I variant de 17 à 80, on affecte les mots Wi de la manière suivante :
+** Wi = Wi-3 XOR Wi-8 XOR Wi-14 XOR Wi-16
+FOR I = 17 TO 80
+		W[i] = BitLRotate(1, BITXOR(W[i-3], W[i-8], W[i-14], W[i-16]))
+ENDFOR
+
+A = H0
+B = H1
+C = H2
+D = H3
+E = H4
+
+** Pour I variant de 1 à 80 et avec Sn un décalage circulaire gauche de n bits,
+** on effectue les calculs suivants :
+FOR I = 1 TO 20
+		nTemp = BitLRotate(5, A) + BITOR(BITAND(B, C), BITAND(BITNOT(B), D)) + ;
+		E + W[i] + 0x5A827999
+		E = D
+		D = C
+		C = BitLRotate(30, B)
+		B = A
+		A = m.nTemp
+ENDFOR
+
+FOR I = 21 TO 40
+		nTemp = BitLRotate(5, A) + BITXOR(B, C, D) + E + W[i] + 0x6ED9EBA1
+		E = D
+		D = C
+		C = BitLRotate(30, B)
+		B = A
+		A = m.nTemp
+ENDFOR
+
+FOR I = 41 TO 60
+		nTemp = BitLRotate(5, A) + BITOR(BITAND(B, C), BITAND(B, D), BITAND(C, D)) + ;
+		E + W[i] + 0x8F1BBCDC
+		E = D
+		D = C
+		C = BitLRotate(30, B)
+		B = A
+		A = m.nTemp
+ENDFOR
+
+FOR I = 61 TO 80
+		nTemp = BitLRotate(5, A) + BITXOR(B, C, D) + E + W[i] + 0xCA62C1D6
+		E = D
+		D = C
+		C = BitLRotate(30, B)
+		B = A
+		A = m.nTemp
+ENDFOR
+
+H0 = H0 + A
+H1 = H1 + B
+H2 = H2 + C
+H3 = H3 + D
+H4 = H4 + E
+
+RETURN
+
+* ---------------------------------------------
+FUNCTION BitLRotate
+LPARAMETERS nBits, nWord
+RETURN BITLSHIFT(m.nWord, m.nBits) + BITRSHIFT(m.nWord, (32 - (m.nBits)))

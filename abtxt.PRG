@@ -138,7 +138,7 @@ lparameters ;
 , tuW1, tuW2, tuW3, tuW4, tuW5, tuW6, tuW7, tuW8, tuW9, tuW10, tuW11, tuW12, tuW13, tuW14, tuW15, tuW16, tuW17, tuW18, tuW19, tuW20, tuW21, tuW22, tuW23, tuW24 && [''] {fr} mots suivants
 
 local lcResult
-lcResult = space(0)
+lcResult = ''
 
 if not vartype(m.tuSep) == 'L'
 	local lnWord
@@ -164,13 +164,13 @@ return m.lcResult
 procedure cWords_test
 ? sys(16)
 
-? cWords('/', space(0), 10, .f., 'moi') == '10/.F./moi'
+? cWords('/', '', 10, .f., 'moi') == '10/.F./moi'
 
 local array laW[6]
 laW[1] = 'thierry'
 laW[2] = 15
 laW[3] = .f.
-laW[4] = space(0)
+laW[4] = ''
 laW[5] = 0
 laW[6] = createobject('form')
 ? cWords(',', @m.laW) == 'thierry,15,.F.,0'
@@ -190,7 +190,7 @@ llW2Empty = vartype(m.tuW2) == 'C' and empty(m.tuW2) or vartype(m.tuW2) $ 'OGXU'
 
 do case
 case pcount() < 3
-	return iif(m.llW1Empty, space(0), transform(m.tuW1))
+	return iif(m.llW1Empty, '', transform(m.tuW1))
 
 case not (m.llW1Empty or m.llW2Empty)
 	lcSep = transform(m.tuSep)
@@ -250,7 +250,7 @@ local lcChars, lcResult && Texte comparable
 
 do case
 case isnull(m.tc) or empty(m.tc)
-	lcResult = space(0)
+	lcResult = ''
 
 case vartype(m.tc) == 'C'
 	lcResult = upper(alltrim(m.tc))
@@ -261,7 +261,7 @@ case vartype(m.tc) == 'C'
 	lcResult = cSpaceAroundGroup(m.lcResult) && {fr} normalise le nombre d'espaces autour des caractères de groupement
 
 otherwise
-	lcResult = space(0)
+	lcResult = ''
 endcase
 
 if vartype(m.tnLength) == 'N' and m.tnLength > 0
@@ -290,7 +290,7 @@ lparameters ;
 , tcChars && {fr} Caractère(s) dont les répétitions sont à éliminer
 
 local lcChars, llResult, lcResult
-lcResult = space(0)
+lcResult = ''
 
 llResult = vartype(m.tcChain) = 'C' and vartype(m.tcChars)='C' and len(m.tcChars) > 0
 assert m.llResult message cAssertMsg(textmerge([paramètres invalides : <<m.tcChain>> | <<m.tcChars>>]))
@@ -392,7 +392,7 @@ function cSpaceAroundGroup && {fr} Chaîne oû le nombre d'Space(1) autour des car
 lparameters tcChain && {fr} Chaîne
 
 local lcResult
-lcResult = space(0)
+lcResult = ''
 
 #define GROUPCAR_OPEN		'([{'
 #define GROUPCAR_CLOSE	')]}'
@@ -407,13 +407,13 @@ if vartype(m.tcChain)='C' ;
 
  	do case
 	case m.lcCar == space(1)
-		lcResult = m.lcResult + iif(m.llGroupCarOpen, space(0), m.lcCar)
+		lcResult = m.lcResult + iif(m.llGroupCarOpen, '', m.lcCar)
 	case m.lcCar $ GROUPCAR_OPEN
 		lcResult = iif(m.llSpace, m.lcResult, m.lcResult + space(1)) + m.lcCar
 	case m.lcCar $ GROUPCAR_CLOSE
 		lcResult = iif(m.llSpace, left(m.lcResult, len(m.lcResult)-1), m.lcResult) + m.lcCar
 	otherwise
-		lcResult = m.lcResult + iif(m.llGroupCarClose, space(1), space(0)) + m.lcCar
+		lcResult = m.lcResult + iif(m.llGroupCarClose, space(1), '') + m.lcCar
 	endcase
 
 	llSpace = m.lcCar == space(1)
@@ -446,7 +446,7 @@ lparameters ;
 , tnFactGroup; && [3] {fr} Facteur de regroupement des groupes de chiffres
 , tcSep && [Space(1)] {fr} Caractère de séparation des groupes de chiffres
 local lcResult
-store space(0) to m.lcResult
+store '' to m.lcResult
 
 * {fr} Si une chaine valide a été passée
 if vartype(m.tcChain) == 'C'
@@ -470,7 +470,7 @@ if vartype(m.tcChain) == 'C'
 		* {fr} Pour chaque caractère en partant de la fin
 		local lnCar, lcCar, lnChiffres, llSepAj
 		lnChiffres = 0
-		lcResult = space(0)
+		lcResult = ''
 		for m.lnCar = m.lnChain to 1 step -1
 
 			lcCar = substr(m.lcChain, m.lnCar, 1)
@@ -681,14 +681,14 @@ laTest[2] = 2.25	 && {fr} N
 laTest[3] = .t.	 && {fr} L
 laTest[4] = date(2003,2,8) && {fr} D
 laTest[5] = datetime(2003,2,8,11,34,15) && {fr} T
-laTest[6] = space(0) && {fr} C Empty
+laTest[6] = '' && {fr} C Empty
 laTest[7] = 0	 && {fr} N Empty
 laTest[8] = .f. && {fr} L Empty
 laTest[9] = {} && {fr} D Empty
 loTest.Test('"First",2.25,.T.,{^2003-02-08},{^2003-02-08 11:34:15},"",0,.F.,{/}', @m.laTest,,,.t.)
 
 dimension laTest[5,2]
-laTest= space(0)
+laTest= ''
 laTest[1,2] = 'First'
 laTest[2,2] = 'Second'
 laTest[3,2] = '  '
@@ -712,7 +712,7 @@ if vartype(m.tcChain) == 'C' ;
 
 	return cRepCharDel(chrtranc(m.tcChain, NON_PRINTABLE, space(len(NON_PRINTABLE))))
 else
-	return space(0)
+	return ''
 endif
 
 * ===================================================================
@@ -980,7 +980,7 @@ case type('m.toObject.class') == 'C' and type('m.toObject.classLibrary') == 'C' 
 	&& - ParentClass Property 
 	
 	lcResult = cWords(', ';
-		, 'BaseClass: ' + cL(m.toObject.BaseClass);
+		, 'BaseClass: ' + Iif(PemStatus(m.toObject, 'BaseClass', 2), 'N/A', cL(m.toObject.BaseClass));
 		, nEvl(m.toObject.ParentClass, 'ParentClass: ' + cL(m.toObject.ParentClass));
 		, 'Class: ' + cL(m.toObject.class);
 		, nEvl(m.toObject.ClassLibrary, 'ClassLibrary:' + cL(m.toObject.ClassLibrary));
@@ -1098,7 +1098,7 @@ loTest.Test('.NULL.', .null.) && {fr} X
 
 	lcOnError = on('error')
 	on error m.llError = .t.
-loTest.Test(space(0), foo) && {fr} U = 'Unknown type'
+loTest.Test('', foo) && {fr} U = 'Unknown type'
 	on error &lcOnError
 
 	luTest = "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20";
@@ -1140,7 +1140,7 @@ endfunc
 function cLitterals_List
 lparameters cList
 local aa[1]
-return Iif(alines(aa, m.cList, 5, ',') > 0;
+return Iif(alines(aa, Evl(m.cList, ''), 5, ',') > 0;
 	, cListOfArray(@m.aa,,,.T.);
 	, cL(m.cList);
 	)
@@ -1195,7 +1195,7 @@ tlJSON = lTrue(m.tlJSON)
 
 local lcVarType, llResult, lcResult
 
-lcResult = space(0)
+lcResult = ''
 
 lcVarType = type('tuData', 1)
 lcVarType = iif(m.lcVarType == 'A', m.lcVarType, vartype(m.tuData))
@@ -1274,7 +1274,7 @@ case m.lcVarType == 'O' && {fr} Objet
 		endif
 		lcResult = '{' + substr(m.lcResult, 2) + '}'
 	else
-		lcResult = space(0)
+		lcResult = ''
 	endif
 
 case m.lcVarType == 'A' && {fr} Array
@@ -1362,9 +1362,9 @@ loAsserts = abSet('ASSERTS', 'OFF') && 'ON'
 
 loTest.Test('4', 4)
 
-loTest.Test(space(0), createobject('Collection'))
+loTest.Test('', createobject('Collection'))
 
-loTest.Test(space(0), createobject('Excel.Application'))
+loTest.Test('', createobject('Excel.Application'))
 
 luData = createobject('Custom')
 m.luData.addproperty('car', 'a')
@@ -1436,7 +1436,7 @@ lparameters ;
 , tlPeriod && [.F.] {fr} séparateur décimal point (.F.: courant) [Val() veut courant, calcul et ALTER COLUMN veulent point]
 
 local llResult, lcResult
-lcResult = space(0)
+lcResult = ''
 
 * {fr} Si le paramètre est de type caractère
 llResult = inlist(vartype(m.tcNum), 'C', 'X')
@@ -1452,8 +1452,8 @@ if m.llResult
 		lcNum = alltrim(m.tcNum)
 		lcSep = set('Separator')
 		lcPoint = set('Point')
-		lcNum = iif(m.lcSep == m.lcPoint, m.lcNum, chrtran(m.lcNum, m.lcSep, space(0)))
-		lcNum = chrtran(m.lcNum, space(1), space(0))
+		lcNum = iif(m.lcSep == m.lcPoint, m.lcNum, chrtran(m.lcNum, m.lcSep, ''))
+		lcNum = chrtran(m.lcNum, space(1), '')
 
 		* {fr} Lire si séparateur décimal POINT demandé
 		local llPeriod
@@ -1547,7 +1547,7 @@ function cEuroANSI && {fr} Chaine de caractères désaccentuée
 lparameters tuEuropean && {fr} type C : Chaine de caractères accentuée, .T. : supprimer les variables publiques créées
 
 local lcVarType, lcResult && {fr} Chaine de caractères désaccentuée
-lcResult = space(0)
+lcResult = ''
 
 * {fr} Si le paramètre est correct
 lcVarType = vartype(m.tuEuropean)
@@ -1579,9 +1579,9 @@ release European, EuroAnsi
 loTest.Test('hebete', 'hébété')
 loTest.Test('aaaeeeeioouu', 'àÃ¤Ã¢éèêÃ«ioÃ²ûù')
 loTest.Test('AAAEEEEIOOUU', 'Ã€Ã„Ã‚ÉÃˆÃŠÃ‹IOÃ’Ã™Ã›')
-loTest.Test(space(0), .t.)
-loTest.Test(space(0), space(0))
-loTest.Test(space(0), null)
+loTest.Test('', .t.)
+loTest.Test('', '')
+loTest.Test('', null)
 
 return loTest.Result()
 
@@ -1602,7 +1602,7 @@ lcCars = ;
 	'!#$%&*()_+-={}|[]\";' +;
 	['<>?,./]
 lnCars = len(m.lcCars)
-lcResult = space(0)
+lcResult = ''
 rand(-1)
 
 for m.lnCar = 1 to m.tnLength
@@ -1678,7 +1678,7 @@ lparameters ;
 , tcChiffres && @ {fr} Chaîne de chiffres trouvée en retour
 local lnResult, llResult
 lnResult = 0
-tcChiffres = space(0)
+tcChiffres = ''
 
 * {fr} Si les paramètres requis sont valides
 llResult = vartype(m.tcChain) == 'C' ;
@@ -1697,7 +1697,7 @@ if m.llResult
 		* {fr} Pour chaque position dans la chaine
 		local lnStart, lcChiffres, lnSpaces, lnCar, lcCar, llChiffre
 		for m.lnStart = 1 to m.lnChain - m.tnChiffres + 1
-			lcChiffres = space(0)
+			lcChiffres = ''
 			lnSpaces = 0
 
 			* {fr} Pour chaque caractère dans la limite du nombre de chiffres
@@ -1746,12 +1746,12 @@ return lnResult
 procedure nAtDigits_Test && {fr} Teste nAtDigits
 ? sys(16)
 local lcRet
-lcRet = space(0)
+lcRet = ''
 ? nAtDigits('0123456789', 3) = 1
 ? nAtDigits('0123456789', 3, .f., @m.lcRet) = 1 and m.lcRet == '012'
 ? nAtDigits('01 23456789', 3, .f., @m.lcRet) = 4 and m.lcRet == '234'
 ? nAtDigits('01 23456789', 3, .t., @m.lcRet) = 1 and m.lcRet == '012'
-? nAtDigits('012345678 9', 10, .f., @m.lcRet) = 0 and m.lcRet == space(0)
+? nAtDigits('012345678 9', 10, .f., @m.lcRet) = 0 and m.lcRet == ''
 ? nAtDigits('012345678 9', 10, .t., @m.lcRet) = 1 and m.lcRet == '0123456789'
 ? nAtDigits('ABCDEF678 9', 4, .t., @m.lcRet) = 7 and m.lcRet == '6789'
 ? nAtDigits('1 2 3ABCDEF678 9', 4, .t., @m.lcRet) = 12 and m.lcRet == '6789'
@@ -1826,7 +1826,7 @@ lparameters ;
   tcChain; && {fr} Chaîne à analyser
 , tlRight && [.F.] {fr} Chercher en partant de la droite
 local lcResult && {fr} Chiffres extraits dans l'ordre oû ils se trouvent
-lcResult = space(0)
+lcResult = ''
 
 * {fr} Si la chaine comporte des caractères
 if vartype(m.tcChain)='C' ;
@@ -1932,7 +1932,7 @@ local lcResult;
 , lcChar;
 , llChar;
 
-lcResult = space(0)
+lcResult = ''
 
 * {en} Move until first non-space character
 do while substr(m.tcChain, m.tnPos, 1) == space(1)
@@ -1968,7 +1968,7 @@ lparameters ;
 , tcParenth && [()] {fr} caractères d'encadement à ajouter
 
 local llResult, lcResult && {fr} Chaine avec la référence ajoutée
-lcResult = space(0)
+lcResult = ''
 
 llResult = vartype(m.tcChain) == 'C'
 assert m.llResult message cAssertMsg(textmerge("Paramètre invalide: <<m.tcChain>>"))
@@ -2219,7 +2219,7 @@ llResult = vartype(m.tcChain) == 'C';
  and vartype(m.tcWord) == 'C';
  and not (empty(m.tcChain) or empty(m.tcWord));
  and (lTrue(m.tlAnyWord);
- 		 or chrtran(m.tcWord, VFPOPSEPCARS, space(0)) == m.tcWord)
+ 		 or chrtran(m.tcWord, VFPOPSEPCARS, '') == m.tcWord)
 assert m.llResult message cAssertMsg(textmerge("received invalid parameters"))
 if m.llResult
 
@@ -2394,10 +2394,10 @@ lparameters tcCarsExclude && [''] {fr} Caractères à exclure
 local lcResult;
 , lcCars, lnCar
 
-lcResult = space(0)
+lcResult = ''
 
 * {fr} Lister les opérateurs et séparateurs
-lcCars = chrtran(VFPOPSEPCARS, uDefault(m.tcCarsExclude, space(0)), space(0))
+lcCars = chrtran(VFPOPSEPCARS, uDefault(m.tcCarsExclude, ''), '')
 
 for lnCar = 1 to len(m.lcCars)
 	lcResult = m.lcResult + ',' + ['] + substr(m.lcCars, m.lnCar, 1) + [']
@@ -2410,7 +2410,7 @@ function cFirstAlpha && {fr} Chaîne dont l'initiale est alphabétique
 lparameters ;
   tcChain && {fr} Chaine
 local llResult, lcResult
-lcResult = space(0)
+lcResult = ''
 
 llResult = vartype(m.tcChain) == 'C'
 assert m.llResult message cAssertMsg(textmerge("paramètre invalide: <<m.tcChain>>"))
@@ -2540,7 +2540,7 @@ define class abRegExp as GA_LIGHTWEIGHT_CLASS && {fr} Expression régulière ; Imp
 * ===================================================================
 
 && {fr} RÉGLAGES - cf. this.init() / this.setup()
-pattern = space(0) && {fr} Masque d'expression régulière
+pattern = '' && {fr} Masque d'expression régulière
 IgnoreCase = .f. && {fr} Ignorer la casse dans les comparaisons
 global = .f. && {fr} Trouver toutes les occurrences ou la première seulement
 Multiline = .f. && {fr} Le texte comporte plusieurs lignes && ^ = iif(Multiline, line start, chain start) $ = iif(Multiline, line end, chain end)
@@ -2599,7 +2599,7 @@ lparameters ;
 
 local laParm[1], lcParm, lcResult
 
-lcResult = space(0)
+lcResult = ''
 
 if alines(laParm, m.tcParms) > 0 && {fr} cInLineCommentStripped(m.tcParms)
 
@@ -2615,7 +2615,7 @@ return m.lcResult
 * -----------------------------------------------------------------
 hidden procedure Pattern_Assign
 lparameters tcPattern && [''] {fr} Expression régulière de recherche
-tcPattern = iif(vartype(m.tcPattern) == 'C', m.tcPattern, space(0))
+tcPattern = iif(vartype(m.tcPattern) == 'C', m.tcPattern, '')
 
 this.lPatterns = CR $ m.tcPattern
 
@@ -2965,7 +2965,7 @@ return strtran(strtran(strtran(strtran(m.tcChain;
 * ===================================================================
 function cCRDel && {fr} chaîne oû les sauts de ligne sont supprimés
 lparameters tcChain && {fr} Chaîne
-return cCRto(m.tcChain, space(0))
+return cCRto(m.tcChain, '')
 
 * ===================================================================
 function cCRSpace && {fr} chaîne oû les sauts de ligne sont remplacés par un Space(1)
@@ -2976,6 +2976,10 @@ return cCRto(m.tcChain, space(1))
 * ===================================================================
 function cOuiNon(tl) && {fr} oui ou non selon logique
 return iif(vartype(m.tl) $ 'LX', iif(m.tl, 'OUI', 'NON'), m.tl) && .NULL. <> .F.
+
+* ===================================================================
+function cOKKO(tl)
+return iif(vartype(m.tl) $ 'LX', iif(m.tl, 'OK', 'KO'), m.tl) && .NULL. <> .F.
 
 * ===================================================================
 function cYesNo(tl) && {fr} yes ou no selon logique
@@ -3005,7 +3009,7 @@ lparameters tcChain
 
 return iif(vartype(m.tcChain) == 'C';
 	, cEscaped_Misc(cEscaped_Punc(cEscaped_Base(m.tcChain)));
-	, space(0);
+	, '';
 	)
 
 * ===================================================================

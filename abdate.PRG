@@ -34,7 +34,7 @@ if vartype(m.tnSecs) == 'N' ;
 
  	local lnDays, lcDays
  	lnDays = int(m.tnSecs / 3600 / 24)
- 	lcDays = iif(m.lnDays > 0, ltrim(str(m.lnDays)) + ' j ', space(0))
+ 	lcDays = iif(m.lnDays > 0, ltrim(str(m.lnDays)) + ' j ', '')
  	lcResult = textmerge([<<m.lcDays>><<cHHMMSS(Mod(m.tnSecs, 24*3600))>>])
 endif
 
@@ -102,7 +102,7 @@ loTest.Test("00:59:59", 3600-1)
 loTest.Test("01:00:01", 3600+1)
 loTest.Test("24:00:10", 24*3600+10)
 loTest.Test("99:00:00", 99*3600)
-loTest.Test(space(0), -1)
+loTest.Test('', -1)
 
 return loTest.Result()
 
@@ -239,7 +239,7 @@ local lnYearCent
 
 lnYearCent = nYearCent(m.tuYear)
 
-return iif(m.lnYearCent = 0, space(0), ltrim(str(m.lnYearCent)))
+return iif(m.lnYearCent = 0, '', ltrim(str(m.lnYearCent)))
 
 * ---------------------------------------------------------
 procedure cYearCent_test && {fr} Teste cYearCent
@@ -247,7 +247,7 @@ procedure cYearCent_test && {fr} Teste cYearCent
 local loTest as abUnitTest of abDev.prg
 loTest = newobject('abUnitTest', 'abDev.prg')
 
-loTest.Test(space(0), '2004,25')
+loTest.Test('', '2004,25')
 loTest.Test('2004', '2004')
 loTest.Test('2004', '04')
 loTest.Test('2033', '33')
@@ -306,7 +306,7 @@ procedure cYearNoCent_test && {fr} teste cYearNoCent()
 local loTest as abUnitTest of abDev.prg
 loTest = newobject('abUnitTest', 'abDev.prg')
 
-loTest.Test(space(0), 4.25)
+loTest.Test('', 4.25)
 loTest.Test('00', 2000)
 loTest.Test('04', 2004)
 loTest.Test('33', 2033)
@@ -340,7 +340,7 @@ lparameters ;
 , tcAn	 && @ [''] {fr} An séparé
 
 local lcResult
-lcResult = space(0)
+lcResult = ''
 
 if  .f.;
  or vartype(m.tcDate) = 'C' and ! empty(m.tcDate) ;
@@ -358,7 +358,7 @@ if  .f.;
 			lnPosSepJM = iif(m.lnPosSepJM = m.lnPosSepMA, 0, m.lnPosSepJM)
 			tcMois = cFigures(substr (m.tcDate, m.lnPosSepJM + 1, m.lnPosSepMA - 1))
 		else
-			tcMois = space(0)
+			tcMois = ''
 		endif
 		if m.lnPosSepMA >= 0
 			tcAn = cFigures(substr (m.tcDate, m.lnPosSepMA + 1))
@@ -370,7 +370,7 @@ if  .f.;
 	llAnNul = empty(m.tcAn) && 00 pour 2000 n'est pas un an nul
 	if m.llAnNul and !m.llMoisNul && {fr} l'année a été passée à la place du mois
 		tcAn = m.tcMois
-		tcMois = space(0)
+		tcMois = ''
 		llAnNul = .f.
 	endif
 
@@ -384,12 +384,12 @@ if  .f.;
 	endif
 
 	llMoisNul = val(m.tcMois) = 0
-	tcMois = iif(m.llMoisNul, space(0), padl(alltrim(m.tcMois), 2, '0'))
+	tcMois = iif(m.llMoisNul, '', padl(alltrim(m.tcMois), 2, '0'))
 
 	tcDate = '';
-		+ iif(m.llMoisNul, space(0), alltrim (m.tcMois));
-		+ iif(m.llMoisNul or m.llAnNul, space(0), '/');
-		+ iif(m.llAnNul, space(0), iif(m.llMoisNul, m.tcAn, right(alltrim(m.tcAn), 2))) && {fr} Ne garder que les années !
+		+ iif(m.llMoisNul, '', alltrim (m.tcMois));
+		+ iif(m.llMoisNul or m.llAnNul, '', '/');
+		+ iif(m.llAnNul, '', iif(m.llMoisNul, m.tcAn, right(alltrim(m.tcAn), 2))) && {fr} Ne garder que les années !
 
 	lcResult = m.tcDate
 endif && {fr} Vartype(tcDate) = 'C' ...
@@ -490,7 +490,7 @@ lparameters tu && [Date()] {fr} Date ou date & heure ou nombre AAAAMM
 tu = evl(m.tu, date())
 
 local lcType, lnYear, lnMonth, ld, lcDate, llResult, lcResult
-lcResult = space(0)
+lcResult = ''
 
 lcType = vartype(m.tu)
 if m.lcType == 'N' and m.tu > 0
@@ -531,7 +531,7 @@ lcResult = space(8)
 
 * {fr} Si une date valide a été passée
 if vartype(m.tcDate) == 'C' ;
- and val(chrtran(m.tcDate, DATE_SEP, space(0))) > 0
+ and val(chrtran(m.tcDate, DATE_SEP, '')) > 0
 
 * {fr} Localiser les éventuels séparateurs d'an et de mois
 	local lnSepAn, lnSepMois
@@ -619,7 +619,7 @@ local lcResult;
 , llResult;
 , lcWords, lnWords
 
-lcResult = space(0)
+lcResult = ''
 
 lcWords = cDateLong(m.tu)
 lnWords = getwordcount(m.lcWords)
@@ -820,7 +820,7 @@ if m.llResult
 		llResult = not empty(m.ldResult)
 		if m.llResult
 
-			tc = strtran(m.tc, m.lcResult, space(0))
+			tc = strtran(m.tc, m.lcResult, '')
 		endif
 	endif
 endif

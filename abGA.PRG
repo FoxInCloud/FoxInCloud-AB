@@ -891,7 +891,7 @@ FUNCTION ga_DBCTablesTree && Tables d'une base de données dans l'ordre de parent
 		, laRelation[1], lnRelations
 		
 		loDB = abSet('DATABASE', m.tcDBC,,,.T.)
-		lnExcludes = ALines(laExcludes, Upper(Evl(m.tcExcludes, Space(0))), 1+4, ',', ';')
+		lnExcludes = ALines(laExcludes, Upper(Evl(m.tcExcludes, '')), 1+4, ',', ';')
 		lnResult = ADBObjects(taTable, "TABLE")
 
 		= ga_TopologicalSort_Object(@m.obj)
