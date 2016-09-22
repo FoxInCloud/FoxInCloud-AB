@@ -127,6 +127,7 @@ function aListItems && {fr} Listbox|Combobox.List[] > array
 lparameters ;
   taItems; && @ {fr} Éléments de .List[]
 , toList as listbox && {fr} Objet Listbox ou ComboBox
+
 external array taItems
 
 local lnResult as Integer; && {fr} nombre d'éléments
@@ -154,7 +155,7 @@ if m.llResult
 			lnResult = .listcount
 			if m.lnResult > 0
 
-				lnCol = max(evl(.columncount, 1), .boundcolumn)
+				lnCol = max(evl(.ColumnCount, 1), .boundcolumn)
 				dimension taItems[m.lnResult, m.lnCol]
 
 				for liRow = 1 to m.lnResult
@@ -180,6 +181,7 @@ if m.llResult
 endif
 
 return m.lnResult
+endfunc
 
 * ------------------------------------
 procedure aListItems_Test && {fr} test unitaire de aListItems()
@@ -193,7 +195,7 @@ loTest = newobject('abUnitTest', 'abDev.prg')
 loList = createobject('Listbox')
 
 with m.loList as listbox
-	.columncount = 2
+	.ColumnCount = 2
 	.boundcolumn = 2
 	.clear
 	for liItem = 1 to 100
@@ -203,6 +205,7 @@ with m.loList as listbox
 	endfor
 	.value = '' && {fr} Valeur en dehors de la liste
 endwith
+
 loTest.Test(100, @m.laItem, m.loList) && 100 x 2 = .2 ms
 loTest.assert(100, m.loList.listcount)
 
@@ -214,25 +217,29 @@ with m.loList as listbox
 	.list[.NewIndex, 2] = '104'
 	.value = '104'
 endwith
+
 loTest.Test(2, @m.laItem, m.loList)
 loTest.assert(["101","102","103","104"], cListOfArray(@m.laItem,,-1,.t.))
 
 return loTest.Result()
 
 * ========================================
-function aItemsList && {en} Array from Listbox|Combobox.List[]
+function aItemsList && {en} Sets Listbox|Combobox.List[] from Array 
 lparameters ;
   taItems; && @ {fr} Éléments de .List[]
 , toList as listbox && {fr} Objet Listbox ou ComboBox
+
 external array taItems
 
 * modify command c:\test\test\Listbox_combobox.list.prg
 
 local lnResult as integer; && {fr} nombre d'éléments
 , llResult as Boolean;
-, loForm as form, liDS as integer, llDS as Boolean;
-, lcAlias as string, lcField as string, llFldState as Boolean, lnFldState as integer, luValue;
-, liCol as integer;
+, loForm as form;
+, llDS as Boolean, liDS as integer;
+, luValue;
+, lcAlias as string, lcField as string, llFldState as Boolean, lnFldState as integer;
+, lnCol as integer, liCol as integer;
 , liRow as integer;
 , lcElt as string;
 
@@ -270,13 +277,14 @@ if m.llResult
 *			.rowsource = '' && 2015-12-07 -- thn -- work around Error 1152 (Cannot access the selected table) -- useless and dangerous - breaks .rowsourcetype = 3 && {fr} SQL-select
 			.rowsourcetype = 0 && {en} None
 			.clear
-			.columncount = alen(m.taItems, 2) && {fr} For a ComboBox or Listbox control, if you set ColumnCount to 0, the first column is displayed based on the RowSource property or on the items added with the AddItem method
+*			.ColumnCount = alen(m.taItems, 2) && {en} For a ComboBox or Listbox control, if you set ColumnCount to 0, the first column is displayed based on the RowSource property or on the items added with the AddItem method
+			lnCol = alen(m.taItems, 2) && 2016-09-21 thn -- {FiC V 2.22.0-beta.7} {en} do not change .ColumnCount
 
 			do case
 			case laEmpty(@m.taItems)
 				lnResult = 0
 
-			case .columncount <= 1
+			case m.lnCol <= 1
 				for each lcElt in m.taItems
 					.additem(transform(m.lcElt)) && {fr} par sécurité
 				endfor
@@ -284,7 +292,7 @@ if m.llResult
 			otherwise
 				for liRow = 1 to alen(m.taItems, 1)
 					.additem(transform(m.taItems[m.liRow, 1]))
-					for liCol = 2 to .columncount
+					for liCol = 2 to m.lnCol
 						.list[.NewIndex, m.liCol] = transform(m.taItems[m.liRow, m.liCol]) && {fr} The AddItem method always inserts a new row into a multicolumn ComboBox or Listbox. After a row has been inserted, columns in that row should be populated using the .List(.NewIndex, nColumn) syntax
 					endfor
 				endfor
@@ -303,6 +311,7 @@ if m.llResult
 endif
 
 return m.lnResult
+endfunc
 
 * ------------------------------------
 procedure aItemsList_Test && {fr} test unitaire de aItemsList()
@@ -317,7 +326,7 @@ loTest = newobject('abUnitTest', 'abDev.prg')
 loList = createobject('Listbox')
 with m.loList as listbox
 	.rowsourcetype = 5 && {fr} before updating .RowSource, program must reset .RowSourceType to the proper value
-	.columncount = 5
+	.ColumnCount = 5
 	.boundcolumn = 2
 endwith
 
@@ -364,7 +373,7 @@ if loCont(m.toCont)
 			.baseclass == 'Pageframe',;
 				.pageCount,;
 			.baseclass == 'Grid',;
-				.columnCount,;
+				.ColumnCount,;
 			inlist(.baseclass, 'Optiongroup', 'Commandgroup'),;
 				.buttonCount,;
 			.baseclass == 'Formset',;
@@ -665,7 +674,10 @@ if m.llResult
 *assert !Lower(m.tcClass) == 'baseform' && 4 Feb 2014
 
 	tcClass = alltrim(m.tcClass)
-	loSets = newobject('abSetsMaintain', 'abdev.prg')
+	loSets = newobject('abSetsMaintain', 'abDev.prg';
+		, .null.; && && [.null.] {en} type of SETs - .null.: all, .T.: scoped to the dataSession, .F.: global (not scoped to the dataSession)
+		, !wlAutomation(); && tlProcClass [.F.] {en} also save Set("Procedure") & Set("Classlib")
+		)
 
 	try
 		try
@@ -2015,7 +2027,7 @@ lcResult = ''
 loTest.Test(.null., m.loObj, @m.lcResult) && .NULL.
 ? m.lcResult
 
-loObj.columncount = 2
+loObj.ColumnCount = 2
 lcResult = ''
 loTest.Test(.null., m.loObj, @m.lcResult) && .NULL.
 ? m.lcResult
@@ -3044,3 +3056,22 @@ endif
 
 return loTest.Result()
 endproc
+
+* ------------------------------------
+function cAnchor && {en} .Anchor described
+lparameters iAnchor
+
+return Evl(cWords(', ';
+	, Iif(BitTest(m.iAnchor, 0), 'Top Absolute', '');
+	, Iif(BitTest(m.iAnchor, 1), 'Left Absolute', '');
+	, Iif(BitTest(m.iAnchor, 2), 'Bottom Absolute', '');
+	, Iif(BitTest(m.iAnchor, 3), 'Right Absolute', '');
+	, Iif(BitTest(m.iAnchor, 4), 'Top Relative', '');
+	, Iif(BitTest(m.iAnchor, 5), 'Left Relative', '');
+	, Iif(BitTest(m.iAnchor, 6), 'Bottom Relative', '');
+	, Iif(BitTest(m.iAnchor, 7), 'Right Relative', '');
+	, Iif(BitTest(m.iAnchor, 8), 'Horizontal Fixed Size', '');
+	, Iif(BitTest(m.iAnchor, 9), 'Vertical Fixed Size', '');
+	), 'Top Left')
+
+endfunc

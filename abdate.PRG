@@ -581,8 +581,10 @@ return iif(vartype(m.td) == 'D' ;
 * ================================================
 function cDateLong && {fr} Date longue
 lparameters ;
-  tu; && {fr} Date ou date-heure
+  tu; && {fr} [Datetime()] Date ou date-heure
 , tlNoDay && [.F.] {fr} ôter le jour de la semaine
+
+tu = Evl(m.tu, Datetime())
 
 local lcResult;
 , llResult;
@@ -630,32 +632,35 @@ if m.llResult
 endif
 
 return m.lcResult
+endfunc
 
 * ================================================
 function cMonthFR && {fr} Mois en français
 lparameters tnMonth && {fr} N° du mois
 
 return icase(;
-		!vartype(m.tnMonth) == 'N', transform(m.tnMonth) + '?',;
-		m.tnMonth = 01, 'janvier',;
-		m.tnMonth = 02, 'février',;
-		m.tnMonth = 03, 'mars',;
-		m.tnMonth = 04, 'avril',;
-		m.tnMonth = 05, 'mai',;
-		m.tnMonth = 06, 'juin',;
-		m.tnMonth = 07, 'juillet',;
-		m.tnMonth = 08, 'août',;
-		m.tnMonth = 09, 'septembre',;
-		m.tnMonth = 10, 'octobre',;
-		m.tnMonth = 11, 'novembre',;
-		m.tnMonth = 12, 'décembre',;
-		textmerge('n° de mois non supporté : <<m.tnMonth>>');
-		)
+	!vartype(m.tnMonth) == 'N', transform(m.tnMonth) + '?',;
+	m.tnMonth = 01, 'janvier',;
+	m.tnMonth = 02, 'février',;
+	m.tnMonth = 03, 'mars',;
+	m.tnMonth = 04, 'avril',;
+	m.tnMonth = 05, 'mai',;
+	m.tnMonth = 06, 'juin',;
+	m.tnMonth = 07, 'juillet',;
+	m.tnMonth = 08, 'août',;
+	m.tnMonth = 09, 'septembre',;
+	m.tnMonth = 10, 'octobre',;
+	m.tnMonth = 11, 'novembre',;
+	m.tnMonth = 12, 'décembre',;
+	textmerge('n° de mois non supporté : <<m.tnMonth>>');
+	)
+endfunc
 
 * ================================================
 function iAge && {fr} Age en années entières
 lparameters td
 return iYears(m.td, date())
+endfunc
 
 * ================================================
 function iYears && {fr} Années entières entre deux dates ou date-heures
@@ -1297,12 +1302,16 @@ cLangUser(m.cLangUser)
 return loTest.Result()
 
 * ================================================
-function cDateFig_Long && {fr} Date eu chiffres et longue
+function cDateFig_Long && {fr} Date en chiffres et longue
 lparameters ;
   tu; && {fr} Date ou date-heure
 , tlNoDay && [.F.] {fr} ôter le jour de la semaine
 
-return transform(m.tu) + ' (' + cDateLong(m.tu, m.tlNoDay) + ')'
+local result
+
+result = cDateLong(@m.tu, m.tlNoDay)
+return transform(m.tu) + ' (' + m.result + ')'
+endfunc
 
 * ================================================
 function ctRFC822 && {fr} Date et heure selon la norme RFC822
@@ -1366,3 +1375,38 @@ return m.lcResult
 function iQuarter && {fr} N° de trimestre
 lparameters td
 return Ceiling(Month(m.td)/3)
+
+* ================================================
+function iDayMonthYear && {fr} position du jour, mois et année dans le format de date courant
+lparameters ;
+  liDay; && {fr} position du jour
+, liMonth; && {fr} position du mois
+, liYear && {fr} position de l'année
+
+local iSetDate1 as Integer
+
+iSetDate1 = Set("Date", 1) && Date Ordering: 0 – MDY, 1 – DMY, 2 – YMD
+
+liDay   = ICase(m.iSetDate1 = 0, 2, m.iSetDate1 = 1, 1, m.iSetDate1 = 2, 3, .null.)
+liMonth = ICase(m.iSetDate1 = 0, 1, m.iSetDate1 = 1, 2, m.iSetDate1 = 2, 2, .null.)
+liYear  = ICase(m.iSetDate1 = 0, 3, m.iSetDate1 = 1, 3, m.iSetDate1 = 2, 1, .null.)
+
+endfunc
+
+* ================================================
+function nGMToffsetMin && {fr} Minutes entre l'heure locale et l'heure GMT
+
+declare integer;
+	GetTimeZoneInformation;
+	in win32api;
+	string @ TimeZoneStruct
+   
+local lcTZ, lnDayLightSavings
+
+lcTZ = Space(256)
+lnDayLightSavings = GetTimeZoneInformation(@m.lcTZ)
+
+RETURN nOfcDWord(Substr(m.lcTZ, 1, 4), .T.); && modify command abDev
+	- Iif(m.lnDaylightSavings = 2, 60, 0)
+
+endfunc

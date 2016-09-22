@@ -1138,9 +1138,9 @@ endfunc
 
 * -----------------------------------------------------------------
 function cLitterals_List
-lparameters cList
+lparameters cList, cDelim
 local aa[1]
-return Iif(alines(aa, Evl(m.cList, ''), 5, ',') > 0;
+return Iif(alines(aa, Evl(m.cList, ''), 5, Evl(m.cDelim, ',')) > 0;
 	, cListOfArray(@m.aa,,,.T.);
 	, cL(m.cList);
 	)

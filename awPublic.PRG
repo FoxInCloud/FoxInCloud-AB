@@ -136,6 +136,7 @@ function wlFIC && {fr} Un package FoxInCloud est installé sur cet ordinateur
 lparameters ;
   tlTrial; && @ [.F.] {fr} La version d'essai est installée
 , tuVersion && @ [.null.] {fr} N° de la version installée
+
 tlTrial = .F.
 tuVersion = .null.
 
@@ -779,24 +780,24 @@ lparameters ;
 
 tlRemove = lTrue(m.tlRemove)
 
-LOCAL llResult as Boolean; && {fr} mission accomplie
+LOCAL success as Boolean; && {fr} mission accomplie
 , laProp[1], lcProp, liProp; && {fr} propriétés indiquées
 , laPropSave[1], lnPropSave, lcPropSave; && {fr} propriétés existantes
 
-llResult = .T.;
+success = .T.;
  and Vartype(m.toObj) == 'O';
  and Vartype(m.tcProps) == 'C';
  and NOT Empty(m.tcProps);
  and Vartype(m.tcPropSave) == 'C';
  and InList(Lower(m.tcPropSave), Lower('wcPropSave'), Lower('wcPropSaveNot'));
  and .T.
-ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([Invalid parameters(s)]))
-IF m.llResult
+ASSERT m.success MESSAGE cAssertMsg(Textmerge([Invalid parameters(s)]))
+IF m.success
 
 	* {fr} Si les propriétés indiquées sont valides
-	llResult = ALines(laProp, m.tcProps, 1+4, ',', ';') > 0 && trim
-	ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([Invalid Properties list '<<m.tcProps>>']))
-	IF m.llResult
+	success = ALines(laProp, m.tcProps, 1+4, ',', ';') > 0 && trim
+	ASSERT m.success MESSAGE cAssertMsg(Textmerge([Invalid Properties list '<<m.tcProps>>']))
+	IF m.success
 	
 		* {fr} Tabuler la liste existante
 		IF .T.;
@@ -827,7 +828,7 @@ IF m.llResult
 *!*				* {fr} Si la propriété existe dans l'objet
 *!*				IF lProperty(m.toObj, m.lcProp)
 *!*				ELSE
-*!*					llResult = .F. && {fr} important de laisser ainsi car une fois que llResult = .F., ne doit plus bouger
+*!*					success = .F. && {fr} important de laisser ainsi car une fois que success = .F., ne doit plus bouger
 *!*				ENDIF
 		ENDFOR
 		
@@ -846,7 +847,7 @@ IF m.llResult
 	ENDIF
 ENDIF
 
-return m.llResult
+return m.success
 endproc
 
 * =============================================================
@@ -1069,13 +1070,15 @@ endif
 * =============================================================
 procedure wReport && {en} REPORT FORM in Web and LAN modes
 lparameters ;
-  tParm1 AS Character; && {fr} Parameter 1 TBD
+  tcResult AS Character; && @ [''] {en} Returned result: Address of the PDF file generated or error if any
+, tcPDFgen AS Character; && [Whatever we find first] {en} PDF generator to be used (useful only if several generators are installed)
+, tParm1 AS Character; && {fr} Parameter 1 TBD
 , tParm2 AS Character; && {fr} Parameter 2 TBD, and so on
 , tParmN AS Character; && {fr} Parameter n TBD
-, tcResult AS Character; && @ [''] {en} Returned result: Address of the PDF file generated or error if any
-, tcPDFgen AS Character && [Whatever we find first] {en} PDF generator to be used (useful only if several generators are installed)
 
-LOCAL lcReportForm, loResult AS Exception, llResult
+return .F. && WIP -- DO NOT USE
+
+LOCAL llResult, lcReportForm, loResult AS Exception
 
 IF wlLAN() && {fr} LAN mode, just execute REPORT FORM
 
@@ -1121,6 +1124,7 @@ ELSE && {fr} Web mode
 ENDIF
 	
 return m.llResult
+endproc
 
 * ---------------------------------------
 procedure wReport_xFRX && {en} REPORT FORM in Web mode using xFRX
@@ -1200,7 +1204,7 @@ case !loClass(m.toForm, 'awFrm')
 
 case wlLAN() && {en} desktop mode
 
-	tlModal = lTrue(m.tlModal)
+	tlModal = lTrue(m.tlModal) or m.toForm.WindowType = 1
 
 	if m.tlModal and varSet(@m.lcSCX, Sys(1271, m.toForm)) and ga_Type_IsChar(m.lcSCX, .T.)
 		lcSCX = Chrtran(JustStem(m.lcSCX), '- ', '__')
@@ -1692,7 +1696,7 @@ ENDIF
 return m.luResult
 
 * ---------------------------------------
-procedure wMenu_lValid && {en} A Menu command or function is supported (2-3 ms)
+function wMenu_lValid && {en} A Menu command or function is supported (2-3 ms)
 lparameters ;
   tcCmdFunc AS String; && {en} Command or function to be checked for
 , tcCmdFuncFound AS String; && @ [.null.] {en} Command or function Name found in the instruction
@@ -1702,70 +1706,71 @@ lparameters ;
 
 store .null. to tcCmdFuncFound, tlFunc, tcCmdFuncNorm, tcLevel
 
-LOCAL lcPattern, laPattern[1], llResult
+LOCAL llResult;
+, lcPattern, laPattern[1]
 
-TEXT TO lcPattern NOSHOW FLAGS 1 PRETEXT 7 && modify command awOOPmenu > awMenu_cPatterns()
-	(^\bacti(v(a(t(e)?)?)?)?\b\s+\bmenu\b)	ACTIVATE MENU	C	M
-	(^\bacti(v(a(t(e)?)?)?)?\b\s+\bpopu(p)?\b)	ACTIVATE POPUP	C	P
-	(^\bclea(r)?\b\s+\bmenu(s)?\b)	CLEAR MENUS	C	M
-	(^\bclea(r)?\b\s+\bpopu(p(s)?)?\b)	CLEAR POPUPS	C	P
-	(^\bdeac(t(i(v(a(t(e)?)?)?)?)?)?\b\s+\bmenu\b)	DEACTIVATE MENU	C	M
-	(^\bdeac(t(i(v(a(t(e)?)?)?)?)?)?\b\s+\bpopu(p)?\b)	DEACTIVATE POPUP	C	P
-	(^\bdefi(n(e)?)?\b\s+\bbar\b)	DEFINE BAR	C	P
-	(^\bdefi(n(e)?)?\b\s+\bmenu\b)	DEFINE MENU	C	M
-	(^\bdefi(n(e)?)?\b\s+\bpad\b)	DEFINE PAD	C	M
-	(^\bdefi(n(e)?)?\b\s+\bpopu(p)?\b)	DEFINE POPUP	C	P
-	(^\bhide\b\s+\bmenu\b)	HIDE MENU	C	M
-	(^\bhide\b\s+\bpopu(p)?\b)	HIDE POPUP	C	P
-	(^\bmove\b\s+\bpopu(p)?\b)	MOVE POPUP	C	P
-	(^\bon\b\s+\bbar\b)	ON BAR	C	P
-	(^\bon\b\s+\bpad\b)	ON PAD	C	M
-	(^\bon\b\s+\bsele(c(t(i(o(n)?)?)?)?)?\b\s+\bbar\b)	ON SELECTION BAR	C	P
-	(^\bon\b\s+\bsele(c(t(i(o(n)?)?)?)?)?\b\s+\bmenu\b)	ON SELECTION MENU	C	M
-	(^\bon\b\s+\bsele(c(t(i(o(n)?)?)?)?)?\b\s+\bpad\b)	ON SELECTION PAD	C	M
-	(^\bon\b\s+\bsele(c(t(i(o(n)?)?)?)?)?\b\s+\bpopu(p)?\b)	ON SELECTION POPUP	C	P
-	(^\bpop\b\s+\bmenu\b)	POP MENU	C	M
-	(^\bpop\b\s+\bpopu(p)?\b)	POP POPUP	C	P
-	(^\bpush\b\s+\bmenu\b)	PUSH MENU	C	M
-	(^\bpush\b\s+\bpopu(p)?\b)	PUSH POPUP	C	P
-	(^\brele(a(s(e)?)?)?\b\s+\bbar\b)	RELEASE BAR	C	P
-	(^\brele(a(s(e)?)?)?\b\s+\bmenu(s)?\b)	RELEASE MENUS	C	M
-	(^\brele(a(s(e)?)?)?\b\s+\bpad\b)	RELEASE PAD	C	M
-	(^\brele(a(s(e)?)?)?\b\s+\bpopu(p(s)?)?\b)	RELEASE POPUPS	C	P
-	(^\bset\b\s+\bmark\b\s+\bof\b\s+\bbar\b)	SET MARK OF BAR	C	P
-	(^\bset\b\s+\bmark\b\s+\bof\b\s+\bmenu\b)	SET MARK OF MENU	C	M
-	(^\bset\b\s+\bmark\b\s+\bof\b\s+\bpopu(p)?\b)	SET MARK OF POPUP	C	P
-	(^\bset\b\s+\bskip\b\s+\bof\b\s+\bbar\b)	SET SKIP OF BAR	C	P
-	(^\bset\b\s+\bskip\b\s+\bof\b\s+\bmenu\b)	SET SKIP OF MENU	C	M
-	(^\bset\b\s+\bskip\b\s+\bof\b\s+\bpad\b)	SET SKIP OF PAD	C	M
-	(^\bset\b\s+\bskip\b\s+\bof\b\s+\bpopu(p)?\b)	SET SKIP OF POPUP	C	P
-	(^\bset\b\s+\bsysm(e(n(u)?)?)?\b)	SET SYSMENU	C	M
-	(^\bshow\b\s+\bmenu\b)	SHOW MENU	C	M
-	(^\bshow\b\s+\bpopu(p)?\b)	SHOW POPUP	C	P
-	(^\bsize\b\s+\bpopu(p)?\b)	SIZE POPUP	C	P
-	(\bbar\b)\s*\(	BAR	F	P
-	(\bcntb(a(r)?)?\b)\s*\(	CNTBAR	F	P
-	(\bcntp(a(d)?)?\b)\s*\(	CNTPAD	F	M
-	(\bgetb(a(r)?)?\b)\s*\(	GETBAR	F	P
-	(\bgetp(a(d)?)?\b)\s*\(	GETPAD	F	M
-	(\bmenu\b)\s*\(	MENU	F	M
-	(\bmrkb(a(r)?)?\b)\s*\(	MRKBAR	F	P
-	(\bmrkp(a(d)?)?\b)\s*\(	MRKPAD	F	M
-	(\bpad\b)\s*\(	PAD	F	M
-	(\bpopu(p)?\b)\s*\(	POPUP	F	P
-	(\bprmb(a(r)?)?\b)\s*\(	PRMBAR	F	P
-	(\bprmp(a(d)?)?\b)\s*\(	PRMPAD	F	M
-	(\bprom(p(t)?)?\b)\s*\(	PROMPT	F	
-	(\bskpb(a(r)?)?\b)\s*\(	SKPBAR	F	P
-	(\bskpp(a(d)?)?\b)\s*\(	SKPPAD	F	M
-	(^\bbarp(r(o(m(p(t)?)?)?)?)?\b)	BARPROMPT	V	P
-	(^\bon\b\s+\bexit\b\s+\bbar\b)	ON EXIT BAR	V	P
-	(^\bon\b\s+\bexit\b\s+\bmenu\b)	ON EXIT MENU	V	M
-	(^\bon\b\s+\bexit\b\s+\bpad\b)	ON EXIT PAD	V	M
-	(^\bon\b\s+\bexit\b\s+\bpopu(p)?\b)	ON EXIT POPUP	V	P
-ENDTEXT
+lcPattern = ''; && modify command awOOPmenu > awMenu_cPatterns() && 2016-09-14 thn -- {FiC V 2.22.0-beta.6} {en} replaced text ... endtext to avoid recursive textmerge error
++ CRLF + '(^\bacti(v(a(t(e)?)?)?)?\b\s+\bmenu\b)	ACTIVATE MENU	C	M';
++ CRLF + '(^\bacti(v(a(t(e)?)?)?)?\b\s+\bpopu(p)?\b)	ACTIVATE POPUP	C	P';
++ CRLF + '(^\bclea(r)?\b\s+\bmenu(s)?\b)	CLEAR MENUS	C	M';
++ CRLF + '(^\bclea(r)?\b\s+\bpopu(p(s)?)?\b)	CLEAR POPUPS	C	P';
++ CRLF + '(^\bdeac(t(i(v(a(t(e)?)?)?)?)?)?\b\s+\bmenu\b)	DEACTIVATE MENU	C	M';
++ CRLF + '(^\bdeac(t(i(v(a(t(e)?)?)?)?)?)?\b\s+\bpopu(p)?\b)	DEACTIVATE POPUP	C	P';
++ CRLF + '(^\bdefi(n(e)?)?\b\s+\bbar\b)	DEFINE BAR	C	P';
++ CRLF + '(^\bdefi(n(e)?)?\b\s+\bmenu\b)	DEFINE MENU	C	M';
++ CRLF + '(^\bdefi(n(e)?)?\b\s+\bpad\b)	DEFINE PAD	C	M';
++ CRLF + '(^\bdefi(n(e)?)?\b\s+\bpopu(p)?\b)	DEFINE POPUP	C	P';
++ CRLF + '(^\bhide\b\s+\bmenu\b)	HIDE MENU	C	M';
++ CRLF + '(^\bhide\b\s+\bpopu(p)?\b)	HIDE POPUP	C	P';
++ CRLF + '(^\bmove\b\s+\bpopu(p)?\b)	MOVE POPUP	C	P';
++ CRLF + '(^\bon\b\s+\bbar\b)	ON BAR	C	P';
++ CRLF + '(^\bon\b\s+\bpad\b)	ON PAD	C	M';
++ CRLF + '(^\bon\b\s+\bsele(c(t(i(o(n)?)?)?)?)?\b\s+\bbar\b)	ON SELECTION BAR	C	P';
++ CRLF + '(^\bon\b\s+\bsele(c(t(i(o(n)?)?)?)?)?\b\s+\bmenu\b)	ON SELECTION MENU	C	M';
++ CRLF + '(^\bon\b\s+\bsele(c(t(i(o(n)?)?)?)?)?\b\s+\bpad\b)	ON SELECTION PAD	C	M';
++ CRLF + '(^\bon\b\s+\bsele(c(t(i(o(n)?)?)?)?)?\b\s+\bpopu(p)?\b)	ON SELECTION POPUP	C	P';
++ CRLF + '(^\bpop\b\s+\bmenu\b)	POP MENU	C	M';
++ CRLF + '(^\bpop\b\s+\bpopu(p)?\b)	POP POPUP	C	P';
++ CRLF + '(^\bpush\b\s+\bmenu\b)	PUSH MENU	C	M';
++ CRLF + '(^\bpush\b\s+\bpopu(p)?\b)	PUSH POPUP	C	P';
++ CRLF + '(^\brele(a(s(e)?)?)?\b\s+\bbar\b)	RELEASE BAR	C	P';
++ CRLF + '(^\brele(a(s(e)?)?)?\b\s+\bmenu(s)?\b)	RELEASE MENUS	C	M';
++ CRLF + '(^\brele(a(s(e)?)?)?\b\s+\bpad\b)	RELEASE PAD	C	M';
++ CRLF + '(^\brele(a(s(e)?)?)?\b\s+\bpopu(p(s)?)?\b)	RELEASE POPUPS	C	P';
++ CRLF + '(^\bset\b\s+\bmark\b\s+\bof\b\s+\bbar\b)	SET MARK OF BAR	C	P';
++ CRLF + '(^\bset\b\s+\bmark\b\s+\bof\b\s+\bmenu\b)	SET MARK OF MENU	C	M';
++ CRLF + '(^\bset\b\s+\bmark\b\s+\bof\b\s+\bpopu(p)?\b)	SET MARK OF POPUP	C	P';
++ CRLF + '(^\bset\b\s+\bskip\b\s+\bof\b\s+\bbar\b)	SET SKIP OF BAR	C	P';
++ CRLF + '(^\bset\b\s+\bskip\b\s+\bof\b\s+\bmenu\b)	SET SKIP OF MENU	C	M';
++ CRLF + '(^\bset\b\s+\bskip\b\s+\bof\b\s+\bpad\b)	SET SKIP OF PAD	C	M';
++ CRLF + '(^\bset\b\s+\bskip\b\s+\bof\b\s+\bpopu(p)?\b)	SET SKIP OF POPUP	C	P';
++ CRLF + '(^\bset\b\s+\bsysm(e(n(u)?)?)?\b)	SET SYSMENU	C	M';
++ CRLF + '(^\bshow\b\s+\bmenu\b)	SHOW MENU	C	M';
++ CRLF + '(^\bshow\b\s+\bpopu(p)?\b)	SHOW POPUP	C	P';
++ CRLF + '(^\bsize\b\s+\bpopu(p)?\b)	SIZE POPUP	C	P';
++ CRLF + '(\bbar\b)\s*\(	BAR	F	P';
++ CRLF + '(\bcntb(a(r)?)?\b)\s*\(	CNTBAR	F	P';
++ CRLF + '(\bcntp(a(d)?)?\b)\s*\(	CNTPAD	F	M';
++ CRLF + '(\bgetb(a(r)?)?\b)\s*\(	GETBAR	F	P';
++ CRLF + '(\bgetp(a(d)?)?\b)\s*\(	GETPAD	F	M';
++ CRLF + '(\bmenu\b)\s*\(	MENU	F	M';
++ CRLF + '(\bmrkb(a(r)?)?\b)\s*\(	MRKBAR	F	P';
++ CRLF + '(\bmrkp(a(d)?)?\b)\s*\(	MRKPAD	F	M';
++ CRLF + '(\bpad\b)\s*\(	PAD	F	M';
++ CRLF + '(\bpopu(p)?\b)\s*\(	POPUP	F	P';
++ CRLF + '(\bprmb(a(r)?)?\b)\s*\(	PRMBAR	F	P';
++ CRLF + '(\bprmp(a(d)?)?\b)\s*\(	PRMPAD	F	M';
++ CRLF + '(\bprom(p(t)?)?\b)\s*\(	PROMPT	F	';
++ CRLF + '(\bskpb(a(r)?)?\b)\s*\(	SKPBAR	F	P';
++ CRLF + '(\bskpp(a(d)?)?\b)\s*\(	SKPPAD	F	M';
++ CRLF + '(^\bbarp(r(o(m(p(t)?)?)?)?)?\b)	BARPROMPT	V	P';
++ CRLF + '(^\bon\b\s+\bexit\b\s+\bbar\b)	ON EXIT BAR	V	P';
++ CRLF + '(^\bon\b\s+\bexit\b\s+\bmenu\b)	ON EXIT MENU	V	M';
++ CRLF + '(^\bon\b\s+\bexit\b\s+\bpad\b)	ON EXIT PAD	V	M';
++ CRLF + '(^\bon\b\s+\bexit\b\s+\bpopu(p)?\b)	ON EXIT POPUP	V	P';
++ '';
 
-aLinesCols(@m.laPattern, m.lcPattern)
+aLinesCols(@m.laPattern, Alltrim(m.lcPattern, CR, LF))
 tcCmdFunc = Alltrim(cInLineCommentStripped(m.tcCmdFunc), ' ', TABUL, CR, LF)
 
 WITH abRegExp() AS abRegExp OF abTxt.prg
@@ -1790,6 +1795,7 @@ WITH abRegExp() AS abRegExp OF abTxt.prg
 ENDWITH
 
 return m.llResult
+endfunc
 
 * ---------------------------------------
 procedure wMenu_lValid_Test && {fr} Teste wMenu_lValid()
@@ -1904,9 +1910,12 @@ if !this.lAutomation
 	set procedure to (m.this.classLibrary) additive
 endif
 
-this.oSets = abSetsMaintain(; && 2016-08-18 thn -- {FiC V 2.22.0-beta.3} {en} added
-	  .T.; && [.F.] {en} also save Set("Procedure") & Set("Classlib")
-	, this.wlWeb; && [.F.] {en} only save SETs not scoped to the dataSession
+this.oSets = Iif(this.lDevMode;
+	, abSetsMaintain(; && 2016-08-18 thn -- {FiC V 2.22.0-beta.3} {en} added && modify command abDev
+		  Iif(this.wlLAN, .null., .F.); && [.null.] {en} type of SETs - .null.: all, .T.: scoped to the dataSession, .F.: global (not scoped to the dataSession)
+		, .T.; && [.F.] {en} also save Set("Procedure") & Set("Classlib")
+		);
+	, .null.;
 	)
 
 if Vartype(this.oSets) # 'O'
@@ -2245,34 +2254,33 @@ endproc
 *!*		endtext
 *!*		
 *!*		return ALines(m.aKey, m.result)
-
-*!*		endproc
- 
+*!*		endproc 
 
 * ============================================
-ENDDEFINE && {fr} CLASS awSets
+ENDDEFINE && CLASS awSets
 * ============================================
 
 
 * ============================================
-DEFINE CLASS awGrc AS Column
+DEFINE CLASS awGrc AS Column && {en} FoxInCloud base column class {fr} Classe de base Column FoxInCloud
 * ============================================
 
 headerClass = 'awGrh'
 headerClassLibrary = DOS_AB + 'awPublic.prg'
 
-woForm = .null. && {en} LAN: form launched by thisForm.wForm() {fr} LAN : Formulaire lancé par thisForm.wForm()
-wcPropSave = '' && [Web] {en} User-state properties to be saved {fr} Propriétés à sauvegarder
-wcPropSaveNot = '' && [Web] {en} Custom user state properties NOT to be saved {fr} Propriétés à NE PAS sauvegarder
+woForm = .null. && Desktop/LAN {en} Form launched by thisForm.wForm() {fr} Formulaire lancé par thisForm.wForm()
+wcPropSave = '' && {en} Properties saved (web) {fr} Propriétés sauvegardées (web)
+wcPropSaveNot = '' && [Web] {en} Custom properties NOT to be saved {fr} Propriétés à NE PAS sauvegarder
+
 wcID = '' && {en} HTML 'id' attribute {fr} attribut HTML 'id'
-woHTMLGen = .null. && {fr} AS awHTMLGen OF awHTML.prg - {en} awHTMLgen instance {fr} instance de awHTMLgen
+woHTMLgen = .null. && as awHTMLgen of awHTML.prg - {en} awHTMLgen instance {fr} instance de awHTMLgen
 wCSSclassAdd = '' && {en} Additional CSS class(es) {fr} Classe(s) CSS additionnelles
 wcHTML = .null. && [cf. this.wcHTMLGen()]{en} Object custom HTML {fr} HTML spécifique de l'objet
 wcHTMLevents = .null. && {en} HTML events to implement (coma delimited) - .null.: all (default), '': none {fr} Evénements HTML à générer (séparés par ',') - .null.: tous (défaut), '': aucun
 
 wlContentDynamic = .F. && {en} This object's members and/or properties are dynamic - .T. if members or property change at run-time {fr} Le contenu et/ou les propriétés de cet objet sont dynamiques - .T. si les membres ou les propriétés changent à l'exécution
 
-DynamicToolTipText = '' && {en} [Web only, not supported by VFP] Character expression setting ToolTipText for each grid row {fr} Expression caractère définissant le ToolTipText pour chaque ligne de la grille
+DynamicToolTipText = '' && {en} [Web only, not supported by VFP] Character expression setting .ToolTipText for each grid row {fr} [Web seul] Expression caractère définissant .ToolTipText pour chaque ligne de la grille
 _MemberData = '<VFPData><memberdata name="dynamictooltiptext" display="DynamicToolTipText" type="property"/></VFPData>'
 
 *!*		*--------------------------------------------
@@ -2627,21 +2635,21 @@ PROTECTED PROCEDURE wReadMe
 ENDPROC
 
 * ============================================
-ENDDEFINE && {fr} CLASS awGrc
+ENDDEFINE && CLASS awGrc
 * ============================================
 
 * ============================================
-DEFINE CLASS awGrh AS Header
+DEFINE CLASS awGrh AS Header && {en} FoxInCloud base Header class {fr} Classe de base Header FoxInCloud
 * ============================================
 
 Caption = "Header"
 
-woForm = .null. && {en} LAN: form launched by thisForm.wForm() {fr} LAN : Formulaire lancé par thisForm.wForm()
-wcPropSave = '' && {en} User-state properties saved (web) {fr} Propriétés sauvegardées (web)
-wcPropSaveNot = '' && [Web] {en} Custom user state properties NOT to be saved {fr} Propriétés à NE PAS sauvegarder
+woForm = .null. && Desktop/LAN {en} Form launched by thisForm.wForm() {fr} Formulaire lancé par thisForm.wForm()
+wcPropSave = '' && {en} Properties saved (web) {fr} Propriétés sauvegardées (web)
+wcPropSaveNot = '' && [Web] {en} Custom properties NOT to be saved {fr} Propriétés à NE PAS sauvegarder
 
 wcID = '' && {en} HTML 'id' attribute {fr} attribut HTML 'id'
-woHTMLGen = .null. && {fr} AS awHTMLGen OF awHTML.prg - {en} awHTMLgen instance {fr} instance de awHTMLgen
+woHTMLgen = .null. && as awHTMLgen of awHTML.prg - {en} awHTMLgen instance {fr} instance de awHTMLgen
 wCSSclassAdd = '' && {en} Additional CSS class(es) {fr} Classe(s) CSS additionnelles
 wcHTML = .null. && [cf. this.wcHTMLGen()]{en} Object custom HTML {fr} HTML spécifique de l'objet
 wcHTMLevents = .null. && {en} HTML events to implement (coma delimited) - .null.: all (default), '': none {fr} Evénements HTML à générer (séparés par ',') - .null.: tous (défaut), '': aucun
@@ -2983,18 +2991,19 @@ PROTECTED PROCEDURE wReadMe
 ENDPROC
 
 * ============================================
-ENDDEFINE && {fr} CLASS awGrh
+ENDDEFINE && CLASS awGrh
 * ============================================
 
 * ============================================
-DEFINE CLASS awSes AS Session
+DEFINE CLASS awSes AS Session && {en} FoxInCloud base Session class {fr} Classe de base Session FoxInCloud
 * ============================================
-woForm = .null. && {en} LAN: form launched by thisForm.wForm() {fr} LAN : Formulaire lancé par thisForm.wForm()
-wcPropSave = '' && {en} User-state properties saved (web) {fr} Propriétés sauvegardées (web)
-wcPropSaveNot = '' && [Web] {en} Custom user state properties NOT to be saved {fr} Propriétés à NE PAS sauvegarder
+
+woForm = .null. && Desktop/LAN {en} Form launched by thisForm.wForm() {fr} Formulaire lancé par thisForm.wForm()
+wcPropSave = '' && {en} Properties saved (web) {fr} Propriétés sauvegardées (web)
+wcPropSaveNot = '' && [Web] {en} Custom properties NOT to be saved {fr} Propriétés à NE PAS sauvegarder
 
 wcID = '' && {en} HTML 'id' attribute {fr} attribut HTML 'id'
-woHTMLGen = .null. && {fr} AS awHTMLGen OF awHTML.prg - {en} awHTMLgen instance {fr} instance de awHTMLgen
+woHTMLgen = .null. && as awHTMLgen of awHTML.prg - {en} awHTMLgen instance {fr} instance de awHTMLgen
 wCSSclassAdd = '' && {en} Additional CSS class(es) {fr} Classe(s) CSS additionnelles
 wcHTML = .null. && [cf. this.wcHTMLGen()]{en} Object custom HTML {fr} HTML spécifique de l'objet
 wcHTMLevents = .null. && {en} HTML events to implement (coma delimited) - .null.: all (default), '': none {fr} Evénements HTML à générer (séparés par ',') - .null.: tous (défaut), '': aucun
@@ -3173,7 +3182,7 @@ PROTECTED PROCEDURE wReadMe
 ENDPROC
 
 * ============================================
-ENDDEFINE && {fr} CLASS awSes
+ENDDEFINE && CLASS awSes
 * ============================================
 
 * -----------------------------------------------------
@@ -3337,14 +3346,19 @@ local success as Boolean;
 , nAnchor as Number;
 , Top_ as Number;
 , Height_ as Number;
+, lForm as boolean;
 
 if aoClassCont(@m.aCntl, m.toCont,, .F.) > 0
 
 	delta = m.tHeightPost - m.tHeightAnte
 	ratio = m.tHeightPost / m.tHeightAnte
+	lForm = m.toCont.BaseClass == 'Form'
 
 	for each oCntl in m.aCntl foxobject
-		if lProperty(m.oCntl, 'Anchor') and m.oCntl.Anchor > 0
+		if lProperty(m.oCntl, 'Anchor');
+		 and m.oCntl.Anchor > 0;
+		 and (m.lForm or !PemStatus(m.toCont, m.oCntl.Name, 6)) && controls inherited from a class apply .Anchor themselves, even if hidden
+
 			with m.oCntl as awTxt of aw.vcx
 
 				nAnchor = .Anchor && optimization
@@ -3352,19 +3366,18 @@ if aoClassCont(@m.aCntl, m.toCont,, .F.) > 0
 				Height_ = .Height
 
 				.Top = Round(ICase(;
-					BitTest(m.nAnchor, 4),; && Top Relative 32 5 2, 256 Anchors control to Top border of container and maintains relative distance between the Top border.
+					   BitTest(m.nAnchor, 4); && Top RELATIVE - Anchors control to Top border of container and maintains relative distance between the Top border.
+					or BitTest(m.nAnchor, 9),; && Vertical Fixed Size - Anchors center of control relative to top and bottom borders but remains fixed in size.
 						.Top * m.ratio,;
-					!BitTest(m.nAnchor, 0) and BitTest(m.nAnchor, 2),; && Bottom Absolute 8 3 128, 256 Anchors control to Bottom border of container and does not change the distance between the Bottom border.
+					!BitTest(m.nAnchor, 0) and BitTest(m.nAnchor, 2),; && Bottom ABSOLUTE - Anchors control to Bottom border of container and does not change the distance between the Bottom border.
 						.Top + m.delta,;
-					BitTest(m.nAnchor, 9),; && Vertical Fixed Size 		512 9 1, 4, 16, 64 Anchors center of control relative to top and bottom borders but remains fixed in size.
-						.Top + m.delta/2,;
-						.Top; && Top absolute
+						.Top; && Top ABSOLUTE
 					), 0)
 
 				if (.F.;
-				 or BitTest(m.nAnchor, 2); && Bottom absolute
-				 or BitTest(m.nAnchor, 6); && Bottom relative
-				 ) and !BitTest(m.nAnchor, 9); && Vertical Fixed Size 		512 9 1, 4, 16, 64 Anchors center of control relative to top and bottom borders but remains fixed in size.
+				 or BitTest(m.nAnchor, 2); && Bottom ABSOLUTE
+				 or BitTest(m.nAnchor, 6); && Bottom RELATIVE
+				 ) and !BitTest(m.nAnchor, 9); && Vertical Fixed Size - Anchors center of control relative to top and bottom borders but remains fixed in size.
 				 
 					.Height = Round(m.tHeightPost - .Top - (m.tHeightAnte - m.Top_ - m.Height_) * Iif(BitTest(m.nAnchor, 6); && Bottom relative
 						, m.ratio;
@@ -3402,42 +3415,47 @@ local success as Boolean;
 , nAnchor as Number;
 , Left_ as Number;
 , Width_ as Number;
+, lForm as boolean;
 
 if aoClassCont(@m.aCntl, m.toCont,, .F.) > 0
 
 	delta = m.tWidthPost - m.tWidthAnte
 	ratio = m.tWidthPost / m.tWidthAnte
+	lForm = m.toCont.BaseClass == 'Form'
 
 	for each oCntl in m.aCntl foxobject
-		if lProperty(m.oCntl, 'Anchor') and m.oCntl.Anchor > 0
-			with m.oCntl as awTxt of aw.vcx
+		if lProperty(m.oCntl, 'Anchor');
+		 and m.oCntl.Anchor > 0;
+		 and (m.lForm or !PemStatus(m.toCont, m.oCntl.Name, 6)) && controls inherited from a class apply .Anchor themselves, even if hidden
 
-* setStepOn(.wcID = 'event_scx-tutoinfoboxclient')
+			with m.oCntl as awTxt of aw.vcx
 
 				nAnchor = .Anchor && optimization
 				Left_ = .Left
 				Width_ = .Width
 
 				.Left = Round(ICase(;
-					BitTest(.Anchor, 5),; && Left Relative 32 5 2, 256 Anchors control to left border of container and maintains relative distance between the left border.
+					   BitTest(.Anchor, 5); && Left RELATIVE - Anchors control to left border of container and maintains relative distance between the left border.
+					or BitTest(.Anchor, 8),; && Horizontal Fixed Size - Anchors center of control relative to left and right borders but remains fixed in size.
 						.Left * m.ratio,;
-					!BitTest(.Anchor, 1) and BitTest(.Anchor, 3),; && Right Absolute 8 3 128, 256 Anchors control to right border of container and does not change the distance between the right border.
+					!BitTest(.Anchor, 1) and BitTest(.Anchor, 3),; && Right ABSOLUTE - Anchors control to right border of container and does not change the distance between the right border.
 						.Left + m.delta,;
-					BitTest(.Anchor, 8),; && Horizontal Fixed Size 256 8 2, 8, 32, 128 Anchors center of control relative to left and right borders but remains fixed in size.
-						.Left + m.delta/2,;
 						.Left; && Left absolute
 					), 0)
 
 				if (.F.;
-				 or BitTest(m.nAnchor, 3); && Right absolute
-				 or BitTest(m.nAnchor, 7); && Right relative
-				 ) and !BitTest(m.nAnchor, 8); && Horizontal Fixed Size 		512 9 1, 4, 16, 64 Anchors center of control relative to Left and Right borders but remains fixed in size.
+				 or BitTest(m.nAnchor, 3); && Right ABSOLUTE
+				 or BitTest(m.nAnchor, 7); && Right RELATIVE
+				 ) and !BitTest(m.nAnchor, 8); && Horizontal Fixed Size - Anchors center of control relative to Left and Right borders but remains fixed in size.
 				 
-					.Width = Round(m.tWidthPost - .Left - (m.tWidthAnte - m.Left_ - m.Width_) * Iif(BitTest(m.nAnchor, 7); && Right relative
+					.Width = Round(m.tWidthPost - .Left - (m.tWidthAnte - m.Left_ - m.Width_) * Iif(BitTest(m.nAnchor, 7); && Right RELATIVE
 						, m.ratio;
 						, 1;
 						), 0)
 				endif
+
+* setStepOn(.wcID = 'coordon_scx-navigdbf1') && 2016-08-31 thn -- {FiC V 2.22.0-beta.4} {en} Dooxi test
+
 			endwith
 
 			if !InList(m.oCntl.BaseClass, 'Optiongroup', 'Commandgroup'); && 2016-08-05 thn -- {FiC V 2.22.0-beta.2} {en} .Anchor works even with !Form.Visible

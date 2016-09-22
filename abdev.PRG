@@ -1687,7 +1687,7 @@ if m.llResult
 				if loRegExp.Test(justfname(m.loFile.name))
 
 					* {fr} Changer son inclusion
-					loFile.Exclude = iif(isNull(m.llInclude), not m.loFile.Exclude, m.llInclude)
+					loFile.Exclude = not iif(isNull(m.llInclude), m.loFile.Exclude, m.llInclude)
 					tnResult = m.tnResult + 1
 				endif
 			endfor
@@ -2616,7 +2616,7 @@ lnFailed = 0
 store .t. to m.llResult, m.llSet, m.llRestore
 
 * {fr} For each test Set
-lnSets = abSet_Tests_aSets(@m.laSets)
+lnSets = abSet_Tests_aVFPsets(@m.laSets)
 for each m.lcSet in m.laSets
 
 	lcSet = cInLineCommentStripped(m.lcSet)
@@ -2683,9 +2683,9 @@ messagebox(m.lcResult, 64)
 return m.llResult
 
 * ------------------------------------
-procedure abSet_Tests_aSets && {en} Tested Sets
-lparameters taSets && @ {en} Array where tested sets should be stored
-external array taSets
+procedure abSet_Tests_aVFPsets && {en} Tested Sets
+lparameters aVFPsets && @ {en} Array where tested sets should be stored
+external array aVFPsets
 
 local lnResult; && {fr} Number of Tested Sets
 , lnVersion;
@@ -2825,7 +2825,7 @@ lcSets = '';
 	+ iif(m.lnVersion >= 900, CRLF + m.lcSetsVFP9, '')
 lcSets = strtran(m.lcSets, CRLF2, CRLF)
 
-lnResult = alines(m.taSets, m.lcSets)
+lnResult = alines(m.aVFPsets, m.lcSets)
 
 return m.lnResult
 
@@ -2928,14 +2928,17 @@ enddefine && {fr} CLASS abSets
 * ===========================================
 function abSetsMaintain && {fr} Sauve les sets critiques et les restore s'ils ont changé
 lparameters ;
-  tlProcClass; && [.F.] {en} also save Set("Procedure") & Set("Classlib")
-, tlGlobal; && [.F.] {en} only save SETs not scoped to the dataSession
+  tlSetsType; && [.null.] {en} type of SETs - .null.: all, .T.: scoped to the dataSession, .F.: global (not scoped to the dataSession)
+, tlProcClass; && [.F.] {en} also save Set("Procedure") & Set("Classlib")
 
-return createobject('abSetsMaintain', m.tlProcClass, m.tlGlobal)
+return createobject('abSetsMaintain';
+	, Iif(Pcount() > 0, m.tlSetsType, .null.); && [.null.] {en} SETs .T.: scoped to the dataSession, .F.: global, .null.: all
+	, m.tlProcClass;
+	)
 endfunc
 
 * ------------------------------------
-procedure abSetsMaintain_Test && {fr} Test abSetsMaintain()
+procedure abSetsMaintain_Test && {fr} abSetsMaintain() unit test
 
 local loUnitTest as abUnitTest of abDev.prg, loResult
 loUnitTest = newobject('abUnitTest', 'abDev.prg')
@@ -2958,165 +2961,28 @@ hidden aSet[1], nSets
 *---------------------------------------------------------------------------
 protected procedure init
 lparameters ;
-  tlProcClass; && [.F.] {en} also save Set("Procedure") & Set("Classlib")
-, tlGlobal; && [.F.] {en} only save SETs not scoped to the dataSession
+  tlSetsType; && [.null.] {en} type of SETs - .null.: all, .T.: scoped to the dataSession, .F.: global (not scoped to the dataSession)
+, tlProcClass; && [.F.] {en} also save Set("Procedure") & Set("Classlib")
 
 local success as Boolean;
-, lcSets, lnSets, laSet[1], liSet
+, laSet[1];
+, liSet;
 
-#if .f. && not supported
-	compatible, 1
-	century, 2
-	reprocess, 1
-	reprocess, 2
-	reprocess, 3
-	talk, 1
-	textmerge, 4
-	notify, 1
-	FIELDS, 1 && 2016-08-18 thn -- {en} removed http://support.west-wind.com/Thread4PC0SHQLT.wwt?rl=1#4PH0Q7H4B
-	NOCPTRANS && 2016-08-18 thn -- {en} removed http://support.west-wind.com/Thread4PC0SHQLT.wwt?rl=1#4PH0Q7H4B
-
-#endif
-
-lcSets = ''
-
-if !lTrue(m.tlGlobal)
-text to lcSets textmerge noshow flags 1 pretext 3 && scoped to the datasession
-	<<m.lcSets>>
-	ANSI
-	AUTOINCERROR
-	AUTOSAVE
-	BLOCKSIZE
-	CARRY
-	CENTURY
-	COLLATE
-	CURRENCY
-	DATABASE
-	DATE
-	DECIMALS
-	DELETED
-	EXACT
-	EXCLUSIVE
-	FIELDS
-	FIXED
-	HOURS
-	LOCK
-	MEMOWIDTH
-	MULTILOCKS && 2016-08-18 thn -- {en} add an option to save/restore only global SETs (not those scoped to datasession)
-	NEAR
-	NULL
-	POINT
-	REFRESH
-	REPROCESS
-	SAFETY
-	SECONDS
-	SYSFORMATS
-	TALK
-	UNIQUE
-
-	CENTURY, 1
-	CURRENCY, 1
-	FIELDS, 2
-	REFRESH, 1
-endtext
-endif
-
-text to lcSets textmerge noshow flags 1 pretext 3 && global, IOW not scoped to the datasession
-	<<m.lcSets>>
-	ALTERNATE
-	ASSERTS
-	BROWSEIME
-	CLOCK
-	COMPATIBLE
-	CONSOLE
-	COVERAGE
-	CPDIALOG
-	DATASESSION
-	DEFAULT
-	DELIMITERS
-	ENGINEBEHAVIOR
-	ESCAPE
-	FDOW
-	FULLPATH
-	FWEEK
-	HELP
-	LIBRARY
-	MESSAGE
-	MOUSE
-	NOTIFY
-	NULLDISPLAY
-	ODOMETER
-	OPTIMIZE
-	PATH
-	PRINTER
-	REPORTBEHAVIOR
-	RESOURCE
-	SEPARATOR
-	SPACE
-	SQLBUFFERING
-	STATUS
-	STRICTDATE
-	SYSMENU
-	TABLEPROMPT
-	TABLEVALIDATE
-	TEXTMERGE
-	TEXTMERGE, 1
-	TEXTMERGE, 2
-	TEXTMERGE, 3
-	UDFPARMS
-
-	ALTERNATE, 1
-	BELL, 1
-	COVERAGE, 1
-	MOUSE, 1
-	RESOURCE, 1
-	DELIMITERS, 1
-	MESSAGE, 1
-	HELP, 1
-ENDTEXT
-
-lcSets = m.lcSets + CRLF + iif(m.tlProcClass;
-	, '';
-		+ 'PROCEDURE' + CRLF;
-		+ 'CLASSLIB' + CRLF;
-	, '';
+this.nSets = aVFPsetsValue(; && see below
+	 @m.laSet;
+	, Iif(Pcount() > 0, m.tlSetsType, .null.); && [.null.] {en} SETs .T.: scoped to the dataSession, .F.: global, .null.: all
+	, m.tlProcClass;
 	)
 
-store alines(m.laSet, m.lcSets, 5) to lnSets, this.nSets
-success = m.lnSets > 0
+success = m.this.nSets > 0
 if m.success
 
-	aColsIns(@m.laSet, 1, 2)
-
-	for liSet = 1 to m.lnSets
-
-		laSet[m.liSet, 2] = evl(int(val(getwordnum(m.laSet[m.liSet, 1], 2, ','))), 0)
-		laSet[m.liSet, 1] = alltrim(getwordnum(m.laSet[m.liSet, 1], 1, ','))
-		laSet[m.liSet, 3] = this.uSet(laSet[m.liSet, 1], laSet[m.liSet, 2])
-
-	endfor
-
-	dimension this.aSet[m.lnSets, 3]
+	dimension this.aSet[m.this.nSets, Alen(m.laSet, 2)]
 	acopy(m.laSet, this.aSet)
-
 endif
 
 return m.success
 endproc
-
-*---------------------------------------------------------------------------
-protected function uSet as Variant
-lparameters lcSet, lnSet
-
-return icase(;
-		m.lcSet == 'DEFAULT',;
-			set(m.lcSet) + curdir(),;
-		empty(m.lnSet),;
-			set(m.lcSet),;
-			set(m.lcSet, m.lnSet);
-		)
-endfunc
-
 
 *---------------------------------------------------------------------------
 procedure Set as Boolean
@@ -3177,7 +3043,7 @@ local liSet, lcSet, luSet, lnSet
 
 for liSet = 1 to this.nSets
 
-	if !this.aSet[m.liSet, 3] == this.uSet(this.aSet[m.liSet, 1], this.aSet[m.liSet, 2]); && {en} restore only if different
+	if !this.aSet[m.liSet, 3] == uVFPsetValue(this.aSet[m.liSet, 1], this.aSet[m.liSet, 2]); && {en} restore only if different
 		or .F. && .T. tests all restores
 
 		this.set(;
@@ -3188,7 +3054,7 @@ for liSet = 1 to this.nSets
 
 	endif
 endfor
-
+endproc
 
 * ===========================================
 enddefine && {fr} CLASS abSetsMaintain
@@ -3281,8 +3147,9 @@ function cException && {fr} Message d'exception standard
 lparameters toException as exception && {fr} Objet exception
 
 local lcResult;
-, luUserValue;
+, lcUserValue;
 , lcMessage;
+, lcLine;
 
 lcResult = ''
 
@@ -3299,18 +3166,21 @@ if type('m.toException.BaseClass') == 'C';
 				));
 			, '';
 			)
-		luUserValue = ICase(;
+		lcUserValue = ICase(;
 			type('.userValue.BaseClass') == 'C' and .userValue.BaseClass == 'Exception',;
 				cException(.userValue),;
 			Vartype(.userValue) == 'C' and CR $ .userValue,;
 				CRLF + Ltrim(.userValue, CR, LF, ' '),;
-				.userValue;
+				Cast(.userValue as M);
 			)
 		lcMessage = Trim(.Message, ',', ' ', '.') && "Erreur levée par l'utilisateur, ."
 
+		lcMessage = m.lcMessage + Iif(Empty(m.lcMessage) or Empty(m.lcUserValue), '', ' - ') + m.lcUserValue && c2Words() may not be available
+		lcLine = Iif(Vartype(.LineNo) == 'N', Ltrim(Transform(.LineNo, '999,999')), .LineNo)
+
 		lcResult = textmerge(icase(;
-			cLangUser() = 'fr',	[Méthode ou procédure <<.Procedure>>() : erreur n° <<.ErrorNo>> ("<<c2Words(m.lcMessage,' - ', m.luUserValue)>>") à la ligne n° <<.LineNo>>],; && copy-paste this line to add another language support
-													[Method or procedure <<.Procedure>>(): error #<<.ErrorNo>> ("<<c2Words(m.lcMessage,' - ', m.luUserValue)>>") at code line #<<.LineNo>>]; && default: English
+			cLangUser() = 'fr',	[Méthode ou procédure <<.Procedure>>() : erreur n° <<.ErrorNo>> ("<<m.lcMessage>>") à la ligne n° <<m.lcLine>>],; && copy-paste this line to add another language support
+													[Method or procedure <<.Procedure>>(): error #<<.ErrorNo>> ("<<m.lcMessage>>") at code line #<<m.lcLine>>]; && default: English
 			)) + ' ' + m.lcResult
 	endwith
 endif
@@ -3965,8 +3835,8 @@ luResult = .null.
 	t && {fr} DateTime
 	U && {fr} Unknown or variable does not exist
 	X && .NULL.
-	y && {fr} Currency
-	i && {fr} Integer && {fr} support additionnel
+	Y && {fr} Currency
+	I && {fr} Integer && {fr} support additionnel
 #endif
 
 llResult = vartype(m.tcTypeDest) == 'C'
@@ -4060,12 +3930,14 @@ endif
 return m.luResult
 
 * ------------------------------------
-function uValue_TD
+function uValue_TD && {fr} date[-heure] d'après une valeur quelconque
 lparameters ;
   tuValue; && {fr} Valeur source
 , tcTypeDest; && {fr} Type de valeur attendu selon codification de la fonction VFP varType()
 
-local cMark, lCentury, cDate, cTime
+local cMark, lCentury;
+, cDate, cTime;
+, liDay, liMonth, liYear
 
 cMark = evl(set("Mark"), '/')
 
@@ -4075,11 +3947,6 @@ tuValue = strtran(strtran(strtran(strtran(chrtran(cRepCharDel(alltrim(m.tuValue)
 	, m.cMark + ' ', m.cMark);
 	, ' :', ':');
 	, ': ', ':');
-
-lCentury = 4 = Max(;
-	  len(getwordnum(m.tuValue, 1, m.cMark)); && YYYY/xx/xx
-	, len(getwordnum(m.tuValue, 3, m.cMark)); && xx/xx/YYYY
-	)
 
 do case
 
@@ -4091,34 +3958,46 @@ case !vartype(m.tuValue) == 'C';
 case left(m.tuValue, 1) == '{' and right(m.tuValue, 1) == '}' && {fr} litteral
 	return evaluate(m.tuValue)
 
-case m.lCentury and m.tcTypeDest = 'D' &&
+case ! 2 = Occurs(m.cMark, m.tuValue)
+	assert .F.
+	return .null.
+
+case !iDayMonthYear(@m.liDay, @m.liMonth, @m.liYear) && modify command abDate
+
+case !varSet(@m.lCentury, 4 = len(getwordnum(m.tuValue, m.liYear, m.cMark)))
+
+case m.lCentury and m.tcTypeDest = 'D'
 	cDate = m.tuValue
 	return date(;
-		  evl(int(val(getwordnum(m.cDate, 1, m.cMark))), year(date())); && {fr} year
-		, evl(int(val(getwordnum(m.cDate, 2, m.cMark))), month(date())); && {fr} month
-		, evl(int(val(getwordnum(m.cDate, 3, m.cMark))), day(date())); && {fr} day
+		  evl(Cast(getwordnum(m.cDate, m.liYear, m.cMark) as I), year(date())); && {fr} year
+		, evl(Cast(getwordnum(m.cDate, m.liMonth, m.cMark) as I), month(date())); && {fr} month
+		, evl(Cast(getwordnum(m.cDate, m.liDay, m.cMark) as I), day(date())); && {fr} day
 		)
 
-case m.lCentury && {fr} m.tcTypeDest = 'T'
+case m.lCentury && m.tcTypeDest = 'T'
 	cDate = getwordnum(m.tuValue, 1)
 	cTime = getwordnum(m.tuValue, 2)
 	return datetime(;
-		  evl(int(val(getwordnum(m.cDate, 1, m.cMark))), year(date())); && {fr} year
-		, evl(int(val(getwordnum(m.cDate, 2, m.cMark))), month(date())); && {fr} month
-		, evl(int(val(getwordnum(m.cDate, 3, m.cMark))), day(date())); && {fr} day
-		, int(val(getwordnum(m.cTime, 1, ':'))); && {fr} hour
-		, int(val(getwordnum(m.cTime, 2, ':'))); && {fr} minute
-		, int(val(getwordnum(m.cTime, 3, ':'))); && {fr} seconds
+		  evl(Cast(getwordnum(m.cDate, m.liYear, m.cMark) as I), year(date())); && {fr} year
+		, evl(Cast(getwordnum(m.cDate, m.liMonth, m.cMark) as I), month(date())); && {fr} month
+		, evl(Cast(getwordnum(m.cDate, m.liDay, m.cMark) as I), day(date())); && {fr} day
+		, Cast(getwordnum(m.cTime, 1, ':') as I); && {fr} hour
+		, Cast(getwordnum(m.cTime, 2, ':') as I); && {fr} minute
+		, Cast(getwordnum(m.cTime, 3, ':') as I); && {fr} seconds
 		)
 
-case m.tcTypeDest = 'D'
-	return ctod(m.tuValue)
-
 otherwise
-	return ctot(m.tuValue)
+	return Iif(m.tcTypeDest = 'D', Ctod(m.tuValue), Ctot(m.tuValue))
 
 endcase
 endfunc
+
+#if .F.
+	liYear = Iif(m.liYear >= 100; && Specifies the year returned in the year 2000-compliant Date value. nYear can be a value from 100 to 9999
+		, m.liYear;
+		, (Set("Century", 1) + Iif( m.liYear >= Set("Century", 2), 0, 1))* 100 + m.liYear;
+		)
+#endif
 
 * -----------------------------------------------------------------
 procedure uValue_Test && {fr} Teste uValue()
@@ -6038,29 +5917,28 @@ endproc
 procedure ClassLibAdd && {fr} Ajoute un fichier vcx à Set("ClassLib") s'il n'y est déjà
 lparameters ;
   tcVCX; && {fr} fichier(s) vcx
-, tlRemove && [.F.] {fr} RELEASE CLASSLIB
+, tlRemove && [.F.] RELEASE CLASSLIB
 
-local laVCX[1], lcVCX, llSet, lcAlias, llResult && {fr} le fichier a été ajouté ou retiré
+local llResult; && {fr} le fichier a été ajouté ou retiré
+, laVCX[1], lcVCX;
+, llSet
 
 if .t.;
  and vartype(m.tcVCX) == 'C';
  and alines(laVCX, m.tcVCX, 5, ',', ';') > 0
-
+ 
+	tlRemove = lTrue(m.tlRemove)
  	for each lcVCX in m.laVCX
 
-		lcAlias = upper(juststem(m.lcVCX))
-		llSet = ' ALIAS ' + m.lcAlias + ',' $ set("Classlib") + ','
-		if lTrue(m.tlRemove)
-			if m.llSet
-				release classlib (m.lcVCX)
-				llResult = .t.
-			endif
-		else
-			if not m.llSet and file(m.lcVCX)
-				set classlib to (m.lcVCX) additive
-				llResult = .t.
-			endif
-		endif
+		llSet = ' ALIAS ' + Upper(JustStem(m.lcVCX)) + ',' $ set("Classlib") + ','
+		do case
+		case m.tlRemove and m.llSet
+			release classlib (m.lcVCX)
+			llResult = .t.
+		case !m.tlRemove and !m.llSet and file(ForceExt(m.lcVCX, 'vcx'))
+			set classlib to (m.lcVCX) additive
+			llResult = .t.
+		endcase
  	endfor
 endif
 
@@ -7635,3 +7513,278 @@ RETURN
 FUNCTION BitLRotate
 LPARAMETERS nBits, nWord
 RETURN BITLSHIFT(m.nWord, m.nBits) + BITRSHIFT(m.nWord, (32 - (m.nBits)))
+endfunc
+
+* ---------------------------------------------
+function nOfcDWord && Number from a Signed DWORD or Integer binary string
+lparameters tcDWord, tlSigned
+
+local i, nOfcDWord
+
+nOfcDWord = 0
+FOR i = 1 TO LEN(m.tcDWord)
+  nOfcDWord = m.nOfcDWord + (Asc(Substr(m.tcDWord, m.i, 1)) * (2 ^ (8 * (m.i - 1))))
+ENDFOR
+
+IF m.tlSigned and nOfcDWord > 0x80000000
+  nOfcDWord = nOfcDWord - 1 - 0xFFFFFFFF
+ENDIF
+
+return m.nOfcDWord
+endfunc
+
+* ---------------------------------------------
+function aVFPsets && VFP Sets
+lparameters ;
+  aVFPsets; && @ {en} VFP Sets
+, tlSetsType; && [.null.] {en} type of SETs .T.: scoped to the dataSession, .F.: global, .null.: all
+, tlProcClass; && [.F.] {en} add Set("Procedure") & Set("Classlib")
+, tlUnSupported; && [.F.] {en} add sets for which auto-restore is not supported
+
+external array aVFPsets
+tlSetsType = Iif(Pcount()>=2 and Vartype(m.tlSetsType) $ 'LX', m.tlSetsType, .null.)
+tlUnSupported = lTrue(m.tlUnSupported)
+
+local cSets
+cSets = ''
+
+if lTrue(Nvl(m.tlSetsType, .T.)) && scoped to the datasession
+text to cSets textmerge noshow flags 1 pretext 3
+	<<m.cSets>>
+	ANSI
+	AUTOINCERROR
+	AUTOSAVE
+	BLOCKSIZE
+	CARRY
+	CENTURY
+	COLLATE
+	CURRENCY
+	DATABASE
+	DATE
+	DECIMALS
+	DELETED
+	EXACT
+	EXCLUSIVE
+	FIELDS
+	FIXED
+	HOURS
+	LOCK
+	MEMOWIDTH
+	MULTILOCKS
+	NEAR
+	NULL
+	POINT
+	REFRESH
+	REPROCESS
+	SAFETY
+	SECONDS
+	SYSFORMATS
+	TALK
+	UNIQUE
+
+	CENTURY, 1
+	CURRENCY, 1
+	FIELDS, 2
+	REFRESH, 1
+endtext
+if m.tlUnSupported
+text to cSets textmerge noshow flags 1 pretext 3
+	<<m.cSets>>
+	date, 1 && Date Ordering: 0 – MDY, 1 – DMY, 2 – YMD
+	century, 2 && ROLLOVER nYear
+	century, 3 && System Regional Calendar setting
+	fields, 1 && FieldName1, FieldName2, ... && 2016-08-18 thn -- {en} removed http://support.west-wind.com/Thread4PC0SHQLT.wwt?rl=1#4PH0Q7H4B
+	reprocess, 1 && System session setting
+	reprocess, 2 && Current session setting type: 0 means attempts, 1 means seconds
+	reprocess, 3 && System session setting type: 0 means attempts, 1 means seconds
+	talk, 1 && WINDOW, NOWINDOW or WindowName
+endtext
+endif
+endif
+
+if lFalse(Nvl(m.tlSetsType, .F.)) && not scoped to the datasession -- aka global
+text to cSets textmerge noshow flags 1 pretext 3
+	<<m.cSets>>
+	ALTERNATE
+	ASSERTS
+	BELL
+	BROWSEIME
+	CLOCK
+	COMPATIBLE
+	CONSOLE
+	COVERAGE
+	CPDIALOG
+	DATASESSION
+	DEFAULT
+	DELIMITERS
+	ENGINEBEHAVIOR
+	ESCAPE
+	FDOW
+	FULLPATH
+	FWEEK
+	HELP
+	LIBRARY
+	MESSAGE
+	MOUSE
+	NOTIFY
+	NULLDISPLAY
+	ODOMETER
+	OPTIMIZE
+	PATH
+	PRINTER
+	REPORTBEHAVIOR
+	RESOURCE
+	SEPARATOR
+	SPACE
+	SQLBUFFERING
+	STATUS
+	STATUS BAR
+	STRICTDATE
+	SYSMENU
+	TABLEPROMPT
+	TABLEVALIDATE
+	TEXTMERGE
+	TEXTMERGE, 1
+	TEXTMERGE, 2
+	TEXTMERGE, 3
+	UDFPARMS
+
+	ALTERNATE, 1
+	BELL, 1
+	COVERAGE, 1
+	MOUSE, 1
+	RESOURCE, 1
+	DELIMITERS, 1
+	MESSAGE, 1
+	HELP, 1
+endtext
+if m.tlUnSupported
+text to cSets textmerge noshow flags 1 pretext 3
+	<<m.cSets>>
+	compatible, 1 && PROMPT or NOPROMPT (determines whether Visual FoxPro displays a dialog box when you open a dBASE table containing a memo field)
+	notify, 1 && current value of SET NOTIFY CURSOR
+	nocptrans && 2016-08-18 thn -- {en} removed http://support.west-wind.com/Thread4PC0SHQLT.wwt?rl=1#4PH0Q7H4B
+	textmerge, 4 && Evaluate source of TEXT ... ENDTEXT call and return TEXTMERGE nesting level
+endtext
+endif
+endif
+
+cSets = Trim(cInLineCommentStripped(m.cSets), CR, LF) + CRLF + iif(lTrue(m.tlProcClass);
+	, '';
+		+ 'PROCEDURE' + CRLF;
+		+ 'CLASSLIB' + CRLF;
+	, '';
+	)
+
+return ALines(m.aVFPsets, Upper(m.cSets), 5)
+endfunc
+
+*---------------------------------------------------------------------------
+function uVFPsetValue as Variant
+lparameters lcSet, lnSet
+
+return icase(;
+		m.lcSet == 'DEFAULT',;
+			set(m.lcSet) + curdir(),;
+		empty(m.lnSet),;
+			set(m.lcSet),;
+			set(m.lcSet, m.lnSet);
+		)
+
+endfunc
+
+* ---------------------------------------------
+function aVFPsetsValue && {en} Array of VFP Sets and their Value - use outside of textmerge()
+lparameters ;
+  aVFPsetsValue; && @ {en} [SET, specifier, value]
+, tlSetsType; && [.null.] {en} type of SETs .T.: scoped to the dataSession, .F.: global, .null.: all
+, tlProcClass; && [.F.] {en} add Set("Procedure") & Set("Classlib")
+, tlUnSupported; && [.F.] {en} add sets for which auto-restore is not supported
+
+external array aVFPsetsValue
+tlSetsType = Iif(Pcount()>=2 and Vartype(m.tlSetsType) $ 'LX', m.tlSetsType, .null.)
+
+local result as Integer; && number of sets
+, liSet as Integer;
+
+result = aVFPsets(; && see below
+	 @m.aVFPsetsValue;
+	, m.tlSetsType; && [.null.] {en} SETs .T.: scoped to the dataSession, .F.: global, .null.: all
+	, m.tlProcClass;
+	, m.tlUnSupported;
+	)
+if m.result > 0
+
+	aColsIns(@m.aVFPsetsValue, 1, 2)
+
+	for liSet = 1 to m.result
+
+		aVFPsetsValue[m.liSet, 2] = evl(int(val(getwordnum(m.aVFPsetsValue[m.liSet, 1], 2, ','))), 0)
+		aVFPsetsValue[m.liSet, 1] = alltrim(getwordnum(m.aVFPsetsValue[m.liSet, 1], 1, ','))
+		aVFPsetsValue[m.liSet, 3] = uVFPsetValue(aVFPsetsValue[m.liSet, 1], aVFPsetsValue[m.liSet, 2])
+	endfor
+endif
+
+return m.result
+endfunc
+
+* ---------------------------------------------
+function cVFPsetsValue && {en} String of VFP Sets and their Value - use outside of textmerge()
+lparameters ;
+  tcSeparator; && [', '] {en} SETs separator
+, tlSetsType; && [.null.] {en} type of SETs .T.: scoped to the dataSession, .F.: global, .null.: all
+, tlProcClass; && [.F.] {en} add Set("Procedure") & Set("Classlib")
+, tlUnSupported; && [.F.] {en} add sets for which auto-restore is not supported
+
+tlSetsType = Iif(Pcount()>=2 and Vartype(m.tlSetsType) $ 'LX', m.tlSetsType, .null.)
+
+local result as String;
+, aa[1]; && @ {en} [SET, specifier, value]
+, loSelect as abSelect of abData.prg;
+, luSet as String;
+, liSet as Integer;
+, lcSet1 as Integer;
+
+result = ''
+if aVFPsetsValue(@m.aa, m.tlSetsType, m.tlProcClass, m.tlUnSupported) > 0
+
+	* {en} sort on columns # 1, 2
+	loSelect = abSelect(0)
+	create cursor _cVFPsetsValue_ (cSet varchar(30), iSet I, nSet I NULL, mSet M NULL)
+	index on cSet + Str(iSet) tag cVFPsets
+	for liSet = 1 to Alen(m.aa, 1)
+		luSet = m.aa[m.liSet, 3]
+		insert into _cVFPsetsValue_ values (;
+			  m.aa[m.liSet, 1];
+			, m.aa[m.liSet, 2];
+			, Iif(Vartype(m.luSet) == 'N', m.luSet, .null.);
+			, Iif(Vartype(m.luSet) == 'C', m.luSet, .null.);
+			)
+	endfor
+	liSet = 0
+	scan
+		liSet = m.liSet + 1
+	  aa[m.liSet, 1] = cSet
+		aa[m.liSet, 2] = iSet
+		aa[m.liSet, 3] = Nvl(nSet, mSet)
+	endscan
+	use
+
+	tcSeparator = Iif(ga_Type_IsChar(m.tcSeparator, .T.), m.tcSeparator, ', ')
+	for liSet = 1 to Alen(m.aa, 1)
+		lcSet1 = Cast(Evl(m.aa[m.liSet, 2], '') as M) 
+		result = m.result;
+			+ m.tcSeparator;
+			+ 'Set("';
+			+ m.aa[m.liSet, 1];
+			+ nEvl(m.lcSet1, '", ' + m.lcSet1) + Iif(Empty(m.lcSet1), '"', '');
+			+ ') = ';
+			+ cL(m.aa[m.liSet, 3]);
+			+ ''
+	endfor
+
+	result = Substrc(m.result, Lenc(m.tcSeparator) + 1)
+endif
+
+return m.result
+endfunc

@@ -171,7 +171,7 @@ function abSelect && {fr} Change la zone de travail Select() et rétablit à destr
 lparameters ;
   tuSelect; && [0] {fr} Zone de travail / alias à sélectionner, ou table à ouvrir et sélectionner
 , tlKeepOpened; && [.F.] {fr} Si la table est ouverte, laisser ouverte en sortie
-, tcError && @ [''] {fr} Erreur éventuelle
+, tcError; && @ [''] {fr} Erreur éventuelle
 
 return createobject('abSelect', m.tuSelect, m.tlKeepOpened, @m.tcError)
 
@@ -998,11 +998,16 @@ lparameters ;
   tcAlias; && {fr} Alias
 , tcMode; && [''] 'Exclusive' | 'Shared' | 'Noupdate' | '' (=Set("EXCLUSIVE"))
 , tlAgain; && [.F.] {fr} AGAIN
-, tcAliasNew && [m.tcAlias] {fr} Nouvel Alias
+, tcAliasNew; && [m.tcAlias] {fr} Nouvel Alias
+, tiWorkArea; && [0] {fr} Work area && 2016-09-01 thn -- {FiC V 2.22.0-beta.5} {en} added
 
-local lcTable, lcOrder, lcFilter, lcField, lcFields, lcMode, laUsed[1], llAgain, lcAgain;
-	, lnSelect, loException as exception;
-	, llResult
+local llResult;
+, lcTable, lcOrder, lcFilter;
+, lcField, lcFields;
+, lcMode, laUsed[1];
+, llAgain, lcAgain;
+, lnSelect;
+, loException as exception;
 
 tcAlias = upper(evl(m.tcAlias, ''))
 if used(m.tcAlias)
@@ -1037,16 +1042,23 @@ if used(m.tcAlias)
 			llResult = .f.
 			use && {fr} si on reuse par dessus, VFP peut prendre un homonyme
 			try
-				use (m.lcTable) &tlAgain &tcMode alias (m.tcAliasNew) &lcOrder
-				llResult = .t.
+				tiWorkArea = Cast(Iif(ga_Type_isPositiveInteger(m.tiWorkArea) and m.tiWorkArea <= 32767; && In Visual FoxPro, you can open and manipulate tables in 32,767 work areas
+					, m.tiWorkArea;
+					, 0;
+					) as M)
+				use (m.lcTable) &tlAgain &tcMode alias (m.tcAliasNew) &lcOrder in &tiWorkArea
+				tcAlias = m.tcAliasNew
+				llResult = .T.
 			catch to loException
-				use (m.lcTable) &lcAgain &lcMode alias (m.tcAlias) &lcOrder
+				use (m.lcTable) &lcAgain &lcMode alias (m.tcAlias) &lcOrder in &tiWorkArea
 			endtry
 
+			select (m.tcAlias)
 			set filter to &lcFilter
 			set fields to &lcFields
 			set fields &lcField
 		endif
+
 		select (m.lnSelect)
 	endif
 endif
@@ -8575,7 +8587,7 @@ enddefine && {fr} CLASS abDataSyncVFP
 procedure tModUpdate && {en} updates record's last modification date-time {fr} Met à jour la date&heure de dernière modification de l'enregistrement
 && {en} required by the a*DataSyncVFP system
 && {en} append to the record rule of each table as illustrated below ...
-&& {en} /!\ record rule does not fire when record is deleted
+&& {en} /!\ The Delete command does not trigger the table validation rule. However, the DELETE TRIGGER is called. The RECALL commmand does trigger the table validation rule. -- Ben Creighton
 && {fr} nécessaire au système a*DataSyncVFP
 && {fr} ajouter à la fin de la règle d'enregistrement de chaque table comme indiqué ci-dessous ...
 && {fr} /!\ la règle d'enregistrement ne se déclenche pas lorsque l'enregistrement est supprimé
@@ -8589,7 +8601,7 @@ lSyncField = evl(m.lSyncField, 'lSYNC') && {fr} FoxInCloud standard
 * {en} Set record's last modification date-time
 * {fr} Régler la date et heure de dernière modification
 if .t.;
- and !(lTrue(m.pltModKeep)); && {fr} pltModKeep : {en} Inhibit record's last modification date-time modification [see abDataSyncVFP.tablesync_()] {fr} Inhiber la mise à jour automatique de la date de modification [cf. abDataSyncVFP.tablesync_()]
+ and !(vartype(m.pltModKeep) == 'L' and m.pltModKeep); && {fr} pltModKeep : {en} Inhibit record's last modification date-time modification [see abDataSyncVFP.tablesync_()] {fr} Inhiber la mise à jour automatique de la date de modification [cf. abDataSyncVFP.tablesync_()]
  and ! empty(field(m.tModField)) && {en} Field exists in table {fr} Le champ existe dans la table
 	replace (m.tModField) with datetime() && {en} In a table rule, Alias() == alias of the table owning the rule	{fr} dans une règle de table, Alias() == alias de la table dont la règle est exécutée
 endif
@@ -8597,7 +8609,7 @@ endif
 * {en} Set record was not modified through synchronization
 * {fr} Indiquer que l'enregistrement n'a pas été modifié par synchronisation
 if .t.;
- and !(lTrue(m.plSync)); && {fr} plSync : {en} Records are being synchronized [see abDataSyncVFP.tablesync_()] {fr} synchronisation en cours  [cf. abDataSyncVFP.tablesync_()]
+ and !(vartype(m.plSync) == 'L' and m.plSync); && {fr} plSync : {en} Records are being synchronized [see abDataSyncVFP.tablesync_()] {fr} synchronisation en cours  [cf. abDataSyncVFP.tablesync_()]
  and ! empty(field(m.lSyncField)) && {en} Field exists in table {fr} Le champ existe dans la table
 	replace (m.lSyncField) with .f. && {en} In a table rule, Alias() == alias of the table owning the rule	{fr} dans une règle de table, Alias() == alias de la table dont la règle est exécutée
 endif

@@ -13,7 +13,7 @@
 * {en} This permission notice shall be entirely included in all copies or substantial portions of the Software
 * =====================================================
 * (c) Gregory Adam 
-* Last build: 07/06/2016 19:00:01 by ThierryNivelet
+* Last build: 09/14/2016 16:33:28 by ThierryNivelet
 
 && ga_Collection
 * Gregory Adam 2010
@@ -891,7 +891,7 @@ FUNCTION ga_DBCTablesTree && Tables d'une base de données dans l'ordre de parent
 		, laRelation[1], lnRelations
 		
 		loDB = abSet('DATABASE', m.tcDBC,,,.T.)
-		lnExcludes = ALines(laExcludes, Upper(Evl(m.tcExcludes, '')), 1+4, ',', ';')
+		lnExcludes = ALines(laExcludes, Upper(Evl(m.tcExcludes, Space(0))), 1+4, ',', ';')
 		lnResult = ADBObjects(taTable, "TABLE")
 
 		= ga_TopologicalSort_Object(@m.obj)
@@ -4665,15 +4665,13 @@ success = ga_StringParse_Object(@m.obj);
 		  @m.masked;
 		, 'hello("[") + ["""""""""""] ' + "+ '[]'";
 		);
-	and m.masked;
-		==[hello(~~~) + ~~~~~~~~~~~~~ + ~~~~];
+	and m.masked == [hello(~~~) + ~~~~~~~~~~~~~ + ~~~~];
 	and m.obj.MaskStrings(;
 		  @m.masked;
 		, "func('titi \' titi', 3, 'toto \' toto')";
 		, .T.;
 		);
-	and m.masked;
-		=="func(~~~~~~~~~~~~~~, 3, ~~~~~~~~~~~~~~)";
+	and m.masked == "func(~~~~~~~~~~~~~~, 3, ~~~~~~~~~~~~~~)";
 	and .T.
 
 nTest = 1

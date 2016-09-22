@@ -55,6 +55,32 @@ endif
 
 return m.lnResult
 
+* ========================================
+procedure tFileSet && {fr} règle la date et heure d'un fichier
+lparameters ;
+  result as String; && @ {en} result (cumulative)
+, cFile as String; && {en} file full address
+, tFile as datetime; && @ [datetime()] {en} date-time to be set
+, iType as Integer; && [1] {fr} type de date-heure (additive): 1 dernière modification, 2 dernier accès, 4 création
+, lGMT as Boolean; && [.F.] {fr} la date-heure indiquée est GMT
+
+return .t.;
+ and (vartype(m.cFile) == 'C' or cResultAdd(@m.result, textmerge([<<cL(m.cFile)>> is expected as a String])));
+ and (file(m.cFile) or cResultAdd(@m.result, textmerge([File '<<m.cFile>>' can't be found])));
+ and (.F.;
+ 	or !vartype(m.tFile) $ 'DT' and varSet(@m.tFile, Datetime());
+ 	or !empty(m.tFile);
+ 	or cResultAdd(@m.result, textmerge([<<cL(m.tFile)>> is expected as not Empty(date or date-time)]));
+ 	);
+ and tFileSet_(;
+ 	 @m.result;
+ 	, m.cFile;
+ 	, m.tFile;
+ 	, m.iType;
+ 	, m.lGMT;
+	);
+ and .T.
+
 * =============================================================
 function tFileSet_ && {fr} change la date-heure d'un fichier
 lparameters ;
@@ -62,6 +88,7 @@ lparameters ;
 , cFile as String; && {fr} fichier
 , tFile as DateTime; && [datetime()] {fr} nouvelle date-heure
 , iType as Integer; && [1] {fr} type de date-heure (additive): 1 dernière modification, 2 dernier accès, 4 création
+, lGMT as Boolean; && [.F.] {fr} la date-heure indiquée est GMT
 
 && Courtesy M. Olivier Hamou -- http://www.atoutfox.org/nntp.asp?ID=0000017371
 
@@ -112,6 +139,7 @@ IF hFile = -1 && failed to open
 ENDIF
 
 tFile = Evl(m.tFile, Datetime())
+tFile = m.tFile - Iif(lTrue(m.lGMT), nGMToffsetMin()*60, 0)
 
 cSysTime = ;
 	DwordOfInt(Year(m.tFile)); && modify command abDev
@@ -169,30 +197,6 @@ RETURN !Empty(m.nResult) or cResultAdd(@m.result, textmerge([kernel32 SetFileTim
 	  ) + [ <<GetLastError()>>]))
 
 ENDFUNC
-
-* ========================================
-procedure tFileSet && {fr} règle la date et heure d'un fichier
-lparameters ;
-  result as String; && @ {en} result (cumulative)
-, cFile as String; && {en} file full address
-, tFile as datetime; && @ [datetime()] {en} date-time to be set
-, iType as Integer; && [1] {fr} type de date-heure (additive): 1 dernière modification, 2 dernier accès, 4 création
-
-return .t.;
- and (vartype(m.cFile) == 'C' or cResultAdd(@m.result, textmerge([<<cL(m.cFile)>> is expected as a String])));
- and (file(m.cFile) or cResultAdd(@m.result, textmerge([File '<<m.cFile>>' can't be found])));
- and (.F.;
- 	or !vartype(m.tFile) $ 'DT' and varSet(@m.tFile, Datetime());
- 	or !empty(m.tFile);
- 	or cResultAdd(@m.result, textmerge([<<cL(m.tFile)>> is expected as not Empty(date or date-time)]));
- 	);
- and tFileSet_(;
- 	 @m.result;
- 	, m.cFile;
- 	, m.tFile;
- 	, m.iType;
-	);
- and .T.
 
 * -------------------------------
 procedure tFileSet_Test && {fr} Teste tFileSet()
@@ -1570,7 +1574,7 @@ lparameters ;
 , tcFolder; && [dossier courant] {fr} Adresse du dossier oû rechercher les sous-dossiers
 , tcFoldersExcl; && [''] {fr} sous-dossiers à exclure et/ou squelette des fichiers attendus dans les dossiers à inclure
 , tvRecurse; && [.F.] {fr} Récurser dans les sous-sous-dossiers etc., si N, nombre de niveaux de récursion
-, tlAddrOnly && [.F.] {fr} Ne garder que les adresses des dossiers (supprimer date, taille, etc.)
+, tlAddrOnly; && [.F.] {fr} Ne garder que les adresses des dossiers (supprimer date, taille, etc.)
 
 external array taSubFolders && {fr} pour le gestionnaire de projet
 tcFolder = addbs(fullpath(evl(m.tcFolder, '')))
@@ -2464,3 +2468,61 @@ else
 	return .t.
 endif
 endfunc
+
+* ========================================
+function cFileTimeStampName && {en} Name of a file with a time stamp
+lparameters ;
+	cFileAddr as String; && {en} File Address
+, lSeconds as Boolean; && [.F.] {en} add seconds to time stamp
+
+lSeconds = lTrue(m.lSeconds)
+return ForceExt('';
+	  + JustStem(m.cFileAddr);
+	  + '_';
+	  + Transform(Left(Ttoc(Datetime(), 1), 12 + Iif(m.lSeconds, 2, 0)), '@R 9999-99-99_99-99' + Iif(m.lSeconds, '-99', ''));
+	, Lower(JustExt(m.cFileAddr));
+	)
+endfunc
+
+* ========================================
+function cFileTimeStampSaveAddr && {en} Address of a file saved with a time stamp
+lparameters ;
+	cFileAddr as String; && {en} File Address
+, lSeconds as Boolean; && [.F.] {en} add seconds to time stamp
+
+local cFileTimeStampSaveAddr, cLangUser
+
+cLangUser = cLangUser()
+
+cFileTimeStampSaveAddr = Addbs(JustPath(m.cFileAddr)) + '_'
+cFileTimeStampSaveAddr = m.cFileTimeStampSaveAddr + ICase(;
+	Directory(m.cFileTimeStampSaveAddr + 'Save'), 'Save',;
+	Directory(m.cFileTimeStampSaveAddr + 'Sauve'), 'Sauve',;
+	Directory(m.cFileTimeStampSaveAddr + 'Old'), 'Old',;
+		ICase(;
+			m.cLangUser = 'fr', 'Sauve',;&& copy-paste this line to add another language support
+			m.cLangUser = 'de', 'Speich',;&& copy-paste this line to add another language support
+			m.cLangUser = 'es', 'Salvo',;&& copy-paste this line to add another language support
+			m.cLangUser = 'it', 'Salva',;&& copy-paste this line to add another language support
+			m.cLangUser = 'pt', 'Salva',;&& copy-paste this line to add another language support
+			'Save'; && default: English
+		);
+	)
+
+return Addbs(m.cFileTimeStampSaveAddr) + cFileTimeStampName(m.cFileAddr, m.lSeconds)
+endfunc
+
+* ========================================
+function FileTimeStampSave && {en} File saved with a time stamp
+lparameters ;
+  result as String; && @ {en} result (cumulative)
+, cFileAddr as String; && {en} Source File Address
+, lSeconds as Boolean; && [.F.] {en} add seconds to time stamp
+, cFileAddrSave; && @ {en} Saved File Address
+
+cFileAddrSave = cFileTimeStampSaveAddr(m.cFileAddr, m.lSeconds)
+return FileCopy(m.cFileAddr, m.cFileAddrSave, m.result)
+endfunc
+
+
+
