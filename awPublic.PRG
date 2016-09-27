@@ -1946,6 +1946,7 @@ if m.this.lDevMode
 	this.Set('CONSOLE', 'OFF')
 	push menu _mSysMenu  && set sysmenu save
 	push key
+	wait clear
 endif
 
 return DoDefault(@m.result)
@@ -1993,6 +1994,10 @@ IF m.this.lDevMode
 
 * set step on && 2016-08-19 thn -- {FiC V 2.22.0-beta.4} {en} debug abSetsMaintain (modify command abDev)
 
+	if File('foxyPreviewer.app')
+		do foxyPreviewer.app with 'release'
+	endif
+
 	if Vartype(this.oSets) == 'O'
 		this.oSets = .null. && 2016-08-18 thn -- {FiC V 2.22.0-beta.3} {en} added
 	else
@@ -2015,6 +2020,7 @@ IF m.this.lDevMode
 	_Screen.Icon = m.this.cIcon
 	_Screen.Caption = m.this.cCaption
 	_Screen.WindowState = m.this.iWindowState
+	this.oISX = .null.
 
 	wait clear
 endif
@@ -3348,10 +3354,11 @@ local success as Boolean;
 , Height_ as Number;
 , lForm as boolean;
 
-if aoClassCont(@m.aCntl, m.toCont,, .F.) > 0
+delta = m.tHeightPost - m.tHeightAnte
+ratio = m.tHeightPost / m.tHeightAnte
 
-	delta = m.tHeightPost - m.tHeightAnte
-	ratio = m.tHeightPost / m.tHeightAnte
+if m.delta # 0 and aoClassCont(@m.aCntl, m.toCont,, .F.) > 0
+
 	lForm = m.toCont.BaseClass == 'Form'
 
 	for each oCntl in m.aCntl foxobject
@@ -3407,7 +3414,7 @@ lparameters ;
 , tWidthAnte;
 , tWidthPost;
 
-local success as Boolean;
+local success as Boolean; && at least one object resized
 , aCntl[1];
 , oCntl as awTxt of aw.vcx;
 , delta as Number;
@@ -3417,10 +3424,11 @@ local success as Boolean;
 , Width_ as Number;
 , lForm as boolean;
 
-if aoClassCont(@m.aCntl, m.toCont,, .F.) > 0
+delta = m.tWidthPost - m.tWidthAnte
+ratio = m.tWidthPost / m.tWidthAnte
 
-	delta = m.tWidthPost - m.tWidthAnte
-	ratio = m.tWidthPost / m.tWidthAnte
+if m.delta # 0 and aoClassCont(@m.aCntl, m.toCont,, .F.) > 0
+
 	lForm = m.toCont.BaseClass == 'Form'
 
 	for each oCntl in m.aCntl foxobject
