@@ -125,7 +125,7 @@ if m.lnLine > 0
 		enddo
 	endfor
 
-	return cListOfArray(@m.laLine, CRLF,,,.t.) + iif(m.lnLine > 1, CRLF, '')
+	return cListOfArray(@m.laLine, CRLF,,,.t.) + Iif(m.lnLine > 1, CRLF, '')
 else
 	return ''
 endif
