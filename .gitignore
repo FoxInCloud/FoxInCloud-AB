@@ -52,6 +52,7 @@ Temporary Items
 *.err
 *.bak
 *.tbk
+*.sublime*
 
 # =================
 # Abaque FoxInCloud

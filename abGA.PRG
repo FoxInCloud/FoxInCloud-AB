@@ -13,7 +13,7 @@
 * {en} This permission notice shall be entirely included in all copies or substantial portions of the Software
 * =====================================================
 * (c) Gregory Adam 
-* Last build: 09/14/2016 16:33:28 by ThierryNivelet
+* Last build: 10/03/2016 11:53:34 by ThierryNivelet
 
 && ga_Collection
 * Gregory Adam 2010

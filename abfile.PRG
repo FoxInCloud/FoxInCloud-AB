@@ -2474,12 +2474,16 @@ function cFileTimeStampName && {en} Name of a file with a time stamp
 lparameters ;
 	cFileAddr as String; && {en} File Address
 , lSeconds as Boolean; && [.F.] {en} add seconds to time stamp
+, lSkeleton as Boolean; && [.F.] {en} Skeleton of file name
 
 lSeconds = lTrue(m.lSeconds)
+local lnLen
+lnLen = 12 + Iif(m.lSeconds, 2, 0)
 return ForceExt('';
 	  + JustStem(m.cFileAddr);
 	  + '_';
-	  + Transform(Left(Ttoc(Datetime(), 1), 12 + Iif(m.lSeconds, 2, 0)), '@R 9999-99-99_99-99' + Iif(m.lSeconds, '-99', ''));
+	  + Transform(Iif(lTrue(m.lSkeleton), Replicate('?', m.lnLen), Left(Ttoc(Datetime(), 1), m.lnLen));
+	  	, '@R 9999-99-99_99-99' + Iif(m.lSeconds, '-99', ''));
 	, Lower(JustExt(m.cFileAddr));
 	)
 endfunc
@@ -2489,6 +2493,7 @@ function cFileTimeStampSaveAddr && {en} Address of a file saved with a time stam
 lparameters ;
 	cFileAddr as String; && {en} File Address
 , lSeconds as Boolean; && [.F.] {en} add seconds to time stamp
+, lSkeleton as Boolean; && [.F.] {en} Skeleton of file name
 
 local cFileTimeStampSaveAddr, cLangUser
 
@@ -2500,16 +2505,16 @@ cFileTimeStampSaveAddr = m.cFileTimeStampSaveAddr + ICase(;
 	Directory(m.cFileTimeStampSaveAddr + 'Sauve'), 'Sauve',;
 	Directory(m.cFileTimeStampSaveAddr + 'Old'), 'Old',;
 		ICase(;
-			m.cLangUser = 'fr', 'Sauve',;&& copy-paste this line to add another language support
-			m.cLangUser = 'de', 'Speich',;&& copy-paste this line to add another language support
-			m.cLangUser = 'es', 'Salvo',;&& copy-paste this line to add another language support
-			m.cLangUser = 'it', 'Salva',;&& copy-paste this line to add another language support
-			m.cLangUser = 'pt', 'Salva',;&& copy-paste this line to add another language support
-			'Save'; && default: English
+			m.cLangUser = 'fr',	'Sauve',;&& copy-paste this line to add another language support
+			m.cLangUser = 'de',	'Speich',;&& copy-paste this line to add another language support
+			m.cLangUser = 'es',	'Salvo',;&& copy-paste this line to add another language support
+			m.cLangUser = 'it',	'Salva',;&& copy-paste this line to add another language support
+			m.cLangUser = 'pt',	'Salva',;&& copy-paste this line to add another language support
+													'Save'; && default: English
 		);
 	)
 
-return Addbs(m.cFileTimeStampSaveAddr) + cFileTimeStampName(m.cFileAddr, m.lSeconds)
+return Addbs(m.cFileTimeStampSaveAddr) + cFileTimeStampName(m.cFileAddr, m.lSeconds, m.lSkeleton)
 endfunc
 
 * ========================================
@@ -2519,9 +2524,28 @@ lparameters ;
 , cFileAddr as String; && {en} Source File Address
 , lSeconds as Boolean; && [.F.] {en} add seconds to time stamp
 , cFileAddrSave; && @ {en} Saved File Address
+, nFileHistory; && [all] {en} Number of files to be kept as history
+
+local success as Boolean;
+, aFileHistory[1]; && {en} History of files
+, iFileHistory; && {en} History File
+, cFileHistory; && {en} History File
+, cFilePath;
 
 cFileAddrSave = cFileTimeStampSaveAddr(m.cFileAddr, m.lSeconds)
-return FileCopy(m.cFileAddr, m.cFileAddrSave, m.result)
+success = FileCopy(m.cFileAddr, m.cFileAddrSave, m.result)
+if m.success and ga_type_isPositiveInteger(m.nFileHistory) and ADir(m.aFileHistory, cFileTimeStampSaveAddr(m.cFileAddr, m.lSeconds, .T.)) > m.nFileHistory
+
+	aColsDel(@m.aFileHistory, 2)
+	Asort(m.aFileHistory)
+	cFilePath = Addbs(JustPath(m.cFileAddrSave))
+	for iFileHistory = Alen(m.aFileHistory) - m.nFileHistory to 1 step -1
+		success = FileDel(m.cFilePath + m.aFileHistory[m.iFileHistory],,, @m.result) and m.success
+	endfor
+	assert m.success
+endif
+
+return m.success
 endfunc
 
 

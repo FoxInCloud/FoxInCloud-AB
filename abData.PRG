@@ -915,8 +915,9 @@ enddefine && {fr} CLASS oAlias
 
 * ========================================
 function cAliasesUsed && {fr} Alias ouverts dans la session de données courante
+lparameters nAlias
 local array aa[1]
-return Iif(AUsed(m.aa) > 0 and Asort(m.aa) > 0;
+return Iif(varSet(@m.nAlias, AUsed(m.aa)) and m.nAlias > 0 and Asort(m.aa) > 0;
 	, Lower(cListOfArray(@m.aa,', ',1));
 	, '';
 	)

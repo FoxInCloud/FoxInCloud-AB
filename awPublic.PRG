@@ -1171,17 +1171,25 @@ LOCAL result as Variant; && {en} failure: .null., modeless: reference to form ob
 , loForm as awFrm of aw.vcx;
 , lcParms as String;
 
+tlModal = Iif(Pcount() > 1, m.tlModal, .null.) && 2016-10-07 thn -- {FiC V 2.22.0-beta.8} {en} default to .WindowType
 lcParms = wcParms(Pcount() - 2)
 
 loForm = wFormNoShow(m.tcForm, @m.tlModal &lcParms)
 
-return ICase(;
-	!wFormShow(m.loForm, m.tlModal),;
-		.null.,; && {en} failure
-	!m.tlModal,;
-		m.loForm,; && {en} modeless & success
-		.T.; && {en} modal & success: as of standard VFP behavior, reference to the form is lost after form closes
-	)
+&& 2016-10-03 thn -- {FiC V 2.22.0-beta.8}
+&& - {en} isNull(m.tuFormCallBack) means "rely on .WindowType"
+&& - {en} in case of success, always return a reference to the form
+
+return Iif(wFormShow(m.loForm, m.tlModal), m.loForm, .null.)
+
+*!*	return ICase(;
+*!*		!,;
+*!*			.null.,; && {en} failure
+*!*		!m.tlModal,;
+*!*			m.loForm,; && {en} modeless & success
+*!*			.T.; && {en} modal & success: as of standard VFP behavior, reference to the form is lost after form closes
+*!*		)
+endproc
 
 * =============================================================
 procedure wFormShow && {en} Shows form in Web and LAN modes after wFormNoShow() {fr} Affiche un formulaire en modes Web ou desktop après wFormNoShow()
@@ -1237,10 +1245,8 @@ procedure wFormNoShow as awFrm of aw.vcx && {en} DO FORM ... NOSHOW (.scx or cla
 && {fr}   pour l'afficher dans une pleine page Web, utiliser awPublic.prg!wFormMaster()
 lparameters ;
   tcForm AS String; && {en} eg 'Form.scx' or form class
-, tlModal AS Boolean; && [.F.] {en} render as a modal form (returned value not supported)
+, tlModal AS Boolean; && [.F.] {en} .NULL. rely on .WindowType (added 2016-10-03) / .T. modal / .F. modeless (returned value supported by aw.vcx!awFrm.wFormNoShow() only) {fr} .NULL. se baser sur .WindowType (ajouté le 2016-10-03) / .T. modal / .F. modeless (retour de valeur supporté par aw.vcx!awFrm.wFormNoShow() seulement)
 , t01,t02,t03,t04,t05,t06,t07,t08,t09,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19,t20 && @ {en} parameters to be passed to Form.Init()
-
-tlModal = lTrue(m.tlModal)
 
 LOCAL loForm as awFrm of aw.vcx;
 , success as Boolean;
@@ -1289,9 +1295,11 @@ case .T.;
 			)))
 
 otherwise
-	
+
+	* ============================================
 	lcParms = wcParms(m.lnParms)
-	loForm = m.loAppHost.oForm(m.tcForm, m.loForm, m.tlModal &lcParms)
+	loForm = m.loAppHost.oForm(m.tcForm, m.loForm, @m.tlModal &lcParms)
+	* ============================================
 
 	success = .F.;
  		or Vartype(m.loForm) == 'O';
@@ -1994,8 +2002,10 @@ IF m.this.lDevMode
 
 * set step on && 2016-08-19 thn -- {FiC V 2.22.0-beta.4} {en} debug abSetsMaintain (modify command abDev)
 
-	if File('foxyPreviewer.app')
-		do foxyPreviewer.app with 'release'
+	local lcFoxy && 2016-09-28 thn -- {FiC V 2.22.0-beta.7} {en} added
+	lcFoxy = 'foxyPreviewer.app'
+	if File(m.lcFoxy)
+		Do(m.lcFoxy) with 'release'
 	endif
 
 	if Vartype(this.oSets) == 'O'

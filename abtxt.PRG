@@ -104,10 +104,10 @@ loTest.assert('791-1491, 1890, 2891 (MilitÃ¤rfzg. Mit geteilert Scheibe)', m.lcD
 return loTest.Result()
 
 * ===================================================================
-function cJustified && {fr} Chaîne justifiée
+function cJustified && {en} String justified on a given number of columns {fr} Chaîne justifiée sur un nombre de colonnes
 lparameters ;
-  tcChain; && {fr} Chaîne à justifier
-, tnCols; && [80] {fr} Nombre de colonnes
+  tcChain; && {en} String to justify {fr} Chaîne à justifier
+, tnCols; && [80] {en} Number of columns {fr} Nombre de colonnes
 
 tcChain = iif(vartype(m.tcChain) == 'C', m.tcChain, '')
 tnCols = evl(m.tnCols, 80)
@@ -129,6 +129,7 @@ if m.lnLine > 0
 else
 	return ''
 endif
+endfunc
 
 * ===================================================================
 function cWords && {fr} Mots séparés par paires non vides
@@ -2592,6 +2593,11 @@ endtry
 return m.llResult && .F. > {fr} objet non créé
 
 * -----------------------------------------------------------------
+protected procedure destroy
+return && 2016-09-29 thn -- no default
+endproc
+
+* -----------------------------------------------------------------
 protected function cPatterns
 lparameters ;
   tcFunction; && {fr} Fonction qui 'fabrique' les patterns ('.xx' pour une méthode de cet objet ou 'xx' pour une fonction libre)
@@ -3061,10 +3067,10 @@ return iif(vartype(m.tcChain) == 'C';
 		, '&#39;', [']);
 		, '&#8211;', chr(150));
 		, '&#8212;', chr(151));
-		, '&#160;', chr(160));
+		, '&#160;',  chr(160));
 		, '&#8364;', chr(128));
 		, '&#8482;', chr(153));
-		, '&#339;', chr(156));
+		, '&#339;',  chr(156));
 	, m.tcChain)
 
 * ===================================================================
@@ -4027,17 +4033,25 @@ IF Vartype(m.tcTexte) == 'C';
  AND Vartype(m.tnCorps) == 'N';
  AND m.tnCorps >= 0
 
-	IF Empty(m.tcTexte) OR m.tnCorps = 0
+	IF Empty(m.tcTexte) OR Empty(m.tnCorps)
 		lnResult = 0
 	ELSE
 		tcFont = Alltrim(m.tcFont) && 10/05/2004 valeur erronée avec m.tcFont = 'UniveLigUltCon         '
 		tcStyle = Iif(Vartype(m.tcStyle) == 'C', m.tcStyle, '')
-		lnResult = ;
-				Txtwidth(m.tcTexte, m.tcFont, m.tnCorps, m.tcStyle) * ;
-				Fontmetric(6, m.tcFont, m.tnCorps, m.tcStyle)
+		lnResult = Txtwidth(m.tcTexte, m.tcFont, m.tnCorps, m.tcStyle) * Fontmetric(6, m.tcFont, m.tnCorps, m.tcStyle)
 	ENDIF
 ELSE
 	lnResult = -1
 ENDIF
 
 RETURN m.lnResult
+endfunc
+
+* -------------------------------------------------------------
+function nLineHeightPX && {fr} Hauteur d'une ligne de texte en pixels écran
+lparameters cFontName, nFontSize, cFontStyle
+return 0;
+	+ Fontmetric(2, m.cFontName, m.nFontSize, m.cFontStyle); && Character ascent  (units above baseline) in pixels
+	+ Fontmetric(3, m.cFontName, m.nFontSize, m.cFontStyle); && Character descent (units below baseline) in pixels
+	+ 0
+endfunc

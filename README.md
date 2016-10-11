@@ -7,9 +7,17 @@ Categorized by scope: Array, Data, Date, Development, Text, etc.
 
 More details on http://foxincloud.com/OpenSource.php
 
-## How to use?
+## How to install
 
-somewhere in your initialization process, add:
+Just download and copy this package anywhere you want;  
+however, if you plan to use FoxInCloud in the future, the recommended location is:
+```foxpro
+home(1) + 'tools\ab\'
+```
+
+## How to use
+
+Somewhere in your initialization process, add:
 ```foxpro
 set path to <where your FoxInCloud-AB package is installed> additive
 do ab

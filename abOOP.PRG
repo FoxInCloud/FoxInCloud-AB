@@ -398,6 +398,7 @@ local loResult as Object; && {fr} Objet contenu
 , loException as Exception;
 , loForm as awFrm of aw;
 , liDS as Integer;
+, cAliasUsed, nAliasUsed;
 
 loResult = .null.
 llResult = Vartype(m.tiObject) == 'N' and Between(m.tiObject, 1, nObjectsCont(m.toCont))
@@ -430,10 +431,12 @@ if m.llResult
 					set datasession to m.loForm.DataSessionID
 				endif
 				
+				cAliasUsed = cAliasesUsed(@m.nAliasUsed)
+				
 				text to loException.userValue textmerge noshow flags 1 pretext 3
 			 		.Name: <<.Name>>
 			 		.wcID: <<.wcID>>
-			 		.RecordSource: <<cL(.recordSource)>> (used: <<used(.recordSource)>>, aliases used in dataSession #<<Set("Datasession")>>: <<cAliasesUsed()>>)
+			 		.RecordSource: <<cL(.recordSource)>> (used: <<used(.recordSource)>>, <<m.nAliasUsed>> alias<<Iif(m.nAliasUsed > 1, 'es', '')>> used in dataSession #<<Set("Datasession")>>: <<m.cAliasUsed>>)
 			 		columnID/.ColumnCount: <<m.tiObject>> / <<.ColumnCount>>
 			 		.wcRScursor: <<cL(.wcRScursor)>>
 			 		.wcPKexpr: <<cL(.wcPKexpr)>>
