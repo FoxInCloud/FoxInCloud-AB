@@ -9,11 +9,13 @@ More details on http://foxincloud.com/OpenSource.php
 
 ## How to install
 
-Just download and copy this package anywhere you want;  
+1- Download this package anywhere you want;  
 however, if you plan to use FoxInCloud in the future, the recommended location is:
 ```foxpro
 home(1) + 'tools\ab\'
 ```
+
+2- Rebuild `aw.vcx` from `aw.vc2` using [FoxBin2Prg](http://vfpx.codeplex.com/wikipage?title=FoxBin2Prg)
 
 ## How to use
 
@@ -23,7 +25,7 @@ set path to <where your FoxInCloud-AB package is installed> additive
 do ab
 ```
 
-Then use the classes, procedures and functions in your code as usual
+Then use the procedures, functions and classes in your code as usual
 
 ## Wanna contribute?
 
