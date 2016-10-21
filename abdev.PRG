@@ -5775,8 +5775,8 @@ if .t.;
 		  )
 
 endif
-
 return .f. && {fr} impératif
+endfunc
 
 * ===================================================================
 function cResultHeader && {fr} En-tête standard d'un résultat
@@ -7380,7 +7380,7 @@ endfunc
 *!*  MessageBox(SHA1("ceci est un test")="71438dc237b45f04759c41e1b2d34f42a46318f3")
 
 * ---------------------------------------------
-FUNCTION SHA1
+FUNCTION SHA1 && RSA-SHA1 digital signature
 LPARAMETERS cMessage
 
 PRIVATE HO, H1, H2, H3, H4

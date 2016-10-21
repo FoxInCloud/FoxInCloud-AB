@@ -7116,7 +7116,7 @@ if m.llResult
 
 	do case
 
-	case empty(m.lnResult) && {fr} added 04 Feb 2014
+	case Empty(Nvl(m.lnResult, 0)) && {fr} added 04 Feb 2014
 
 	case m.tiRecno < 0 and CursorGetProp("Buffering", m.tcAlias) < 4
 		lcResult = textmerge(icase(;
@@ -7796,13 +7796,14 @@ define class abDataSyncVFP as custom && {fr} Synchronise deux tables ou deux bas
 
 	this.cErrorHeader = alltrim(evl(m.this.cErrorHeader, '/!\'))
 
-	this.lResult = .t.
+	this.lResult = .T.
 	this.cResult = ''
 
 	local liResultItem
 	for liResultItem = 1 to alen(this.aResultItems, 1)
 		store this.aResultItems[m.liResultItem, 2] to ('m.this.oResult.' + this.aResultItems[m.liResultItem, 1])
 	endfor
+	endproc
 
 	*---------------------------------------
 	protected procedure cResult_Assign
@@ -7971,29 +7972,32 @@ define class abDataSyncVFP as custom && {fr} Synchronise deux tables ou deux bas
 	, tlReplace; && [.F.] {fr} Remplacer toute la table destination
 	, tlCKmatch && [.F.] {fr} Matcher les enregistrements sur la première clé candidate de la table destination
 
+	local llResult;
+	, lcResult, liResultItem, lcResultItem;
+	, laTablesIgnore[1];
+	, lnTable, liTable, lcTable, llTable;
+	, luFieldsIgnore, llReplace, llCandMatch;
+
 	this.ResultClear
+	lcResult = ''
+
 	this.cDBCdest = evl(m.tcDBCdest, m.this.cDBCdest) && {fr} cf. this.cDBCdest_assign()
 	this.cDBCsrce = evl(m.tcDBCsrce, m.this.cDBCsrce) && {fr} cf. this.cDBCsrce_assign()
 	if m.this.lResult
-
-		local laTablesIgnore[1], lnTables, lnTable, lcTable, llTable;
-		, luFieldsIgnore, llReplace, llCandMatch;
-		, liResultItem, lcResultItem, lcResult, llResult
 
 		* {fr} Tabuler les tables à ignorer
 		this.aTablesIgnore(@m.laTablesIgnore, m.tcTablesIgnore)
 
 		* {fr} Pour chaque table destination
-		lnTables = alen(m.this.aDBCdestTables)
-		dimension this.aResults[m.lnTables]
-		lcResult = ''
-		for m.lnTable = 1 to m.lnTables
+		lnTable = alen(m.this.aDBCdestTables)
+		dimension this.aResults[m.lnTable]
+		for m.liTable = 1 to m.lnTable
 
-			lcTable = this.aDBCdestTables[m.lnTable]
+			lcTable = this.aDBCdestTables[m.liTable]
 			this.ResultClear
 
 			* {fr} Si la table n'est pas à ignorer
-			if ascan(laTablesIgnore, m.lcTable,1,-1,1,7) = 0
+			if Empty(ascan(laTablesIgnore, m.lcTable,1,-1,1,7))
 
 				* {fr} Si la table est à traiter
 				luFieldsIgnore = m.tuFieldsIgnore
@@ -8026,13 +8030,14 @@ define class abDataSyncVFP as custom && {fr} Synchronise deux tables ou deux bas
 																		[Table '<<m.lcTable>>' was ignored as of list '<<m.tcTablesIgnore>>']; && Default: English
 					))
 			endif
+
 			this.oResult.lResult = m.llTable
 
 			* {fr} Enregistrer le résultat pour la table
-			this.aResults[m.lnTable] = createobject('empty') && {fr} Résultat d'exécution sous forme d'objet
+			this.aResults[m.liTable] = createobject('empty') && {fr} Résultat d'exécution sous forme d'objet
 			for liResultItem = 1 to alen(this.aResultItems, 1)
 				lcResultItem = this.aResultItems[m.liResultItem, 1]
-				addproperty(this.aResults[m.lnTable], m.lcResultItem, evaluate('this.oResult.' + m.lcResultItem))
+				addproperty(this.aResults[m.liTable], m.lcResultItem, evaluate('this.oResult.' + m.lcResultItem))
 			endfor
 
 			llResult = m.llResult and m.llTable

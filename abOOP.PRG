@@ -750,7 +750,6 @@ lparameters ;
 , tcPEM; && [''] {fr} PEM à ajouter aux noms de classe
 , lObjAdd; && [.F.] {fr} ajouter le nom de l'objet lui-même
 
-
 local aa[1], lPEM
 
 lPEM = ga_Type_IsChar(m.tcPEM, .T.)
@@ -1373,7 +1372,7 @@ function lMethod && {fr} Un objet est doté d'une Méthode ou un Événement
 lparameters ;
   toObject as form; && {fr} Objet VFP
 , tcMethod as string; && {fr} méthode
-, tcEventMethod as string && [any] 'm'ethod or 'E'vent
+, tcEventMethod as string && [any] 'M'ethod or 'E'vent
 
 return .t.;
 	and vartype(m.toObject) == 'O';
@@ -1452,8 +1451,7 @@ lparameters ;
 
 local llResult
 
-llResult = lMethod(m.toObject, m.tcMethod) && {fr} toObject has tcMethod
-if m.llResult
+if lMethod(m.toObject, m.tcMethod) && {fr} toObject has tcMethod
 
 	llResult = .f.;
 		or empty(m.toObject.classlibrary) and m.toObject.class == m.toObject.baseclass;

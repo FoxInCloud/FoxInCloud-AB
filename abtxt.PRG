@@ -2948,13 +2948,16 @@ enddefine && {fr} CLASS abRegExp
 function cCRto && {fr} chaîne oû les sauts de ligne sont remplacés par ...
 lparameters ;
   tcChain; && {fr} Chaîne
-, tcReplace && {fr} Chaîne remplaçant les sauts de ligne
+, tcReplace && [' '] {fr} Chaîne remplaçant les sauts de ligne
+
+tcReplace = Iif(ga_Type_IsChar(m.tcReplace), m.tcReplace, ' ')
 
 return strtran(strtran(strtran(strtran(m.tcChain;
-	, CRLF, m.tcReplace); && modify file abtxt.h
-	, LFCR, m.tcReplace); && modify file abtxt.h
-	, CR, m.tcReplace); && modify file abtxt.h
-	, LF, m.tcReplace) && modify file abtxt.h
+	, CRLF, m.tcReplace); && modify file abTxt.h
+	, LFCR, m.tcReplace); && modify file abTxt.h
+	, CR, m.tcReplace); && modify file abTxt.h
+	, LF, m.tcReplace) && modify file abTxt.h
+endfunc
 
 * ===================================================================
 function cCR2to && {fr} chaîne oû les sauts de ligne doubles sont remplacés par ...
@@ -2963,10 +2966,10 @@ lparameters ;
 , tcReplace && {fr} Chaîne remplaçant les sauts de ligne
 
 return strtran(strtran(strtran(strtran(m.tcChain;
-	, CRLF2, m.tcReplace); && modify file abtxt.h
-	, LFCR2, m.tcReplace); && modify file abtxt.h
-	, CR2, m.tcReplace); && modify file abtxt.h
-	, LF2, m.tcReplace) && modify file abtxt.h
+	, CRLF2, m.tcReplace); && modify file abTxt.h
+	, LFCR2, m.tcReplace); && modify file abTxt.h
+	, CR2, m.tcReplace); && modify file abTxt.h
+	, LF2, m.tcReplace) && modify file abTxt.h
 
 * ===================================================================
 function cCRDel && {fr} chaîne oû les sauts de ligne sont supprimés
@@ -4050,6 +4053,7 @@ endfunc
 * -------------------------------------------------------------
 function nLineHeightPX && {fr} Hauteur d'une ligne de texte en pixels écran
 lparameters cFontName, nFontSize, cFontStyle
+cFontStyle = Evl(m.cFontStyle, '')
 return 0;
 	+ Fontmetric(2, m.cFontName, m.nFontSize, m.cFontStyle); && Character ascent  (units above baseline) in pixels
 	+ Fontmetric(3, m.cFontName, m.nFontSize, m.cFontStyle); && Character descent (units below baseline) in pixels

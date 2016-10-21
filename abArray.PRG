@@ -55,7 +55,7 @@ return m.lnResult
 function aAppend && {fr} Ajoute les lignes d'un tableau à un autre {en} Appends line from an array to another
 lparameters ;
   taDest; && @ {fr} Résultat {en} Result array
-, taSrce; && @ {fr} Source des lignes ajoutées à tadEst {en} array to append to tadEst
+, taSrce; && @ {fr} Source des lignes ajoutées à taDest {en} array to append to taDest
 , tlUnique; && [.F.] {fr} ne pas ajouter les lignes existantes {en} don't append lines that already exists in the result array
 , tlPrepend && [.F.] {fr} ajouter en début de tableau {en} append at the beginning of the array
 
@@ -227,7 +227,7 @@ return loUnitTest.Result()
 function aFilter && {fr} Filtre les éléments d'un tableau par un autre {en} Filters the elements of an array by another array
 lparameters ;
   taDest; && @ {fr} Résultat {en} result
-, taSrce; && @ {fr} TAbleau contenant les lignes filtrant tadEst {en} array with lines used to filter tadEst
+, taSrce; && @ {fr} Tableau contenant les lignes filtrant taDest {en} array with lines used to filter taDest
 , tlExactOff; && [.F.] {fr} COmparer avec exact off {en} compare with exact off
 , tlCase; && [.F.] {fr} COmparer en respectant la casse {en} case-sensitive comparison
 , tlExclude && [.F.] {fr} Garder les éléments destination absents de la source {en} Keep destination elements that can't be found in source
@@ -1172,7 +1172,7 @@ return loUnitTest.Result()
 function aRowCopyIns && {fr} Copie une ligne d'un tableau et l'insère dans un autre à une position donnée {en} Copy one line from an array and insert it in another array at a specific position
 lparameters ;
   taDest; && @ {fr} Résultat {en} Result
-, taSrce; && @ {fr} tableau source des lignes copiées dans tadEst {en} array source from where one line is inserted in tadEst
+, taSrce; && @ {fr} tableau source des lignes copiées dans taDest {en} array source from where one line is inserted in taDest
 , tiDest; && [dernière] {fr} N° de ligne APRÈS laquelle insérer la ligne copiée, 0 pour insérer au début {en} index of line AFTER the line is inserted
 , tiSrce   && [1] {fr} n° de la ligne du tableau source à copier dans la destination {en} index of line from source array to be copied in taDest
 external array taDest, taSrce

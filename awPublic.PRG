@@ -1410,7 +1410,7 @@ return m.luForm
 endfunc
 
 * ---------------------------------------
-function wMenu_cDoc && {fr} wMenu() documentation
+function wMenu_cDoc && {en} wMenu() documentation
 lparameters cLangUser
 cLangUser = Evl(m.cLangUser, cLangUser())
 
@@ -1432,9 +1432,9 @@ To adapt any menu command or function to LAN (desktop) mode and Web mode, pass i
 (FoxInCloud Adaptation Assistant adapts all your menu instructions that way)
 
 <code lang="vfp">
-DEFI POPU myPopup MARGIN	RELA SHADOW  COLOR  W+/B* && {fr} command before adaptation
-wMenu('DEFI POPU myPopup MARGIN	RELA SHADOW  COLOR  W+/B* ') && {fr} command after adaptation
-&& {fr} note: wMenu() expands standard abbreviated Visual FoxPro keywords and parses any number of spaces or tabs around clauses
+DEFI POPU myPopup MARGIN	RELA SHADOW COLOR W+/B* && command before adaptation
+wMenu('DEFI POPU myPopup MARGIN	RELA SHADOW COLOR W+/B* ') && command after adaptation
+&& note: wMenu() expands standard abbreviated Visual FoxPro keywords and parses any number of spaces or tabs around clauses
 </code>
 
 Except ''ON SELECTION'' commands and ''SKIP FOR'' expressions, expressions inside clauses must be expressed as literals;
@@ -1442,8 +1442,8 @@ To convert expressions to literals, simply place your instruction in ''Textmerge
 
 <code lang="vfp">
 lcPrompt = "Display contents of myFile"
-DEFINE BAR 2 OF myPopup  PROMPT m.lcPrompt SKIP FOR !FILE("myFile.ext") && {fr} command before adaptation
-wMenu(Textmerge('DEFINE BAR 2 OF myPopup  PROMPT "<<m.lcPrompt>>" SKIP FOR !FILE("myFile.ext")')) && {fr} command after adaptation
+DEFINE BAR 2 OF myPopup PROMPT m.lcPrompt SKIP FOR !FILE("myFile.ext") && command before adaptation
+wMenu(Textmerge('DEFINE BAR 2 OF myPopup PROMPT "<<m.lcPrompt>>" SKIP FOR !FILE("myFile.ext")')) && command after adaptation
 </code>
 
 To make it even more simple, you can use the FoxInCloud ''cLitteral()'' function (aliased as ''cL'');
@@ -1452,8 +1452,8 @@ To make it even more simple, you can use the FoxInCloud ''cLitteral()'' function
 <code lang="vfp">
 liBar = 2
 lcPrompt = "Display contents of myFile"
-DEFINE BAR m.liBar OF myPopup  PROMPT m.lcPrompt SKIP FOR !FILE("myFile.ext") && {fr} command before adaptation
-wMenu(Textmerge('DEFINE BAR <<cL(m.liBar)>> OF myPopup  PROMPT <<cL(m.lcPrompt)>> SKIP FOR !FILE("myFile.ext")')) && {fr} command after adaptation
+DEFINE BAR m.liBar OF myPopup PROMPT m.lcPrompt SKIP FOR !FILE("myFile.ext") && command before adaptation
+wMenu(Textmerge('DEFINE BAR <<cL(m.liBar)>> OF myPopup PROMPT <<cL(m.lcPrompt)>> SKIP FOR !FILE("myFile.ext")')) && command after adaptation
 </code>
 
 
@@ -1463,7 +1463,7 @@ If any error occurs, execution chain will stop on the offending instruction, and
 <code lang="vfp">
 local success, result
 success = .T.;
-	and wMenu('DEFI POPU myPopup MARGIN RELATIVE SHADOW COLOR  W+/B*', @m.result);
+	and wMenu('DEFI POPU myPopup MARGIN RELATIVE SHADOW COLOR W+/B*', @m.result);
 	and wMenu('ON SELECTION BAR 2 OF myPopup loMyForm.myMethod(m.myValue)', @m.result)
 assert m.success message m.result
 if m.success
@@ -1489,15 +1489,15 @@ wMenu('DEFINE PAD|BAR ... SKIP FOR myFunction(m.myValue)', @m.result)
 <code lang="vfp">
 local success, result
 success = .T.;
-	and wMenu('DEFI POPU myPopup MARGIN RELATIVE SHADOW COLOR  W+/B*', @m.result);
+	and wMenu('DEFI POPU myPopup MARGIN RELATIVE SHADOW COLOR W+/B*', @m.result);
 	and wMenu('DEFINE BAR 2 OF myPopup PROMPT "xx" SKIP FOR m.myBoolean', @m.result);
 	and wMenu('ON SELECTION BAR 2 OF myPopup loMyForm.myMethod(m.myValue)', @m.result);
 	;
-	and varSet(@m.result, CreateObject('Empty')); && {fr} you create an object which defines the parameters that are required for your ON SELECTION commands and SKIP FOR expressions
+	and varSet(@m.result, CreateObject('Empty')); && you create an object which defines the parameters that are required for your ON SELECTION commands and SKIP FOR expressions
 	and AddProperty(m.result, 'loMyForm', thisForm);
 	and AddProperty(m.result, 'myValue', m.myValue);
 	and AddProperty(m.result, 'myBoolean', m.myBoolean);
-	and wMenu('ACTIVATE POPUP myPopup ... NOWAIT', @m.result) && {fr} m.result contains: - on call, the 'parameter object' - on return, error message if any, else .null.
+	and wMenu('ACTIVATE POPUP myPopup ... NOWAIT', @m.result) && m.result contains: - on call, the 'parameter object' - on return, error message if any, else .null.
 assert m.success message m.result
 </code>
 
@@ -1509,10 +1509,10 @@ local loMyObject, success, result
 thisForm.AddObject('oObject', 'myCustom', InitParm)
 loMyObject = thisForm.oObject
 success = .T.;
-	and wMenu('DEFI POPU myPopup MARGIN RELATIVE SHADOW COLOR  W+/B*', @m.result);
+	and wMenu('DEFI POPU myPopup MARGIN RELATIVE SHADOW COLOR W+/B*', @m.result);
 	and wMenu('ON SELECTION BAR 2 OF myPopup loMyObject.myMethod(m.myValue)', @m.result);
-	and varSet(@m.result, CreateObject('Empty')); && {fr} you create an object which defines the parameters that are required for your ON SELECTION commands and SKIP FOR expressions
-	and AddProperty(m.result, 'loMyObject', m.loMyObject); && {fr} loMyObject is needed to evaluate some SKIP FOR expression or execute some ON SELECTION command
+	and varSet(@m.result, CreateObject('Empty')); && you create an object which defines the parameters that are required for your ON SELECTION commands and SKIP FOR expressions
+	and AddProperty(m.result, 'loMyObject', m.loMyObject); && loMyObject is needed to evaluate some SKIP FOR expression or execute some ON SELECTION command
 	and AddProperty(m.result, 'myValue', m.myValue);
 	and wMenu('ACTIVATE POPUP myPopup ... NOWAIT', @m.result)
 assert m.success message m.result
@@ -1538,13 +1538,13 @@ local loMyObject, success, result
 thisForm.AddObject('oObject', 'myCustom', InitParm)
 loMyObject = thisForm.oObject
 success = .T.;
-	and wMenu('DEFI POPU myPopup MARGIN RELATIVE SHADOW COLOR  W+/B*', @m.result);
+	and wMenu('DEFI POPU myPopup MARGIN RELATIVE SHADOW COLOR W+/B*', @m.result);
 	and wMenu('ON SELECTION BAR 2 OF myPopup loMyObject.myMethod(m.myValue)', @m.result);
-	and varSet(@m.result, CreateObject('Empty')); && {fr} you create an object which defines the parameters that are required for your ON SELECTION commands and SKIP FOR expressions
-	and AddProperty(m.result, 'loMyObject', m.loMyObject); && {fr} loMyObject is needed to evaluate some SKIP FOR expression or execute some ON SELECTION command
+	and varSet(@m.result, CreateObject('Empty')); && you create an object which defines the parameters that are required for your ON SELECTION commands and SKIP FOR expressions
+	and AddProperty(m.result, 'loMyObject', m.loMyObject); && loMyObject is needed to evaluate some SKIP FOR expression or execute some ON SELECTION command
 	and AddProperty(m.result, 'myValue', m.myValue);
 	and AddProperty(m.result, 'woCallBack', m.this);
-	and AddProperty(m.result, 'wcCallBack', 'wFormCallBack'); && {fr} this.wFormCallBack() will execute when myPopup deactivates
+	and AddProperty(m.result, 'wcCallBack', 'wFormCallBack'); && this.wFormCallBack() will execute when myPopup deactivates
 	and wMenu('ACTIVATE POPUP myPopup ...', @m.result)
 assert m.success message m.result
 </code>
@@ -1552,9 +1552,9 @@ assert m.success message m.result
 ''wMenu()'' also executes menu functions:
 
 <code lang="vfp">
-&& {fr} function call before adaptation:
+&& function call before adaptation:
 ? Prmba( "myPopup", 2 )
-&& {fr} function call after adaptation:
+&& function call after adaptation:
 ? wMenu('Prmba( "myPopup", 2 )', @m.result)
 </code>
 
@@ -1589,10 +1589,10 @@ local luResult as Variant; && {menu command} success: .T., failure: .F. - {menu 
 , llResult AS Boolean;
 , lcResult AS String;
 , loResult AS Exception;
-, llFunc AS Boolean; && @ [.null.] {fr} Function
-, lcCmdFuncFound AS String; && @ [.null.] {fr} Command or function Name found in the instruction
-, lcCmdFuncNorm AS String; && @ [.null.] {fr} Normalized Command or function Name
-, lcLevel AS String; && @ [.null.] {fr} Level ('M'enu or 'Popup')
+, llFunc AS Boolean; && @ [.null.] {en} Function
+, lcCmdFuncFound AS String; && @ [.null.] {en} Command or function Name found in the instruction
+, lcCmdFuncNorm AS String; && @ [.null.] {en} Normalized Command or function Name
+, lcLevel AS String; && @ [.null.] {en} Level ('M'enu or 'Popup')
 , llAppHost AS Boolean;
 , laVar[1], liVar AS Integer, lcVar As String;
 
@@ -1647,7 +1647,7 @@ if m.llResult
 								assert .F. message cAssertMsg(m.varsIn_resultOut)
 							ENDTRY
 
-						else && {fr} no error handling -------------------------------------
+						else && {en} no error handling -------------------------------------
 
 							IF m.llFunc
 								luResult = Evaluate(m.tcCmdFunc)
@@ -1658,7 +1658,7 @@ if m.llResult
 						* =============================================================
 					ENDIF
 
-			else && {fr} wlWeb()
+			else && wlWeb()
 
 				llResult = m.llAppHost or wlAppHost(@m.loAppHost)
 				varsIn_resultOut = Iif(m.llResult, m.varsIn_resultOut, Textmerge(ICase(;
@@ -1670,13 +1670,13 @@ if m.llResult
 					
 					llResult = m.loAppHost.wMenu_(;
 						  @m.luResult; && {fr} résultat, si fonction et succès, retour de la fonction
-						, m.tcCmdFunc; && {fr} Command or function to be executed (except for ON SELECTION commands and SKIP FOR expressions, parameters must be literals)
-						, m.lcCmdFuncFound; && @ [.null.] {fr} Command or function name found in the instruction
-						, m.llFunc; && @ [.null.] {fr} Function
-						, m.lcCmdFuncNorm; && @ [.null.] {fr} Normalize()d Command or Function
-						, m.lcLevel; && @ [.null.] {fr} Level ('M'enu or 'Popup')
+						, m.tcCmdFunc; && {en} Command or function to be executed (except for ON SELECTION commands and SKIP FOR expressions, parameters must be literals)
+						, m.lcCmdFuncFound; && @ [.null.] {en} Command or function name found in the instruction
+						, m.llFunc; && @ [.null.] {en} Function
+						, m.lcCmdFuncNorm; && @ [.null.] {en} Normalize()d Command or Function
+						, m.lcLevel; && @ [.null.] {en} Level ('M'enu or 'Popup')
 						, @m.varsIn_resultOut; && @ {var1Name: var1Value, var2Name: var2Value, ...} - variables used in ON SELECTION commands, that must be in scope when ACTIVATEing Menu or Popup
-						, Set("Datasession"); && [Set("Datasession")] {fr} Datasession where instruction is executed (for define menu / define popup)
+						, Set("Datasession"); && [Set("Datasession")] {en} Datasession where instruction is executed (for define menu / define popup)
 						)
 
 					assert m.llResult message cAssertMsg(m.luResult)
@@ -1881,7 +1881,7 @@ protected ;
 wlWeb = .null. && {en} application runs in Web mode {fr} l'application fonctionne en mode Web
 wlLAN = .null. && {en} application runs in LAN (desktop) mode {fr} l'application fonctionne en mode LAN (desktop)
 lDevMode = .null. && {en} application runs in the IDE {fr} l'application fonctionne dans l'IDE de VFP
-lAutomation = .null. && {en} App works in COM mode {fr} L'application fonctionne en mode COM
+lAutomation = .null. && {en} App works in COM mode (this.wlWeb only) {fr} L'application fonctionne en mode COM (si this.wlWeb)
 oConfigApp = .null. && {en} App configuration object - see xxxServer.prg!xxxAppConfig {fr} Objet de configuration de l'application - voir xxxServer.prg!xxxAppConfig
 oAppConfig = .null. && {en} App configuration object - see xxxServer.prg!xxxAppConfig {fr} Objet de configuration de l'application - voir xxxServer.prg!xxxAppConfig
 
@@ -1970,6 +1970,7 @@ lparameters ;
 , tlSupported; && [this.lSupported] {en} assume abSet() supports this setting
 
 && 2016-08-18 thn -- {FiC V 2.22.0-beta.3} {en} added
+&& 2016-10-21 thn -- {FiC V 2.22.0-beta.8} {en} deprecated by abSetsMaintain() -- plain SETs are now supported
 
 * set step on 
 
@@ -3347,77 +3348,7 @@ Vertical Fixed Size 		512 9 1, 4, 16, 64 Anchors center of control relative to t
 #endif
 
 * -----------------------------------------------------
-procedure wAnchorResizeHeight && {en} Resizes and replaces contained objects upon .Height change
-&& called by awFrm.Height_Assign() && /!\ recursive
-lparameters ;
-  toCont as awFrm of aw.vcx; && {en} Object of a Visual Container class
-, tHeightAnte;
-, tHeightPost;
-
-local success as Boolean;
-, aCntl[1];
-, oCntl as awTxt of aw.vcx;
-, delta as Number;
-, ratio as Number;
-, nAnchor as Number;
-, Top_ as Number;
-, Height_ as Number;
-, lForm as boolean;
-
-delta = m.tHeightPost - m.tHeightAnte
-ratio = m.tHeightPost / m.tHeightAnte
-
-if m.delta # 0 and aoClassCont(@m.aCntl, m.toCont,, .F.) > 0
-
-	lForm = m.toCont.BaseClass == 'Form'
-
-	for each oCntl in m.aCntl foxobject
-		if lProperty(m.oCntl, 'Anchor');
-		 and m.oCntl.Anchor > 0;
-		 and (m.lForm or !PemStatus(m.toCont, m.oCntl.Name, 6)) && controls inherited from a class apply .Anchor themselves, even if hidden
-
-			with m.oCntl as awTxt of aw.vcx
-
-				nAnchor = .Anchor && optimization
-				Top_ = .Top
-				Height_ = .Height
-
-				.Top = Round(ICase(;
-					   BitTest(m.nAnchor, 4); && Top RELATIVE - Anchors control to Top border of container and maintains relative distance between the Top border.
-					or BitTest(m.nAnchor, 9),; && Vertical Fixed Size - Anchors center of control relative to top and bottom borders but remains fixed in size.
-						.Top * m.ratio,;
-					!BitTest(m.nAnchor, 0) and BitTest(m.nAnchor, 2),; && Bottom ABSOLUTE - Anchors control to Bottom border of container and does not change the distance between the Bottom border.
-						.Top + m.delta,;
-						.Top; && Top ABSOLUTE
-					), 0)
-
-				if (.F.;
-				 or BitTest(m.nAnchor, 2); && Bottom ABSOLUTE
-				 or BitTest(m.nAnchor, 6); && Bottom RELATIVE
-				 ) and !BitTest(m.nAnchor, 9); && Vertical Fixed Size - Anchors center of control relative to top and bottom borders but remains fixed in size.
-				 
-					.Height = Round(m.tHeightPost - .Top - (m.tHeightAnte - m.Top_ - m.Height_) * Iif(BitTest(m.nAnchor, 6); && Bottom relative
-						, m.ratio;
-						, 1;
-						), 0)
-				endif
-			endwith
-
-			if !InList(m.oCntl.BaseClass, 'Optiongroup', 'Commandgroup'); && 2016-08-05 thn -- {FiC V 2.22.0-beta.2} {en} .Anchor works even with !Form.Visible
-			 and loCont(m.oCntl)
-				wAnchorResizeHeight(; && /!\ recursion
-					  m.oCntl;
-					, m.Height_;
-					, m.oCntl.Height;
-					)
-			endif
-		endif
-	endfor
-endif
-endproc
-
-* -----------------------------------------------------
-procedure wAnchorResizeWidth && {en} Resizes and replaces contained objects upon .Width change
+procedure wAnchorResizeWidth && {en} Resizes and moves contained objects upon .Width change
 && called by awFrm.Width_Assign() && /!\ recursive
 lparameters ;
   toCont as awFrm of aw.vcx; && {en} Object of a Visual Container class
@@ -3444,7 +3375,7 @@ if m.delta # 0 and aoClassCont(@m.aCntl, m.toCont,, .F.) > 0
 	for each oCntl in m.aCntl foxobject
 		if lProperty(m.oCntl, 'Anchor');
 		 and m.oCntl.Anchor > 0;
-		 and (m.lForm or !PemStatus(m.toCont, m.oCntl.Name, 6)) && controls inherited from a class apply .Anchor themselves, even if hidden
+		 and (m.lForm or !PemStatus(m.toCont, m.oCntl.Name, 6)) && controls inherited from a class apply .Anchor themselves, even when hidden
 
 			with m.oCntl as awTxt of aw.vcx
 
@@ -3466,14 +3397,11 @@ if m.delta # 0 and aoClassCont(@m.aCntl, m.toCont,, .F.) > 0
 				 or BitTest(m.nAnchor, 7); && Right RELATIVE
 				 ) and !BitTest(m.nAnchor, 8); && Horizontal Fixed Size - Anchors center of control relative to Left and Right borders but remains fixed in size.
 				 
-					.Width = Round(m.tWidthPost - .Left - (m.tWidthAnte - m.Left_ - m.Width_) * Iif(BitTest(m.nAnchor, 7); && Right RELATIVE
+					.Width = Max(Round(m.tWidthPost - .Left - (m.tWidthAnte - m.Left_ - m.Width_) * Iif(BitTest(m.nAnchor, 7); && Right RELATIVE
 						, m.ratio;
 						, 1;
-						), 0)
+						), 0), 0)
 				endif
-
-* setStepOn(.wcID = 'coordon_scx-navigdbf1') && 2016-08-31 thn -- {FiC V 2.22.0-beta.4} {en} Dooxi test
-
 			endwith
 
 			if !InList(m.oCntl.BaseClass, 'Optiongroup', 'Commandgroup'); && 2016-08-05 thn -- {FiC V 2.22.0-beta.2} {en} .Anchor works even with !Form.Visible
@@ -3482,6 +3410,82 @@ if m.delta # 0 and aoClassCont(@m.aCntl, m.toCont,, .F.) > 0
 					  m.oCntl;
 					, m.Width_;
 					, m.oCntl.Width;
+					)
+			endif
+		endif
+	endfor
+endif
+endproc
+
+* -----------------------------------------------------
+procedure wAnchorResizeHeight && {en} Resizes and moves contained objects upon .Height change
+&& called by awFrm.Height_Assign() && /!\ recursive
+lparameters ;
+  toCont as awFrm of aw.vcx; && {en} Object of a Visual Container class
+, tHeightAnte;
+, tHeightPost;
+
+local success as Boolean;
+, aCntl[1];
+, oCntl as awTxt of aw.vcx;
+, delta as Number;
+, ratio as Number;
+, nAnchor as Number;
+, Top as Number;
+, Height as Number;
+, lForm as boolean;
+
+delta = m.tHeightPost - m.tHeightAnte
+ratio = m.tHeightPost / m.tHeightAnte
+
+if m.delta # 0 and aoClassCont(@m.aCntl, m.toCont,, .F.) > 0
+
+	lForm = m.toCont.BaseClass == 'Form'
+
+	for each oCntl in m.aCntl foxobject
+		if lProperty(m.oCntl, 'Anchor');
+		 and m.oCntl.Anchor > 0;
+		 and (m.lForm;
+		 	or !PemStatus(m.toCont, m.oCntl.Name, 6); && controls inherited from a class apply .Anchor themselves, even when hidden
+		 	);
+		 and !(m.oCntl.BaseClass == 'Grid' and type('m.oCntl.wlCntGrdPage') == 'L' and m.oCntl.wlCntGrdPage); && 2016-10-11 thn -- {FiC V 2.22.0-beta.8} {en} experimental finding -- surprisingly, only .Height is affected -- modify class awcntgrdpage of aw.vcx method this_access
+		 and .T.
+
+			with m.oCntl as awTxt of aw.vcx
+
+* setStepOn(.wcID == 'pagedgrid_scx-grid-grid') && 2016-10-11 thn -- {FiC V 2.22.0-beta.8} {en} 
+
+				nAnchor = .Anchor && optimization
+				Top = .Top
+				Height = .Height
+
+				.Top = Round(ICase(;
+					   BitTest(m.nAnchor, 4); && Top RELATIVE - Anchors control to Top border of container and maintains relative distance between the Top border.
+					or BitTest(m.nAnchor, 9),; && Vertical Fixed Size - Anchors center of control relative to top and bottom borders but remains fixed in size.
+						m.Top * m.ratio,;
+					!BitTest(m.nAnchor, 0) and BitTest(m.nAnchor, 2),; && Bottom ABSOLUTE - Anchors control to Bottom border of container and does not change the distance between the Bottom border.
+						m.Top + m.delta,;
+						m.Top; && Top ABSOLUTE
+					), 0)
+
+				if (.F.;
+				 or BitTest(m.nAnchor, 2); && Bottom ABSOLUTE
+				 or BitTest(m.nAnchor, 6); && Bottom RELATIVE
+				 ) and !BitTest(m.nAnchor, 9); && Vertical Fixed Size - Anchors center of control relative to top and bottom borders but remains fixed in size.
+				 
+					.Height = Max(Round(m.tHeightPost - .Top - (m.tHeightAnte - m.Top - m.Height) * Iif(BitTest(m.nAnchor, 6); && Bottom relative
+						, m.ratio;
+						, 1;
+						), 0), 0)
+				endif
+			endwith
+
+			if !InList(m.oCntl.BaseClass, 'Optiongroup', 'Commandgroup'); && 2016-08-05 thn -- {FiC V 2.22.0-beta.2} {en} .Anchor works even with !Form.Visible
+			 and loCont(m.oCntl)
+				wAnchorResizeHeight(; && /!\ recursion
+					  m.oCntl;
+					, m.Height;
+					, m.oCntl.Height;
 					)
 			endif
 		endif

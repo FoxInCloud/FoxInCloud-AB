@@ -90,7 +90,7 @@ lparameters ;
 , iType as Integer; && [1] {fr} type de date-heure (additive): 1 dernière modification, 2 dernier accès, 4 création
 , lGMT as Boolean; && [.F.] {fr} la date-heure indiquée est GMT
 
-&& Courtesy M. Olivier Hamou -- http://www.atoutfox.org/nntp.asp?ID=0000017371
+&& Courtesy Mr Olivier Hamou -- http://www.atoutfox.org/nntp.asp?ID=0000017371
 
 local nResult;
 , cResult;
@@ -124,10 +124,10 @@ declare Integer CloseHandle IN kernel32;
 declare Integer GetLastError IN Win32API 
 
 lcBuff = Repli(Chr(0), 250)
-cFile = FullPath(m.cFile)
+cFile = Iif(lFullPath(m.cFile), m.cFile, FullPath(m.cFile))
 hFile = OpenFile(;
 	  m.cFile;
-	, @m.lcBuff; && A pointer to the OFSTRUCT structure that receives information about a file when it is first opened. The structure can be used in subsequent calls to the OpenFile function to see an open file.
+	, @m.lcBuff; && A pointer to the OFSTRUCT structure (https://msdn.microsoft.com/en-us/library/windows/desktop/aa365282(v=vs.85).aspx) that receives information about a file when it is first opened. The structure can be used in subsequent calls to the OpenFile function to see an open file.
 	, 0x00000001; && Opens a file for write access only
 	)
 IF hFile = -1 && failed to open

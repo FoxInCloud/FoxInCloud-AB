@@ -853,7 +853,7 @@ return m.loResult
 function acXLWSs && {fr} Noms des feuilles de calcul contenues dans un classeur Excel
 lparameters ;
   taXLWS; && @ {fr} Noms des feuilles de calcul contenues dans le classeur Excel
-, tcXLWBAddr && {fr} Adresse du classeur Excel à explorer
+, tcXLWBaddr && {fr} Adresse du classeur Excel à explorer
 
 external array taXLWS
 
@@ -864,7 +864,7 @@ lnResult = 0
 aClear(@m.taXLWS)
 
 * {fr} Si le classeur XL indiqué peut être localisé
-llXLWBAddr = file(m.tcXLWBAddr)
+llXLWBAddr = file(m.tcXLWBaddr)
 assert m.llXLWBAddr message "Impossible de trouver un classeur XL à l'adresse" + alltrim(m.tcXLWBAdd)
 if m.llXLWBAddr
 
@@ -872,7 +872,7 @@ if m.llXLWBAddr
 	local loXL as Excel.application,;
 		loXLWB as Excel.Workbook
 	loXL = oXL()
-	loXLWB = loXL.Workbooks.open(fullpath(m.tcXLWBAddr), 0, .t.)
+	loXLWB = loXL.Workbooks.open(fullpath(m.tcXLWBaddr), 0, .t.)
 
 	* {fr} Lire les noms des feuilles de calcul contenues dans le classeur
 	local loXLWS as Excel.WorkSheet
@@ -1176,12 +1176,12 @@ endproc
 procedure XLWSofTableMemo && {fr} feuille Excel d'après une table FoxPro avec les champs MEMO (impossible avec COPY TO)
 lparameters ;
   tuTable; && [Alias()] {fr} Alias, zone ou adresse de la table source
-, tcXLWBAddr; && [forceExt(tuTable, 'XLS'] {fr} Adresse du classeur XL cible
+, tcXLWBaddr; && [forceExt(tuTable, 'XLS'] {fr} Adresse du classeur XL cible
 
 local llResult;
 , lcAlias;
 , llDBFOpened;
-, lcTableAddr, lcXLWBAddr;
+, lcTableAddr, lcXLWBaddr;
 , loXL as Excel.Application;
 , loXLWB as Excel.Workbook;
 , loXLWS as Excel.WorkSheet;
@@ -1201,8 +1201,8 @@ if m.llResult
 
 	* {fr} Si le classeur peut être ouvert ou créé
 	lcTableAddr = cTableAddress(m.lcAlias)
-	lcXLWBAddr = uDefault(m.tcXLWBAddr, forceext(m.lcTableAddr, EXT_XLS))
-	loXLWB = oXLWB(m.lcXLWBAddr, @m.llXLSOpened, @m.llXLScreated)
+	lcXLWBaddr = uDefault(m.tcXLWBaddr, forceext(m.lcTableAddr, EXT_XLS))
+	loXLWB = oXLWB(m.lcXLWBaddr, @m.llXLSOpened, @m.llXLScreated)
 	llResult = loXLWB(m.loXLWB)
 	if m.llResult
 		with m.loXLWB as Excel.Workbook
@@ -1261,7 +1261,7 @@ if m.llResult
 
 			* {fr} Sauver le classeur et fermer Excel
 			if m.llXLScreated
-				.saveas(m.lcXLWBAddr, xlWorkbookNormal)
+				.saveas(m.lcXLWBaddr, xlWorkbookNormal)
 			else
 				.save
 			endif
@@ -1285,7 +1285,7 @@ endproc
 procedure TableMemoOfXLWS && {fr} Table FoxPro avec les champs MEMO d'après une feuille Excel (impossible avec Import ou append from)
 lparameters ;
   tuTable; && [Alias()] {fr} Alias, zone ou adresse de la table destination
-, tcXLWBAddr; && [forceExt(tuTable, 'XLS'] {fr} Adresse du classeur XL source
+, tcXLWBaddr; && [forceExt(tuTable, 'XLS'] {fr} Adresse du classeur XL source
 , tcXLWS; && [première] {fr} Feuille contenant les données à importer
 , tlFieldsCheck && [.F.] {fr} Vérifier que les champs de la feuille sont tous dans la table
 local llResult
@@ -1299,10 +1299,10 @@ assert m.llResult message cAssertMsg(textmerge("<<Program()>> - Invalid table sp
 if m.llResult
 
 	* {fr} Si le classeur existe et peut être ouvert en automation
-	local lcTableAddr, lcXLWBAddr, loXLWB as Excel.Workbook, llOpened, llCreated
+	local lcTableAddr, lcXLWBaddr, loXLWB as Excel.Workbook, llOpened, llCreated
 	lcTableAddr = cTableAddress(m.lcAlias)
-	lcXLWBAddr = uDefault(m.tcXLWBAddr, forceext(m.lcTableAddr, EXT_XLS))
-	loXLWB = oXLWB(m.lcXLWBAddr, @m.llOpened, @m.llCreated)
+	lcXLWBaddr = uDefault(m.tcXLWBaddr, forceext(m.lcTableAddr, EXT_XLS))
+	loXLWB = oXLWB(m.lcXLWBaddr, @m.llOpened, @m.llCreated)
 	llResult = loXLWB(m.loXLWB) and not m.llCreated
 	if m.llResult
 		with m.loXLWB as Excel.Workbook
@@ -1402,7 +1402,7 @@ return m.llResult
 *========================================
 procedure XL8table && {fr} Importe une feuille d'un Classeur Excel 97 dans une table
 lparameters ;
-  tcXLWBAddr; && {fr} Adresse du MASQUE de classeur Excel contenant la feuille à importer
+  tcXLWBaddr; && {fr} Adresse du MASQUE de classeur Excel contenant la feuille à importer
 , tcSheet; && [feuille n°1] {fr} Nom de la feuille à importer
 , tlNonVerifDernVers; && @ [.F.] {fr} Ne pas prendre le dernier n° de version du classeur Excel ; @ la table a été rafraîchie
 , tlImportForce; && [.F.] {fr} Importer même si le classeur est plus ancien que la table
@@ -1439,18 +1439,18 @@ local llResult, lcResult && {fr} Adresse de la table créée OU nom du curseur OU 
 *================================================================
 
 lcResult = ''
-llResult = vartype(m.tcXLWBAddr) == 'C'
+llResult = vartype(m.tcXLWBaddr) == 'C'
 if m.llResult
 
 	* {fr} Si un classeur existe selon le masque spécifié
-	local lcXLWBAddr, lcXLWBPath, lcDBFStem, lcDBFAddr, lcAliasUsed, llAliasUsed, llExclusive
-	lcXLWBAddr = iif(m.tlNonVerifDernVers, fullpath(m.tcXLWBAddr), cFileFreshest(m.tcXLWBAddr))
-	llResult = file(m.lcXLWBAddr)
+	local lcXLWBaddr, lcXLWBPath, lcDBFStem, lcDBFAddr, lcAliasUsed, llAliasUsed, llExclusive
+	lcXLWBaddr = iif(m.tlNonVerifDernVers, fullpath(m.tcXLWBaddr), cFileFreshest(m.tcXLWBaddr))
+	llResult = file(m.lcXLWBaddr)
 	if m.llResult
 
 		* {fr} Déterminer l'adresse de la table destination
-		lcXLWBPath = addbs(justpath(m.lcXLWBAddr))
-		lcDBFStem = iif(empty(m.tcSheet), juststem(m.tcXLWBAddr), m.tcSheet)
+		lcXLWBPath = addbs(justpath(m.lcXLWBaddr))
+		lcDBFStem = iif(empty(m.tcSheet), juststem(m.tcXLWBaddr), m.tcSheet)
 		lcDBFAddr = forcepath(m.lcDBFStem + '.' + EXT_DBF, m.lcXLWBPath)
 
 		* {fr} Si la table est ouverte, la fermer
@@ -1462,15 +1462,15 @@ if m.llResult
 
 		* {fr} Si import systématique ou classeur plus récent que la table
 		tlNonVerifDernVers = .f. && {fr} indique en retour si la feuille a été importée
-		if m.tlImportForce or nvl(lFileFresher(m.lcDBFAddr, m.lcXLWBAddr), .t.)
+		if m.tlImportForce or nvl(lFileFresher(m.lcDBFAddr, m.lcXLWBaddr), .t.)
 
 			* {fr} Si le classeur n'est pas couramment ouvert (IMPORT FROM échoue si le classeur est ouvert en read-write)
 			local lnHandle
-			lnHandle = fopen(m.lcXLWBAddr, 2) && 2 : read-write, buffered
+			lnHandle = fopen(m.lcXLWBaddr, 2) && 2 : read-write, buffered
 			llResult = m.lnHandle > 0 ;
 			 or set('ASSERT') == 'ON';
 			 	 and 6 = messagebox(;
-								"L'importation de données depuis le classeur " + m.lcXLWBAddr + " est impossible car il est ouvert par Excel" + CRLF + ;
+								"L'importation de données depuis le classeur " + m.lcXLWBaddr + " est impossible car il est ouvert par Excel" + CRLF + ;
 								"Pour continuer l'importation, veuillez fermer le classeur et cliquer sur 'oui'" + CRLF + ;
 								"Pour abandonner l'importation, cliquez sur 'non'" + CRLF + ;
 								"Continuer ?";
@@ -1492,7 +1492,7 @@ if m.llResult
 				llResult = m.tlAutomation
 				if not m.llResult
 					try
-						import from (m.lcXLWBAddr) type xl8 &lcSheet
+						import from (m.lcXLWBaddr) type xl8 &lcSheet
 						llResult = .t.
 					catch to loException
 						llSheetError = m.loException.errorno = 1775 && {fr} You are trying to specify a worksheet name that does not match a name in the specified .XLS file.
@@ -1505,7 +1505,7 @@ if m.llResult
 				case m.tlAutomation or m.llFormatError
 
 					* {fr} Traiter le classeur en automation
-					lcResult = XL8table_Auto(m.lcXLWBAddr, m.tcSheet, m.lcDBFAddr,, m.tlCursor, @laFieldAdd)
+					lcResult = XL8table_Auto(m.lcXLWBaddr, m.tcSheet, m.lcDBFAddr,, m.tlCursor, @laFieldAdd)
 					llResult = iif(m.tlCursor, used(m.lcResult), file(m.lcResult))
 
 				case m.llResult && {fr} IMPORT FROM successful
@@ -1546,17 +1546,17 @@ if m.llResult
 							lcResult = m.lcDBFAddr
 						endif
 					else
-						lcResult = "XL8table() : Impossible de nommer les champs selon le contenu de la première ligne de la feuille " + m.tcSheet + " du classeur " + m.lcXLWBAddr
+						lcResult = "XL8table() : Impossible de nommer les champs selon le contenu de la première ligne de la feuille " + m.tcSheet + " du classeur " + m.lcXLWBaddr
 					endif
 
 				case m.llSheetError
-					lcResult = "XL8table() : Importation impossible car la feuille " + m.tcSheet + " n'existe pas dans le classeur " + m.lcXLWBAddr
+					lcResult = "XL8table() : Importation impossible car la feuille " + m.tcSheet + " n'existe pas dans le classeur " + m.lcXLWBaddr
 
 				otherwise
 					lcResult = cException(m.loException)
 				endcase
 			else
-				lcResult = "XL8table() : Importation impossible car le classeur " + m.lcXLWBAddr + " était ouvert."
+				lcResult = "XL8table() : Importation impossible car le classeur " + m.lcXLWBaddr + " était ouvert."
 			endif
 
 			tlNonVerifDernVers = m.llResult && {fr} indique en retour si la feuille a été importée
@@ -1571,7 +1571,7 @@ if m.llResult
 			use (m.lcDBFAddr) in 0 &lcExclusive
 		endif
 	else
-		lcResult = textmerge("XL8table() : Importation impossible car aucun classeur n'existe selon le masque spécifié : '<<Alltrim(tcXLWBAddr)>>'")
+		lcResult = textmerge("XL8table() : Importation impossible car aucun classeur n'existe selon le masque spécifié : '<<Alltrim(tcXLWBaddr)>>'")
 	endif
 else
 	lcResult = "XL8table() : Veuillez spécifier un masque de classeur XL en première paramètre"
@@ -1584,7 +1584,7 @@ return m.lcResult
 *========================================
 procedure XL8table_Auto && {fr} Importe une feuille excel en automation
 lparameters ;
-  tcXLWBAddr; && {fr} Adresse du MASQUE de classeur Excel contenant la feuille à importer
+  tcXLWBaddr; && {fr} Adresse du MASQUE de classeur Excel contenant la feuille à importer
 , tcSheet; && [feuille n°1] {fr} Nom de la feuille à importer
 , tcTable; && {fr} Table à créer
 , tlNULL; && [.F.] {fr} accepter les valeurs nulles
@@ -1604,7 +1604,7 @@ local lcResult as string;
 
 * {fr} Ouvrir la feuille Excel en automation
 loXL = oXL()
-loWB = loXL.Workbooks.open(m.tcXLWBAddr, .f., .t.)
+loWB = loXL.Workbooks.open(m.tcXLWBaddr, .f., .t.)
 loWS = loWB.Worksheets(iif(vartype(m.tcSheet) == 'C' and not empty(m.tcSheet), m.tcSheet, 1))
 loWF = m.loXL.WorksheetFunction
 lcResult = ''
@@ -1879,29 +1879,40 @@ return m.lcResult
 *-					ENDIF
 
 *========================================
-procedure XL8Tables && {fr} Importe les feuilles d'un Classeur Excel 97 dans des tables (cf. XL8table())
+procedure XL8tables && {fr} Importe les feuilles d'un Classeur Excel 97 dans des tables (cf. XL8table())
 lparameters ;
-  taXL8Table; && @ {fr} Tables crées ou rafraîchies ; Col 1 : Adresse, Col 2 : Rafraîchie (.T./.F.)
-, tcXLWBAddr; && {fr} Adresse du MASQUE de classeur Excel contenant les feuille à importer
+  taXL8tables; && @ {fr} Tables crées ou rafraîchies ; Col 1 : Adresse, Col 2 : Rafraîchie (.T./.F.)
+, tcXLWBaddr; && {fr} Adresse du MASQUE de classeur Excel contenant les feuille à importer
 , tlNonVerifDernVers; && [.F.] {fr} Ne pas prendre la dernière version du classeur Excel
-, tlImportForce && [.F.] {fr} Importer même si le classeur est plus ancien que la table
-external array taXL8Table
+, tlImportForce; && [.F.] {fr} Importer même si le classeur est plus ancien que la table
+, tcFolder; && [''] {fr} sous-dossier où placer les tables
+
+external array taXL8tables
 tlNonVerifDernVers = lTrue(m.tlNonVerifDernVers)
 tlImportForce = lTrue(m.tlImportForce)
+tcFolder = Alltrim(Evl(m.tcFolder, ''))
 
-aClear(@m.taXL8Table)
+aClear(@m.taXL8tables)
 
-local lcXLWBAddr, llResult, lnResult && {fr} Nombre de tables crées ou rafraîchies
+local lnResult; && {fr} Nombre de tables crées ou rafraîchies
+, llResult;
+, loXL as Boolean;
+, lcXLWBaddr;
+, lnXLWSs, laXLWSs[1], lcXLWS;
+, llUpdate;
+, lcDBFaddr;
+, lcPathDest as String;
+, lcAddrDest as String;
+
 lnResult = 0
 
 * {fr} Si un classeur existe selon le masque spécifié
-lcXLWBAddr = iif(m.tlNonVerifDernVers, m.tcXLWBAddr, cFileFreshest(m.tcXLWBAddr))
-llResult = file(m.lcXLWBAddr)
-assert m.llResult message cAssertMsg(textmerge("Impossible de trouver un classeur XL suivant le masque : <<cLitteral(m.tcXLWBAddr)>>"))
+lcXLWBaddr = iif(m.tlNonVerifDernVers, m.tcXLWBaddr, cFileFreshest(m.tcXLWBaddr))
+llResult = file(m.lcXLWBaddr)
+assert m.llResult message cAssertMsg(textmerge("Impossible de trouver un classeur XL suivant le masque : <<cLitteral(m.tcXLWBaddr)>>"))
 if m.llResult
 
 	* {fr} Ouvrir Excel en automation si pas encore fait
-	local loXL
 	loXL = vartype(m.poXL) == 'O' and loXL(m.poXL)
 	if not m.loXL
 		private poXL as Excel.application
@@ -1912,38 +1923,46 @@ if m.llResult
 	if m.llResult
 
 		* {fr} Si le classeur contient au moins une feuille de calcul
-		local lnXLWSs, laXLWSs[1]
-		lnXLWSs = acXLWSs(@laXLWSs, m.lcXLWBAddr)
+		lnXLWSs = acXLWSs(@laXLWSs, m.lcXLWBaddr)
 		llResult = m.lnXLWSs > 0
-		assert m.llResult message "Aucune feuille trouvée dans le classeur" + space(1) + m.lcXLWBAddr
+		assert m.llResult message "Aucune feuille trouvée dans le classeur" + space(1) + m.lcXLWBaddr
 		if m.llResult
 
+			lcPathDest = Iif(Empty(m.tcFolder), '', Addbs(JustPath(m.lcXLWBaddr)) + Addbs(m.tcFolder))
+			
 			* {fr} Pour chaque feuille de calcul
-			local lcXLWS, llUpdate, lcDBFAdr
 			for each m.lcXLWS in laXLWSs
 
 				* {fr} Si la feuille peut être importée dans une table
 				llUpdate = .f.
-				lcDBFAdr = XL8table(m.lcXLWBAddr, m.lcXLWS, @m.llUpdate, m.tlImportForce)
-				if file(m.lcDBFAdr)
+				lcDBFaddr = XL8table(m.lcXLWBaddr, m.lcXLWS, @m.llUpdate, m.tlImportForce)
+				if file(m.lcDBFaddr)
 
 					* {fr} Mémoriser l'adresse de la table
 					lnResult = m.lnResult + 1
-					dimension taXL8Table[m.lnResult, 2]
-					taXL8Table[m.lnResult, 1] = m.lcDBFAdr
-					taXL8Table[m.lnResult, 2] = m.llUpdate
+					dimension taXL8tables[m.lnResult, 2]
+					taXL8tables[m.lnResult, 1] = m.lcDBFaddr
+					taXL8tables[m.lnResult, 2] = m.llUpdate
+
+					* {fr} Le cas échéant, déplacer dans le dossier destination
+					if !Empty(m.lcPathDest)
+						lcAddrDest = m.lcPathDest + JustFname(m.lcDBFaddr)
+						if File(lcAddrDest)
+							delete file (ForceExt(m.lcAddrDest, '*'))
+						endif
+						FileMove(ForceExt(m.lcDBFaddr, '*'), ForceExt(m.lcAddrDest, '*'))
+					endif
 				endif
 			endfor
 		endif
-
 		if not m.loXL
 			poXL.quit
-			release m.poXL
 		endif
 	endif
 endif
 
 return m.lnResult
+endproc
 
 * =====================================
 define class abWord as relation

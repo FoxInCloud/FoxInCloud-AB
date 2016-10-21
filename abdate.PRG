@@ -879,9 +879,12 @@ lparameters tnSecs && {en} number of seconds
 
 local cLangUser
 cLangUser = cLangUser()
-return Ltrim(transform(m.tnSecs, ICase(; && 2016-03-23 thn -- {en} lTrim(): don't prepend a space for use in ? command
-			!Vartype(m.tnSecs) == 'N',;
-				'',;
+return Ltrim(ICase(;
+	!Vartype(m.tnSecs) == 'N',;
+		'',;
+	m.tnSecs >= 60 * 5,;
+		cHHMMSS(m.tnSecs),;
+		transform(m.tnSecs, ICase(; && 2016-03-23 thn -- {en} lTrim(): don't prepend a space for use in ? command
 			m.tnSecs >= 10 or ga_Type_IsInteger(m.tnSecs),;
 				'9999',;
 			m.tnSecs >= 1,;
@@ -890,11 +893,13 @@ return Ltrim(transform(m.tnSecs, ICase(; && 2016-03-23 thn -- {en} lTrim(): don'
 				'9.99',;
 				'9.999';
 			));
-			+ ' ' + icase(;
-				m.cLangUser = 'fr',	'sec',; && copy-paste this line to add another language support
-				m.cLangUser = 'de',	'sek',; && copy-paste this line to add another language support
-														'sec'; && default: English
-				) + iif(m.tnSecs >= 2, 's', '') + '.')
+		+ ' ' + icase(;
+			m.cLangUser = 'fr',	'sec',; && copy-paste this line to add another language support
+			m.cLangUser = 'de',	'sek',; && copy-paste this line to add another language support
+													'sec'; && default: English
+			);
+		+ iif(m.tnSecs >= 2, 's', '') + '.');
+		)
 endfunc
 
 * ================================================
