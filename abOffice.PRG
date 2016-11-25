@@ -1938,13 +1938,8 @@ if m.llResult
 				lcDBFaddr = XL8table(m.lcXLWBaddr, m.lcXLWS, @m.llUpdate, m.tlImportForce)
 				if file(m.lcDBFaddr)
 
-					* {fr} Mémoriser l'adresse de la table
-					lnResult = m.lnResult + 1
-					dimension taXL8tables[m.lnResult, 2]
-					taXL8tables[m.lnResult, 1] = m.lcDBFaddr
-					taXL8tables[m.lnResult, 2] = m.llUpdate
-
 					* {fr} Le cas échéant, déplacer dans le dossier destination
+					lcAddrDest = m.lcDBFaddr
 					if !Empty(m.lcPathDest)
 						lcAddrDest = m.lcPathDest + JustFname(m.lcDBFaddr)
 						if File(lcAddrDest)
@@ -1952,6 +1947,12 @@ if m.llResult
 						endif
 						FileMove(ForceExt(m.lcDBFaddr, '*'), ForceExt(m.lcAddrDest, '*'))
 					endif
+
+					* {fr} Mémoriser l'adresse de la table
+					lnResult = m.lnResult + 1
+					dimension taXL8tables[m.lnResult, 2]
+					taXL8tables[m.lnResult, 1] = m.lcAddrDest
+					taXL8tables[m.lnResult, 2] = m.llUpdate
 				endif
 			endfor
 		endif

@@ -727,7 +727,7 @@ LPARAMETERS ;
 , tnImgType; && @ {fr} Type de l'image - 0: inconnu | 1: trait ou CMJN | 2: NG 4 bits | 3: NG 8 bits | 4: Palette 4 bits | 5: Palette 8 bits | 6: 24 bits RGB | 7:24 bits BGR
 , tcImgType && @ {fr} Type de l'image en clair
 
-LOCAL loGDI AS GPimage OF _GDIplus.vcx, llResult
+LOCAL loGDI AS gpImage OF _GDIplus.vcx, llResult
 
 * {fr} Si le fichier existe
 llResult = Vartype(m.tcImgAddr) == 'C' AND File(m.tcImgAddr)
@@ -738,7 +738,7 @@ ASSERT m.llResult MESSAGE cAssertMsg(Textmerge(ICase(;
 IF m.llResult
 
 	* {fr} Si le contrôle GDI+ peut être instancié
-	loGDI = NewObject('GPimage', '_GDIplus.vcx')
+	loGDI = NewObject('gpImage', '_GDIplus.vcx')
 	llResult = Vartype(m.loGDI) == 'O'
 	ASSERT m.llResult MESSAGE cAssertMsg(Textmerge(ICase(;
 			cLangUser() = 'fr',	[Impossible de créer l'objet GDI+],; && copy-paste this line to add another language support
@@ -746,7 +746,7 @@ IF m.llResult
 		)))
 
 	IF m.llResult
-		WITH loGDI as GPimage OF _GDIplus.vcx
+		WITH loGDI as gpImage OF _GDIplus.vcx
 
 			* {fr} Si l'image peut être ouverte
 			tcImgAddr = cFileCased(m.tcImgAddr, .T.)
@@ -826,7 +826,7 @@ cImgDest = ForceExt(Evl(m.cImgDest, m.cImgSrce), 'png')
 tnWH = Evl(m.tnWH, 1) && {fr} square
 
 local success as Boolean;
-, oImage as GPimage of _GDIplus.vcx;
+, oImage as gpImage of _GDIplus.vcx;
 , oCropped as GPbitmap of _GDIplus.vcx;
 , nWidth;
 , nHeight;
@@ -834,7 +834,7 @@ local success as Boolean;
 , x, y;
 , nHandle
 
-oImage = NewObject("GPimage", "_GDIplus.vcx")
+oImage = NewObject("gpImage", "_GDIplus.vcx")
 oCropped = NewObject("GPbitmap", "_GDIplus.vcx")
 
 success = .F.;
@@ -899,12 +899,12 @@ lparameters ;
 cImgSrce = Evl(m.cImgSrce, '')
 
 local success as Boolean;
-, oImage as GPimage of _GDIplus.vcx;
-, oResized as GPimage of _GDIplus.vcx;
+, oImage as gpImage of _GDIplus.vcx;
+, oResized as gpImage of _GDIplus.vcx;
 , qFormat;
 , nRatio as number;
 
-oImage = NewObject('GPimage', '_GDIplus.vcx')
+oImage = NewObject('gpImage', '_GDIplus.vcx')
 
 success = .T.;
  and (File(m.cImgSrce) or cResultAdd(@m.result, Textmerge([image '<<m.cImgSrce>>' can't be found])));

@@ -38,7 +38,7 @@ llResult = vartype(m.tcChain) == 'C'
 assert m.llResult message "Required parameter tcChain is invalid"
 if m.llResult
 
-	tnTronc = iif(vartype(m.tnTronc) == 'N' and m.tnTronc > 0, m.tnTronc, 50)
+	tnTronc = Iif(ga_Type_IsPositiveInteger(m.tnTronc), m.tnTronc, 50)
 
 	* {fr} Si la chaîne est plus longue que la troncature
 	lcResult = iif(empty(substr(m.tcChain, m.tnTronc + 1));
@@ -2091,70 +2091,7 @@ if m.llResult
 endif
 
 return m.llResult
-
-* ===================================================================
-function cListEdit && {fr} Ajoute ou supprime un élément d'une liste sans doublon
-lparameters ;
-  tcList; && {fr} Liste à éditer
-, tcElts; && {fr} Élément(s) à ajouter / supprimer
-, tlRemove; && [.F.] {fr} Supprimer le ou les élément(s)
-, tcSep; && [,] {fr} Séparateur de liste
-, tlCase && [.F.] {fr} Respecter la casse
-
-local llResult, lcResult
-
-llResult = vartype(m.tcList) == 'C' and vartype(m.tcElts) == 'C'
-assert m.llResult message cAssertMsg(textmerge([la liste <<cLitteral(m.tcList)>> et le ou les élément(s) <<cLitteral(m.tcElts)>> doivent être de type caractère]))
-if m.llResult
-	lcResult = m.tcList
-
-	tlRemove = lTrue(m.tlRemove)
-	tcSep = iif(vartype(m.tcSep) == 'C' and lenc(m.tcSep) == 1, m.tcSep, ',')
-	tlCase = lTrue(m.tlCase)
-
-	* {fr} Si des éléments sont spécifiés
-	local array laElts[1]
-*-			ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([Au moins un élément devrait être spécifié]))
-	if alines(laElts, m.tcElts, 1+4, m.tcSep) > 0
-
-		local lnItems, laItems[1], lnFlags, lcElt, lnElt, llElt
-
-		* {fr} Tabuler la liste existante
-		lnItems = alines(laItems, m.tcList, 1+4, m.tcSep)
-
-		* {fr} Pour chaque élément
-		lnFlags = iif(m.tlCase, 0, 1) + 2 + 4
-		for each lcElt in laElts
-
-			* {fr} Voir si l'élément est dans la liste
-			lnElt = ascan(laItems, m.lcElt, 1, -1, 1, m.lnFlags)
-			llElt = m.lnElt > 0
-
-			* {fr} Si suppression et existe, supprimer
-			if m.tlRemove
-				if m.llElt
-					adel(laItems, m.lnElt)
-					lnItems = m.lnItems - 1
-				endif
-
-			* {fr} Sinon (ajout)
-			else
-				if not m.llElt
-					lnItems = m.lnItems + 1
-					dimension laItems[m.lnItems]
-					laItems[m.lnItems] = m.lcElt
-				endif
-			endif
-		endfor
-
-		* {fr} Reconstituer la liste
-		if m.lnItems > 0
-			lcResult = cListOfArray(@m.laItems)
-		endif
-	endif
-endif
-
-return m.lcResult
+endfunc
 
 * -----------------------------------------------------------------
 procedure lInList_Test
@@ -2167,6 +2104,185 @@ loTest.Test(.f., 'dossier', 'DOSSIER, COND, SINISTRE', ';')
 loTest.Test(.f., 'dossier', 'DOSSIER, COND, SINISTRE', , .t.)
 
 return loTest.Result()
+endproc
+
+* ===================================================================
+function cListEdit && {fr} Ajoute ou supprime un élément d'une liste sans doublon
+lparameters ;
+  tcList; && {fr} Liste à éditer
+, tcElts; && {fr} Élément(s) à ajouter / supprimer
+, tlRemove; && [.F.] {fr} Supprimer le ou les élément(s)
+, tcSep; && [,] {fr} Séparateur de liste
+, tlCase; && [.F.] {fr} Respecter la casse
+
+local lcResult;
+, llResult;
+, laList[1], lnList;
+, lnFlags;
+, laElts[1], lcElt, liElt, llElt;
+
+lcResult = m.tcList
+
+llResult = vartype(m.tcList) == 'C' and vartype(m.tcElts) == 'C'
+assert m.llResult message cAssertMsg(textmerge([la liste <<cLitteral(m.tcList)>> et le ou les élément(s) <<cLitteral(m.tcElts)>> doivent être de type caractère]))
+if m.llResult
+
+	tcSep = iif(vartype(m.tcSep) == 'C' and lenc(m.tcSep) == 1, m.tcSep, ',')
+
+	* {fr} Si des éléments sont spécifiés
+	if ALines(laElts, m.tcElts, 1+4, m.tcSep) > 0
+
+		tlRemove = lTrue(m.tlRemove)
+		lnFlags = iif(lTrue(m.tlCase), 0, 1) + 2 + 4
+
+		* {fr} Pour chaque élément de la liste existante
+		lnList = ALines(laList, m.tcList, 1+4, m.tcSep)
+		for each lcElt in laElts
+
+			* {fr} Voir si l'élément est dans la liste
+			liElt = ascan(laList, m.lcElt, 1, -1, 1, m.lnFlags)
+			llElt = m.liElt > 0
+
+			do case
+			case m.tlRemove and m.llElt
+				adel(laList, m.liElt)
+				lnList = m.lnList - 1
+
+			case !m.tlRemove and !m.llElt
+				lnList = m.lnList + 1
+				dimension laList[m.lnList]
+				laList[m.lnList] = m.lcElt
+			endcase
+		endfor
+
+		* {fr} Reconstituer la liste
+		lcResult = Iif(m.lnList > 0, cListOfArray(@m.laList), '')
+	endif
+endif
+
+return m.lcResult
+endfunc
+
+* ===================================================================
+function cListsIntersect as String && {fr} Intersections de 2 listes
+&& 2016-11-07 thn -- {FiC V 2.23.0-beta.2} {en} created
+lparameters ;
+  tcList1 as String; && {en} List 1
+, tcList2 as String; && {en} List 2
+, tcSep as String; && [','] {en} Item separator
+, tlCase as Boolean; && [.F.] {en} case-sensitive comparison {fr} Comparer en respectant la casse
+, tlOuter as Boolean; && [.F.] {en} Elements of List 1 not in List 2
+
+tcSep = Iif(Vartype(m.tcSep) == 'C' and Lenc(m.tcSep) > 0, m.tcSep, ',')
+tlOuter = lTrue(m.tlOuter)
+
+local aList1[1], lList1, aList2[1], lList2
+
+lList1 = ALines(aList1, m.tcList1, 5, m.tcSep) > 0
+lList2 = ALines(aList2, m.tcList2, 5, m.tcSep) > 0
+
+return ICase(;
+	m.lList1 and m.lList2,;
+		Iif(aFilter(@m.aList1, @m.aList2, , m.tlCase, m.tlOuter) > 0;
+			, cListOfArray(@m.aList1, m.tcSep);
+			, '';
+			),;
+	!m.lList1,;
+		'',;
+	m.lList1 and !m.lList2,;
+		Iif(m.tlOuter, m.tcList1, ''),;
+		'';
+	)
+endfunc
+
+* -----------------------------------------------------------------
+procedure cListsIntersect_Test
+
+local loTest as abUnitTest of abDev.prg, lnAtc
+loTest = newobject('abUnitTest', 'abDev.prg')
+
+loTest.Test('bar baz';
+	, 'foo bar baz'; && tcList1 {en} List 1
+	, 'fuu bar baz'; && tcList2 {en} List 2
+	, ' '; && tcSep [','] {en} Item separator
+	, ; && tlCase [.F.] {en} case-sensitive comparison {fr} Comparer en respectant la casse
+	, ; && tlOuter [.F.] {en} Elements of List 1 not in List 2
+	)
+
+loTest.Test('bar';
+	, 'foo bar'; && tcList1 {en} List 1
+	, 'fuu BAR'; && tcList2 {en} List 2
+	, ' '; && tcSep [','] {en} Item separator
+	, ; && tlCase [.F.] {en} case-sensitive comparison {fr} Comparer en respectant la casse
+	, ; && tlOuter [.F.] {en} Elements of List 1 not in List 2
+	)
+
+loTest.Test('';
+	, 'foo bar'; && tcList1 {en} List 1
+	, 'fuu BAR'; && tcList2 {en} List 2
+	, ' '; && tcSep [','] {en} Item separator
+	, .T.; && tlCase [.F.] {en} case-sensitive comparison {fr} Comparer en respectant la casse
+	, ; && tlOuter [.F.] {en} Elements of List 1 not in List 2
+	)
+
+loTest.Test('foo';
+	, 'foo bar'; && tcList1 {en} List 1
+	, 'fuu BAR'; && tcList2 {en} List 2
+	, ' '; && tcSep [','] {en} Item separator
+	, ; && tlCase [.F.] {en} case-sensitive comparison {fr} Comparer en respectant la casse
+	, .T.; && tlOuter [.F.] {en} Elements of List 1 not in List 2
+	)
+
+loTest.Test('';
+	, 'active'; && tcList1 {en} List 1
+	, ''; && tcList2 {en} List 2
+	, ' '; && tcSep [','] {en} Item separator
+	, ; && tlCase [.F.] {en} case-sensitive comparison {fr} Comparer en respectant la casse
+	, ; && tlOuter [.F.] {en} Elements of List 1 not in List 2
+	)
+
+loTest.Test('active';
+	, 'active'; && tcList1 {en} List 1
+	, ''; && tcList2 {en} List 2
+	, ' '; && tcSep [','] {en} Item separator
+	, ; && tlCase [.F.] {en} case-sensitive comparison {fr} Comparer en respectant la casse
+	, .T.; && tlOuter [.F.] {en} Elements of List 1 not in List 2
+	)
+
+loTest.Test('';
+	, ''; && tcList1 {en} List 1
+	, 'active'; && tcList2 {en} List 2
+	, ' '; && tcSep [','] {en} Item separator
+	, ; && tlCase [.F.] {en} case-sensitive comparison {fr} Comparer en respectant la casse
+	, ; && tlOuter [.F.] {en} Elements of List 1 not in List 2
+	)
+
+loTest.Test('';
+	, ''; && tcList1 {en} List 1
+	, 'active'; && tcList2 {en} List 2
+	, ' '; && tcSep [','] {en} Item separator
+	, ; && tlCase [.F.] {en} case-sensitive comparison {fr} Comparer en respectant la casse
+	, .T.; && tlOuter [.F.] {en} Elements of List 1 not in List 2
+	)
+
+loTest.Test('active';
+	, 'active'; && tcList1 {en} List 1
+	, ''; && tcList2 {en} List 2
+	, ' '; && tcSep [','] {en} Item separator
+	, ; && tlCase [.F.] {en} case-sensitive comparison {fr} Comparer en respectant la casse
+	, .T.; && tlOuter [.F.] {en} Elements of List 1 not in List 2
+	)
+
+loTest.Test('';
+	, 'active'; && tcList1 {en} List 1
+	, 'active'; && tcList2 {en} List 2
+	, ' '; && tcSep [','] {en} Item separator
+	, ; && tlCase [.F.] {en} case-sensitive comparison {fr} Comparer en respectant la casse
+	, .T.; && tlOuter [.F.] {en} Elements of List 1 not in List 2
+	)
+
+return loTest.Result()
+endproc
 
 * ===================================================================
 function lWordsIn && {fr} Plusieurs mots se trouvent dans une chaîne
@@ -2553,6 +2669,7 @@ dimension Matches[1] && [index, match, submatches (collection), length]
 && .Matches[?, 2] = match
 && .Matches[?, 3] = submatches (collection)
 && .Matches[?, 4] = length
+&& .Matches[?, 5] = line number
 
 PatternMatched = '' && {fr} si this.lPatterns, pattern qui satisfait this.Test()
 nPattern = 0 && {fr} n° du Pattern courant, cf. this.Pattern_Assign()
@@ -2810,13 +2927,12 @@ tlDebug = lTrue(m.tlDebug) or m.this.lDebug
 
 if not empty(.pattern)
 
-	local loResults, loResult, loSubMatches as collection, loSubMatch
+	local loResults, loResult, loSubMatches as collection, loSubMatch, lcHead
 
 	loResults = .oRegExp.Execute(@m.tcIn)
 	if m.loResults.count > 0
 
-		* {fr} Tabuler les résultats
-		dimension .Matches[m.loResults.Count, 4] && [index, valeur, submatches, length]
+		dimension .Matches[m.loResults.Count, 5] && [1- index, 2- valeur, 3-submatches, 4-length, 5-line number] && 2016-11-16 thn -- {en} added 5-line number
 		for each loResult in m.loResults && {fr} GA ne met pas la clause 'foxobject'
 
 			* {fr} Objectifier les sub-matches
@@ -2831,6 +2947,8 @@ if not empty(.pattern)
 			.Matches[.nMatches, 2] = m.loResult.value
 			.Matches[.nMatches, 3] = m.loSubMatches
 			.Matches[.nMatches, 4] = m.loResult.length
+				lcHead = Leftc(m.tcIn, .Matches[.nMatches, 1])
+			.Matches[.nMatches, 5] = Max(Occurs(CR, m.lcHead), Occurs(LF, m.lcHead)) + 1
 		endfor
 	endif
 endif
@@ -2878,7 +2996,7 @@ if .nMatches > 0;
 		text TO lcResult TEXTMERGE NOSHOW FLAGS 1
 <<m.lcResult>>
 
---- occurrence <<m.lnMatch>>/<<.nMatches>> - position <<.matches[m.lnMatch, 1])>> - longueur <<.matches[m.lnMatch, 4])>> cars
+--- occurrence <<m.lnMatch>>/<<.nMatches>> - position <<.matches[m.lnMatch, 1])>> - longueur <<.matches[m.lnMatch, 4])>> cars - ligne <<.matches[m.lnMatch, 5])>>
 <<Strtran(cTronc(cLitteral(.matches[m.lnMatch, 2]), 200, .T.), Chr(13) + Chr(10), Chr(182) + Chr(13) + Chr(10))>>
 		ENDTEXT
 
@@ -3467,12 +3585,12 @@ m.loTest.Test(m.lcExpected, m.lcTest, 'fr')
 
 * {fr} test 2 ----
 text to lcTest noshow
-function srceCodeWindow() { /* {en} displays source code from current HTML element into a child window {fr} affiche le HTML de l'élément courant dans une fenêtre fille */
+functtion srceCodeWindow() { /* {en} displays source code from current HTML element into a child window {fr} affiche le HTML de l'élément courant dans une fenêtre fille */
 	// {en} displays source code from current HTML element into a child window {fr} affiche le HTML de l'élément courant dans une fenêtre fille
 ENDTEXT
 
 text to lcExpected noshow
-function srceCodeWindow() { /* displays source code from current HTML element into a child window */
+functtion srceCodeWindow() { /* displays source code from current HTML element into a child window */
 	// displays source code from current HTML element into a child window
 ENDTEXT
 

@@ -1143,17 +1143,25 @@ lparameters ;
 
 local lcResult;
 , liStack;
-, aa[1];
+, lnStack;
+, lcStack;
+, aa[1]; && [1- Call Stack Level, 2- Current program filename, 3- Module or Object name, 4- Module or Object Source filename, 5- Line number in the object source file, 6- Source line contents]
 
+tcInfo = Upper(Left(Ltrim(Evl(m.tcInfo, 'Name')), 1))
 tlLineNo = lTrue(m.tlLineNo)
+
 if m.tlLineNo
-	AStackInfo(aa) && [1- Call Stack Level, 2- Current program filename, 3- Module or Object name, 4- Module or Object Source filename, 5- Line number in the object source file, 6- Source line contents]
+	lnStack = AStackInfo(aa) && The value returned is the number of program levels or rows of the returned array.
 endif
 
 lcResult = ''
-for liStack = 1 to program(-1) - iif(lTrue(m.tlCurrent), 1, 2) && {fr} current program level in call stack
+for liStack = 1 to (Iif(m.tlLineNo, m.lnStack, program(-1)) - iif(lTrue(m.tlCurrent), 1, 2))
+	lcStack = Iif(m.tlLineNo;
+		, m.aa[m.liStack, Iif(m.tcInfo == 'N', 3, 2)];
+		, cModuleInfo(Sys(16, m.liStack), m.tcInfo);
+		)
 	lcResult = m.lcResult + ' > ' + textmerge('';
-		+ "<<m.liStack>>_<<cModuleInfo(Sys(16, m.liStack), m.tcInfo)>>"; && <<Chr(160)>>
+		+ "<<m.liStack>>_<<m.lcStack>>"; && <<Chr(160)>>
 		+ Iif(m.tlLineNo, " (<<Evl(m.aa[m.liStack, 5], 'N/A')>>)", "");
 		)
 endfor
@@ -2985,7 +2993,7 @@ return m.success
 endproc
 
 *---------------------------------------------------------------------------
-procedure Set as Boolean
+procedure set as Boolean
 lparameters lcSet, lnSet, luSet
 
 && {fr} Public car appelé par modify command awPublic > awSets.Set()
@@ -5392,41 +5400,79 @@ endcase
 
 return m.luResult
 
-*------------------------------------
-function Fox2Pix && {fr} foxels to pixels && {fr} courtesy Sergey Berezniker http://www.berezniker.com/content/pages/visual-foxpro/pixels-and-foxels
-lparameters ;
-  tnFoxels; && {fr} foxels to convert
-, tlVertical; && {fr} vertical coordinates
-, tcFontName; && [current form's] {fr} font name
-, tnFontSize && [current form's] {fr} font size
+* ========================================
+function nPixOfFox && {en} Pixels of a Foxels measurement
+lparameter ;
+  tnFoxels; && {en} foxels to convert
+, tlVertical; && [.F.] {en} convert horizontal/vertical coordinates
+, tcFontName; && [current font for the active output window] {en} font name
+, tnFontSize; && [current font for the active output window] {en} font size
+, tcFontStyle; && ['N'ormal] {en} font style
 
-return iif(pcount() >= 4;
-	, m.tnFoxels * fontmetric(iif(m.tlVertical, 1, 6), m.tcFontName, m.tnFontSize);
-	, m.tnFoxels * fontmetric(iif(m.tlVertical, 1, 6));
+return Nvl(Evl(m.tnFoxels, 0), 0) * fontmetric(;
+	  iif(lTrue(m.tlVertical), 1, 6);
+	, evl(m.tcFontName, wfont(1));
+	, evl(m.tnFontSize, wfont(2));
+	, evl(m.tcFontStyle, 'N');
+	)
+endfunc
+
+* ========================================
+function nFoxOfPix && {en} Foxels of a Pixels measurement
+lparameter ;
+  tnPixels; && {en} pixels to convert
+, tlVertical; && [.F.] {en} convert horizontal/vertical coordinates
+, tcFontName; && [current font for the active output window] {en} font name
+, tnFontSize; && [current font for the active output window] {en} font size
+, tcFontStyle; && ['N'ormal] {en} font style
+
+return Nvl(Evl(m.tnPixels, 0), 0) / fontmetric(;
+	  iif(lTrue(m.tlVertical), 1, 6);
+	, evl(m.tcFontName, wfont(1));
+	, evl(m.tnFontSize, wfont(2));
+	, evl(m.tcFontStyle, 'N');
 	)
 
+endfunc
 *------------------------------------
-function Pix2Fox && {fr} pixels to foxels && {fr} courtesy Sergey Berezniker http://www.berezniker.com/content/pages/visual-foxpro/pixels-and-foxels
+function Fox2Pix && {en} pixels of foxels && courtesy Sergey Berezniker http://www.berezniker.com/content/pages/visual-foxpro/pixels-and-foxels
+lparameters ;
+  tnFoxels; && {en} foxels to convert
+, tlVertical; && [.F.] {en} vertical coordinates
+, tcFontName; && [current font for the active output window] {en} font name
+, tnFontSize; && [current font for the active output window] {en} font size
+, tcFontStyle; && ['N'] {en} font style
+
+return Iif(Pcount() < 4;
+	, m.tnFoxels * Fontmetric(Iif(lTrue(m.tlVertical), 1, 6));
+	, m.tnFoxels * Fontmetric(Iif(lTrue(m.tlVertical), 1, 6), m.tcFontName, m.tnFontSize, Evl(m.tcFontStyle, 'N'));
+	)
+endfunc
+
+*------------------------------------
+function Pix2Fox && {en} foxels of pixels && courtesy Sergey Berezniker http://www.berezniker.com/content/pages/visual-foxpro/pixels-and-foxels
 lparameters ;
   tnPixels; && {fr} pixels to convert
-, tlVertical; && {fr} vertical coordinates
-, tcFontName; && [current form's] {fr} font name
-, tnFontSize && [current form's] {fr} font size
+, tlVertical; && [.F.] {en} vertical coordinates
+, tcFontName; && [current font for the active output window] {en} font name
+, tnFontSize; && [current font for the active output window] {en} font size
+, tcFontStyle; && ['N'] {en} font style
 
 local lnResult, llResult
 
-lnResult = iif(pcount() >= 4;
-	, m.tnPixels / fontmetric(iif(m.tlVertical, 1, 6), m.tcFontName, m.tnFontSize);
-	, m.tnPixels / fontmetric(iif(m.tlVertical, 1, 6));
+lnResult = Iif(Pcount() < 4;
+	, m.tnPixels / Fontmetric(Iif(lTrue(m.tlVertical), 1, 6));
+	, m.tnPixels / Fontmetric(Iif(lTrue(m.tlVertical), 1, 6), m.tcFontName, m.tnFontSize, Evl(m.tcFontStyle, 'N'));
 	)
 
 llResult = between(m.lnResult, -32768+1, 32767-1) && 19/12/13 - Invalid coordinates (Error 1959) Coordinate values must be greater than -32768 and less than 32767
-assert m.llResult message cAssertMsg(textmerge([<<m.lnResult>> from: <<m.tnPixels>>px <<Iif(m.tlVertical, 'Vertical', 'Horizontal')>>, Font: <<Evl(m.tcFontName, .null.)>> <<Evl(m.tnFontSize, .null.)>>pt]))
+assert m.llResult message cAssertMsg(textmerge([<<m.lnResult>> from: <<m.tnPixels>>px <<Iif(m.tlVertical, 'Vertical', 'Horizontal')>>, Font: <<Evl(m.tcFontName, .null.)>> <<Evl(m.tnFontSize, .null.)>>pt "<<Evl(m.tcFontStyle, 'N')>>"]))
 
 return iif(m.llResult;
 	, m.lnResult;
-	, 0;
+	, .null.;
 	)
+endfunc
 
 * ==============================
 function cExprEval && {fr} Expression pour évaluer une expression
@@ -7784,6 +7830,76 @@ if aVFPsetsValue(@m.aa, m.tlSetsType, m.tlProcClass, m.tlUnSupported) > 0
 	endfor
 
 	result = Substrc(m.result, Lenc(m.tcSeparator) + 1)
+endif
+
+return m.result
+endfunc
+
+* ========================================
+function nProjectFiles && {en} number of files in a project matching search criteria
+lparameters ;
+  tuPJX as Project;
+, tcFileSkel as String; && @ [all] File skeleton; @ files found
+, tcFileType as String; && [all] see modify file foxpro.h > "File Object Type Property" 
+, tlExclude as Boolean; && [.null.] Excluded from project
+
+local result as Integer;
+, success as Boolean;
+, oFile as File;
+, lFile as Boolean;
+, cFilesFound as String;
+, cPJX as String;
+
+result = 0
+
+tuPJX = oProject(m.tuPJX)
+success = Vartype(m.tuPJX) == 'O'
+assert m.success
+if m.success
+	
+	cPJX = m.tuPJX.Name
+	
+	tcFileSkel = Iif(ga_Type_IsChar(m.tcFileSkel, .T.), m.tcFileSkel, .null.)
+	tcFileType = Iif(.T.;
+	 and ga_Type_IsChar(m.tcFileType, .T.);
+	 and varSet(@m.tcFileType, Alltrim(m.tcFileType));
+	 and Lenc(m.tcFileType) = 1;
+	 and InList(m.tcFileType; && modify file foxpro.h > "File Object Type Property" 
+		, FILETYPE_DATABASE;          && Database (.DBC)
+		, FILETYPE_FREETABLE;         && Free table (.DBF)
+		, FILETYPE_QUERY;             && Query (.QPR)
+		, FILETYPE_FORM;              && Form (.SCX)
+		, FILETYPE_REPORT;            && Report (.FRX)
+		, FILETYPE_LABEL;             && Label (.LBX)
+		, FILETYPE_CLASSLIB;          && Class Library (.VCX)
+		, FILETYPE_PROGRAM;           && Program (.PRG)
+		, FILETYPE_APILIB;            && API Library (.FLL)
+		, FILETYPE_APPLICATION;       && Application (.APP)
+		, FILETYPE_MENU;              && Menu (.MNX)
+		, FILETYPE_TEXT;              && Text (.TXT, .H., etc.)
+		, FILETYPE_OTHER;             && Other file types not enumerated above
+		);
+		, m.tcFileType;
+		, .null.;
+		)
+	tlExclude = Iif(Pcount() >= 4 and Vartype(m.tlExclude) == 'L', m.tlExclude, .null.)
+	
+	cFilesFound = ''
+	for each oFile as File in m.tuPJX.Files foxobject
+		
+		lFile = .T.;
+		 and (IsNull(m.tcFileSkel) or Likec(m.tcFileSkel, JustFname(m.oFile.Name)));
+		 and (IsNull(m.tcFileType) or m.oFile.Type == m.tcFileType);
+		 and (IsNull(m.tlExclude)  or m.oFile.Exclude = m.tlExclude)
+		
+		result = m.result + Iif(m.lFile, 1, 0)
+		cFilesFound = m.cFilesFound + Iif(m.lFile;
+			, ', ' + sys(2014, m.oFile.Name, m.cPJX); && 2016-11-09 thn -- {en} FullPath(m.oFile.Name, m.cPJX) does not work
+			, '';
+			)
+
+	endfor
+	tcFileSkel = Ltrim(Substr(m.cFilesFound, 2))
 endif
 
 return m.result

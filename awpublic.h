@@ -4,15 +4,15 @@
 && {en} To step back to previous MAJOR or MINOR version (does not apply to patches):
 && {fr} Pour revenir à la version MAJEURE ou MINEURE précédente (ne s'applique pas aux correctifs) :
 && 1- modify file awPublic_override.h:
-&& {en} 2- add these lines (uncommented):
-&& {fr} 2- ajouter ces lignes (sans commentaire) :
+&& 2- {en} add these lines (uncommented):
+&& 2- {fr} ajouter ces lignes (sans commentaire) :
 #IFNDEF	PREVIOUS_FIC_VERSION
 *!*	#DEFINE	PREVIOUS_FIC_VERSION
 #ENDIF
-&& {en} 3- make sure you run VFP / FiC studio as an Administrator
-&& {fr} 3- assurez-vous d'exécuter VFP / FiC studio en tant qu'Administrateur
-&& {en} 4- compile project:
-&& {fr} 4- compiler le projet :
+&& 3- {en} make sure you run VFP / FiC studio as an Administrator
+&& 3- {fr} assurez-vous d'exécuter VFP / FiC studio en tant qu'Administrateur
+&& 4- {en} compile project:
+&& 4- {fr} compiler le projet :
 * do atPJcompile with 'PREVIOUS_FIC_VERSION'
 
 #DEFINE wMESSAGEBOX_CLASS		awFrmMB

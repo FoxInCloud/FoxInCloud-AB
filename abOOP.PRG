@@ -1356,7 +1356,7 @@ return m.llResult
 endfunc
 
 * ========================================
-function lPropHidden && {fr} Un objet est doté d'un propriété cachée [PemStatus(obj, prop, 2) ne retourne que les propriétés PROTECTED]
+function lPropHidden && {fr} Un objet est doté d'un propriété cachée [PemStatus(obj, prop, 2) retourne seulement les propriétés PROTECTED]
 lparameters ;
   toObject; && {fr} Objet VFP
 , tcProp && {fr} propriété
@@ -1366,6 +1366,49 @@ local array laProp[1]
 return .t.;
 	and amembers(laProp, m.toObject, 0, 'H')  > 0;
 	and ascan(laProp, alltrim(m.tcProp), 1, -1, 1, 7) > 0
+
+* ========================================
+function lPropChanged && {fr} Une propriété d'un objet ou classe est changée par une de ses classes parent
+lparameters ;
+  tObject; && {fr} Objet ou classe VFP
+, tcProp as String && {fr} propriété
+
+local success as Boolean;
+, lcBaseClass;
+, llClass;
+, luClass;
+, luProp;
+, luPropClass;
+
+if Type('m.tObject.BaseClass') == 'C' and ga_Type_IsChar(m.tcProp, .T.)
+	lcBaseClass = m.tObject.BaseClass
+	do while .T.
+		luClass = Icase(;
+			!m.llClass,;
+				m.tObject,;
+			Vartype(m.luClass) == 'O',;
+				GetPem(m.luClass, 'Class'),;
+				GetPem(m.luClass, 'ParentClass');
+				)
+		do case
+		case !(PemStatus(m.luClass, m.tcProp, 5) and Upper(Left(PemStatus(m.luClass, m.tcProp, 3), 1)) == 'P');
+			or Vartype(m.luClass) == 'C' and GetPem(m.luClass, 'Class') == m.lcBaseClass
+			exit
+		case .T.;
+		 and varSet(@m.luProp, GetPem(m.luClass, m.tcProp));
+		 and varSet(@m.luPropClass, GetPem(GetPem(m.luClass, Iif(Vartype(m.luClass) == 'O', 'Class', 'ParentClass')), m.tcProp)); && 2016-11-25 thn -- {FiC V 2.23.0-beta.5} {en} PemStatus(m.luClass, m.tcProp, 0) does not seem to work on classes
+		 and !luEqual(m.luProp, m.luPropClass)
+			success = .T.
+			exit
+		endcase
+		llClass = .T.
+	enddo
+else
+	success = .null.
+endif
+
+return m.success
+endfunc
 
 * ========================================
 function lMethod && {fr} Un objet est doté d'une Méthode ou un Événement
@@ -2711,48 +2754,6 @@ function cObjAddrNorm(tcObjAddr) && {fr} Adresse d'objet normalisée
 return chrtran(strtran(m.tcObjAddr, '->', '.'), ' ', '')
 
 * ========================================
-function nPixOfFox && {en} Pixels of a Foxels measurement
-lparameter ;
-  tnFoxels; && {en} foxels to convert
-, tlVertical; && [.F.] {en} convert horizontal/vertical coordinates
-, tcFontName; && [active output window]
-, tnFontSize; && [active output window]
-, tcFontStyle && [normal]
-
-tlVertical = iif(lTrue(m.tlVertical), 1, 6)
-
-return evl(m.tnFoxels, 0) * iif(pcount() > 1;
-	, fontmetric(;
-		  m.tlVertical;
-		, evl(m.tcFontName, wfont(1));
-		, evl(m.tnFontSize, wfont(2));
-		, evl(m.tcFontStyle, 'N');
-		);
-	, fontmetric(m.tlVertical);
-	)
-
-* ========================================
-function nFoxOfPix && {en} Foxels of a Pixels measurement
-lparameter ;
-  tnPixels; && {en} pixels to convert
-, tlVertical; && [.F.] {en} convert horizontal/vertical coordinates
-, tcFontName; && [active output window]
-, tnFontSize; && [active output window]
-, tcFontStyle && [normal]
-
-tlVertical = iif(lTrue(m.tlVertical), 1, 6)
-
-return evl(m.tnPixels, 0) / iif(pcount() > 1;
-	, fontmetric(;
-		  m.tlVertical;
-		, evl(m.tcFontName, wfont(1));
-		, evl(m.tnFontSize, wfont(2));
-		, evl(m.tcFontStyle, 'N');
-		);
-	, fontmetric(m.tlVertical);
-	)
-
-* ========================================
 function oPropsDefault && {fr} règle les propriétés d'un objet aux valeur par défaut définies par un autre objet
 lparameters oTrgt, oDefault
 
@@ -3075,4 +3076,28 @@ return Evl(cWords(', ';
 	, Iif(BitTest(m.iAnchor, 9), 'Vertical Fixed Size', '');
 	), 'Top Left')
 
+endfunc
+
+* ------------------------------------
+function oPxOf1Fx && {en} x and y multipliers when form is defined in foxels (.ScaleMode = 0)
+lparameters oControl
+
+local oPxOf1Fx, oForm
+
+oForm = oFormIn(m.oControl)
+
+if Vartype(m.oForm) == 'O'
+	oPxOf1Fx = CreateObject('Empty')
+	AddProperty(m.oPxOf1Fx, 'x', Iif(Empty(m.oForm.ScaleMode); && {en} Applies To: Form | _SCREEN | ToolBar && 2016-10-31 thn -- {FiC V 2.23.0-beta.1} {en} added for Foxels support
+			, nPixOfFox(1, .F., m.oForm.FontName, m.oForm.FontSize, coFontStyle(m.oForm)); && foxels
+			, 1; && pixels
+			))
+	AddProperty(m.oPxOf1Fx, 'y', Iif(Empty(m.oForm.ScaleMode); && {en} Applies To: Form | _SCREEN | ToolBar && 2016-10-31 thn -- {FiC V 2.23.0-beta.1} {en} added for Foxels support
+			, nPixOfFox(1, .T., m.oForm.FontName, m.oForm.FontSize, coFontStyle(m.oForm)); && foxels
+			, 1; && pixels
+			))
+	return m.oPxOf1Fx
+else
+	return .null.
+endif
 endfunc

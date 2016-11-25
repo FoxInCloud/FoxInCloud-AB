@@ -22,38 +22,66 @@ return abUnitTests()
 procedure ReadOnlyClear && {fr} Supprime l'attribut 'lecture seule' des fichiers d'un dossier
 lparameters ;
   tcFolder; && {fr} Adresse du dossier
-, tcFileSkel && [*.*] {fr} squelette de fichiers à traiter
+, tcFileSkel; && [*.*] {fr} squelette de fichiers à traiter
 
-local lnResult && {fr} nombre de fichiers traités
+local lnResult; && {fr} nombre de fichiers traités
+, loFiler as filer.FileUtil;
+, loFile;
+, lnAttrib;
+
 lnResult = 0
 
-* {fr} Si le dossier existe
 if vartype(m.tcFolder) == 'C' and directory(m.tcFolder)
 
-	local loFiler as filer.FileUtil, loFile, lnAttrib
-
-	* {fr} Régler le squelette à sa valeur par défaut
-	tcFileSkel = iif(vartype(m.tcFileSkel) == 'C' and not empty(m.tcFileSkel), m.tcFileSkel, '*.*')
-
-	* {fr} Créer un objet "filer" pour la recherche et la modification des attributs
-	loFiler = createobject('Filer.FileUtil') && {fr} dans VFP\tools\filer\Filer.dll
-
-	* {fr} Charger les fichiers répondant au squelette
+	loFiler = CreateObject('Filer.FileUtil') && {fr} home(1) + '\tools\filer\Filer.dll'
 	loFiler.SearchPath = m.tcFolder
-	loFiler.FileExpression = m.tcFileSkel
-	loFiler.find (0) && {fr} Charge la collection de fichiers
+	loFiler.FileExpression = Iif(ga_Type_IsChar(m.tcFileSkel, .T.), m.tcFileSkel, '*.*')
 
 	* {fr} Supprimer les attributs 'read-only' éventuels
+	loFiler.find(0) && {fr} Charge la collection de fichiers
 	for each loFile in m.loFiler.files
-		lnAttrib = m.loFile.attr
-		if mod(m.lnAttrib, 2) > 0 && {fr} uneven = read only
-			loFile.attr = m.lnAttrib - 1
+		if mod(m.loFile.attr, 2) > 0 && {fr} uneven = read only
+			loFile.attr = m.loFile.attr - 1
 			lnResult = m.lnResult + 1
 		endif
 	endfor
 endif
 
 return m.lnResult
+endproc
+
+* ========================================
+procedure FileReadOnlySet && {fr} Règle l'attribut 'lecture seule' d'un fichier
+lparameters tcFile, tlReadOnly
+
+local success as Boolean;
+, loFiler as filer.FileUtil;
+, loFile;
+
+if File(m.tcFile)
+
+	tcFile = FullPath(m.tcFile)
+	loFiler = CreateObject('Filer.FileUtil') && {fr} home(1) + '\tools\filer\Filer.dll'
+	loFiler.SearchPath = JustPath(m.tcFile)
+	loFiler.FileExpression = JustFname(m.tcFile)
+
+	loFiler.find(0) && {fr} Charge la collection de fichiers
+	if m.loFiler.Files.count = 1
+		loFile = m.loFiler.Files.Item(1)
+		tlReadOnly = lTrue(m.tlReadOnly)
+		m.loFile.attr = m.loFile.attr + ICase(;
+			!m.tlReadOnly and mod(m.loFile.attr, 2) > 0,; && {fr} uneven = read only
+				- 1,;
+			 m.tlReadOnly and mod(m.loFile.attr, 2) = 0,; && {fr} even = read-write
+				+ 1,;
+				0;
+			)
+		success = .T.
+	endif
+endif
+
+return m.success
+endproc
 
 * ========================================
 procedure tFileSet && {fr} règle la date et heure d'un fichier

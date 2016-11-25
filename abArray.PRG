@@ -228,8 +228,8 @@ function aFilter && {fr} Filtre les éléments d'un tableau par un autre {en} Filt
 lparameters ;
   taDest; && @ {fr} Résultat {en} result
 , taSrce; && @ {fr} Tableau contenant les lignes filtrant taDest {en} array with lines used to filter taDest
-, tlExactOff; && [.F.] {fr} COmparer avec exact off {en} compare with exact off
-, tlCase; && [.F.] {fr} COmparer en respectant la casse {en} case-sensitive comparison
+, tlExactOff; && [.F.] {fr} Comparer avec exact off {en} compare with exact off
+, tlCase; && [.F.] {fr} Comparer en respectant la casse {en} case-sensitive comparison
 , tlExclude && [.F.] {fr} Garder les éléments destination absents de la source {en} Keep destination elements that can't be found in source
 
 external array taDest, taSrce

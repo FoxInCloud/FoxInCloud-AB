@@ -4071,15 +4071,20 @@ lparameters ;
 
 tcResult = ''
 
-local llResult as Boolean;
+local success as Boolean;
 , laFields[1],	laTagInfo[1];
-, lcAlias, llAlias, llCursor, lcTable, loSelect as abSelect, loSafety as abSet, llExclusive;
+, lcAlias, llAlias;
+, llCursor, lcTable;
+, loSelect as abSelect;
+, loSafety as abSet;
+, llExclusive;
 , lcFields, llFields;
-, laTag[1], lnTags, llTags, liTag, llZap, lcTag;
+, laTag[1], lnTags, llTags, liTag, lcTag;
+, llZap;
 
 * {fr} Tabuler les spécifications de champs et d'indexes
-llResult = aFields_(@m.laFields, m.tuFields) > 0
-if m.llResult
+success = aFields_(@m.laFields, m.tuFields) > 0
+if m.success
 	aTagInfo_(@m.laTagInfo, m.tuTagInfo)
 
 	* {fr} Ouvrir la table si elle existe
@@ -4104,10 +4109,10 @@ if m.llResult
 
 		if m.llFields or m.llTags
 			lcAlias = ExclusiveForce(m.lcAlias, @m.llExclusive)
-			llResult = used(m.lcAlias)
-			assert m.llResult message cAssertMsg(textmerge([Impossible d'accéder à la table '<<m.tcTable>>' en mode exclusif]))
+			success = used(m.lcAlias)
+			assert m.success message cAssertMsg(textmerge([Impossible d'accéder à la table '<<m.tcTable>>' en mode exclusif]))
 		endif
-		if m.llResult
+		if m.success
 
 			* {fr} Si la structure doit changer && /!\ supporter ALTER COLUMN ... NULL
 			if m.llFields
@@ -4159,7 +4164,7 @@ if m.llResult
 		tlCreated = .t.
 	endif
 
-	if m.llResult and m.llTags
+	if m.success and m.llTags
 
 		assert not m.llZap message cAssertMsg(textmerge([on va zapper '<<m.lcAlias>>'...<<CRLF>>Presser 'Cancel' pour arrêter le programme<<CRLF>>Presser 'Ignore' pour continuer]))
 		if m.llZap
@@ -4183,14 +4188,15 @@ if m.llResult
 		endfor
 		set order to
 
-		reindex && {fr} ajouté le 27/9 pour éviter un CDX bloat inexpliqué
+		reindex && {fr} évite un CDX bloat inexpliqué
 	endif
 
-	* {fr} Rouvrir la table selon le Set("Exclusive") courant
-	if m.llResult and not m.llCursor and not m.llExclusive
+	* {fr} Rouvrir la table selon le Set("Exclusive") courant et l'alias demandé
+	if m.success and not m.llCursor && and not m.llExclusive
 		tcAlias = evl(m.tcAlias, m.lcAlias)
-		llResult = AliasReuse(m.lcAlias,,, m.tcAlias) && {fr} rouvre sous m.lcAlias si Empty(m.tcAlias)
+		success = AliasReuse(m.lcAlias,,, m.tcAlias) && {fr} rouvre sous m.lcAlias si Empty(m.tcAlias)
 	endif
+
 else
 	tcResult = textmerge(icase(;
 		cLangUser() = 'fr', [<<m.tuFields>> est une spécification de champs invalide pour la table '<<m.tcTable>>'],; && copy-paste this line to add another language support
@@ -4198,7 +4204,8 @@ else
 		))
 endif
 
-return m.llResult
+return m.success
+endproc
 
 * ========================================
 function cIndexCmd && {fr} Commande d'indexation d'après les colonnes d'aTagInfo() [Tag, Type, Key, Filter, Order, Collation]

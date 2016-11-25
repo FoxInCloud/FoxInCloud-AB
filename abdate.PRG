@@ -1020,7 +1020,7 @@ return loTest.Result()
 function cDTformat_AW_XL && {fr} Format de date ou date-heure pour ActiveWidget ou Excel
 lparameters ;
   tlT; && [.F.] {fr} Format de date et heure
-, tlXL; && [.F.] {fr} Format pour Excel
+, tlXL; && [.F.] {fr} Format pour Excel /!\ à implémenter
 
 tlXL = lTrue(m.tlXL)
 
@@ -1065,6 +1065,7 @@ return '';
 			 , 'hh:mm');
 		, '';
 		)
+endfunc
 
 * ================================================
 function nWeeksYear && {fr} Nombre de semaines dans une année
