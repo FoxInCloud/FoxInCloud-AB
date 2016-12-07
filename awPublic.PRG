@@ -207,6 +207,56 @@ return Iif(Vartype(m.toControl) == 'O';
 endfunc
 
 * =============================================================
+function wcIconFA && [see http://fontawesome.io/] {en} HTML for a 'font awesome' icon {fr} HTML d'une icône 'Font Awesome'
+lparameters ;
+  cIcon; && {en} pick name from http://fontawesome.io/icons/
+, uSize; && [0|''] 1-'lg'|2-'2x'|3-'3x', …
+, lFixedWidth; && [.F.] {en} Fixed width for vertical alignment
+, cOthers; && see http://fontawesome.io/examples/
+
+#if .F.
+&& {en} example: insert in any text
+&& {en} for desktop mode, make sure to add a space before icon!
+this.Caption = "beginning of text " + wcIconFA('question-circle', 1) + "rest of the text"
+
+&& {fr} exemple : Insérer dans un texte
+&& {fr} pour le mode desktop, pensez à insérer un espace avant l'icône !
+this.Caption = "début du texte " + wcIconFA('question-circle', 1) + "fin du texte"
+#endif
+
+local oAppHost as awAppHost of awAppHost.fxp
+
+if ga_Type_IsChar(m.cIcon, .T.) and wlAppHost(@m.oAppHost) and m.oAppHost.lFontAwesomeAdd
+
+	cIcon = Lower(Alltrim(m.cIcon))
+	cIcon = Iif(Left(m.cIcon, 3) == 'fa-', Substr(m.cIcon, 4), m.cIcon)
+
+	uSize = Evl(m.uSize, '')
+	uSize = ICase(;
+		ga_Type_IsChar(m.uSize, .T.),;
+			Lower(Chrtran(m.uSize, ' _', '--')),;
+		!ga_type_isPositiveInteger(m.uSize),;
+			'',;
+		m.uSize = 1,;
+			'lg',;
+		Between(m.uSize, 2, 5),;
+			'fa-' + Cast(m.uSize as M) + 'x',;
+			'';
+		)
+	uSize = nEvl(m.uSize, ' ' + m.uSize)
+
+	lFixedWidth = Iif(lTrue(m.lFixedWidth), ' fa-fw', '')
+
+	cOthers = Iif(ga_Type_IsChar(m.cOthers, .T.), Lower(Alltrim(m.cOthers)), '')
+	cOthers = nEvl(m.cOthers, ' ' + m.cOthers)
+	
+	return Textmerge([<i class="fa fa-<<m.cIcon>><<m.uSize>><<m.lFixedWidth>><<m.cOthers>>" aria-hidden="true"></i> ])
+else
+	return ''
+endif
+endfunc
+
+* =============================================================
 function cScriptJSfocus && {fr} Javascript pour mettre le focus sur un contrôle
 lparameters toControl as awCbo of aw.vcx
 
@@ -1066,6 +1116,17 @@ IF m.tnParm > 0
 else
 	return ''
 endif
+
+* =============================================================
+function wcSCXfile && {fr} Name of a form file from a FoxInCloud name {fr} Nom d'un fichier écran d'après son nom FoxInCloud
+lparameters tcForm
+tcForm = Lower(Alltrim(m.tcForm))
+return Iif(Rightc(m.tcForm, 4) == '_scx';
+	, Leftc(m.tcForm, Lenc(m.tcForm)-4) + '.scx';
+	, m.tcForm;
+	)
+endfunc
+
 
 * =============================================================
 procedure wReport && {en} REPORT FORM in Web and LAN modes

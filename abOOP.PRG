@@ -405,7 +405,7 @@ llResult = Vartype(m.tiObject) == 'N' and Between(m.tiObject, 1, nObjectsCont(m.
 assert m.llResult message cAssertMsg(textmerge("Invalid member number <<m.tiObject>> in <<cLitteral(m.toCont)>>"))
 if m.llResult
 
-	with m.toCont as awGrd of aw.vcx
+	with m.toCont as Form
 
 		try
 
@@ -859,7 +859,7 @@ return iif(aoClassCont(@m.laObject, m.toCont, m.tcClasses, m.tlRecurse, m.tnCont
 function HTMLtabIndex && {en} Collects .TabIndex for HTML
 lparameters ;
   oTabIndex as GA_DICTIONARY_CLASS of abGA.prg; && @ {fr} key: Sys(1272, m.oCont) - value : Tabindex
-, toForm as awFrm of aw.vcx
+, toForm as Form
 
 local success as Boolean;
 , iTabIndex as integer;
@@ -876,13 +876,13 @@ return m.success
 *----------------------------------------------------
 function HTMLtabIndex_ && {en} Collects .TabIndex for HTML - recursive
 lparameters ;
-  toCont as awCnt of aw.vcx;
+  toCont as Container;
 , oTabIndex as GA_DICTIONARY_CLASS of abGA.prg;
 , iTabIndex as integer
 
 local success as Boolean;
 , aoCont[1];
-, oCont as awTxt of aw.vcx;
+, oCont as Textbox;
 , iTabIndex_ as integer
 
 success = .t.
@@ -3100,4 +3100,44 @@ if Vartype(m.oForm) == 'O'
 else
 	return .null.
 endif
+endfunc
+
+* ------------------------------------
+function oDSofForm as DataEnvironment && {en} Reference to the dataEvironment object of a form
+lparameters oForm as Form
+
+local oDSofForm as DataEnvironment;
+, aa[1];
+, iMember;
+, oMember;
+
+oDSofForm = .null.
+
+if Vartype(m.oForm) == 'O'
+	for iMember = 1 to AMembers(aa, m.oForm, 2)
+		oMember = Evaluate('m.oForm.' + m.aa[m.iMember])
+		if m.oMember.baseClass == 'Dataenvironment'
+			oDSofForm = m.oMember
+			exit
+		endif
+	endfor
+endif
+
+return m.oDSofForm
+endfunc
+
+* ------------------------------------
+function lActivePage as Boolean && {en} A page is active in a pageframe
+lparameters oPage as Page
+
+local lActivePage as Boolean;
+, iPage as Integer;
+, oPgf as PageFrame;
+
+return .T.;
+ and loClass(m.oPage, 'page');
+ and Type('m.oPage.Parent') == 'O';
+ and varSet(@m.oPgf, m.oPage.Parent);
+ and m.oPgf.ActivePage = m.oPage.PageOrder
+
 endfunc

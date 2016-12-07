@@ -132,57 +132,61 @@ endif
 endfunc
 
 * ===================================================================
-function cWords && {fr} Mots séparés par paires non vides
+function cWords && {en} Words separated if not empty {fr} Mots séparés si non vides
 lparameters ;
-  tuSep; && {fr} Séparateur
-, tuW0; && {fr} tableau de mots (1 dim.) ou premier mot
-, tuW1, tuW2, tuW3, tuW4, tuW5, tuW6, tuW7, tuW8, tuW9, tuW10, tuW11, tuW12, tuW13, tuW14, tuW15, tuW16, tuW17, tuW18, tuW19, tuW20, tuW21, tuW22, tuW23, tuW24 && [''] {fr} mots suivants
+  tuSep; && {en} Separator {fr} Séparateur, type variable
+, tuW0; && {en} array of words (1 dim.) or first word {fr} tableau de mots (1 dim.) ou premier mot
+, tuW1, tuW2, tuW3, tuW4, tuW5, tuW6, tuW7, tuW8, tuW9, tuW10, tuW11, tuW12, tuW13, tuW14, tuW15, tuW16, tuW17, tuW18, tuW19, tuW20, tuW21, tuW22, tuW23, tuW24 && [''] {en} other words {fr} mots suivants
 
-local lcResult
+local lcResult;
+, lnWord
+
 lcResult = ''
 
-if not vartype(m.tuSep) == 'L'
-	local lnWord
+do case
+case !Vartype(m.tuSep) == 'C'
 
- 	if type('tuW0',1) <> 'A' && {fr} not an array
- 		if pcount() > 2
-	 		for m.lnWord = 0 to pcount()-2
-	 			lcResult = c2Words(m.lcResult, m.tuSep, evaluate('m.tuW' + ltrim(str(m.lnWord))))
-	 		endfor
-	 	endif
+case type('tuW0',1) == 'A' && array
+	external array tuW0
+	for m.lnWord = 1 to Alen(m.tuW0)
+		lcResult = c2Words(m.lcResult, m.tuSep, m.tuW0[m.lnWord])
+	endfor
 
- 	else
- 		external array tuW0
- 		for m.lnWord = 1 to alen(m.tuW0)
- 			lcResult = c2Words(m.lcResult, m.tuSep, m.tuW0[m.lnWord])
- 		endfor
- 	endif
-endif
+case pcount() > 2
+	for m.lnWord = 0 to pcount()-2
+		lcResult = c2Words(m.lcResult, m.tuSep, evaluate('m.tuW' + ltrim(str(m.lnWord))))
+	endfor
+endcase
 
 return m.lcResult
+endfunc
 
 * -----------------------------------------------------------------
 procedure cWords_test
-? sys(16)
 
-? cWords('/', '', 10, .f., 'moi') == '10/.F./moi'
+local loTest as abUnitTest of abDev.prg
+loTest = newobject('abUnitTest', 'abDev.prg')
+
+loTest.Test('10/.F./VFP', '/', '', 10, .f., 'VFP')
 
 local array laW[6]
-laW[1] = 'thierry'
+laW[1] = 'VFP'
 laW[2] = 15
 laW[3] = .f.
 laW[4] = ''
 laW[5] = 0
 laW[6] = createobject('form')
-? cWords(',', @m.laW) == 'thierry,15,.F.,0'
-laW[6] = null
+loTest.Test('VFP,15,.F.,0', ',', @m.laW)
+
+return m.loTest.result()
+endproc
 
 * ===================================================================
-function c2Words && {fr} Deux mots séparés si non vides
+function c2Words && {en} 2 words separated if not empty {fr} Deux mots séparés si non vides
 lparameters ;
-  tuW1; && {fr} Premier mot, type variable
-, tuSep; && {fr} Séparateur, type variable
-, tuW2 && {fr} Second mot, type variable
+  tuW1; && {en} First word {fr} Premier mot, type variable
+, tuSep; && {en} Separator {fr} Séparateur, type variable
+, tuW2 && {en} Second word {fr} Second mot, type variable
 
 local llW1Empty, llW2Empty, lcSep, lnSep, lcW1, lcW2
 
@@ -210,6 +214,7 @@ case m.llW1Empty
 otherwise && {fr} CASE m.llW2Empty
 	return transform(m.tuW1)
 endcase
+endfunc
 
 * -----------------------------------------------------------------
 procedure c2Words_test
@@ -2156,7 +2161,7 @@ if m.llResult
 		endfor
 
 		* {fr} Reconstituer la liste
-		lcResult = Iif(m.lnList > 0, cListOfArray(@m.laList), '')
+		lcResult = Iif(m.lnList > 0, cListOfArray(@m.laList, m.tcSep), '')
 	endif
 endif
 
@@ -4176,4 +4181,32 @@ return 0;
 	+ Fontmetric(2, m.cFontName, m.nFontSize, m.cFontStyle); && Character ascent  (units above baseline) in pixels
 	+ Fontmetric(3, m.cFontName, m.nFontSize, m.cFontStyle); && Character descent (units below baseline) in pixels
 	+ 0
+endfunc
+
+* -------------------------------------------------------------
+function nLineInterPX && {fr} Interligne de texte en pixels écran
+lparameters cFontName, nFontSize, cFontStyle
+cFontStyle = Evl(m.cFontStyle, '')
+return nLineHeightPX(m.cFontName, m.nFontSize, m.cFontStyle);
+	+ Fontmetric(4, m.cFontName, m.nFontSize, m.cFontStyle); && leading (space between lines)
+	+ Fontmetric(5, m.cFontName, m.nFontSize, m.cFontStyle); && extra leading
+	+ 0
+endfunc
+
+* -------------------------------------------------------------
+function noLineHeightPX && {fr} Hauteur d'une ligne de texte d'un objet
+lparameters toControl as awTxt of aw.vcx
+return Iif(lProperty(m.toControl, 'FontName');
+	, nLineHeightPX(m.toControl.FontName, m.toControl.FontSize, coFontStyle(m.toControl));
+	, .null.;
+	)
+endfunc
+
+* -------------------------------------------------------------
+function noLineInterPX && {fr} Hauteur d'une ligne de texte d'un objet
+lparameters toControl as awTxt of aw.vcx
+return Iif(lProperty(m.toControl, 'FontName');
+	, nLineInterPX(m.toControl.FontName, m.toControl.FontSize, coFontStyle(m.toControl));
+	, .null.;
+	)
 endfunc
