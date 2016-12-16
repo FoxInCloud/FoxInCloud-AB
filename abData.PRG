@@ -7632,963 +7632,979 @@ return m.llResult
 define class abDataSyncVFP as custom && {fr} Synchronise deux tables ou deux bases de données VFP && {fr} as custom pour .addObject()
 * ========================================
 
-	* {fr} RÉGLAGES
-	&& {fr} Champ {date et heure de dernière modification} dans les tables du DBC - requis pour la synchronisation de base de données (avec la classe acDataSyncVFP) ; pris en compte dans le réglage de plSync
-	&& {en} Field {last modification Datetime} in DBC tables - required for database synchronisation
-	cTimeStampField = 'tMOD' && 'tMOD' {fr} est le standard FoxInCloud {en} is FoxInCloud standard
+* {fr} RÉGLAGES
+&& {fr} Champ {date et heure de dernière modification} dans les tables du DBC - requis pour la synchronisation de base de données (avec la classe acDataSyncVFP) ; pris en compte dans le réglage de plSync
+&& {en} Field {last modification Datetime} in DBC tables - required for database synchronisation
+cTimeStampField = 'tMOD' && 'tMOD' {fr} est le standard FoxInCloud {en} is FoxInCloud standard
 
-	&& {fr} champ 'enregistrement modifié par synchronisation' normalement présent dans chaque table
-	&& {en} Field {record modified by synchronization} in DBC tables - required for database synchronisation
-	clSyncField = 'lSYNC' && 'lSYNC' {fr} est le standard FoxInCloud {en} is FoxInCloud standard
+&& {fr} champ 'enregistrement modifié par synchronisation' normalement présent dans chaque table
+&& {en} Field {record modified by synchronization} in DBC tables - required for database synchronisation
+clSyncField = 'lSYNC' && 'lSYNC' {fr} est le standard FoxInCloud {en} is FoxInCloud standard
 
-	lTypesForce = .f. && {fr} Forcer les types des champs de la table source vers ceux de la table destination
-	lSyncDeleted = .t. && {fr} Synchroniser les enregistrements deletés
-	lModCheck = .f. && {fr} Vérifier que les données ont changé avant de remplacer (évite une mise à jour inutile de la date de modification)
+lTypesForce = .f. && {fr} Forcer les types des champs de la table source vers ceux de la table destination
+lSyncDeleted = .t. && {fr} Synchroniser les enregistrements deletés
+lModCheck = .f. && {fr} Vérifier que les données ont changé avant de remplacer (évite une mise à jour inutile de la date de modification)
 
-	lDebug = .f. && {fr} Enrichir les messages d'erreur
-	cErrorHeader = '/!\' && {fr} en-tête ajouté au résultat en cas d'erreur
+lDebug = .f. && {fr} Enrichir les messages d'erreur
+cErrorHeader = '/!\' && {fr} en-tête ajouté au résultat en cas d'erreur
 
-	cDBCdest = '' && {fr} Adresse de la base de données destination
-	cDBCsrce = '' && {fr} Adresse de la base de données source
-	&& {fr} les base de données source et destination peuvent porter le même nom ... l'adresse est nécessaire
-	cTablesIgnore = '' && {fr} tables à ignorer (cf. this.DBCSync())
+cDBCdest = '' && {fr} Adresse de la base de données destination
+cDBCsrce = '' && {fr} Adresse de la base de données source
+&& {fr} les base de données source et destination peuvent porter le même nom ... l'adresse est nécessaire
+cTablesIgnore = '' && {fr} tables à ignorer (cf. this.DBCSync())
 
-	* {fr} RÉSULTATS EN LECTURE SEULE
-	lResult = .t. && {fr} Succès / Échec
-	cResult = '' && {fr} Texte résultat
-	oResult = .null. && {fr} Objet résultat (par table)
-	dimension aResults[1]; && {fr} Objets résultats (tables)
-		, aResultItems[1] && {fr} éléments de l'objet résultat : cf. this.Init_aResultItems()
-	cResultCursor = '' && {fr} Curseur résultats
+* {fr} RÉSULTATS EN LECTURE SEULE
+lResult = .t. && {fr} Succès / Échec
+cResult = '' && {fr} Texte résultat
+oResult = .null. && {fr} Objet résultat (par table)
+dimension aResults[1]; && {fr} Objets résultats (tables)
+	, aResultItems[1] && {fr} éléments de l'objet résultat : cf. this.Init_aResultItems()
+cResultCursor = '' && {fr} Curseur résultats
 
-	* {fr} INTERNES
-	protected lErrorFatal, aDBCdestTables[1], cLangUser
+* {fr} INTERNES
+protected lErrorFatal, aDBCdestTables[1], cLangUser
 
-	*---------------------------------------
-	procedure init
-	lparameters ;
-	  Result; && @
-	, cLangUser && [cLangUser()]
+*---------------------------------------
+procedure init
+lparameters ;
+  Result; && @
+, cLangUser && [cLangUser()]
 
-	local llResult;
-	, lnResultItem;
-	, lcResultItems
+local llResult;
+, lnResultItem;
+, lcResultItems
 
-	this.cLangUser = cLangUser(m.cLangUser)
+this.cLangUser = cLangUser(m.cLangUser)
 
-	* {fr} Tabuler les éléments l'objet résultat
-	llResult = .t.;
-		and dodefault();
-		and this.Init_aResultItems()
-	if m.llResult
+* {fr} Tabuler les éléments l'objet résultat
+llResult = .t.;
+	and dodefault();
+	and this.Init_aResultItems()
+if m.llResult
 
-		* {fr} Créer l'objet résultat
-		this.oResult = createobject('empty') && {fr} Résultat d'exécution sous forme d'objet
-		for lnResultItem = 1 to alen(this.aResultItems, 1)
-			addproperty(m.this.oResult, this.aResultItems[m.lnResultItem, 1], this.aResultItems[m.lnResultItem, 2])
-		endfor
-
-		* {fr} Créer le curseur résultats (qui contiendra un objet résultat par table)
-		lcResultItems = ''
-		this.cResultCursor = textmerge([<<m.this.name>>_<<Ttoc(Datetime(),1)>>])
-		for lnResultItem = 1 to alen(this.aResultItems, 1)
-			lcResultItems = c2Words(m.lcResultItems, ',', textmerge("<<this.aResultItems[m.lnResultItem, 1]>> <<this.aResultItems[m.lnResultItem, 3]>>"))
-		endfor
-		addproperty(m.this, 'abSelect', abSelect())
-		create cursor (m.this.cResultCursor) (&lcResultItems)
-
-		this.cDBCsrce = m.this.cDBCsrce && {fr} see this.cDBCsrce_Assign()
-		this.cDBCdest = m.this.cDBCdest && {fr} see this.cDBCdest_Assign()
-	endif
-
-	return m.llResult
-	endproc
-	
-	*---------------------------------------
-	procedure cTimeStampField_get && {en} Field {last modification Datetime} in DBC tables - required for database synchronisation {fr} Champ {date et heure de dernière modification} dans les tables du DBC - requis pour la synchronisation de base de données (avec la classe acDataSyncVFP) ; pris en compte dans le réglage de plSync
-	lparameters tcTable && upper(table currently synchronized)
-
-	&& {en} implement in your sub-class if (this.cTimeStampField) differs across tables
-	&& {fr} implémenter en sous-classe si (this.cTimeStampField) dépend de la table
-	
-	return this.cTimeStampField
-	endproc
-
-	*---------------------------------------
-	procedure clSyncField_get && {en} Field {record modified by synchronization} in DBC tables - required for database synchronisation {fr} champ 'enregistrement modifié par synchronisation' normalement présent dans chaque table
-	lparameters tcTable && upper(table currently synchronized)
-
-	&& {en} implement in your sub-class if (this.clSyncField) differs across tables
-	&& {fr} implémenter en sous-classe si (this.clSyncField) dépend de la table
-
-	return this.clSyncField
-	endproc
-
-	*---------------------------------------
-	hidden function Init_aResultItems && {fr} 1-Nom | 2-Valeur par défaut | 3-Type de champ | 4 Description localisée
-
-	local llResult;
-	, lcResultItem;
-	, lnResultItem;
-	, laResultItem[1];
-	, liResultItem;
-	, laLang[1];
-	, liLangUser;
-	, llLangUser;
-
-	&& /!\ la Description ne doit pas contenir '|'
-	text TO lcResultItem NOSHOW FLAGS 1 PRETEXT 1+2 && {fr} Field | default value | Type | en | fr | de | es | it | pt
-		lResult | .T. | L | Success | Succès
-		cResult | '' | M | Result | Résultat
-		cTableSrce | '' | C(100) | Source Table | Table source
-		cTableDest | '' | C(100) | Destination Table | Table destination
-		nRecsSrce | 0 | I | Source Recs | Enr. source
-		nRecsAdded | 0 | I | Added | Ajoutés
-		nRecsReplaced | 0 | I | Replaced | Remplacés
-		nRecsDeleted | 0 | I | Deleted | Supprimés
-		nFiles | 0 | I | # Files | Nb Fichiers
-		cFiles | '' | M | Files | Fichiers
-		nRecsSrceError | 0 | I | Errors | Erreurs
-		cRecsSrceErrorNo | '' | C(100) | Erroneous Source records # | No[s] d'enregistrement[s] source avec erreur
-		cRecsSrceErrorContent | '' | M | Erroneous Source records contents | Contenu du[es] enregistrement[s] source avec erreur
-		cException | '' | M | Exception if any | Exception éventuelle
-		lDBCsrce | .F. | L | Srce DBC OK | DBC source OK
-		lDBCdest | .F. | L | Dest DBC OK | DBC destination OK
-		lTableSrce | .F. | L | Srce Table OK | Table source OK
-		lTableDest | .F. | L | Dest Table OK | Table destination OK
-		cFieldsMissingSrce | '' | M | Missing fields in Source table | Champs manquants dans la table source
-		cFieldsMissingDest | '' | M | Missing fields in Destination table | Champs manquants dans la table destination
-		lDestExclusive | .F. | L | Destination table was replaced | Remplacement de la table destination qui a pu être ouverte en exclusif
-		lPCtag | .F. | L | Records were compared using a candidate or primary index | Les enregistrements ont été comparés selon un index primaire ou candidat
-		lCtag | .F. | L | Records were compared using a candidate index | Les enregistrements ont été comparés selon un index candidat
-		cPCtag | '' | C(100) | Primary or candidate index tag in destination table | Nom de l'index primaire ou candidat de la table destination
-		cPCexp | '' | C(100) | Primary or candidate index expression in destination table | Expression de l'index primaire ou candidat de la table destination
-	ENDTEXT
-
-	lnResultItem = aLinesCols(@m.laResultItem, m.lcResultItem, '|')
-
-	liLangUser = 0
-	if alines(laLang, 'en | fr | de | es | it | pt', 5, '|') > 0
-		liLangUser = ascan(laLang, m.this.cLangUser, 1, -1, 1, 7)
-		liLangUser = iif(m.liLangUser > alen(m.laResultItem, 2)- 3;
-			, m.liLangUser;
-			, 0;
-			)
-	endif
-
-	llLangUser = m.liLangUser > 0
-
-	for liResultItem = 1 to m.lnResultItem
-		laResultItem[m.liResultItem, 1] = alltrim(m.laResultItem[m.liResultItem, 1])
-		laResultItem[m.liResultItem, 2] = evaluate(alltrim(m.laResultItem[m.liResultItem, 2])) && {fr} valeur par défaut
-		laResultItem[m.liResultItem, 3] = alltrim(m.laResultItem[m.liResultItem, 3])
-		laResultItem[m.liResultItem, 4] = alltrim(iif(m.llLangUser;
-			, evl(laResultItem[m.liResultItem, m.liLangUser], laResultItem[m.liResultItem, 4]);
-			, laResultItem[m.liResultItem, 4];
-			))
+	* {fr} Créer l'objet résultat
+	this.oResult = createobject('empty') && {fr} Résultat d'exécution sous forme d'objet
+	for lnResultItem = 1 to alen(this.aResultItems, 1)
+		addproperty(m.this.oResult, this.aResultItems[m.lnResultItem, 1], this.aResultItems[m.lnResultItem, 2])
 	endfor
 
-	aColsDel(@m.laResultItem, 5)
-
-	dimension this.aResultItems[m.lnResultItem, 4]
-	acopy(m.laResultItem, this.aResultItems)
-
-	*---------------------------------------
-	protected procedure destroy
-
-	use in select(m.this.cResultCursor)
-
-	*---------------------------------------
-	protected procedure ResultClear && {fr} Raze l'objet résultat
-
-	this.cErrorHeader = alltrim(evl(m.this.cErrorHeader, '/!\'))
-
-	this.lResult = .T.
-	this.cResult = ''
-
-	local liResultItem
-	for liResultItem = 1 to alen(this.aResultItems, 1)
-		store this.aResultItems[m.liResultItem, 2] to ('m.this.oResult.' + this.aResultItems[m.liResultItem, 1])
+	* {fr} Créer le curseur résultats (qui contiendra un objet résultat par table)
+	lcResultItems = ''
+	this.cResultCursor = textmerge([<<m.this.name>>_<<Ttoc(Datetime(),1)>>])
+	for lnResultItem = 1 to alen(this.aResultItems, 1)
+		lcResultItems = c2Words(m.lcResultItems, ',', textmerge("<<this.aResultItems[m.lnResultItem, 1]>> <<this.aResultItems[m.lnResultItem, 3]>>"))
 	endfor
-	endproc
+	addproperty(m.this, 'abSelect', abSelect())
+	create cursor (m.this.cResultCursor) (&lcResultItems)
 
-	*---------------------------------------
-	protected procedure cResult_Assign
-	lparameters tcResult
+	this.cDBCsrce = m.this.cDBCsrce && {fr} see this.cDBCsrce_Assign()
+	this.cDBCdest = m.this.cDBCdest && {fr} see this.cDBCdest_Assign()
+endif
 
-	tcResult = iif(ga_Type_IsChar(m.tcResult), m.tcResult, '?')
+return m.llResult
+endproc
 
-	if m.this.lResult
-		this.cResult = m.tcResult
-	else
-		this.cResult = c2Words(;
-			  m.this.cResult;
-			, CRLF;
-			, textmerge([<<m.this.cErrorHeader>> <<Lower(Program(Program(-1)-1))>> - <<Alltrim(m.tcResult)>>]);
-			)
-	endif
+*---------------------------------------
+procedure cTimeStampField_get && {en} Field {last modification Datetime} in DBC tables - required for database synchronisation {fr} Champ {date et heure de dernière modification} dans les tables du DBC - requis pour la synchronisation de base de données (avec la classe acDataSyncVFP) ; pris en compte dans le réglage de plSync
+lparameters tcTable && upper(table currently synchronized)
 
-	*---------------------------------------
-	protected procedure cResultAdd
-	lparameters tcResult
+&& {en} implement in your sub-class if (this.cTimeStampField) differs across tables
+&& {fr} implémenter en sous-classe si (this.cTimeStampField) dépend de la table
 
-	local llResult
-	llResult = m.this.lResult
-	this.lResult = .f.
+return this.cTimeStampField
+endproc
+
+*---------------------------------------
+procedure clSyncField_get && {en} Field {record modified by synchronization} in DBC tables - required for database synchronisation {fr} champ 'enregistrement modifié par synchronisation' normalement présent dans chaque table
+lparameters tcTable && upper(table currently synchronized)
+
+&& {en} implement in your sub-class if (this.clSyncField) differs across tables
+&& {fr} implémenter en sous-classe si (this.clSyncField) dépend de la table
+
+return this.clSyncField
+endproc
+
+*---------------------------------------
+hidden function Init_aResultItems && {fr} 1-Nom | 2-Valeur par défaut | 3-Type de champ | 4 Description localisée
+
+local llResult;
+, lcResultItem;
+, lnResultItem;
+, laResultItem[1];
+, liResultItem;
+, laLang[1];
+, liLangUser;
+, llLangUser;
+
+&& /!\ la Description ne doit pas contenir '|'
+text TO lcResultItem NOSHOW FLAGS 1 PRETEXT 1+2 && {fr} Field | default value | Type | en | fr | de | es | it | pt
+	lResult | .T. | L | Success | Succès
+	cResult | '' | M | Result | Résultat
+	cTableSrce | '' | C(100) | Source Table | Table source
+	cTableDest | '' | C(100) | Destination Table | Table destination
+	nRecsSrce | 0 | I | Source Recs | Enr. source
+	nRecsAdded | 0 | I | Added | Ajoutés
+	nRecsReplaced | 0 | I | Replaced | Remplacés
+	nRecsDeleted | 0 | I | Deleted | Supprimés
+	nFiles | 0 | I | # Files | Nb Fichiers
+	cFiles | '' | M | Files | Fichiers
+	nRecsSrceError | 0 | I | Errors | Erreurs
+	cRecsSrceErrorNo | '' | C(100) | Erroneous Source records # | No[s] d'enregistrement[s] source avec erreur
+	cRecsSrceErrorContent | '' | M | Erroneous Source records contents | Contenu du[es] enregistrement[s] source avec erreur
+	cException | '' | M | Exception if any | Exception éventuelle
+	lDBCsrce | .F. | L | Srce DBC OK | DBC source OK
+	lDBCdest | .F. | L | Dest DBC OK | DBC destination OK
+	lTableSrce | .F. | L | Srce Table OK | Table source OK
+	lTableDest | .F. | L | Dest Table OK | Table destination OK
+	cFieldsMissingSrce | '' | M | Missing fields in Source table | Champs manquants dans la table source
+	cFieldsMissingDest | '' | M | Missing fields in Destination table | Champs manquants dans la table destination
+	lDestExclusive | .F. | L | Destination table was replaced | Remplacement de la table destination qui a pu être ouverte en exclusif
+	lPCtag | .F. | L | Records were compared using a candidate or primary index | Les enregistrements ont été comparés selon un index primaire ou candidat
+	lCtag | .F. | L | Records were compared using a candidate index | Les enregistrements ont été comparés selon un index candidat
+	cPCtag | '' | C(100) | Primary or candidate index tag in destination table | Nom de l'index primaire ou candidat de la table destination
+	cPCexp | '' | C(100) | Primary or candidate index expression in destination table | Expression de l'index primaire ou candidat de la table destination
+ENDTEXT
+
+lnResultItem = aLinesCols(@m.laResultItem, m.lcResultItem, '|')
+
+liLangUser = 0
+if alines(laLang, 'en | fr | de | es | it | pt', 5, '|') > 0
+	liLangUser = ascan(laLang, m.this.cLangUser, 1, -1, 1, 7)
+	liLangUser = iif(m.liLangUser > alen(m.laResultItem, 2)- 3;
+		, m.liLangUser;
+		, 0;
+		)
+endif
+
+llLangUser = m.liLangUser > 0
+
+for liResultItem = 1 to m.lnResultItem
+	laResultItem[m.liResultItem, 1] = alltrim(m.laResultItem[m.liResultItem, 1])
+	laResultItem[m.liResultItem, 2] = evaluate(alltrim(m.laResultItem[m.liResultItem, 2])) && {fr} valeur par défaut
+	laResultItem[m.liResultItem, 3] = alltrim(m.laResultItem[m.liResultItem, 3])
+	laResultItem[m.liResultItem, 4] = alltrim(iif(m.llLangUser;
+		, evl(laResultItem[m.liResultItem, m.liLangUser], laResultItem[m.liResultItem, 4]);
+		, laResultItem[m.liResultItem, 4];
+		))
+endfor
+
+aColsDel(@m.laResultItem, 5)
+
+dimension this.aResultItems[m.lnResultItem, 4]
+acopy(m.laResultItem, this.aResultItems)
+
+*---------------------------------------
+protected procedure destroy
+
+use in select(m.this.cResultCursor)
+
+*---------------------------------------
+protected procedure ResultClear && {fr} Raze l'objet résultat
+
+this.cErrorHeader = alltrim(evl(m.this.cErrorHeader, '/!\'))
+
+this.lResult = .T.
+this.cResult = ''
+
+local liResultItem
+for liResultItem = 1 to alen(this.aResultItems, 1)
+	store this.aResultItems[m.liResultItem, 2] to ('m.this.oResult.' + this.aResultItems[m.liResultItem, 1])
+endfor
+endproc
+
+*---------------------------------------
+protected procedure cResult_Assign
+lparameters tcResult
+
+tcResult = iif(ga_Type_IsChar(m.tcResult), m.tcResult, '?')
+
+if m.this.lResult
 	this.cResult = m.tcResult
-	this.lResult = m.llResult
+else
+	this.cResult = c2Words(;
+		  m.this.cResult;
+		, CRLF;
+		, textmerge([<<m.this.cErrorHeader>> <<Lower(Program(Program(-1)-1))>> - <<Alltrim(m.tcResult)>>]);
+		)
+endif
 
-	*---------------------------------------
-	protected procedure oResultFinal && {fr} Objet résultat final
-	this.oResult.lResult = m.this.lResult
-	this.oResult.cResult = m.this.cResult
-	return m.this.oResult
+*---------------------------------------
+protected procedure cResultAdd
+lparameters tcResult
 
-	*---------------------------------------
-	procedure cResultFinal && {fr} résultat final
-	lparameters ;
-	  tlSuccess; && [.F.] {fr} en cas de succès, seulement le résultat
-	, tlPipe && [.F.] {fr} séparer les éléments par '|'
+local llResult
+llResult = m.this.lResult
+this.lResult = .f.
+this.cResult = m.tcResult
+this.lResult = m.llResult
 
-	tlPipe = iif(lTrue(m.tlPipe), ' | ', CRLF)
+*---------------------------------------
+protected procedure oResultFinal && {fr} Objet résultat final
+this.oResult.lResult = m.this.lResult
+this.oResult.cResult = m.this.cResult
+return m.this.oResult
 
-	this.oResultFinal
+*---------------------------------------
+procedure cResultFinal && {fr} résultat final
+lparameters ;
+  tlSuccess; && [.F.] {fr} en cas de succès, seulement le résultat
+, tlPipe && [.F.] {fr} séparer les éléments par '|'
 
-	local lcResult, liResultItem, luResultItem
+tlPipe = iif(lTrue(m.tlPipe), ' | ', CRLF)
 
-	lcResult = ''
-	for liResultItem = 1 to iif(lTrue(m.tlSuccess) and m.this.oResult.lResult;
-	 , 2;
-	 , alen(this.aResultItems, 1);
-	 )
+this.oResultFinal
 
-		luResultItem = evaluate('m.this.oResult.' + this.aResultItems[m.liResultItem, 1])
+local lcResult, liResultItem, luResultItem
 
-		lcResult = m.lcResult;
-			+ m.tlPipe;
-			+ this.aResultItems[m.liResultItem, 4] + ': ';
-			+ cTronc(transform(m.luResultItem), 3000, .t.) && {fr} cCRLFfix()
+lcResult = ''
+for liResultItem = 1 to iif(lTrue(m.tlSuccess) and m.this.oResult.lResult;
+ , 2;
+ , alen(this.aResultItems, 1);
+ )
 
-	endfor
+	luResultItem = evaluate('m.this.oResult.' + this.aResultItems[m.liResultItem, 1])
 
-	this.ResultClear
+	lcResult = m.lcResult;
+		+ m.tlPipe;
+		+ this.aResultItems[m.liResultItem, 4] + ': ';
+		+ cTronc(transform(m.luResultItem), 3000, .t.) && {fr} cCRLFfix()
 
-	return substr(m.lcResult, len(m.tlPipe) + 1)
+endfor
 
-	*---------------------------------------
-	hidden procedure cDBCdest_Assign
-	lparameters tcDBC && {fr} nom | adresse de la base de données destination
+this.ResultClear
 
-	this.oResult.lDBCdest = this.lDBC(@m.tcDBC)
+return substr(m.lcResult, len(m.tlPipe) + 1)
 
-	if .t.;
-	 and m.this.oResult.lDBCdest;
-	 and (not luEqual(m.this.cDBCdest, m.tcDBC) or lCallingModule('Init'))
+*---------------------------------------
+hidden procedure cDBCdest_Assign
+lparameters tcDBC && {fr} nom | adresse de la base de données destination
 
-		* {fr} Nouvelle base de données : tabuler les tables
-		local array laTables[1]
-		this.oResult.lDBCdest = ga_DBCTablesTree(@m.laTables, m.tcDBC) > 0 && {fr} aDBCTablesTree(@m.laTables, m.tcDBC) > 0
-		if this.oResult.lDBCdest
+this.oResult.lDBCdest = this.lDBC(@m.tcDBC)
 
-			dimension this.aDBCdestTables[Alen(m.laTables)]
-			acopy(laTables, m.this.aDBCdestTables)
+if .t.;
+ and m.this.oResult.lDBCdest;
+ and (not luEqual(m.this.cDBCdest, m.tcDBC) or lCallingModule('Init'))
 
-			this.cDBCdest = m.tcDBC
-		else
-			this.cResult = textmerge(icase(;
-				m.this.cLangUser = 'fr',	[Aucune table trouvée dans la base de données :],; && copy-paste this line to add another language support
-																	[No table was found in the database:]; && Default: English"
-				) + [ '<<m.tcDBC>>'])
-		endif
-	endif
+	* {fr} Nouvelle base de données : tabuler les tables
+	local array laTables[1]
+	this.oResult.lDBCdest = ga_DBCTablesTree(@m.laTables, m.tcDBC) > 0 && {fr} aDBCTablesTree(@m.laTables, m.tcDBC) > 0
+	if this.oResult.lDBCdest
 
-	this.lResult = m.this.lResult and this.oResult.lDBCdest
+		dimension this.aDBCdestTables[Alen(m.laTables)]
+		acopy(laTables, m.this.aDBCdestTables)
 
-	*---------------------------------------
-	hidden procedure cDBCsrce_Assign
-	lparameters tcDBC && {fr} nom | adresse de la base de données source
-
-	this.oResult.lDBCsrce = this.lDBC(@m.tcDBC)
-	if m.this.oResult.lDBCsrce
-
-		this.cDBCsrce = m.tcDBC
-	endif
-
-	this.lResult = m.this.lResult and this.oResult.lDBCsrce
-
-	*---------------------------------------
-	hidden procedure lDBC as Boolean && {fr} base de données ouverte
-	lparameters tcDBC && @ {fr} nom | adresse de la base de données
-
-	local llResult
-
-	do case
-
-	case empty(m.tcDBC)
-		llResult = .null.
-
-	case !ga_Type_IsChar(m.tcDBC)
+		this.cDBCdest = m.tcDBC
+	else
 		this.cResult = textmerge(icase(;
-				m.this.cLangUser = 'fr',	[Spécification de base de données invalide : <<cLitteral(m.tcDBC)>>],; && copy-paste this line to add another language support
-																	[Database specification is invalid: <<cLitteral(m.tcDBC)>>]; && Default: English
-				))
+			m.this.cLangUser = 'fr',	[Aucune table trouvée dans la base de données :],; && copy-paste this line to add another language support
+																[No table was found in the database:]; && Default: English"
+			) + [ '<<m.tcDBC>>'])
+	endif
+endif
 
-	case !VarStore(@m.tcDBC, forceext(m.tcDBC, 'dbc'))
-		this.cResult = icase(;
-				m.this.cLangUser = 'fr',	[Erreur inattendue],; && copy-paste this line to add another language support
-																	[Unexpected error]; && Default: English
-				)
+this.lResult = m.this.lResult and this.oResult.lDBCdest
 
-	case !file(m.tcDBC)
-		this.cResult = textmerge(icase(;
-				m.this.cLangUser = 'fr',	[Base de données introuvable : <<cLitteral(m.tcDBC)>>],; && copy-paste this line to add another language support
-																	[This database can't be found: <<cLitteral(m.tcDBC)>>]; && Default: English
-				))
+*---------------------------------------
+hidden procedure cDBCsrce_Assign
+lparameters tcDBC && {fr} nom | adresse de la base de données source
 
-	otherwise
-		tcDBC = fullpath(m.tcDBC)
-		open database (m.tcDBC)
-		llResult = .t.
+this.oResult.lDBCsrce = this.lDBC(@m.tcDBC)
+if m.this.oResult.lDBCsrce
 
-	endcase
+	this.cDBCsrce = m.tcDBC
+endif
 
-	assert nvl(m.llResult, .t.) message m.this.cResult
+this.lResult = m.this.lResult and this.oResult.lDBCsrce
 
-	return m.llResult
+*---------------------------------------
+hidden procedure lDBC as Boolean && {fr} base de données ouverte
+lparameters tcDBC && @ {fr} nom | adresse de la base de données
 
-	*---------------------------------------
-	protected function aTablesIgnore && {fr} Tables à ignorer
-	lparameters ;
-	  taTablesIgnore; && @ {fr} Tables à ignorer
-	, tcTablesIgnore && {fr} Tables à ignorer
-	external array taTablesIgnore
+local llResult
 
-	tcTablesIgnore = iif(vartype(m.tcTablesIgnore) == 'C', m.tcTablesIgnore, '')
-	this.cTablesIgnore = iif(vartype(m.this.cTablesIgnore) == 'C', m.this.cTablesIgnore, '')
-	tcTablesIgnore = upper(c2Words(m.tcTablesIgnore, ',', m.this.cTablesIgnore))
+do case
 
-	return alines(taTablesIgnore, m.tcTablesIgnore, 1, ',', ';') && {fr} peu importent les doublons !
+case empty(m.tcDBC)
+	llResult = .null.
 
-	*---------------------------------------
-	procedure DBCSync && {fr} Synchronise deux bases de données VFP
-	lparameters ;
-	  tcDBCdest; && [this.cDBCdest] {fr} Adresse de la base de données destination
-	, tcDBCsrce; && [this.cDBCsrce] {fr} Adresse de la base de données source
-	, tcTablesIgnore; && [this.cTablesIgnore] {fr} Tables à ignorer
-	, tuFieldsIgnore; && ['WARNING'] {fr} Ignorer si ces champs de la table destination sont absents de la table source ; .T.: aucune vérification de structure
-	, tlReplace; && [.F.] {fr} Remplacer toute la table destination
-	, tlCKmatch && [.F.] {fr} Matcher les enregistrements sur la première clé candidate de la table destination
+case !ga_Type_IsChar(m.tcDBC)
+	this.cResult = textmerge(icase(;
+			m.this.cLangUser = 'fr',	[Spécification de base de données invalide : <<cLitteral(m.tcDBC)>>],; && copy-paste this line to add another language support
+																[Database specification is invalid: <<cLitteral(m.tcDBC)>>]; && Default: English
+			))
 
-	local llResult;
-	, lcResult, liResultItem, lcResultItem;
-	, laTablesIgnore[1];
-	, lnTable, liTable, lcTable, llTable;
-	, luFieldsIgnore, llReplace, llCandMatch;
+case !VarStore(@m.tcDBC, forceext(m.tcDBC, 'dbc'))
+	this.cResult = icase(;
+			m.this.cLangUser = 'fr',	[Erreur inattendue],; && copy-paste this line to add another language support
+																[Unexpected error]; && Default: English
+			)
 
-	this.ResultClear
-	lcResult = ''
+case !file(m.tcDBC)
+	this.cResult = textmerge(icase(;
+			m.this.cLangUser = 'fr',	[Base de données introuvable : <<cLitteral(m.tcDBC)>>],; && copy-paste this line to add another language support
+																[This database can't be found: <<cLitteral(m.tcDBC)>>]; && Default: English
+			))
 
-	this.cDBCdest = evl(m.tcDBCdest, m.this.cDBCdest) && {fr} cf. this.cDBCdest_assign()
-	this.cDBCsrce = evl(m.tcDBCsrce, m.this.cDBCsrce) && {fr} cf. this.cDBCsrce_assign()
-	if m.this.lResult
+otherwise
+	tcDBC = fullpath(m.tcDBC)
+	open database (m.tcDBC)
+	llResult = .t.
 
-		* {fr} Tabuler les tables à ignorer
-		this.aTablesIgnore(@m.laTablesIgnore, m.tcTablesIgnore)
+endcase
 
-		* {fr} Pour chaque table destination
-		lnTable = alen(m.this.aDBCdestTables)
-		dimension this.aResults[m.lnTable]
-		for m.liTable = 1 to m.lnTable
+assert nvl(m.llResult, .t.) message m.this.cResult
 
-			lcTable = this.aDBCdestTables[m.liTable]
-			this.ResultClear
+return m.llResult
 
-			* {fr} Si la table n'est pas à ignorer
-			if Empty(ascan(laTablesIgnore, m.lcTable,1,-1,1,7))
+*---------------------------------------
+protected function aTablesIgnore && {fr} Tables à ignorer
+lparameters ;
+  taTablesIgnore; && @ {fr} Tables à ignorer
+, tcTablesIgnore && {fr} Tables à ignorer
+external array taTablesIgnore
 
-				* {fr} Si la table est à traiter
-				luFieldsIgnore = m.tuFieldsIgnore
-				llReplace = m.tlReplace
-				llCandMatch = m.tlCKmatch
-				if this.DBCSync_Table_Ante(m.lcTable, @m.luFieldsIgnore, @m.llReplace, @m.llCandMatch)
+tcTablesIgnore = iif(vartype(m.tcTablesIgnore) == 'C', m.tcTablesIgnore, '')
+this.cTablesIgnore = iif(vartype(m.this.cTablesIgnore) == 'C', m.this.cTablesIgnore, '')
+tcTablesIgnore = upper(c2Words(m.tcTablesIgnore, ',', m.this.cTablesIgnore))
 
-					* {fr} Si les tables peuvent être synchronisées
-					llTable = this.TableSync(;
-						  textmerge([<<this.cDBCdest>>!<<m.lcTable>>]);
-						, textmerge([<<this.cDBCsrce>>!<<m.lcTable>>]);
-						, m.luFieldsIgnore;
-						, m.llReplace;
-						, m.llCandMatch;
-						)
+return alines(taTablesIgnore, m.tcTablesIgnore, 1, ',', ';') && {fr} peu importent les doublons !
 
-					this.oResult.lResult = m.llTable
+*---------------------------------------
+procedure DBCSync && {fr} Synchronise deux bases de données VFP
+lparameters ;
+  tcDBCdest; && [this.cDBCdest] {fr} Adresse de la base de données destination
+, tcDBCsrce; && [this.cDBCsrce] {fr} Adresse de la base de données source
+, tcTablesIgnore; && [this.cTablesIgnore] {fr} Tables à ignorer
+, tuFieldsIgnore; && ['WARNING'] {fr} Ignorer si ces champs de la table destination sont absents de la table source ; .T.: aucune vérification de structure
+, tlReplace; && [.F.] {fr} Remplacer toute la table destination
+, tlCKmatch; && [.F.] {fr} Matcher les enregistrements sur la première clé candidate de la table destination
+, tlPKreplace; && @ [.F.] {fr} Si m.tlCKmatch et clé primaire différente, remplacer && 2016-12-13 thn -- {FiC V 2.23.0-beta.8} {en} added for ipMigrator
 
-					* {fr} Exécuter la méthode shell
-					llTable = this.DBCSync_Table_Post(m.lcTable, m.this.oResultFinal())
-				else
-					this.cResult = textmerge(icase(;
-						m.this.cLangUser = 'fr',	[La table '<<m.lcTable>>' n'a pas été synchronisée sur ordre de <<m.this.Name>>.DBCSync_Table_Ante()],; && copy-paste this line to add another language support
-																			[<<m.this.Name>>.DBCSync_Table_Ante() ordered not to synchronize  '<<m.lcTable>>']; && Default: English
-						))
-				endif
+local llResult;
+, lcResult, liResultItem, lcResultItem;
+, laTablesIgnore[1];
+, lnTable, liTable, lcTable, llTable;
+, luFieldsIgnore, llReplace, llCandMatch;
+, llPKreplace; && [.F.] {fr} Si m.tlCKmatch et clé primaire différente, remplacer && 2016-12-13 thn -- {FiC V 2.23.0-beta.8} {en} added for ipMigrator
+
+this.ResultClear
+lcResult = ''
+
+this.cDBCdest = evl(m.tcDBCdest, m.this.cDBCdest) && {fr} cf. this.cDBCdest_assign()
+this.cDBCsrce = evl(m.tcDBCsrce, m.this.cDBCsrce) && {fr} cf. this.cDBCsrce_assign()
+if m.this.lResult
+
+	* {fr} Tabuler les tables à ignorer
+	this.aTablesIgnore(@m.laTablesIgnore, m.tcTablesIgnore)
+
+	* {fr} Pour chaque table destination
+	lnTable = alen(m.this.aDBCdestTables)
+	dimension this.aResults[m.lnTable]
+	for m.liTable = 1 to m.lnTable
+
+		lcTable = this.aDBCdestTables[m.liTable]
+		this.ResultClear
+
+		* {fr} Si la table n'est pas à ignorer
+		if Empty(ascan(laTablesIgnore, m.lcTable,1,-1,1,7))
+
+			* {fr} Si la table est à traiter
+			luFieldsIgnore = m.tuFieldsIgnore
+			llReplace = m.tlReplace
+			llCandMatch = m.tlCKmatch
+			llPKreplace = m.tlPKreplace
+			if this.DBCSync_Table_Ante(m.lcTable, @m.luFieldsIgnore, @m.llReplace, @m.llCandMatch, @m.llPKreplace)
+
+				* {fr} Si les tables peuvent être synchronisées
+				llTable = this.TableSync(;
+					  textmerge([<<this.cDBCdest>>!<<m.lcTable>>]);
+					, textmerge([<<this.cDBCsrce>>!<<m.lcTable>>]);
+					, m.luFieldsIgnore;
+					, m.llReplace;
+					, m.llCandMatch;
+					, m.llPKreplace;
+					)
+
+				this.oResult.lResult = m.llTable
+
+				* {fr} Exécuter la méthode shell
+				llTable = this.DBCSync_Table_Post(m.lcTable, m.this.oResultFinal())
 			else
 				this.cResult = textmerge(icase(;
-					m.this.cLangUser = 'fr',	[La table '<<m.lcTable>>' a été ignorée conformément à la liste '<<m.tcTablesIgnore>>'],; && copy-paste this line to add another language support
-																		[Table '<<m.lcTable>>' was ignored as of list '<<m.tcTablesIgnore>>']; && Default: English
+					m.this.cLangUser = 'fr',	[La table '<<m.lcTable>>' n'a pas été synchronisée sur ordre de <<m.this.Name>>.DBCSync_Table_Ante()],; && copy-paste this line to add another language support
+																		[<<m.this.Name>>.DBCSync_Table_Ante() ordered not to synchronize  '<<m.lcTable>>']; && Default: English
 					))
-			endif
-
-			this.oResult.lResult = m.llTable
-
-			* {fr} Enregistrer le résultat pour la table
-			this.aResults[m.liTable] = createobject('empty') && {fr} Résultat d'exécution sous forme d'objet
-			for liResultItem = 1 to alen(this.aResultItems, 1)
-				lcResultItem = this.aResultItems[m.liResultItem, 1]
-				addproperty(this.aResults[m.liTable], m.lcResultItem, evaluate('this.oResult.' + m.lcResultItem))
-			endfor
-
-			llResult = m.llResult and m.llTable
-			lcResult = c2Words(m.lcResult, CRLF, m.this.cResult)
-
-			* {fr} Si erreur fatale, terminé
-			if m.this.lErrorFatal
-				exit
-			endif
-		endfor
-
-		* {fr} Enregistrer le résultat final
-		this.cResult = m.lcResult
-		this.lResult = m.llResult
-	endif
-
-	return m.this.lResult
-
-	*---------------------------------------
-	protected procedure DBCSync_Table_Ante && {fr} méthode shell avant synchronisation
-	lparameters ;
-	  tcTable; && {fr} Table sur le point d'être synchronisée
-	, tuFieldsIgnore; && @ {fr} Ignorer si ces champs de la table destination sont absents de la table source ; .T.: aucune vérification de structure
-	, tlReplace; && @ {fr} Remplacer toute la table destination
-	, tlCKmatch && @ {fr} Matcher les enregistrements sur la première clé candidate de la table destination
-
-	*---------------------------------------
-	protected procedure DBCSync_Table_Post && {fr} méthode shell après synchronisation
-	lparameters ;
-	  tcTable; && {fr} Table qui vient d'être synchronisée
-	, toResult && {fr} Résultat de la synchronisation
-
-	local llResult
-	llResult = dodefault(m.tcTable, m.toResult)
-	if m.llResult
-
-		* {fr} Si le curseur résultat est ouvert
-		llResult = used(m.this.cResultCursor)
-		assert m.llResult message cAssertMsg(textmerge(icase(;
-			m.this.cLangUser = 'fr',	[Le curseur résultat '<<m.this.cResultCursor>>' a été refermé par erreur],; && copy-paste this line to add another language support
-																[Result Cursor '<<m.this.cResultCursor>>' was mistakenly closed]; && Default: English
-			)))
-		if m.llResult
-
-			* {fr} Ajouter un enregistrement résultat
-			local loSelect
-			loSelect = abSelect(m.this.cResultCursor)
-			append blank
-			gather name m.toResult memo
-		endif
-	endif
-
-	return m.llResult
-
-	* ---------------------------------------
-	procedure TableSync && {fr} Synchronise deux tables VFP
-	lparameters ;
-	  tcTableDest; && {fr} Table destination (Adresse || Alias || db!Table)
-	, tcTableSrce; && {fr} Table source  (Adresse || Alias || db!Table)
-	, tuFieldsIgnore; && ['WARNING'] {fr} Ignorer si ces champs de la table destination sont absents de la table source ; .T.: aucune vérification de structure
-	, tlReplace; && [.F.] {fr} Remplacer toute la table destination
-	, tlCKmatch; && [.F.] {fr} Matcher les enregistrements sur la première clé candidate de la table destination
-	, tnRecs; && [all] {fr} Nombre d'enregistrements à synchroniser
-
-	this.ResultClear
-
-	local loSelect as abSelect of abData.prg;
-	, lcAliasSrce, llAliasSrce;
-	, lcAliasDest, llAliasDest;
-	, loException as exception
-
-	loSelect = abSelect()
-
-	this.oResult.cTableDest = cTableComment(m.tcTableDest)
-	this.oResult.cTableSrce = cTableComment(m.tcTableSrce)
-
-	* {fr} Si la table destination peut être ouverte && {fr} en premier pour l'aliaser sous son nom
-	lcAliasDest = cAlias(m.tcTableDest, @m.llAliasDest)
-	this.oResult.lTableDest = used(m.lcAliasDest)
-	this.lResult = this.oResult.lTableDest
-	if m.this.lResult
-
-		* {fr} Si la table source peut être ouverte
-		lcAliasSrce = cAlias(m.tcTableSrce, @m.llAliasSrce)
-		this.oResult.lTableSrce = used(m.lcAliasSrce)
-		this.lResult = this.oResult.lTableSrce
-		if m.this.lResult
-
-			this.oResult.nRecsSrce = RecCount(m.lcAliasSrce)
-
-			* {fr} Si le champs de la Table source sont tous dans la Table destination et réciproquement
-			this.lResult = .f.;
-			 or lTrue(m.tuFieldsIgnore) ;
-			 or this.lFieldsMatch(m.lcAliasDest, m.lcAliasSrce, uDefault(m.tuFieldsIgnore, 'WARNING'))
-			if m.this.lResult
-
-				try
-
-					* {fr} Réaliser la sychronisation
-					this.lResult = this.TableSync_(;
-						  m.lcAliasDest;
-						, m.lcAliasSrce;
-						, m.tlReplace;
-						, m.tlCKmatch;
-						, m.tnRecs;
-						)
-
-				catch to loException
-					this.lResult = .f.
-					this.cResult = cException(m.loException)
-					this.oResult.cException = m.this.cResult
-				endtry
-			else
-			* {fr} Traité par this.lFieldsMatch()
 			endif
 		else
 			this.cResult = textmerge(icase(;
-				m.this.cLangUser = 'fr',	[Impossible d'ouvrir la table source <<cLitteral(m.tcTableSrce)>>],; && copy-paste this line to add another language support
-																	[Could not open source table <<cLitteral(m.tcTableSrce)>>]; && Default: English
+				m.this.cLangUser = 'fr',	[La table '<<m.lcTable>>' a été ignorée conformément à la liste '<<m.tcTablesIgnore>>'],; && copy-paste this line to add another language support
+																	[Table '<<m.lcTable>>' was ignored as of list '<<m.tcTablesIgnore>>']; && Default: English
 				))
+		endif
+
+		this.oResult.lResult = m.llTable
+
+		* {fr} Enregistrer le résultat pour la table
+		this.aResults[m.liTable] = createobject('empty') && {fr} Résultat d'exécution sous forme d'objet
+		for liResultItem = 1 to alen(this.aResultItems, 1)
+			lcResultItem = this.aResultItems[m.liResultItem, 1]
+			addproperty(this.aResults[m.liTable], m.lcResultItem, evaluate('this.oResult.' + m.lcResultItem))
+		endfor
+
+		llResult = m.llResult and m.llTable
+		lcResult = c2Words(m.lcResult, CRLF, m.this.cResult)
+
+		* {fr} Si erreur fatale, terminé
+		if m.this.lErrorFatal
+			exit
+		endif
+	endfor
+
+	* {fr} Enregistrer le résultat final
+	this.cResult = m.lcResult
+	this.lResult = m.llResult
+endif
+
+return m.this.lResult
+
+*---------------------------------------
+protected procedure DBCSync_Table_Ante && {fr} méthode shell avant synchronisation
+lparameters ;
+  tcTable; && {fr} Table sur le point d'être synchronisée
+, tuFieldsIgnore; && @ {fr} Ignorer si ces champs de la table destination sont absents de la table source ; .T.: aucune vérification de structure
+, tlReplace; && @ {fr} Remplacer toute la table destination
+, tlCKmatch; && @ {fr} Matcher les enregistrements sur la première clé candidate de la table destination
+, tlPKreplace; && @ [.F.] {fr} Si m.tlCKmatch et clé primaire différente, remplacer && 2016-12-13 thn -- {FiC V 2.23.0-beta.8} {en} added for ipMigrator
+
+*---------------------------------------
+protected procedure DBCSync_Table_Post && {fr} méthode shell après synchronisation
+lparameters ;
+  tcTable; && {fr} Table qui vient d'être synchronisée
+, toResult && {fr} Résultat de la synchronisation
+
+local llResult
+llResult = dodefault(m.tcTable, m.toResult)
+if m.llResult
+
+	* {fr} Si le curseur résultat est ouvert
+	llResult = used(m.this.cResultCursor)
+	assert m.llResult message cAssertMsg(textmerge(icase(;
+		m.this.cLangUser = 'fr',	[Le curseur résultat '<<m.this.cResultCursor>>' a été refermé par erreur],; && copy-paste this line to add another language support
+															[Result Cursor '<<m.this.cResultCursor>>' was mistakenly closed]; && Default: English
+		)))
+	if m.llResult
+
+		* {fr} Ajouter un enregistrement résultat
+		local loSelect
+		loSelect = abSelect(m.this.cResultCursor)
+		append blank
+		gather name m.toResult memo
+	endif
+endif
+
+return m.llResult
+
+* ---------------------------------------
+procedure TableSync && {fr} Synchronise deux tables VFP
+lparameters ;
+  tcTableDest; && {fr} Table destination (Adresse || Alias || db!Table)
+, tcTableSrce; && {fr} Table source  (Adresse || Alias || db!Table)
+, tuFieldsIgnore; && ['WARNING'] {fr} Ignorer si ces champs de la table destination sont absents de la table source ; .T.: aucune vérification de structure
+, tlReplace; && [.F.] {fr} Remplacer toute la table destination
+, tlCKmatch; && [.F.] {fr} Matcher les enregistrements sur la première clé candidate de la table destination
+, tnRecs; && [all] {fr} Nombre d'enregistrements à synchroniser
+, tlPKreplace; && [.F.] {fr} Si m.tlCKmatch et clé primaire différente, remplacer && 2016-12-13 thn -- {FiC V 2.23.0-beta.8} {en} added for ipMigrator
+
+this.ResultClear
+
+local loSelect as abSelect of abData.prg;
+, lcAliasSrce, llAliasSrce;
+, lcAliasDest, llAliasDest;
+, loException as exception
+
+loSelect = abSelect()
+
+this.oResult.cTableDest = cTableComment(m.tcTableDest)
+this.oResult.cTableSrce = cTableComment(m.tcTableSrce)
+
+* {fr} Si la table destination peut être ouverte && {fr} en premier pour l'aliaser sous son nom
+lcAliasDest = cAlias(m.tcTableDest, @m.llAliasDest)
+this.oResult.lTableDest = used(m.lcAliasDest)
+this.lResult = this.oResult.lTableDest
+if m.this.lResult
+
+	* {fr} Si la table source peut être ouverte
+	lcAliasSrce = cAlias(m.tcTableSrce, @m.llAliasSrce)
+	this.oResult.lTableSrce = used(m.lcAliasSrce)
+	this.lResult = this.oResult.lTableSrce
+	if m.this.lResult
+
+		this.oResult.nRecsSrce = RecCount(m.lcAliasSrce)
+
+		* {fr} Si le champs de la Table source sont tous dans la Table destination et réciproquement
+		this.lResult = .f.;
+		 or lTrue(m.tuFieldsIgnore) ;
+		 or this.lFieldsMatch(m.lcAliasDest, m.lcAliasSrce, uDefault(m.tuFieldsIgnore, 'WARNING'))
+		if m.this.lResult
+
+			try
+
+				* {fr} Réaliser la sychronisation
+				this.lResult = this.TableSync_(;
+					  m.lcAliasDest;
+					, m.lcAliasSrce;
+					, m.tlReplace;
+					, m.tlCKmatch;
+					, m.tnRecs;
+					, m.tlPKreplace; && 2016-12-13 thn -- {FiC V 2.23.0-beta.8} {en} added for ipMigrator
+					)
+
+			catch to loException
+				this.lResult = .f.
+				this.cResult = cException(m.loException)
+				this.oResult.cException = m.this.cResult
+			endtry
+		else
+		* {fr} Traité par this.lFieldsMatch()
 		endif
 	else
 		this.cResult = textmerge(icase(;
-			m.this.cLangUser = 'fr',	[Impossible d'ouvrir la table destination <<cLitteral(m.tcTableDest)>>],; && copy-paste this line to add another language support
-																[Could not open destination table <<cLitteral(m.tcTableDest)>>]; && Default: English
+			m.this.cLangUser = 'fr',	[Impossible d'ouvrir la table source <<cLitteral(m.tcTableSrce)>>],; && copy-paste this line to add another language support
+																[Could not open source table <<cLitteral(m.tcTableSrce)>>]; && Default: English
 			))
 	endif
-
-	assert m.this.lResult message m.this.cResult
-
-	if m.llAliasDest && {fr} après assert pour voir le contenu des tables
-		use in select(m.lcAliasDest)
-	endif
-	if m.llAliasSrce
-		use in select(m.lcAliasSrce)
-	endif
-
-	return m.this.lResult
-
-	* ---------------------------------------
-	hidden function lFieldsMatch && {fr} Les champs des tables source et destination sont cohérents
-	lparameters ;
-	  tcAliasDest; && {fr} Alias de la table destination
-	, tcAliasSrce; && {fr} Alias de la table source
-	, tcFieldsIgnore && {fr} Champs à ignorer
-
-	local llFieldsSrce, llFieldsDest
-
-	this.oResult.cFieldsMissingSrce = nvl(cFieldsNotIn(m.tcAliasDest, m.tcAliasSrce, m.tcFieldsIgnore), '?')
-	llFieldsSrce = empty(m.this.oResult.cFieldsMissingSrce)
-
-	this.oResult.cFieldsMissingDest = nvl(cFieldsNotIn(m.tcAliasSrce, m.tcAliasDest, m.tcFieldsIgnore), '?')
-	llFieldsDest = .t. && Empty(m.this.oResult.cFieldsMissingDest)
-
-	this.lResult = m.llFieldsDest and m.llFieldsSrce
-
-	if not m.this.lResult
-
-		local lcTableSrce, lcTableDest
-		lcTableSrce = displaypath(cTableAddress(m.tcAliasSrce), 50)
-		lcTableDest = displaypath(cTableAddress(m.tcAliasDest), 50)
-
-		this.cResult = c2Words(;
-			  iif(m.llFieldsSrce;
-				, '';
-				, textmerge(icase(;
-					m.this.cLangUser = 'fr',	[La table destination '<<m.lcTableDest>>' comporte au moins un champ manquant dans la table source '<<m.lcTableSrce>>' : <<cLitteral(m.this.oResult.cFieldsMissingSrce)>>],; && copy-paste this line to add another language support
-																		[Destination table '<<m.lcTableDest>>' holds at least one field missing in source table '<<m.lcTableSrce>>': <<cLitteral(m.this.oResult.cFieldsMissingSrce)>>]; && Default: English
-					));
-				);
-			, CRLF;
-			, iif(m.llFieldsDest;
-				, '';
-				, textmerge(icase(;
-					m.this.cLangUser = 'fr',	[La table source '<<m.lcTableSrce>>' comporte au moins un champ manquant dans la table destination '<<m.lcTableDest>>' : <<cLitteral(m.this.oResult.cFieldsMissingDest)>>],; && copy-paste this line to add another language support
-																		[Source table '<<m.lcTableSrce>>' holds at least one field missing in destination table '<<m.lcTableDest>>': <<cLitteral(m.this.oResult.cFieldsMissingDest)>>]; && Default: English
-					));
-				);
-			)
-	endif
-
-	return m.this.lResult
-
-	*---------------------------------------
-	protected procedure TableSync_ && {fr} Réalise la synchronisation des tables
-	lparameters ;
-	  tcAliasDest; && {fr} Alias de la table destination
-	, tcAliasSrce; && {fr} Alias de la table source
-	, tlReplace; && [.F.] {fr} Remplacer toute la table destination
-	, tlCKmatch; && [.F.] {fr} Matcher les enregistrements sur la première clé candidate de la table destination
-	, tnRecs; && [all] {fr} Nombre d'enregistrements à synchroniser
-
-	tlReplace = lTrue(m.tlReplace)
-	tlCKmatch = lTrue(m.tlCKmatch)
-	tnRecs = iif(vartype(m.tnRecs) == 'N' and m.tnRecs > 0, int(m.tnRecs), 0)
-
-	* {fr} Si la table destination a une clé unique (primaire ou candidate)
-	local llCtag, lcPCtag, lcPCexp, lcPCexpMem;
-	, llPtag, lcPtag, lcPexp, lcPexpMem, lcPexpDest, lcPCmsg
-
-	llCtag = m.tlCKmatch
-	lcPCtag = cTagPC(m.tcAliasDest, @m.lcPCexp, @m.llCtag)
-	this.oResult.lPCtag = not empty(m.lcPCtag) and lTableExpr(m.lcPCexp, m.tcAliasSrce)
-	if this.oResult.lPCtag
-
-		* {fr} Calculer l'expression mémoire de la clé
-		lcPCexpMem = cExprFieldsPrefixed(m.lcPCexp, m.tcAliasDest, 'm') && {fr} expression de recherche de l'enr. à mettre à jour (en mémoire)
-
-		* {fr} Si la clé est candidate et la table destination a une clé primaire valable sur la table source
-		llPtag = not m.llCtag
-		if m.llPtag
-			lcPtag = m.lcPCtag
-			lcPexp = m.lcPCexp
-			lcPexpMem = m.lcPCexpMem
-		else
-			lcPtag = cTagP(m.tcAliasDest, @m.lcPexp)
-			llPtag = not empty(m.lcPtag) and lTableExpr(m.lcPexp, m.tcAliasSrce)
-			if m.llPtag
-				lcPexpMem = cExprFieldsPrefixed(m.lcPexp, m.tcAliasDest, 'm')
-				lcPexpDest = cExprFieldsPrefixed(m.lcPexp, m.tcAliasDest, m.tcAliasDest)
-			endif
-		endif
-
-		* {fr} Définir si les enr. sont comparés sur leur clé candidate
-		this.oResult.lcTag = not m.llPtag or m.tlCKmatch && {fr} les enregistrements sont comparés selon un index candidat
-		this.oResult.cPCtag = iif(m.this.oResult.lcTag, m.lcPCtag, m.lcPtag) && {fr} nom de l'index primaire ou candidat de la table destination
-		this.oResult.cPCexp = iif(m.this.oResult.lcTag, m.lcPCexp, m.lcPexp) && {fr} expression de l'index primaire ou candidat de la table destination
-		lcPCmsg = textmerge([];
-			+ icase(;
-				m.this.cLangUser = 'fr',	[ajout ou remplacement d'enregistrement(s) selon la clé <<Iif(this.oResult.lCtag, 'candidate', 'primaire')>> '<<m.this.oResult.cPCtag>>' (<<m.this.oResult.cPCexp>>)],; && copy-paste this line to add another language support
-																	[adding or replacing records based on <<Iif(this.oResult.lCtag, 'candidate', 'primary')>> key '<<m.this.oResult.cPCtag>>' (<<m.this.oResult.cPCexp>>)]; && Default: English
-				);
-			+ iif(m.this.oResult.lcTag and m.llPtag;
-				, icase(;
-					m.this.cLangUser = 'fr',	[ et la clé primaire '<<m.lcPtag>>' (<<m.lcPexp>>)],; && copy-paste this line to add another language support
-																		[ and primary key '<<m.lcPtag>>' (<<m.lcPexp>>)]; && Default: English
-					);
-				, '';
-				);
-			)
-
-
-	* {fr} Sinon (la table destination n'a pas de clé unique)
-	else
-		if m.tlCKmatch
-			this.lResult = .f.
-			lcPCmsg = icase(;
-				m.this.cLangUser = 'fr',	[synchronisation abandonnée : une clé candidate est exigée mais aucune n'est commune à la table source et destination],; && copy-paste this line to add another language support
-																	[synchronisation canceled: a candidate key is required but source and destination tables don't share any]; && Default: English
-				)
-		else
-			lcPCmsg = icase(;
-				m.this.cLangUser = 'fr',	[ajout seul (aucune clé primaire ou candidate commune à la table source et destination)],; && copy-paste this line to add another language support
-																	[adding records only (source and destination tables share no primary or candidate key)]; && Default: English
-				)
-		endif
-	endif
-	lcPCmsg = iif(m.this.lResult and m.tlReplace, 'vidée puis ', '') + m.lcPCmsg
+else
 	this.cResult = textmerge(icase(;
-		m.this.cLangUser = 'fr',	[Table destination : '<<Dbf(m.tcAliasDest)>>' - <<m.lcPCmsg>>],; && copy-paste this line to add another language support
-															[Destination table: '<<Dbf(m.tcAliasDest)>>' - <<m.lcPCmsg>>]; && Default: English
+		m.this.cLangUser = 'fr',	[Impossible d'ouvrir la table destination <<cLitteral(m.tcTableDest)>>],; && copy-paste this line to add another language support
+															[Could not open destination table <<cLitteral(m.tcTableDest)>>]; && Default: English
 		))
+endif
+
+assert m.this.lResult message m.this.cResult
+
+if m.llAliasDest && {fr} après assert pour voir le contenu des tables
+	use in select(m.lcAliasDest)
+endif
+if m.llAliasSrce
+	use in select(m.lcAliasSrce)
+endif
+
+return m.this.lResult
+
+* ---------------------------------------
+hidden function lFieldsMatch && {fr} Les champs des tables source et destination sont cohérents
+lparameters ;
+  tcAliasDest; && {fr} Alias de la table destination
+, tcAliasSrce; && {fr} Alias de la table source
+, tcFieldsIgnore && {fr} Champs à ignorer
+
+local llFieldsSrce, llFieldsDest
+
+this.oResult.cFieldsMissingSrce = nvl(cFieldsNotIn(m.tcAliasDest, m.tcAliasSrce, m.tcFieldsIgnore), '?')
+llFieldsSrce = empty(m.this.oResult.cFieldsMissingSrce)
+
+this.oResult.cFieldsMissingDest = nvl(cFieldsNotIn(m.tcAliasSrce, m.tcAliasDest, m.tcFieldsIgnore), '?')
+llFieldsDest = .t. && Empty(m.this.oResult.cFieldsMissingDest)
+
+this.lResult = m.llFieldsDest and m.llFieldsSrce
+
+if not m.this.lResult
+
+	local lcTableSrce, lcTableDest
+	lcTableSrce = displaypath(cTableAddress(m.tcAliasSrce), 50)
+	lcTableDest = displaypath(cTableAddress(m.tcAliasDest), 50)
+
+	this.cResult = c2Words(;
+		  iif(m.llFieldsSrce;
+			, '';
+			, textmerge(icase(;
+				m.this.cLangUser = 'fr',	[La table destination '<<m.lcTableDest>>' comporte au moins un champ manquant dans la table source '<<m.lcTableSrce>>' : <<cLitteral(m.this.oResult.cFieldsMissingSrce)>>],; && copy-paste this line to add another language support
+																	[Destination table '<<m.lcTableDest>>' holds at least one field missing in source table '<<m.lcTableSrce>>': <<cLitteral(m.this.oResult.cFieldsMissingSrce)>>]; && Default: English
+				));
+			);
+		, CRLF;
+		, iif(m.llFieldsDest;
+			, '';
+			, textmerge(icase(;
+				m.this.cLangUser = 'fr',	[La table source '<<m.lcTableSrce>>' comporte au moins un champ manquant dans la table destination '<<m.lcTableDest>>' : <<cLitteral(m.this.oResult.cFieldsMissingDest)>>],; && copy-paste this line to add another language support
+																	[Source table '<<m.lcTableSrce>>' holds at least one field missing in destination table '<<m.lcTableDest>>': <<cLitteral(m.this.oResult.cFieldsMissingDest)>>]; && Default: English
+				));
+			);
+		)
+endif
+
+return m.this.lResult
+
+*---------------------------------------
+protected procedure TableSync_ && {fr} Réalise la synchronisation des tables
+lparameters ;
+  tcAliasDest; && {fr} Alias de la table destination
+, tcAliasSrce; && {fr} Alias de la table source
+, tlReplace; && [.F.] {fr} Remplacer toute la table destination
+, tlCKmatch; && [.F.] {fr} Matcher les enregistrements sur la première clé candidate de la table destination
+, tnRecs; && [all] {fr} Nombre d'enregistrements à synchroniser
+, tlPKreplace; && [.F.] {fr} Si m.tlCKmatch et clé primaire différente, remplacer && 2016-12-13 thn -- {FiC V 2.23.0-beta.8} {en} added for ipMigrator
+
+tlReplace = lTrue(m.tlReplace)
+tlCKmatch = lTrue(m.tlCKmatch)
+tlPKreplace = lTrue(m.tlPKreplace)
+tnRecs = iif(vartype(m.tnRecs) == 'N' and m.tnRecs > 0, int(m.tnRecs), 0)
+
+* {fr} Si la table destination a une clé unique (primaire ou candidate)
+local llCtag, lcPCtag, lcPCexp, lcPCexpMem;
+, llPtag, lcPtag, lcPexp, lcPexpMem, lcPexpDest, lcPCmsg
+
+llCtag = m.tlCKmatch
+lcPCtag = cTagPC(m.tcAliasDest, @m.lcPCexp, @m.llCtag)
+this.oResult.lPCtag = not empty(m.lcPCtag) and lTableExpr(m.lcPCexp, m.tcAliasSrce)
+if this.oResult.lPCtag
+
+	* {fr} Calculer l'expression mémoire de la clé
+	lcPCexpMem = cExprFieldsPrefixed(m.lcPCexp, m.tcAliasDest, 'm') && {fr} expression de recherche de l'enr. à mettre à jour (en mémoire)
+
+	* {fr} Si la clé est candidate et la table destination a une clé primaire valable sur la table source
+	llPtag = not m.llCtag
+	if m.llPtag
+		lcPtag = m.lcPCtag
+		lcPexp = m.lcPCexp
+		lcPexpMem = m.lcPCexpMem
+	else
+		lcPtag = cTagP(m.tcAliasDest, @m.lcPexp)
+		llPtag = not empty(m.lcPtag) and lTableExpr(m.lcPexp, m.tcAliasSrce)
+		if m.llPtag
+			lcPexpMem = cExprFieldsPrefixed(m.lcPexp, m.tcAliasDest, 'm')
+			lcPexpDest = cExprFieldsPrefixed(m.lcPexp, m.tcAliasDest, m.tcAliasDest)
+		endif
+	endif
+
+	* {fr} Définir si les enr. sont comparés sur leur clé candidate
+	this.oResult.lcTag = !m.llPtag or m.tlCKmatch && {fr} les enregistrements sont comparés selon un index candidat
+	this.oResult.cPCtag = iif(m.this.oResult.lcTag, m.lcPCtag, m.lcPtag) && {fr} nom de l'index primaire ou candidat de la table destination
+	this.oResult.cPCexp = iif(m.this.oResult.lcTag, m.lcPCexp, m.lcPexp) && {fr} expression de l'index primaire ou candidat de la table destination
+	lcPCmsg = textmerge([];
+		+ icase(;
+			m.this.cLangUser = 'fr',	[ajout ou remplacement d'enregistrement(s) selon la clé <<Iif(this.oResult.lCtag, 'candidate', 'primaire')>> '<<m.this.oResult.cPCtag>>' (<<m.this.oResult.cPCexp>>)],; && copy-paste this line to add another language support
+																[adding or replacing records based on <<Iif(this.oResult.lCtag, 'candidate', 'primary')>> key '<<m.this.oResult.cPCtag>>' (<<m.this.oResult.cPCexp>>)]; && Default: English
+			);
+		+ iif(m.this.oResult.lcTag and m.llPtag;
+			, ' ' + icase(;
+				m.this.cLangUser = 'fr',	Iif(m.tlPKreplace, 'en remplaçant', 'et') + [ la clé primaire '<<m.lcPtag>>' (<<m.lcPexp>>)] + Iif(m.tlPKreplace, ' si différente', ''),; && copy-paste this line to add another language support
+																	Iif(m.tlPKreplace, 'while replacing the', 'and') + [ primary key '<<m.lcPtag>>' (<<m.lcPexp>>)] + Iif(m.tlPKreplace, ' if different', ''); && Default: English
+				);
+			, '';
+			);
+		)
+
+
+* {fr} Sinon (la table destination n'a pas de clé unique)
+else
+	if m.tlCKmatch
+		this.lResult = .f.
+		lcPCmsg = icase(;
+			m.this.cLangUser = 'fr',	[synchronisation abandonnée : une clé candidate est exigée mais aucune n'est commune à la table source et destination],; && copy-paste this line to add another language support
+																[synchronisation canceled: a candidate key is required but source and destination tables don't share any]; && Default: English
+			)
+	else
+		lcPCmsg = icase(;
+			m.this.cLangUser = 'fr',	[ajout seul (aucune clé primaire ou candidate commune à la table source et destination)],; && copy-paste this line to add another language support
+																[adding records only (source and destination tables share no primary or candidate key)]; && Default: English
+			)
+	endif
+endif
+lcPCmsg = iif(m.this.lResult and m.tlReplace, 'vidée puis ', '') + m.lcPCmsg
+this.cResult = textmerge(icase(;
+	m.this.cLangUser = 'fr',	[Table destination : '<<Dbf(m.tcAliasDest)>>' - <<m.lcPCmsg>>],; && copy-paste this line to add another language support
+														[Destination table: '<<Dbf(m.tcAliasDest)>>' - <<m.lcPCmsg>>]; && Default: English
+	))
+if m.this.lResult
+
+	* {fr} Si la table destination doit et peut être remplacée (vidée avant synchronisation)
+	if m.tlReplace
+		tcAliasDest = ExclusiveForce(m.tcAliasDest)
+		this.lResult = used(m.tcAliasDest)
+		if m.this.lResult and RecCount(m.tcAliasDest) > 0
+			zap in (m.tcAliasDest)
+		endif
+		this.oResult.lDestExclusive = m.this.lResult
+	endif
 	if m.this.lResult
 
-		* {fr} Si la table destination doit et peut être remplacée (vidée avant synchronisation)
-		if m.tlReplace
-			tcAliasDest = ExclusiveForce(m.tcAliasDest)
-			this.lResult = used(m.tcAliasDest)
-			if m.this.lResult and RecCount(m.tcAliasDest) > 0
-				zap in (m.tcAliasDest)
-			endif
-			this.oResult.lDestExclusive = m.this.lResult
+		* {fr} si une seule des tables est dans une base de données, tabuler les correspondances entre champs longs et courts (10 caractères)
+		local llFieldLongSrce, llFieldLongDest, lnFieldLong10, laFieldLong10[1]
+		llFieldLongSrce = CursorGetProp("SourceType", m.tcAliasSrce)%100 # 3 or !Empty(CursorGetProp("Database", m.tcAliasSrce))
+		llFieldLongDest = CursorGetProp("SourceType", m.tcAliasDest)%100 # 3 or !Empty(CursorGetProp("Database", m.tcAliasDest))
+		lnFieldLong10 = Iif(m.llFieldLongSrce # m.llFieldLongDest;
+			, aFieldLong10(@m.laFieldLong10, Iif(m.llFieldLongSrce, m.tcAliasSrce, m.tcAliasDest));
+			, 0;
+			)
+
+		* {fr} Créer une variable par champ de la table source
+		local lcFields, laField[1], lnField, liField, lcField
+		lcFields = c2Words(cFields(m.tcAliasSrce), ',', iif(Empty(m.lnFieldLong10), '', cListOfArray(@m.laFieldLong10,, Iif(m.llFieldLongSrce, 2, 1))))
+		local &lcFields
+
+		* {fr} Si forçage des types ou vérification des modifications
+		if .f.;
+		 or m.this.lTypesForce;
+		 or m.this.lModCheck
+
+			* {fr} Tabuler les champs de la table source présents dans la table destination, et leurs types
+			lnField = alines(laField, strtran(m.lcFields, ',', ','+',') + ',', 1+2, ',') && {fr} un élément vide après chaque champ pour la 2ème colonne
+			dimension laField[m.lnField, 2]
+			for liField = m.lnField to 1 step -1
+				lcField = laField[m.liField, 1]
+				if lField(m.lcField, m.tcAliasDest)
+					laField[m.liField, 2] = vartype(evaluate(m.tcAliasDest + '.' + m.lcField), .t.)
+				else
+					lnField = m.lnField - 1
+					adel(laField, m.liField)
+				endif
+			endfor
+			dimension laField[m.lnField, 2]
 		endif
-		if m.this.lResult
 
-			* {fr} si une seule des tables est dans une base de données, tabuler les correspondances entre champs longs et courts (10 caractères)
-			local llFieldLongSrce, llFieldLongDest, lnFieldLong10, laFieldLong10[1]
-			llFieldLongSrce = CursorGetProp("SourceType", m.tcAliasSrce)%100 # 3 or !Empty(CursorGetProp("Database", m.tcAliasSrce))
-			llFieldLongDest = CursorGetProp("SourceType", m.tcAliasDest)%100 # 3 or !Empty(CursorGetProp("Database", m.tcAliasDest))
-			lnFieldLong10 = Iif(m.llFieldLongSrce # m.llFieldLongDest;
-				, aFieldLong10(@m.laFieldLong10, Iif(m.llFieldLongSrce, m.tcAliasSrce, m.tcAliasDest));
-				, 0;
-				)
+		* {fr} Créer les variables privées standard FoxInCloud / ZenBuyer
+		local cTimeStampField
+		private plSync, pltModKeep, plPKgen
+		cTimeStampField = this.cTimeStampField_get(m.tcAliasSrce)
+		plSync = .t. && {fr} Inhibe le contrôle des droits dans la base zenbuyer
+		pltModKeep = .t.; && {fr} Inhibe la mise à jour automatique de la date de modification
+		 and vartype(m.cTimeStampField) == 'C';
+		 and lField(m.cTimeStampField, m.tcAliasSrce);
+		 and lField(m.cTimeStampField, m.tcAliasDest);
+		 and .T.
+		plPKgen = m.tlReplace or not m.llPtag && {fr} Générer la PK
 
-			* {fr} Créer une variable par champ de la table source
-			local lcFields, laField[1], lnField, liField, lcField
-			lcFields = c2Words(cFields(m.tcAliasSrce), ',', iif(Empty(m.lnFieldLong10), '', cListOfArray(@m.laFieldLong10,, Iif(m.llFieldLongSrce, 2, 1))))
-			local &lcFields
+		local llDeletedOff, loDeleted, loExact, loException as exception, clSyncField, llSyncField
 
-			* {fr} Si forçage des types ou vérification des modifications
-			if .f.;
-			 or m.this.lTypesForce;
-			 or m.this.lModCheck
+		llDeletedOff = m.this.lSyncDeleted
+		loDeleted = abSet('DELETED', iif(m.llDeletedOff, 'OFF', 'ON'))
+		loExact = abSet('EXACT', 'ON')
+		clSyncField = this.clSyncField_get(m.tcAliasDest)
+		llSyncField = .t.;
+			and lField(m.clSyncField, m.tcAliasDest);
+			and loClass(m.this, 'acDataSyncVFP') && {fr} seulement si synchronisation depuis une source distante
 
-				* {fr} Tabuler les champs de la table source présents dans la table destination, et leurs types
-				lnField = alines(laField, strtran(m.lcFields, ',', ','+',') + ',', 1+2, ',') && {fr} un élément vide après chaque champ pour la 2ème colonne
-				dimension laField[m.lnField, 2]
-				for liField = m.lnField to 1 step -1
-					lcField = laField[m.liField, 1]
-					if lField(m.lcField, m.tcAliasDest)
-						laField[m.liField, 2] = vartype(evaluate(m.tcAliasDest + '.' + m.lcField), .t.)
-					else
-						lnField = m.lnField - 1
-						adel(laField, m.liField)
+		* {fr} Si remplacement sans clé unique dans la table destination
+		if m.tlReplace;
+		 and !this.oResult.lPCtag;
+		 and m.tnRecs = 0
+
+			* ==============
+			* {fr} Ajouter tout simplement
+			select (m.tcAliasDest)
+			try
+				append from dbf(m.tcAliasSrce)
+				if m.llSyncField
+					replace all (m.clSyncField) with .t.
+				endif
+			catch to loException
+				throw m.loException
+			finally
+				this.oResult.nRecsAdded = _tally
+			endtry
+			* ==============
+
+		* {fr} Sinon (matching sur clé primaire ou candidate)
+		else
+
+			* {fr} Pour chaque enregistrement de la source
+			local llReplace, llInsert, luValue, llRec, lcRec, lcRecNo, lcRecContent, llDeleted
+			select (m.tcAliasSrce)
+			scan
+
+				llRec = .t. && {fr} Résultat de l'enregistrement
+				lcRec = '' && {fr} Résultat de l'enregistrement
+				lcRecNo = cast(recno(m.tcAliasSrce) as M)
+
+				* ====================================
+				scatter memvar memo && FIELDS &lcFields
+				* ====================================
+				
+				* {fr} si noms longs, copier dans nom court ou réciproquement
+				for liField = 1 to m.lnFieldLong10
+					store Evaluate('m.' + m.laFieldLong10[m.liField, Iif(m.llFieldLongSrce, 1, 2)]) to (m.laFieldLong10[m.liField, Iif(m.llFieldLongSrce, 2, 1)])
+				endfor
+
+				* {fr} Si forçage demandé, ajuster les types des champs en mémoire
+				for liField = 1 to Iif(m.this.lTypesForce, m.lnField, 0)
+					luValue = evaluate('m.' + laField[m.liField, 1])
+					if not vartype(m.luValue, .t.) == laField[m.liField, 2]
+						store uValue(m.luValue, laField[m.liField, 2]) to ('m.' + laField[m.liField, 1])
 					endif
 				endfor
-				dimension laField[m.lnField, 2]
-			endif
-
-			* {fr} Créer les variables privées standard FoxInCloud / ZenBuyer
-			local cTimeStampField
-			private plSync, pltModKeep, plPKgen
-			cTimeStampField = this.cTimeStampField_get(m.tcAliasSrce)
-			plSync = .t. && {fr} Inhibe le contrôle des droits dans la base zenbuyer
-			pltModKeep = .t.; && {fr} Inhibe la mise à jour automatique de la date de modification
-			 and vartype(m.cTimeStampField) == 'C';
-			 and lField(m.cTimeStampField, m.tcAliasSrce);
-			 and lField(m.cTimeStampField, m.tcAliasDest);
-			 and .T.
-			plPKgen = m.tlReplace or not m.llPtag && {fr} Générer la PK
-
-			local llDeletedOff, loDeleted, loExact, loException as exception, clSyncField, llSyncField
-
-			llDeletedOff = m.this.lSyncDeleted
-			loDeleted = abSet('DELETED', iif(m.llDeletedOff, 'OFF', 'ON'))
-			loExact = abSet('EXACT', 'ON')
-			clSyncField = this.clSyncField_get(m.tcAliasDest)
-			llSyncField = .t.;
-				and lField(m.clSyncField, m.tcAliasDest);
-				and loClass(m.this, 'acDataSyncVFP') && {fr} seulement si synchronisation depuis une source distante
-
-			* {fr} Si remplacement sans clé unique dans la table destination
-			if m.tlReplace;
-			 and !this.oResult.lPCtag;
-			 and m.tnRecs = 0
 
 				* ==============
-				* {fr} Ajouter tout simplement
-				select (m.tcAliasDest)
 				try
-					append from dbf(m.tcAliasSrce)
-					if m.llSyncField
-						replace all (m.clSyncField) with .t.
-					endif
-				catch to loException
-					throw m.loException
-				finally
-					this.oResult.nRecsAdded = _tally
-				endtry
-				* ==============
 
-			* {fr} Sinon (matching sur clé primaire ou candidate)
-			else
+					* {fr} Si clé primaire non automatique, chercher l'enregistrement correspondant dans la table destination
+					llReplace = this.oResult.lPCtag;
+						and iif(this.oResult.lcTag;
+							, seek(evaluate(m.lcPCexpMem), m.tcAliasDest, m.lcPCtag);
+							, seek(evaluate(m.lcPexpMem), m.tcAliasDest, m.lcPtag);
+							)
+					llInsert = not m.llReplace
 
-				* {fr} Pour chaque enregistrement de la source
-				local llReplace, llInsert, luValue, llRec, lcRec, lcRecNo, lcRecContent, llDeleted
-				select (m.tcAliasSrce)
-				scan
+					* {fr} Si l'enregistrement existe
+					if m.llReplace
 
-					llRec = .t. && {fr} Résultat de l'enregistrement
-					lcRec = '' && {fr} Résultat de l'enregistrement
-					lcRecNo = cast(recno(m.tcAliasSrce) as M)
-					scatter memvar memo && FIELDS &lcFields
-					
-					* {fr} si noms longs, copier dans nom court ou réciproquement
-					for liField = 1 to m.lnFieldLong10
-						store Evaluate('m.' + m.laFieldLong10[m.liField, Iif(m.llFieldLongSrce, 1, 2)]) to (m.laFieldLong10[m.liField, Iif(m.llFieldLongSrce, 2, 1)])
-					endfor
-
-					* {fr} Si forçage demandé, ajuster les types des champs en mémoire
-					for liField = 1 to Iif(m.this.lTypesForce, m.lnField, 0)
-						luValue = evaluate('m.' + laField[m.liField, 1])
-						if not vartype(m.luValue, .t.) == laField[m.liField, 2]
-							store uValue(m.luValue, laField[m.liField, 2]) to ('m.' + laField[m.liField, 1])
-						endif
-					endfor
-
-					* ==============
-					try
-
-						* {fr} Si clé primaire non automatique, chercher l'enregistrement correspondant dans la table destination
-						llReplace = this.oResult.lPCtag;
-							and iif(this.oResult.lcTag;
-								, seek(evaluate(m.lcPCexpMem), m.tcAliasDest, m.lcPCtag);
-								, seek(evaluate(m.lcPexpMem), m.tcAliasDest, m.lcPtag);
-								)
-						llInsert = not m.llReplace
-
-						* {fr} Si l'enregistrement existe
+						* {fr} Si comparaison sur clé candidate sans conflit de clé primaire
+						llReplace = .F.;
+							or !(this.oResult.lcTag and m.llPtag);
+							or m.tlPKreplace; && 2016-12-13 thn -- {FiC V 2.23.0-beta.8} {en} added for ipMigrator
+							or luEqual(evaluate(m.lcPexpMem), evaluate(m.lcPexpDest));
+							or .F.
 						if m.llReplace
 
-							* {fr} Si comparaison sur clé candidate sans conflit de clé primaire
-							llReplace = not (this.oResult.lcTag and m.llPtag) or luEqual(evaluate(m.lcPexpMem), evaluate(m.lcPexpDest))
-							if m.llReplace
-
-								* {fr} Aligner le statut de suppression
-								llDeleted = .f.
-								if deleted(m.tcAliasSrce)
-									if not deleted(m.tcAliasDest)
-										delete in (m.tcAliasDest)
-										this.oResult.nRecsDeleted = this.oResult.nRecsDeleted + 1
-										llDeleted = .t.
-									endif
-								else && {fr} NOT Deleted(m.tcAliasSrce)
-									if deleted(m.tcAliasDest)
-										recall in (m.tcAliasDest)
-									endif
+							* {fr} Aligner le statut de suppression
+							llDeleted = .f.
+							if deleted(m.tcAliasSrce)
+								if not deleted(m.tcAliasDest)
+									delete in (m.tcAliasDest)
+									this.oResult.nRecsDeleted = this.oResult.nRecsDeleted + 1
+									llDeleted = .t.
 								endif
-
-								* {fr} Si vérification des modifications, vérifier la nécessité du remplacement
-								if m.this.lModCheck
-									for liField = 1 to m.lnField
-										lcField = laField[m.liField, 1]
-										llReplace = not luEqual(evaluate('m.' + m.lcField), evaluate(m.tcAliasDest + '.' + m.lcField))
-										if m.llReplace
-											exit
-										endif
-									endfor
+							else && {fr} NOT Deleted(m.tcAliasSrce)
+								if deleted(m.tcAliasDest)
+									recall in (m.tcAliasDest)
 								endif
-								if m.llReplace
-
-									* {fr} Charger l'enregistrement dans la table destination
-									select (m.tcAliasDest)
-									gather memvar memo && /!\ conditionner MEMO par nouvelle valeur
-
-									if not m.llDeleted
-										this.oResult.nRecsReplaced = m.this.oResult.nRecsReplaced + 1
-									endif
-								endif
-
-							* {fr} Sinon (conflit de clé primaire)
-							else
-								llRec = .f.
-								lcRec = textmerge(icase(;
-									m.this.cLangUser = 'fr',;
-										[]; && copy-paste the 2 following lines to add another language support
-										+ [Enregistrement source n° <<m.lcRecno>> : la valeur de la clé candidate <<m.lcPCexp>> (<<Trim(Transform(Evaluate(m.lcPCexpMem)))>>) existe dans la table destination,];
-										+ [ mais avec une clé primaire différente : <<Evaluate(m.lcPexpMem)>> dans la table source, <<Evaluate(m.lcPexpDest)>> dans la table destination],;
-										[]; && Default: English
-										+ [Source record # <<m.lcRecno>>: value of candidate key <<m.lcPCexp>> (<<Trim(Transform(Evaluate(m.lcPCexpMem)))>>) does exist in destination table,];
-										+ [ but with a different value of pripary key: <<Evaluate(m.lcPexpMem)>> in source table, <<Evaluate(m.lcPexpDest)>> in destination table];
-									))
 							endif
 
+							* {fr} Si vérification des modifications, vérifier la nécessité du remplacement
+							if m.this.lModCheck
+								for liField = 1 to m.lnField
+									lcField = laField[m.liField, 1]
+									llReplace = not luEqual(evaluate('m.' + m.lcField), evaluate(m.tcAliasDest + '.' + m.lcField))
+									if m.llReplace
+										exit
+									endif
+								endfor
+							endif
+							if m.llReplace
+
+								* {fr} Charger l'enregistrement dans la table destination
+								select (m.tcAliasDest)
+								gather memvar memo && /!\ conditionner MEMO par nouvelle valeur
+
+								if not m.llDeleted
+									this.oResult.nRecsReplaced = m.this.oResult.nRecsReplaced + 1
+								endif
+							endif
+
+						* {fr} Sinon (conflit de clé primaire)
 						else
+							llRec = .f.
+							lcRec = textmerge(icase(;
+								m.this.cLangUser = 'fr',;
+									[]; && copy-paste the 2 following lines to add another language support
+									+ [Enregistrement source n° <<m.lcRecno>> : la valeur de la clé candidate <<m.lcPCexp>> (<<Trim(Transform(Evaluate(m.lcPCexpMem)))>>) existe dans la table destination,];
+									+ [ mais avec une clé primaire différente : <<Evaluate(m.lcPexpMem)>> dans la table source, <<Evaluate(m.lcPexpDest)>> dans la table destination],;
+									[]; && Default: English
+									+ [Source record # <<m.lcRecno>>: value of candidate key <<m.lcPCexp>> (<<Trim(Transform(Evaluate(m.lcPCexpMem)))>>) does exist in destination table,];
+									+ [ but with a different value of primary key: <<Evaluate(m.lcPexpMem)>> in source table, <<Evaluate(m.lcPexpDest)>> in destination table];
+								))
+						endif
+
+					else
 
 *!*								if m.llDeletedOff && 2016-08-12 thn -- {FiC V 2.22.0-beta.3} {en} added -- don't know if useful!
 *!*									set deleted on
 *!*								endif
-							insert into (m.tcAliasDest) from memvar
+						insert into (m.tcAliasDest) from memvar
 *!*								if m.llDeletedOff && 2016-08-12 thn -- {FiC V 2.22.0-beta.3} {en} added
 *!*									set deleted off
 *!*								endif
-							this.oResult.nRecsAdded = m.this.oResult.nRecsAdded + 1
-						endif
-
-					catch to loException
-
-						llRec = .f.
-						lcRec = textmerge(icase(;
-							m.this.cLangUser = 'fr',	[Erreur <<cException(m.loException)>> sur l'enregistrement source n° <<m.lcRecno>>],; && copy-paste this line to add another language support
-																				[Error <<cException(m.loException)>> on source record # <<m.lcRecno>>]; && Default: English
-							))
-					endtry
-					* ==============
-
-					if m.llRec
-
-						* {fr} Si remplacement ou insersion, indiquer que l'enregistrement a été mis à jour par synchronisation
-						if (m.llReplace or m.llInsert) and m.llSyncField
-							replace (m.clSyncField) with .t. in (m.tcAliasDest)
-						endif
-
-						* {fr} Exécuter la méthode "shell"
-						llRec = this.TableSync_Rec(m.tcAliasDest, m.llReplace, m.this.oResult.nRecsAdded, m.this.oResult.nRecsReplaced, m.tcAliasSrce)
-						if not m.llRec
-							lcRec = textmerge(icase(;
-								m.this.cLangUser = 'fr',	[Erreur de la méthode shell TableSync_Rec() sur l'enregistrement source n° <<m.lcRecno>>],; && copy-paste this line to add another language support
-																					[Error in shell method TableSync_Rec() on source record # <<m.lcRecno>>]; && Default: English
-								))
-						endif
+						this.oResult.nRecsAdded = m.this.oResult.nRecsAdded + 1
 					endif
 
-					this.lResult = m.this.lResult and m.llRec
+				catch to loException
+
+					llRec = .f.
+					lcRec = textmerge(icase(;
+						m.this.cLangUser = 'fr',	[Erreur <<cException(m.loException)>> sur l'enregistrement source n° <<m.lcRecno>>],; && copy-paste this line to add another language support
+																			[Error <<cException(m.loException)>> on source record # <<m.lcRecno>>]; && Default: English
+						))
+				endtry
+				* ==============
+
+				if m.llRec
+
+					* {fr} Si remplacement ou insersion, indiquer que l'enregistrement a été mis à jour par synchronisation
+					if (m.llReplace or m.llInsert) and m.llSyncField
+						replace (m.clSyncField) with .t. in (m.tcAliasDest)
+					endif
+
+					* {fr} Exécuter la méthode "shell"
+					llRec = this.TableSync_Rec(m.tcAliasDest, m.llReplace, m.this.oResult.nRecsAdded, m.this.oResult.nRecsReplaced, m.tcAliasSrce)
 					if not m.llRec
-						this.cResult = m.lcRec
-						lcRecContent = cRecContent(m.tcAliasSrce)
-						if m.this.lDebug
-							this.cResult = textmerge(icase(;
-								m.this.cLangUser = 'fr',	[L'enregistrement contient : <<m.lcRecContent>>],; && copy-paste this line to add another language support
-																					[Record contains: <<m.lcRecContent>>]; && Default: English
-								))
-						endif
-						this.oResult.cRecsSrceErrorNo = c2Words(this.oResult.cRecsSrceErrorNo, ',', m.lcRecNo)
-						this.oResult.cRecsSrceErrorContent = c2Words(;
-							  this.oResult.cRecsSrceErrorContent;
-							, CRLF;
-							, textmerge(icase(;
-								m.this.cLangUser = 'fr',	[Contenu de l'enregistrement n° <<m.lcRecno>> : <<m.lcRecContent>>],; && copy-paste this line to add another language support
-																					[Record # <<m.lcRecno>> contains: <<m.lcRecContent>>]; && Default: English
-								));
-							)
-						this.oResult.nRecsSrceError = this.oResult.nRecsSrceError + 1
+						lcRec = textmerge(icase(;
+							m.this.cLangUser = 'fr',	[Erreur de la méthode shell TableSync_Rec() sur l'enregistrement source n° <<m.lcRecno>>],; && copy-paste this line to add another language support
+																				[Error in shell method TableSync_Rec() on source record # <<m.lcRecno>>]; && Default: English
+							))
 					endif
+				endif
 
-					if m.tnRecs > 0 and this.oResult.nRecsAdded >= m.tnRecs
-						exit
+				this.lResult = m.this.lResult and m.llRec
+				if not m.llRec
+					this.cResult = m.lcRec
+					lcRecContent = cRecContent(m.tcAliasSrce)
+					if m.this.lDebug
+						this.cResult = textmerge(icase(;
+							m.this.cLangUser = 'fr',	[L'enregistrement contient : <<m.lcRecContent>>],; && copy-paste this line to add another language support
+																				[Record contains: <<m.lcRecContent>>]; && Default: English
+							))
 					endif
-				endscan
-			endif
+					this.oResult.cRecsSrceErrorNo = c2Words(this.oResult.cRecsSrceErrorNo, ',', m.lcRecNo)
+					this.oResult.cRecsSrceErrorContent = c2Words(;
+						  this.oResult.cRecsSrceErrorContent;
+						, CRLF;
+						, textmerge(icase(;
+							m.this.cLangUser = 'fr',	[Contenu de l'enregistrement n° <<m.lcRecno>> : <<m.lcRecContent>>],; && copy-paste this line to add another language support
+																				[Record # <<m.lcRecno>> contains: <<m.lcRecContent>>]; && Default: English
+							));
+						)
+					this.oResult.nRecsSrceError = this.oResult.nRecsSrceError + 1
+				endif
 
-			* {fr} Restituer le résultat final
-			local lnIgnored, lcResult
-			lnIgnored = this.oResult.nRecsSrce - m.this.oResult.nRecsAdded - m.this.oResult.nRecsReplaced - this.oResult.nRecsDeleted - m.this.oResult.nRecsSrceError
-			lcResult = iif(m.this.oResult.lPCtag;
-				, textmerge(icase(;
-								m.this.cLangUser = 'fr',	[, <<m.this.oResult.nRecsReplaced>> remplacés, <<m.this.oResult.nRecsSrceError>> avec erreur],; && copy-paste this line to add another language support
-																					[, <<m.this.oResult.nRecsReplaced>> replaced, <<m.this.oResult.nRecsSrceError>> with error]; && Default: English
-								));
-				, '';
-				)
-			lcResult = textmerge(icase(;
-				m.this.cLangUser = 'fr',	[Table source : '<<Dbf(m.tcAliasSrce)>>' - <<this.oResult.nRecsSrce>> enregistrements, <<m.lnIgnored>> ignorés, <<m.this.oResult.nRecsAdded>> ajoutés<<m.lcResult>>],; && copy-paste this line to add another language support
-																	[Source table: '<<Dbf(m.tcAliasSrce)>>' - <<this.oResult.nRecsSrce>> records, <<m.lnIgnored>> ignored, <<m.this.oResult.nRecsAdded>> added<<m.lcResult>>]; && Default: English
-				))
-			this.cResult =  iif(m.this.lResult, m.this.cResult + CRLF, '') + m.lcResult
-		else
-			this.cResult = textmerge(icase(;
-				m.this.cLangUser = 'fr',	[Impossible d'ouvrir la table destination <<cLitteral(Dbf(m.tcAliasDest))>> en exclusif pour la vider.],; && copy-paste this line to add another language support
-																	[Could not gain exclusive access on destination table <<cLitteral(Dbf(m.tcAliasDest))>> in order to zap it.]; && Default: English
-				))
+				if m.tnRecs > 0 and this.oResult.nRecsAdded >= m.tnRecs
+					exit
+				endif
+			endscan
 		endif
+
+		* {fr} Restituer le résultat final
+		local lnIgnored, lcResult
+		lnIgnored = this.oResult.nRecsSrce - m.this.oResult.nRecsAdded - m.this.oResult.nRecsReplaced - this.oResult.nRecsDeleted - m.this.oResult.nRecsSrceError
+		lcResult = iif(m.this.oResult.lPCtag;
+			, textmerge(icase(;
+							m.this.cLangUser = 'fr',	[, <<m.this.oResult.nRecsReplaced>> remplacés, <<m.this.oResult.nRecsSrceError>> avec erreur],; && copy-paste this line to add another language support
+																				[, <<m.this.oResult.nRecsReplaced>> replaced, <<m.this.oResult.nRecsSrceError>> with error]; && Default: English
+							));
+			, '';
+			)
+		lcResult = textmerge(icase(;
+			m.this.cLangUser = 'fr',	[Table source : '<<Dbf(m.tcAliasSrce)>>' - <<this.oResult.nRecsSrce>> enregistrements, <<m.lnIgnored>> ignorés, <<m.this.oResult.nRecsAdded>> ajoutés<<m.lcResult>>],; && copy-paste this line to add another language support
+																[Source table: '<<Dbf(m.tcAliasSrce)>>' - <<this.oResult.nRecsSrce>> records, <<m.lnIgnored>> ignored, <<m.this.oResult.nRecsAdded>> added<<m.lcResult>>]; && Default: English
+			))
+		this.cResult =  iif(m.this.lResult, m.this.cResult + CRLF, '') + m.lcResult
+	else
+		this.cResult = textmerge(icase(;
+			m.this.cLangUser = 'fr',	[Impossible d'ouvrir la table destination <<cLitteral(Dbf(m.tcAliasDest))>> en exclusif pour la vider.],; && copy-paste this line to add another language support
+																[Could not gain exclusive access on destination table <<cLitteral(Dbf(m.tcAliasDest))>> in order to zap it.]; && Default: English
+			))
 	endif
+endif
 
-	return m.this.lResult
+return m.this.lResult
 
-	*---------------------------------------
-	protected procedure TableSync_Rec && {fr} Exécuté à chaque enregistrement
-	lparameters ;
-	  tcAliasDest; && {fr} Alias de la table destination
-	, tlReplaced; && {fr} L'enregistrement a été remplacé
-	, tnAdded; && {fr} Nombre d'enregistrements ajoutés
-	, tnReplaced; && {fr} Nombre d'enregistrements remplacés
-	, tcAliasSrce && {fr} Alias de la table source
+*---------------------------------------
+protected procedure TableSync_Rec && {fr} Exécuté à chaque enregistrement
+lparameters ;
+  tcAliasDest; && {fr} Alias de la table destination
+, tlReplaced; && {fr} L'enregistrement a été remplacé
+, tnAdded; && {fr} Nombre d'enregistrements ajoutés
+, tnReplaced; && {fr} Nombre d'enregistrements remplacés
+, tcAliasSrce && {fr} Alias de la table source
 
 && {fr} Implémenter en sous-classe
 

@@ -257,6 +257,21 @@ endif
 endfunc
 
 * =============================================================
+function wcIconGI
+lparameters ;
+  cIcon; && {en} 
+
+local oAppHost as awAppHost of awAppHost.fxp
+
+if ga_Type_IsChar(m.cIcon, .T.) and wlAppHost(@m.oAppHost) and m.oAppHost.lBootstrapAdd
+	cIcon = Lower(Alltrim(m.cIcon))
+	return Textmerge([<span class="glyphicon glyphicon-<<m.cIcon>>" aria-hidden="true"></span> ])
+else
+	return ''
+endif
+endfunc
+
+* =============================================================
 function cScriptJSfocus && {fr} Javascript pour mettre le focus sur un contrôle
 lparameters toControl as awCbo of aw.vcx
 
@@ -1225,78 +1240,40 @@ procedure wForm && {en} DO FORM (.scx or class) in Web and LAN modes from an ind
 && {fr}   pour l'afficher dans une pleine page Web, utiliser awPublic.prg!wFormMaster()
 lparameters ;
   tcForm AS String; && {en} eg 'Form.scx' or form class
-, tlModal AS Boolean; && [.F.] {en} render as a modal form (returned value not supported)
-, t01,t02,t03,t04,t05,t06,t07,t08,t09,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19,t20 && @ {en} parameters to be passed to Form.Init()
+, tuFormCallBack as Variant; && [.null.] {en} see documentation below {en} voir la documentation ci-dessous
+, t01,t02,t03,t04,t05,t06,t07,t08,t09,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19,t20 && @ {en} parameters to Form.Init()
+
+&& tuFormCallBack [.null.]:
+&& - .NULL. (default): {en} (added 2016-10-03) rely on .WindowType {fr} (ajouté le 2016-10-03) se baser sur .WindowType
+&& - .T.: modal
+&& - .F.: modeless
+&& - String:
+&&   {en} (added  on 2016-12-13, SUPPORTED IN WEB MODE ONLY) "call-back method name or address" relative to control where current user action has occurred
+&&   {fr} (ajouté le 2016-12-13, SUPPORTÉ SEULEMENT EN MODE WEB) "nom|adresse de la méthod call-back" relativement au contrôle où la dernière action utilisateur a eu lieu
 
 LOCAL result as Variant; && {en} failure: .null., modeless: reference to form object, modal: .T.
 , loForm as awFrm of aw.vcx;
+, llModal AS Boolean; && [.F.] {en} render as a modal form
 , lcParms as String;
 
-tlModal = Iif(Pcount() > 1, m.tlModal, .null.) && 2016-10-07 thn -- {FiC V 2.22.0-beta.8} {en} default to .WindowType
+llModal = ICase(Pcount() = 1 or IsNull(m.tuFormCallBack);
+	, .null.; && 2016-10-07 thn -- {FiC V 2.22.0-beta.8} {en} default to .WindowType
+	, !Empty(m.tuFormCallBack);
+	)
 lcParms = wcParms(Pcount() - 2)
 
-loForm = wFormNoShow(m.tcForm, @m.tlModal &lcParms)
+loForm = wFormNoShow(m.tcForm, @m.llModal &lcParms)
 
 && 2016-10-03 thn -- {FiC V 2.22.0-beta.8}
 && - {en} isNull(m.tuFormCallBack) means "rely on .WindowType"
 && - {en} in case of success, always return a reference to the form
 
-return Iif(wFormShow(m.loForm, m.tlModal), m.loForm, .null.)
+return Iif(wFormShow(m.loForm, Iif(ga_Type_IsChar(m.tuFormCallBack, .T.), m.tuFormCallBack, m.llModal));
+	, m.loForm;
+	, .null.;
+	)
 
-*!*	return ICase(;
-*!*		!,;
-*!*			.null.,; && {en} failure
-*!*		!m.tlModal,;
-*!*			m.loForm,; && {en} modeless & success
-*!*			.T.; && {en} modal & success: as of standard VFP behavior, reference to the form is lost after form closes
-*!*		)
 endproc
-
-* =============================================================
-procedure wFormShow && {en} Shows form in Web and LAN modes after wFormNoShow() {fr} Affiche un formulaire en modes Web ou desktop après wFormNoShow()
-&& {en} In Web mode, Form is displayed in a window within current HTML page,
-&& {en}   to display Form in a full HTML page, use awPublic.prg!wFormMaster() instead
-&& {fr} En mode Web, le formulaire est affiché dans une fenêtre à l'intérieur de la page courante
-&& {fr}   pour l'afficher dans une pleine page Web, utiliser awPublic.prg!wFormMaster()
-lparameters ;
-  toForm as awFrm of aw.vcx;
-, tlModal AS Boolean; && [.F.] {en} render as a modal form (returned value not supported)
-
-LOCAL success as Boolean;
-, loAJAX as awAJAX of awServer.prg; && {en} FoxInCloud AJAX request processing Object
-, lcSCX as String;
-
-do case
-
-case !loClass(m.toForm, 'awFrm')
-	return .f.
-
-case wlLAN() && {en} desktop mode
-
-	tlModal = lTrue(m.tlModal) or m.toForm.WindowType = 1
-
-	if m.tlModal and varSet(@m.lcSCX, Sys(1271, m.toForm)) and ga_Type_IsChar(m.lcSCX, .T.)
-		lcSCX = Chrtran(JustStem(m.lcSCX), '- ', '__')
-		private (m.lcSCX)
-		store m.toForm to (m.lcSCX)
-	endif
-	
-	return Cast(Iif(m.tlModal;
-		, m.toForm.Show(1);
-		, m.toForm.Show();
-		) as L)
-
-case wlAJAX(@m.loAJAX) && {en} web mode, AJAX request
-	return m.loAJAX.dialogAdd(m.toForm) && {fr} a ses assert
-
-otherwise
-	assert .F. message cAssertMsg(Textmerge(ICase(;
-		cLangUser() = 'fr',	[En mode Web, cette fonction ne peut être utilisée que pendant une requête, après que l'application a démarré],; && copy-paste this line to add another language support
-												[In web mode, this function can only be called within a request, after application has started]; && Default: English
-		)))
-	return .f.
-
-endcase
 
 * =============================================================
 procedure wFormNoShow as awFrm of aw.vcx && {en} DO FORM ... NOSHOW (.scx or class) in Web and LAN modes from an independent procedure such as an 'ON SELECTION' menu snippet {fr} DO FORM ... NOSHOW (.scx ou classe) en modes Web ou desktop depuis une procédure indépendante comme une option de menu 'ON SELECTION'
@@ -1306,7 +1283,7 @@ procedure wFormNoShow as awFrm of aw.vcx && {en} DO FORM ... NOSHOW (.scx or cla
 && {fr}   pour l'afficher dans une pleine page Web, utiliser awPublic.prg!wFormMaster()
 lparameters ;
   tcForm AS String; && {en} eg 'Form.scx' or form class
-, tlModal AS Boolean; && [.F.] {en} .NULL. rely on .WindowType (added 2016-10-03) / .T. modal / .F. modeless (returned value supported by aw.vcx!awFrm.wFormNoShow() only) {fr} .NULL. se baser sur .WindowType (ajouté le 2016-10-03) / .T. modal / .F. modeless (retour de valeur supporté par aw.vcx!awFrm.wFormNoShow() seulement)
+, tlModal AS Boolean; && [.F.] {en} .NULL. rely on .WindowType (added 2016-10-03) / .T. modal / .F. modeless {fr} .NULL. se baser sur .WindowType (ajouté le 2016-10-03) / .T. modal / .F. modeless
 , t01,t02,t03,t04,t05,t06,t07,t08,t09,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19,t20 && @ {en} parameters to be passed to Form.Init()
 
 LOCAL loForm as awFrm of aw.vcx;
@@ -1336,6 +1313,7 @@ case wlLAN() && {fr} desktop mode
 		m.loForm.Hide
 	endif
 
+	tlModal = Nvl(m.tlModal, m.loForm.WindowType = 1)
 	success = .T.
 
 case !(wlProcess(@m.loProcess) and wlSession(@m.loSession) and wlAppHost(@m.loAppHost))
@@ -1380,6 +1358,65 @@ return Iif(m.success;
 	, .null.;
 	)
 endproc
+
+* =============================================================
+procedure wFormShow && {en} Shows form in Web and LAN modes after wFormNoShow() {fr} Affiche un formulaire en modes Web ou desktop après wFormNoShow()
+&& {en} In Web mode, Form is displayed in a window within current HTML page,
+&& {en}   to display Form in a full HTML page, use awPublic.prg!wFormMaster() instead
+&& {fr} En mode Web, le formulaire est affiché dans une fenêtre à l'intérieur de la page courante
+&& {fr}   pour l'afficher dans une pleine page Web, utiliser awPublic.prg!wFormMaster()
+lparameters ;
+  toForm as awFrm of aw.vcx;
+, tuFormCallBack as Variant; && [.null.] {en} see documentation below {en} voir la documentation ci-dessous
+
+&& tuFormCallBack [.null.]:
+&& - .NULL. (default): {en} (added 2016-10-03) rely on .WindowType {fr} (ajouté le 2016-10-03) se baser sur .WindowType
+&& - .T.: modal
+&& - .F.: modeless
+&& - String:
+&&   {en} (added  on 2016-12-13, SUPPORTED IN WEB MODE ONLY) "call-back method name or address" relative to control where current user action has occurred
+&&   {fr} (ajouté le 2016-12-13, SUPPORTÉ SEULEMENT EN MODE WEB) "nom|adresse de la méthod call-back" relativement au contrôle où la dernière action utilisateur a eu lieu
+
+LOCAL success as Boolean;
+, loAJAX as awAJAX of awServer.prg; && {en} FoxInCloud AJAX request processing Object
+, lcSCX as String;
+
+do case
+
+case !loClass(m.toForm, 'awFrm')
+	return .f.
+
+case wlLAN() && {en} desktop mode
+
+	tuFormCallBack = !Empty(Nvl(m.tuFormCallBack, m.toForm.WindowType = 1))
+
+	if m.tuFormCallBack and varSet(@m.lcSCX, Sys(1271, m.toForm)) and ga_Type_IsChar(m.lcSCX, .T.)
+		lcSCX = Chrtran(JustStem(m.lcSCX), '- ', '__')
+		private (m.lcSCX)
+		store m.toForm to (m.lcSCX)
+	endif
+
+* wait Sys(1272, _screen.ActiveForm.ActiveControl) window nowait noclear && 2016-12-13 thn -- {FiC V 2.23.0-beta.8} {en} _screen.ActiveForm is not an object in some test cases -- needs further analysis
+
+	return Cast(Iif(m.tuFormCallBack;
+		, m.toForm.Show(1);
+		, m.toForm.Show();
+		) as L)
+
+case wlAJAX(@m.loAJAX) && {en} web mode, AJAX request
+	return m.loAJAX.dialogAdd(;
+		  m.toForm;
+		, Iif(ga_Type_IsChar(m.tuFormCallBack, .T.), m.tuFormCallBack, .F.); && 2016-12-13 thn -- {FiC V 2.23.0-beta.8} {en} added for call-back support
+		)
+
+otherwise
+	assert .F. message cAssertMsg(Textmerge(ICase(;
+		cLangUser() = 'fr',	[En mode Web, cette fonction ne peut être utilisée que pendant une requête, après que l'application a démarré],; && copy-paste this line to add another language support
+												[In web mode, this function can only be called within a request, after application has started]; && Default: English
+		)))
+	return .f.
+
+endcase
 
 * =============================================================
 function wNavigate(URL, newWindow)
@@ -2480,7 +2517,7 @@ endproc
 *--------------------------------------------
 procedure Refresh
 lparameters move_your_refresh_code_into_this_refresh_, t02,t03,t04,t05,t06,t07,t08,t09,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19,t20
-if (Type('m.thisForm.wlPropsRestore') == 'L' AND m.thisForm.wlPropsRestore)
+if Type('m.thisForm.wlPropsRestore') == 'L' and (m.thisForm.wlPropsRestore or m.thisForm.wlHTMLgen)
 	return
 endif
 
@@ -2841,7 +2878,7 @@ endproc
 *--------------------------------------------
 procedure Refresh
 lparameters move_your_refresh_code_into_this_refresh_, t02,t03,t04,t05,t06,t07,t08,t09,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19,t20
-if (Type('m.thisForm.wlPropsRestore') == 'L' AND m.thisForm.wlPropsRestore)
+if Type('m.thisForm.wlPropsRestore') == 'L' and (m.thisForm.wlPropsRestore or m.thisForm.wlHTMLgen)
 	return
 endif
 

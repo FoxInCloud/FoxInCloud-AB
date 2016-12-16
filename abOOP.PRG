@@ -1256,7 +1256,7 @@ function lMember && {fr} Un objet est doté d'un ou plusieurs membre(s)
 lparameters ;
   toObject; && {fr} Objet VFP
 , tcMember; && {fr} membre(s)
-, toMember && @ {fr} membre
+, toMember; && @ {fr} membre
 
 return .t.;
  and vartype(m.toObject) == 'O';
@@ -1266,7 +1266,7 @@ return .t.;
  	, .t.;
 		and pemstatus(m.toObject, m.tcMember, 5);
 		and upper(left(pemstatus(m.toObject, m.tcMember, 3), 1)) == 'O';
-	  and varSet(@m.toMember, evaluate('m.toObject.' + m.tcMember));
+	  and (Pcount() < 3 or varSet(@m.toMember, evaluate('m.toObject.' + m.tcMember)));
 	)
 endfunc
 
@@ -1598,10 +1598,10 @@ return m.llResult
 endfunc
 
 * ========================================
-function oClone && /!\ recursive {en} Clones an object {fr} Clone un objet
+function oClone && (recursive) {en} Clones an object {fr} Clone un objet
 lparameters toObj as collection && {fr} or whatever
 
-local loResult as collection; && {fr} or whatever
+local loResult as collection; && {en} collection or whatever
 , llResult as Boolean;
 , llClass as Boolean;
 , llClassLib as Boolean;
