@@ -1599,9 +1599,9 @@ endfunc
 
 * ========================================
 function oClone && (recursive) {en} Clones an object {fr} Clone un objet
-lparameters toObj as collection && {fr} or whatever
+lparameters toObj as collection && {en} as any VFP class
 
-local loResult as collection; && {en} collection or whatever
+local loResult as collection; && {en} as any VFP class
 , llResult as Boolean;
 , llClass as Boolean;
 , llClassLib as Boolean;
