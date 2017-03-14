@@ -16,6 +16,7 @@
 * do atPJcompile with 'PREVIOUS_FIC_VERSION'
 
 #DEFINE wMESSAGEBOX_CLASS		awFrmMB
+&& 2017-02-02 thn -- {FiC V 2.24.0-beta.5} {en} deprecated by xxxServer.cFrmMBclass
 && {fr} Classe de formulaire de MessageBox()
 && {fr} Utilisé en dehors du contexte d'un formulaire
 && {fr} cf. awPublic.prg!wMessageBox()
@@ -24,6 +25,7 @@
 && {en} see awPublic.prg!wMessageBox()
 
 #DEFINE wINPUTBOX_CLASS			awFrmIB
+&& 2017-02-02 thn -- {FiC V 2.24.0-beta.5} {en} deprecated by xxxServer.cFrmIBclass
 && {fr} Classe de formulaire de InputBox()
 && {fr} Utilisé en dehors du contexte d'un formulaire
 && {fr} cf. awPublic.prg!wInputBox()

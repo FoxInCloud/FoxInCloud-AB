@@ -280,7 +280,7 @@ otherwise
 
 			* {fr} Si le dossier n'existe pas, créer
 			if !lDir(m.lcPath, .T.) && {V1.11} Directory(m.lcPath) ne marche pas pour <user>\appdata\
-				md (m.lcPath)
+				md (m.lcPath) && case sensitive
 			endif
 		endfor
 
@@ -382,7 +382,7 @@ if m.llResult
 
 				else
 
-					copy file (m.tcFileSrce) to (m.lcFileDest) && {fr} changes name to lower case
+					copy file (m.tcFileSrce) to (m.lcFileDest) && {en} changes name to lower case
 					llResult = .t.
 
 *!*							llResult = Empty(CopyFile(m.tcFileSrce, m.tcFileDest, 0)) && {fr} preserves case but ... does not work!
@@ -419,9 +419,16 @@ return m.llResult
 endproc
 
 * ========================================
-function CopyFile(tcFileName, tcCopyFileName, tnFailIfExists) && {fr} http://www.berezniker.com/content/pages/visual-foxpro/copy-move-rename-file-preserving-destination-name-case
+function CopyFile(tcFileName, tcCopyFileName, tnFailIfExists) && http://www.berezniker.com/content/pages/visual-foxpro/copy-move-rename-file-preserving-destination-name-case
 declare long CopyFile in WIN32API String SourceFileName, String DestFileName, long bFailIfExists
-return CopyFile(m.tcFileName, m.tcCopyFileName, m.tnFailIfExists)
+return CopyFile(m.tcFileName, m.tcCopyFileName, m.tnFailIfExists) # 0
+endfunc
+
+* ========================================
+function MoveFile(tcFileName, tcNewFileName) && http://www.berezniker.com/content/pages/visual-foxpro/copy-move-rename-file-preserving-destination-name-case
+declare long MoveFile IN WIN32API String SourceFileName, String DestFileName
+return MoveFile(tcFileName, tcNewFileName) # 0
+endfunc
 
 * ========================================
 procedure FileMove && {fr} Déplace un ou plusieurs fichier(s) en créant le(s) dossier(s) si nécessaire
@@ -429,31 +436,49 @@ lparameters ;
   tcFileSrce ; && {fr} Adresse actuelle (can contain wildcard characters)
 , tcFileDest; && {fr} Nouvelle adresse (can contain wildcard characters)
 , tlCopyForce; && [.F.] {fr} Toujours copier (pas de RENAME, donc potentiellement plus lent)
-, tcResult && @ {fr} Résultat
+, tcResult; && @ {fr} Résultat
+
 tcResult = ''
 
-local loException as exception, llResult
+local llResult as Boolean;
+, loException as exception;
+, lcExt as String;
+, llWild as Boolean;
 
 llResult = lFiles(m.tcFileSrce)
-assert m.llResult message cAssertMsg(textmerge([<<Program()>> - Le fichier '<<m.tcFileSrce>>' n'existe pas]))
+assert m.llResult message cAssertMsg(textmerge([Le fichier '<<m.tcFileSrce>>' n'existe pas]))
 if m.llResult
 
-	llResult = PathCreate(m.tcFileDest, @tcResult)
+	llResult = PathCreate(m.tcFileDest, @m.tcResult)
 	if m.llResult
+
+		lcExt = JustExt(m.tcFileSrce)
+		llWild = '?' $ m.lcExt or '*' $ m.lcExt
 
 		try
 			if lFiles(m.tcFileDest) or lTrue(m.tlCopyForce)
 
 			 	delete file (m.tcFileDest) && {fr} évite que le fichier copié hérite
-			 	copy file (m.tcFileSrce) to (m.tcFileDest)
+			 	if m.llWild
+				 	copy file (m.tcFileSrce) to (m.tcFileDest)
+			 	else
+				 	llResult = CopyFile(cFileCased(m.tcFileSrce), m.tcFileDest)
+			 	endif
 				if lFiles(m.tcFileDest) && {fr} assure que le fichier a été copié avant de supprimer la source
 					delete file (m.tcFileSrce)
 				endif
+
 			else
 
-&& {fr} When you issue RENAME, FileName2 cannot already exist and FileName1 must exist and cannot be open.
-				rename (m.tcFileSrce) to (m.tcFileDest) && {fr} déplace le fichier && {fr} If the file extensions are not included, the default extension .dbf is assumed
-&& {fr} RENAME moves the file and keeps its security profile
+				&& {en} When you issue RENAME, FileName2 cannot already exist and FileName1 must exist and cannot be open.
+				&& {en} RENAME moves the file and keeps its security profile
+				&& {en} If the file extensions are not included, the default extension .dbf is assumed
+				* 
+			 	if m.llWild
+				 	rename (m.tcFileSrce) to (m.tcFileDest) && {fr} déplace le(s) fichier(s)
+			 	else
+				 	llResult = MoveFile(cFileCased(m.tcFileSrce), m.tcFileDest)
+			 	endif
 			endif
 
 		catch to loException
@@ -462,10 +487,11 @@ if m.llResult
 		endtry
 	endif
 
-	assert m.llResult message cAssertMsg(textmerge([<<Program()>> - Erreur en déplaçant '<<m.tcFileSrce>>' dans '<<m.tcFileDest>>' : <<m.tcResult>>]))
+	assert m.llResult message cAssertMsg(textmerge([Erreur en déplaçant '<<m.tcFileSrce>>' dans '<<m.tcFileDest>>' : <<m.tcResult>>]))
 endif
 
 return m.llResult
+endproc
 
 * ========================================
 procedure FileStrTran && {fr} Remplace une chaîne dans un fichier selon StrTran()
@@ -715,7 +741,7 @@ local lnHandle, llResult
 if vartype(m.tcFileAddr) == 'C' and not empty(m.tcFileAddr)
 
 	llResult = lFileAddress(m.tcFileAddr)
-	assert m.llResult message cAssertMsg(textmerge([<<Program()>> - Invalid file specification: <<cLitteral(m.tcFileAddr)>>]))
+	assert m.llResult message cAssertMsg(textmerge([Invalid file specification: <<cLitteral(m.tcFileAddr)>>]))
 	if m.llResult
 
 		lnHandle = fopen(m.tcFileAddr, 12) && 12 : Read and Write unbuffered
@@ -745,17 +771,18 @@ return iif(vartype(m.tcFile1Addr)=='C';
  )
 
 * ========================================
-procedure FilesDir && {fr} Répertorie des fichiers dans un dossier [et ses sous-dossiers]
+procedure FilesDir && {en} Stores files found in a folder [and sub-folders optionally] into a table {fr} Répertorie des fichiers dans un dossier [et ses sous-dossiers]
 lparameters ;
-  tcFileSkels; && {fr} Masques de fichiers à traiter
-, tcFolders; && {fr} Adresse du dossier oû les fichiers sont à chercher
-, tlSubFolders; && [.F.] {fr} Traiter les fichiers dans les sous-dossiers
-, tcSubFoldersExcl; && [m.tlSubFolders, ''] {fr} Sous-dossiers à exclure (séparés par ',')
-, tcTable; && @ {fr} Répertoire de fichiers : table ou curseur ; si vide, nouveau curseur ; Alias en retour
-, tcFieldsExtra; && [aucun] {fr} spécifications de champs à ajouter à la table
-, tcTagsExtra && [aucun] {fr} spécifications d'index à ajouter à la table (cf. aTagInfo_())
+  tcFileSkels; && {en} Files skeletons to find {fr} Masques de fichiers à traiter
+, tcFolders; && {en} Folder where to find {fr} Adresse du dossier oû les fichiers sont à chercher
+, tlSubFolders; && [.F.] {en} search in sub-folders {fr} Traiter les fichiers dans les sous-dossiers
+, tcSubFoldersExcl; && [m.tlSubFolders, ''] {en} sub-folders to exclude from the search {fr} Sous-dossiers à exclure (séparés par ',')
+, tcTable; && @ {en} Result table name where files found are registered {fr} Table répertoire de fichiers : table ou curseur ; si vide, nouveau curseur ; Alias en retour
+, tcFieldsExtra; && [aucun] {en} Additional fields to the table {fr} spécifications de champs à ajouter à la table
+, tcTagsExtra; && [aucun] {en} Additional indexes to the table {fr} spécifications d'index à ajouter à la table (cf. aTagInfo_())
 
-local loDeleted as abSet, lnResult as Integer && {fr} Nombre de fichers répertoriés, -1 si erreur
+local lnResult as Integer; && {en} number of files found, -1 if error {fr} Nombre de fichers répertoriés, -1 si erreur
+, loDeleted as abSet of abDev.prg
 
 tcTable = FilesDirCursor(m.tcTable, m.tcFieldsExtra)
 
@@ -767,6 +794,7 @@ lnResult = iif(used(m.tcTable);
 	, -1)
 
 return m.lnResult
+endproc
 
 * ========================================
 procedure FilesDirCursor && {fr} Ouvre ou crée une table ou un curseur d'inventaire de fichiers
@@ -785,7 +813,7 @@ llResult = TableFreeCreateOrAdjust(;
 		, FilesDirCursor_cTags(m.tcTagsExtra);
 		)
 
-assert m.llResult message cAssertMsg(textmerge([<<Program()>> - le curseur ou la table '<<m.tcTable>>' ne peut être ouvert ou créé]))
+assert m.llResult message cAssertMsg(textmerge([le curseur ou la table '<<m.tcTable>>' ne peut être ouvert ou créé]))
 
 return iif(m.llResult, m.tcAlias, '')
 
@@ -1109,7 +1137,7 @@ local lnResult; &&  && {fr} Taille du fichier en octets
 
 * {fr} If file can be found
 llResult = vartype(m.tcFile) == 'C' and file(m.tcFile)
-assert m.llResult message cAssertMsg(textmerge([<<Program()>> - Invalid File Address Specification: <<m.tcFile>>]))
+assert m.llResult message cAssertMsg(textmerge([Invalid File Address Specification: <<m.tcFile>>]))
 if m.llResult
 
 	if lTrue(m.tlMemo)
@@ -1289,7 +1317,7 @@ tcFileNew = forcepath(m.tcFileNew, justpath(m.tcFile))
 local llResult
 
 llResult = lFileSkeleton(m.tcFileNew) or !lFile(m.tcFileNew)
-assert m.llResult message cAssertMsg(textmerge([<<Program()>> - Impossible de renommer <<m.tcFile>> en <<m.tcFileNew>> car ce fichier existe déjà]))
+assert m.llResult message cAssertMsg(textmerge([Impossible de renommer <<m.tcFile>> en <<m.tcFileNew>> car ce fichier existe déjà]))
 if m.llResult
 	rename (m.tcFile) to (m.tcFileNew)
 endif
@@ -1461,7 +1489,7 @@ lnResult = 0
 * {fr} Si les paramètres requis sont valides
 llResult = vartype(m.tcFolders)=='C' and not empty(m.tcFolders);
 			 and vartype(m.tcProc) == 'C' and not empty(m.tcProc) && {fr} comment vérifier que la procédure est accessible ?
-assert m.llResult message cAssertMsg(textmerge([<<Program()>> - Les dossiers <<cLitteral(@tcFolders)>> ou la procédure <<cLitteral(@tcProc)>> est invalide]))
+assert m.llResult message cAssertMsg(textmerge([Les dossiers <<cLitteral(@tcFolders)>> ou la procédure <<cLitteral(@tcProc)>> est invalide]))
 if m.llResult
 
 	local laSkels[1], lnSkels, lcSkel, lnDocs, laDocs[1], laDocsSkel[1], laSubFolders[1], lnSubFolders, lnSubFolder
@@ -1474,7 +1502,7 @@ if m.llResult
 
 	* {fr} Si le dossier existe
 		llResult = lDir(m.lcFolder, .T.)
-		assert m.llResult message cAssertMsg(textmerge([<<Program()>> - le dossier '<<m.lcFolder>>' n'existe pas]))
+		assert m.llResult message cAssertMsg(textmerge([le dossier '<<m.lcFolder>>' n'existe pas]))
 		if m.llResult
 			lcFolder = addbs(cFileCased(fullpath(m.lcFolder)))
 			aClear(@m.laDocs)
@@ -1570,7 +1598,7 @@ return loTest.result()
 * ========================================
 function cFileSubFolders && {fr} Fichier dans un dossier ou un des ses sous-dossiers
 lparameters ;
-  tcFile; && {fr} Adresse du fichier
+  tcFile; && {fr} Fichier
 , tcFoldersExcl; && [''] {fr} sous-dossiers à exclure et/ou squelette des fichiers attendus dans les dossiers à inclure
 , tvRecurse && [.F.] {fr} Récurser dans les sous-sous-dossiers etc., si N, nombre de niveaux de récursion
 
@@ -1622,11 +1650,11 @@ lnResult = 0
 
 * {fr} Si les paramètres requis sont valides
 llResult = type('taSubFolders', 1) == 'A' && {fr} aClear() est fait plus loin à la première récursion
-assert m.llResult message cAssertMsg(textmerge([<<Program()>> - Le premier paramètre <<cLitteral(taSubFolders)>> doit être un tableau]))
+assert m.llResult message cAssertMsg(textmerge([Le premier paramètre <<cLitteral(taSubFolders)>> doit être un tableau]))
 if m.llResult
 
 	llResult = lDir(m.tcFolder, .t.)
-	* {fr} ASSERT m.llResult MESSAGE cAssertMsg(Textmerge([<<Program()>> - Le dossier '<<m.tcFolder>>' est introuvable]))
+	* {fr} ASSERT m.llResult MESSAGE cAssertMsg(textmerge([Le dossier '<<m.tcFolder>>' est introuvable]))
 	if m.llResult
 
 		* {fr} Si première récursion && {fr} optimisation

@@ -20,11 +20,12 @@ return abUnitTests()
 
 * =============================================================
 function wlWeb as Boolean && {fr} L'application fonctionne en mode Web
-lparameters toServer as awServer of awServer.prg && @ {en} server object
+lparameters toServer as awServer of awServer.prg, toConfig as awAppConfig of awServer.prg && @ {en} server object, application configuration object (see xxxTest|Prod.ini)
 return .T.;
  and Vartype(m.goWCserver) == 'O';
  and loClass(m.goWCserver, 'awServer');
  and varSet(@m.toServer, m.goWCserver);
+ and varSet(@m.toConfig, m.goWCserver.oConfig.oawApp);
  and .T.
 endfunc
 
@@ -183,7 +184,7 @@ endfunc
 
 * =============================================================
 function wcID && {fr} Identifiant d'un objet HTML selon convention FoxInCloud (alias de cawID)
-lparameters ;
+lparameters;
   toControl; && {fr} Contrôle
 , tcSuffix && [''] {fr} suffixe éventuel
 return cawID(m.toControl, m.tcSuffix)
@@ -209,9 +210,10 @@ endfunc
 * =============================================================
 function wcIconFA && [see http://fontawesome.io/] {en} HTML for a 'font awesome' icon {fr} HTML d'une icône 'Font Awesome'
 lparameters ;
-  cIcon; && {en} pick name from http://fontawesome.io/icons/
-, uSize; && [0|''] 1-'lg'|2-'2x'|3-'3x', …
-, lFixedWidth; && [.F.] {en} Fixed width for vertical alignment
+  cIcon as String; && @ {en} pick name from http://getbootstrap.com/components/#glyphicons-glyphs @: CSS class
+, cStyle as String; && @ [''] {en} in: 'muted', 'primary', 'info', 'success', 'danger', 'warning'; out: CSSclass && http://getbootstrap.com/css/#buttons-options, http://getbootstrap.com/css/#helper-classes-colors
+, uSize; && [0|''] 1-'lg'|2-'2x'| … 9-'9x'
+, fixedWidth; && [.F.] {en} Fixed width for vertical alignment
 , cOthers; && see http://fontawesome.io/examples/
 
 #if .F.
@@ -229,28 +231,19 @@ local oAppHost as awAppHost of awAppHost.fxp
 if ga_Type_IsChar(m.cIcon, .T.) and wlAppHost(@m.oAppHost) and m.oAppHost.lFontAwesomeAdd
 
 	cIcon = Lower(Alltrim(m.cIcon))
-	cIcon = Iif(Left(m.cIcon, 3) == 'fa-', Substr(m.cIcon, 4), m.cIcon)
+	cIcon = nEvl(m.cIcon, Iif(Left(m.cIcon, 3) == 'fa-', '', 'fa-') + m.cIcon)
 
-	uSize = Evl(m.uSize, '')
-	uSize = ICase(;
-		ga_Type_IsChar(m.uSize, .T.),;
-			Lower(Chrtran(m.uSize, ' _', '--')),;
-		!ga_type_isPositiveInteger(m.uSize),;
-			'',;
-		m.uSize = 1,;
-			'lg',;
-		Between(m.uSize, 2, 5),;
-			'fa-' + Cast(m.uSize as M) + 'x',;
-			'';
-		)
-	uSize = nEvl(m.uSize, ' ' + m.uSize)
+	cStyle = Iif(ga_Type_IsChar(m.cStyle, .T.), ' text-' + Lower(Alltrim(m.cStyle)), '')
 
-	lFixedWidth = Iif(lTrue(m.lFixedWidth), ' fa-fw', '')
+	uSize = wcIcon_cSize(m.uSize)
+	
+	fixedWidth = Iif(lTrue(m.fixedWidth), ' fa-fw', '')
 
 	cOthers = Iif(ga_Type_IsChar(m.cOthers, .T.), Lower(Alltrim(m.cOthers)), '')
+
+	uSize = nEvl(m.uSize, ' ' + m.uSize)
 	cOthers = nEvl(m.cOthers, ' ' + m.cOthers)
-	
-	return Textmerge([<i class="fa fa-<<m.cIcon>><<m.uSize>><<m.lFixedWidth>><<m.cOthers>>" aria-hidden="true"></i> ])
+	return Textmerge([<span class="fa <<m.cIcon>><<m.cStyle>><<m.uSize>><<m.fixedWidth>><<m.cOthers>>" aria-hidden="true"></span> ])
 else
 	return ''
 endif
@@ -259,16 +252,40 @@ endfunc
 * =============================================================
 function wcIconGI
 lparameters ;
-  cIcon; && {en} 
+  cIcon as String; && @ {en} pick name from http://getbootstrap.com/components/#glyphicons-glyphs @: CSS class
+, cStyle as String; && @ [''] {en} in: 'muted', 'primary', 'info', 'success', 'danger', 'warning'; out: CSSclass && http://getbootstrap.com/css/#buttons-options, http://getbootstrap.com/css/#helper-classes-colors
+, uSize; && [0|''] 1-'lg'|2-'2x'| … 9-'9x'
 
 local oAppHost as awAppHost of awAppHost.fxp
 
 if ga_Type_IsChar(m.cIcon, .T.) and wlAppHost(@m.oAppHost) and m.oAppHost.lBootstrapAdd
 	cIcon = Lower(Alltrim(m.cIcon))
-	return Textmerge([<span class="glyphicon glyphicon-<<m.cIcon>>" aria-hidden="true"></span> ])
+	cIcon = nEvl(m.cIcon, Iif(Leftc(m.cIcon, Len('glyphicon-')) == 'glyphicon-', '', 'glyphicon-') + m.cIcon)
+	cStyle = Iif(ga_Type_IsChar(m.cStyle, .T.), ' text-' + Lower(Alltrim(m.cStyle)), '')
+	uSize = wcIcon_cSize(m.uSize)
+	return Textmerge([<span class="glyphicon <<m.cIcon>><<m.cStyle>><<m.uSize>>" aria-hidden="true"></span> ])
 else
 	return ''
 endif
+endfunc
+
+* =============================================================
+function wcIcon_cSize
+lparameters uSize; && [0|''] 1-'lg'|2-'2x'| … 9-'9x'
+
+uSize = Evl(m.uSize, '')
+uSize = Lower(ICase(;
+	ga_Type_IsChar(m.uSize, .T.) and varSet(@m.uSize, Lower(Chrtran(Alltrim(m.uSize), ' _', '--'))),;
+		Iif(IsDigit(m.uSize), Trim(m.uSize, 'x') + 'x', m.uSize),;
+	!ga_type_isPositiveInteger(m.uSize),;
+		'',;
+	m.uSize = 1,;
+		'lg',;
+	Between(m.uSize, 2, 5),;
+		Cast(m.uSize as M) + 'x',;
+		'';
+	))
+return nEvl(m.uSize, 'fa-' + Iif(Left(m.uSize, 3) == 'fa-', Substr(m.uSize, 4), m.uSize))
 endfunc
 
 * =============================================================
@@ -443,33 +460,33 @@ IF wlLAN()
 									InputBox(m.cInputPrompt, m.cDialogCaption, m.cDefaultValue, m.nTimeout, m.cTimeoutValue, m.cCancelValue);
 	)
 ELSE
-
 	return 0 && {fr} NOT SUPPORTED
 ENDIF
 
 * =============================================================
 function wMessageBox && {en} MessageBox() _W/O MODAL return_ in LAN or Web mode {fr} MessageBox() _SANS RETOUR MODAL_ en mode LAN ou Web
 && _MODAL_ MessageBox():
-&& {en} - form method: use thisForm.wInputBox()
+&& {en} - form method: use thisForm.wMessageBox()
 && {en} - standalone procedure or function: NOT SUPPORTED
 lparameters ;
-  eMessageText; && {fr} cf. VFP MessageBox()
-, nDialogBoxType; && {fr} cf. VFP MessageBox()
-, cTitleBarText; && {fr} cf. VFP MessageBox()
-, nTimeout; && {fr} cf. VFP MessageBox()
-, uParm5 && {fr} in case of abnormal # of parameters wMessageBox('', eMessageText[, nDialogBoxType[, cTitleBarText[, nTimeout]]])
+  eMessageText; && {en} see VFP MessageBox()
+, nDialogBoxType; && {en} see VFP MessageBox()
+, cTitleBarText; && {en} see VFP MessageBox()
+, nTimeout; && {en} see VFP MessageBox()
+, uParm5 && {en} in case of abnormal # of parameters wMessageBox('', eMessageText[, nDialogBoxType[, cTitleBarText[, nTimeout]]])
+
 eMessageText = Evl(m.eMessageText, '')
 
 LOCAL lnParm as Integer;
+, success as Boolean;
 , luTemp as Variant;
 , loForm as awFrmMB OF aw.vcx;
-, llResult as Boolean;
-, loAJAX as awAJAX of awServer.prg
-
+, loAJAX as awAJAX of awServer.prg;
+, loAppHost as awAppHost of awAppHost.fxp;
 
 lnParm = Max(1, Pcount())
 
-IF Empty(m.eMessageText) && {fr} abnormal call wMessageBox('', eMessageText[, nDialogBoxType[, cTitleBarText[, nTimeout]]])
+IF Empty(m.eMessageText) && {en} abnormal call wMessageBox('', eMessageText[, nDialogBoxType[, cTitleBarText[, nTimeout]]])
 	lnParm = Max(1, m.lnParm - 1)
 	eMessageText = m.nDialogBoxType
 	nDialogBoxType = m.cTitleBarText
@@ -489,7 +506,8 @@ if Vartype(m.cTitleBarText) == 'N' && {fr} wMessageBox(“Mon beau message avec Ti
 	lnParm = 4
 endif
 
-IF wlLAN()
+do case
+case wlLAN()
 
 	return ICase(;
 		m.lnParm = 1,	MessageBox(m.eMessageText),;
@@ -498,37 +516,31 @@ IF wlLAN()
 									MessageBox(m.eMessageText, m.nDialogBoxType, m.cTitleBarText, m.nTimeout);
 		)
 
-ELSE
+case wlAJAX(@m.loAJAX) and wlAppHost(@m.loAppHost) && {fr} requête en cours
 
-	llResult = wlAJAX(@m.loAJAX) && {fr} requête en cours
-	ASSERT m.llResult MESSAGE cAssertMsg(Textmerge(ICase(;
+	loForm = ICase(; && {en} see #DEFINE wMESSAGEBOX_CLASS in awPublic.h / awPublic_Override.h && 2017-02-02 thn -- {FiC V 2.24.0-beta.5} {en} deprecated by xxxServer.cFrmMBclass
+		m.lnParm = 1,	m.loAppHost.oForm(m.loAppHost.cFrmMBclass, .T., .T., m.eMessageText),;
+		m.lnParm = 2,	m.loAppHost.oForm(m.loAppHost.cFrmMBclass, .T., .T., m.eMessageText, m.nDialogBoxType),;
+		m.lnParm = 3,	m.loAppHost.oForm(m.loAppHost.cFrmMBclass, .T., .T., m.eMessageText, m.nDialogBoxType, m.cTitleBarText),;
+									m.loAppHost.oForm(m.loAppHost.cFrmMBclass, .T., .T., m.eMessageText, m.nDialogBoxType, m.cTitleBarText, m.nTimeout);
+		)
+	success = loClass(m.loForm, 'awFrmMB')
+	assert m.success message cAssertMsg(Textmerge(ICase(;
+		cLangUser() = 'fr',	[Votre classe d'écran de "MessageBox" '<<m.loForm.Class>>' devrait dériver de 'aw.vcx!awFrmMB'],; && copy-paste this line to add another language support
+												[Your "MessageBox" form class '<<m.loForm.Class>>' should derive from 'aw.vcx!awFrmMB']; && Default: English
+		)))
+
+	success = m.success and m.loAJAX.DialogAdd(m.loForm)
+
+otherwise
+	assert m.success message cAssertMsg(Textmerge(ICase(;
 		cLangUser() = 'fr',	[Aucune requête en cours, MessageBox('<<m.eMessageText>>') est ignoré],; && copy-paste this line to add another language support
 												[No pending user request, MessageBox('<<m.eMessageText>>') is ignored]; && Default: English
 		)))
-	IF m.llResult
-		
-		loForm = CreateObject([wMESSAGEBOX_CLASS]) && {fr} cf. #DEFINE wMESSAGEBOX_CLASS in awPublic.h / awPublic_Override.h
-		llResult = loClass(m.loForm, 'awFrmMB')
-		ASSERT m.llResult MESSAGE cAssertMsg(Textmerge(ICase(;
-			cLangUser() = 'fr',	[Votre classe d'écran de "MessageBox" '<<m.loForm.Class>>' devrait dériver de 'aw.vcx!awFrmMB'],; && copy-paste this line to add another language support
-													[Your "MessageBox" form class '<<m.loForm.Class>>' should derive from 'aw.vcx!awFrmMB']; && Default: English
-			)))
-		IF m.llResult
+endcase
 
-			IF ICase(;
-				m.lnParm = 1,	m.loForm.Init(m.eMessageText),;
-				m.lnParm = 2,	m.loForm.Init(m.eMessageText, m.nDialogBoxType),;
-				m.lnParm = 3,	m.loForm.Init(m.eMessageText, m.nDialogBoxType, m.cTitleBarText),;
-											m.loForm.Init(m.eMessageText, m.nDialogBoxType, m.cTitleBarText, m.nTimeout);
-				)
-		
-				m.loAJAX.DialogAdd(m.loForm)
-			ENDIF
-		ENDIF
-	ENDIF
-
-	return 0 && {fr} pour rester en numérique
-ENDIF
+return 0 && {fr} rester en numérique
+endfunc
 
 * =============================================================
 function wWAIT && {fr} Instruction WAIT exécutée seulement en mode interactif
@@ -1996,11 +2008,15 @@ hidden ;
 , oKey; &&  as Collection
 , oSets; && as abSetsMaintain of abDev.prg
 
+protected array aScreenProp[1]
+
 cError = On('Error')
 
 * ---------------------
 procedure Init
-lparameters result as String && @ {en} error if any {fr} erreur éventuelle
+lparameters;
+  result as String; && @ {en} error if any {fr} erreur éventuelle
+, toAppHost as awAppHost of awAppHost.fxp && {en} Web Application Host object {fr} Objet Hôte d'application Web
 
 on error
 
@@ -2033,6 +2049,9 @@ if Vartype(this.oSets) # 'O'
 endif
 
 this.oISX = abISX()
+
+&& 2017-02-23 thn -- {FiC V 2.24.0-beta.10} {fr} added
+AMembers(this.aScreenProp, _Screen, 0, 'U')
 
 local loAppHost as awAppHost of awAppHost.prg
 if wlAppHost(@m.loAppHost) && modify command awPublic
@@ -2130,6 +2149,15 @@ IF m.this.lDevMode
 	_Screen.Caption = m.this.cCaption
 	_Screen.WindowState = m.this.iWindowState
 	this.oISX = .null.
+
+	&& 2017-02-23 thn -- {FiC V 2.24.0-beta.10} {fr} added
+	local aScreenProp[1], iScreenProp, cScreenProp
+	for iScreenProp = 1 to AMembers(m.aScreenProp, _Screen, 0, 'U')
+		cScreenProp = m.aScreenProp[m.iScreenProp]
+		if Empty(Ascan(this.aScreenProp, m.cScreenProp, 1, -1, 1, 6))
+			RemoveProperty(_Screen, m.cScreenProp)
+		endif
+	endfor
 
 	wait clear
 endif
@@ -2517,7 +2545,7 @@ endproc
 *--------------------------------------------
 procedure Refresh
 lparameters move_your_refresh_code_into_this_refresh_, t02,t03,t04,t05,t06,t07,t08,t09,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19,t20
-if Type('m.thisForm.wlPropsRestore') == 'L' and (m.thisForm.wlPropsRestore or m.thisForm.wlHTMLgen)
+if Type('m.thisForm.wlPropsRestore') == 'L' and (m.thisForm.wlPropsRestore or m.thisForm.wlPropsSave or m.thisForm.wlHTMLgen)
 	return
 endif
 
@@ -2878,7 +2906,7 @@ endproc
 *--------------------------------------------
 procedure Refresh
 lparameters move_your_refresh_code_into_this_refresh_, t02,t03,t04,t05,t06,t07,t08,t09,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19,t20
-if Type('m.thisForm.wlPropsRestore') == 'L' and (m.thisForm.wlPropsRestore or m.thisForm.wlHTMLgen)
+if Type('m.thisForm.wlPropsRestore') == 'L' and (m.thisForm.wlPropsRestore or m.thisForm.wlPropsSave or m.thisForm.wlHTMLgen)
 	return
 endif
 

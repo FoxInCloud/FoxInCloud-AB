@@ -3052,7 +3052,7 @@ local lnResult as integer;
 
 lnResult = 0
 
-lcAlias = cAlias(m.tcDBF, @m.llAlias,, @m.Result)
+lcAlias = cAlias(m.tcDBF, @m.llAlias,, @m.result)
 if used(m.lcAlias)
 
   lnResult = fcount(m.lcAlias)
@@ -3062,7 +3062,7 @@ if used(m.lcAlias)
   	if lenc(m.lcField) > 10
 		  if empty(m.lcFields)
 		  	if IsExclusive(m.lcAlias)
-		  		cResultAdd(@m.Result, textmerge([Can't get the short field name of '<<m.lcField>>' in '<<m.tcDBF>>' because it's used Exclusive]))
+		  		cResultAdd(@m.result, textmerge([Can't get the short field name of '<<m.lcField>>' in '<<m.tcDBF>>' because it's used Exclusive]))
 		  		lnResult = 0
 		  		exit
 		  	else
@@ -3242,7 +3242,7 @@ if used(m.cAlias)
 	endif
 endif
 
-return m.Result
+return m.result
 endfunc
 
 * ========================================
@@ -3272,7 +3272,7 @@ if used(m.cAlias)
 	endif
 endif
 
-return m.Result
+return m.result
 endfunc
 
 * ========================================
@@ -4208,14 +4208,38 @@ return m.success
 endproc
 
 * ========================================
-function cIndexCmd && {fr} Commande d'indexation d'après les colonnes d'aTagInfo() [Tag, Type, Key, Filter, Order, Collation]
+function cIndexCmds && {fr} Commandes d'indexation d'après les colonnes d'aTagInfoEn() [Tag, Type, Key, Filter, Order, Collation]
+lparameters taTagInfoEn
+
+external array taTagInfoEn
+
+local result;
+, iTag;
+
+result = ''
+for iTag = 1 to Alen(m.taTagInfoEn, 1)
+	result = m.result + cIndexCmd(;
+		  m.taTagInfoEn[m.iTag, 1];
+		, m.taTagInfoEn[m.iTag, 2];
+		, m.taTagInfoEn[m.iTag, 3];
+		, m.taTagInfoEn[m.iTag, 4];
+		, m.taTagInfoEn[m.iTag, 5];
+		, m.taTagInfoEn[m.iTag, 6];
+		) + CRLF
+endfor
+
+return m.result
+endfunc
+
+* ========================================
+function cIndexCmd && {fr} Commande d'indexation d'après les colonnes d'aTagInfoEn() [Tag, Type, Key, Filter, Order, Collation]
 lparameters ;
   lcTag; && 1 {en} Index tag name in a .cdx file or index file name for .idx files
 , lcType; && 2 {en} Index tag type
 , lcKey; && 3 {en} Index key expression
 , lcFilter; && 4 {en} Filter expression
 , lcOrder; && 5 {en} Index order as created (Ascending or Descending)
-, lcCollate && 6 {en} Collate sequence
+, lcCollate; && 6 {en} Collate sequence
 
 && {en} When using binary indexes, you cannot use the FOR clause to specify a filter expression or the ASCENDING, DESCENDING, UNIQUE, or CANDIDATE keywords
 
@@ -4477,6 +4501,7 @@ lparameters ;
   taResult; && @ {fr} Spécifications d'indexes au format aTagInfo() [1-tag, 2-type, 3-key expression, 4-filter, 5-order, 6-collate]
 , tcCDXName; && [all open cdx and idx] {en} Name of the compound index (.cdx) file to return information for
 , tuWAalias && [Alias()] {en} Work Area or alias of the table to return information for
+
 external array taResult
 tcCDXName = evl(m.tcCDXName, '')
 tuWAalias = evl(m.tuWAalias, alias())
@@ -5113,11 +5138,11 @@ Result = ''
 nn = aRelationSrce(@m.aa, m.tcAlias, .t., .t.) && [1- Relational Expression, 2- Target Alias, 3- Target Index Expression, 4- Source Alias]
 if m.nn > 0
 	for I = 1 to m.nn
-		Result = m.Result + textmerge(" left join <<Lower(m.aa[m.i, 2])>> on <<Lower(m.aa[m.i, 4])>>.<<Lower(m.aa[m.i, 1])>> = <<Lower(m.aa[m.i, 2])>>.<<Lower(m.aa[m.i, 3])>>")
+		Result = m.result + textmerge(" left join <<Lower(m.aa[m.i, 2])>> on <<Lower(m.aa[m.i, 4])>>.<<Lower(m.aa[m.i, 1])>> = <<Lower(m.aa[m.i, 2])>>.<<Lower(m.aa[m.i, 3])>>")
 	endfor
 endif
 
-return m.Result
+return m.result
 
 * ------------------
 function cRelationSrceJoins_Test && {fr} Test unitaire de cRelationSrceJoins()
@@ -6691,8 +6716,15 @@ define class nRecnoAbs_Test as abUnitTest of abDev.prg
 enddefine
 
 * ========================================
-function abOrder(Result, cAlias, cOrder, lDesc)
-return createobject('abOrder', @m.Result, m.cAlias, m.cOrder, m.lDesc)
+function abOrder
+lparameters ;
+  result; && @ result
+, cAlias; && [Alias()]
+, cOrder; && set order to...
+, lDesc; && [.F.] set order to... descending
+
+return CreateObject('abOrder', @m.result, m.cAlias, m.cOrder, m.lDesc)
+endfunc
 
 * ========================================
 define class abOrder as GA_LIGHTWEIGHT_CLASS && {en} saves, changes and restores Order()
@@ -6702,10 +6734,10 @@ hidden cAlias, cOrder, lDesc
 * -------------------------------
 protected procedure init
 lparameters ;
-  Result; && @
-, cAlias;
-, cOrder;
-, lDesc
+  result; && @ result
+, cAlias; && [Alias()]
+, cOrder; && set order to...
+, lDesc; && [.F.] set order to... descending
 
 local success, lUsed, oSelect
 
@@ -6713,7 +6745,7 @@ cAlias = evl(m.cAlias, alias())
 success = used(m.cAlias)
 if not m.success
 
-	cAlias = cAlias(m.cAlias, @m.lUsed,, @m.Result)
+	cAlias = cAlias(m.cAlias, @m.lUsed,, @m.result)
 	success = used(m.cAlias)
 endif
 
@@ -6759,7 +6791,7 @@ enddefine && {fr} CLASS abOrder
 
 * ========================================
 function abFilter(cAlias, cFilter, Result)
-return createobject('abFilter', m.cAlias, m.cFilter, @m.Result)
+return createobject('abFilter', m.cAlias, m.cFilter, @m.result)
 
 * ========================================
 define class abFilter as GA_LIGHTWEIGHT_CLASS && {fr} Sauve Filter(<Alias>), USE <Alias> si nécessaire, applique un autre filtre, rétablit en sortie
@@ -6776,7 +6808,7 @@ cAlias = evl(m.cAlias, alias())
 success = used(m.cAlias)
 if not m.success
 
-	cAlias = cAlias(m.cAlias, @m.lUsed,, @m.Result)
+	cAlias = cAlias(m.cAlias, @m.lUsed,, @m.result)
 	success = used(m.cAlias)
 endif
 
@@ -7206,7 +7238,7 @@ otherwise
 	Result = bof(m.tcAlias)
 endcase
 
-return m.Result
+return m.result
 endfunc
 
 * ========================================
@@ -7228,7 +7260,7 @@ otherwise
 	Result = eof(m.tcAlias)
 endcase
 
-return m.Result
+return m.result
 endfunc
 
 * ========================================
@@ -7353,7 +7385,7 @@ local Result as integer;
 , lia as integer;
 
 Result = occurs('?', m.cSQL)
-if m.Result > 0
+if m.result > 0
 
 	cSQL = strtran(lower(m.cSQL), '->', '.')
 
@@ -7378,7 +7410,7 @@ if m.Result > 0
 	dimension aSQLparm[m.result]
 
 	lia = 0
-	for liParm = 1 to m.Result
+	for liParm = 1 to m.result
 
 		lcParm = substrc(;
 			  m.cSQL;
@@ -7412,7 +7444,7 @@ if m.Result > 0
 			)
 
 		if ascan(m.aSQLparm, m.lcParm, 1, -1, 1, 6) > 0
-			Result = m.Result - 1
+			Result = m.result - 1
 		else
 			lia = m.lia + 1
 			aSQLparm[m.lia] = m.lcParm
@@ -7422,7 +7454,7 @@ if m.Result > 0
 	dimension m.aSQLparm[m.result]
 endif
 
-return m.Result
+return m.result
 endfunc
 
 * ----------------------
@@ -7487,13 +7519,13 @@ for I = at_c('?', m.lcSQLselect, m.liParm) - 1 to 1 step -1
 
 	otherwise
 		lWord = .t.
-		Result = m.C + m.Result
+		Result = m.C + m.result
 
 	endcase
 endfor
 
 return icase(;
-	upper(alltrim(m.Result)) == 'LIKE',;
+	upper(alltrim(m.result)) == 'LIKE',;
 		'A junk FoxInCloud string _value_ that *for sure* no view parameter will ever match',;
 		.null.;
 	)
@@ -8672,13 +8704,13 @@ if .t.;
 	for iField = 1 to m.nField
 
 		cField = textmerge("<<m.cTable>>.<<Lower(m.laField[m.iField, 1])>>")
-		Result = m.Result + textmerge("DBSetProp('<<m.cField>>', 'FIELD', '<<m.tcProp>>', [<<DBgetProp(m.cField, 'FIELD', m.tcProp)>>])") + CRLF
+		Result = m.result + textmerge("DBSetProp('<<m.cField>>', 'FIELD', '<<m.tcProp>>', [<<DBgetProp(m.cField, 'FIELD', m.tcProp)>>])") + CRLF
 	endfor
 	if m.lAlias
 		use in (m.cAlias)
 	endif
 endif
-return m.Result
+return m.result
 endfunc
 
 * =============================================

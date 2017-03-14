@@ -2997,6 +2997,7 @@ procedure set as Boolean
 lparameters lcSet, lnSet, luSet
 
 && {fr} Public car appelé par modify command awPublic > awSets.Set()
+local aa[1], liSet
 
 do case
 
@@ -3036,6 +3037,12 @@ case inlist(m.lcSet, 'PROCEDURE', 'CLASSLIB') && 2016-08-18 thn -- {en} added
 
 case Empty(m.luSet) and Vartype(m.luSet) == 'C'
 	set &lcSet to
+
+case m.lcSet == 'LIBRARY'
+	set library to
+	for liSet = 1 to ALines(aa, m.luSet, 5, ',')
+		set library to (m.aa[m.liSet]) additive
+	endfor
 
 otherwise
 	set &lcSet to (m.luSet)
@@ -6032,7 +6039,7 @@ endproc
 
 * =============================================
 procedure setStepOn(condition as Boolean) as Boolean
-if (cast(m.condition as L) or empty(pcount())) && {fr} and lDevMode() useless
+if (cast(Nvl(m.condition, .F.) as L) or empty(pcount())) && {fr} and lDevMode() useless
 	set step on
 endif
 endproc

@@ -416,8 +416,8 @@ IF m.llResult and aSubFolders(@m.laFolder, m.tcFolder, m.tcFoldersExcl, m.tnLeve
 			llResult = .F.
 			exit
 		endif
-	ENDFOR
-ENDIF
+	endfor
+endif
 
 ASSERT m.llResult MESSAGE cAssertMsg(Textmerge(ICase(;
 	cLangUser() = 'fr',	[Echec, la profondeur de l'arborescence (<<m.tnLevel>>) est peut-être trop élevée],; && copy-paste this line to add another language support

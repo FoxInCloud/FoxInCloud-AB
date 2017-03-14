@@ -34,7 +34,7 @@ lnResult = 0
 
 llResult = aClear(@m.taResult) and vartype(m.tcString) == 'C'
 assert m.llResult message cAssertMsg(textmerge(icase(;
-	cLangUser() = 'fr',	[tableau attendu en premier paramètre : <<cL(m.taResult)>>, chaîne en 2nd <<cL(m.tcString)>> !],; && copy-paste this line to add another language support
+	cLangUser() = 'fr',	[Tableau attendu en premier paramètre : <<cL(m.taResult)>>, chaîne en 2nd <<cL(m.tcString)>> !],; && copy-paste this line to add another language support
 						[Array expected as 1st parameter: <<cL(m.taResult)>>, String as 2nd <<cL(m.tcString)>>!]; && Default: English
 	)))
 if m.llResult
@@ -52,12 +52,12 @@ endif
 return m.lnResult
 
 * ===================================================================
-function aAppend && {fr} Ajoute les lignes d'un tableau à un autre {en} Appends line from an array to another
+function aAppend && {fr} Ajoute les lignes d'un Tableau à un autre {en} Appends line from an array to another
 lparameters ;
   taDest; && @ {fr} Résultat {en} Result array
 , taSrce; && @ {fr} Source des lignes ajoutées à taDest {en} array to append to taDest
 , tlUnique; && [.F.] {fr} ne pas ajouter les lignes existantes {en} don't append lines that already exists in the result array
-, tlPrepend && [.F.] {fr} ajouter en début de tableau {en} append at the beginning of the array
+, tlPrepend && [.F.] {fr} ajouter en début de Tableau {en} append at the beginning of the array
 
 external array taDest, taSrce && {fr} pour le gestionnaire de projet {en} for the project manager
 tlUnique = lTrue(m.tlUnique)
@@ -79,7 +79,7 @@ assert m.llResult message cAssertMsg(icase(;
 	))
 if m.llResult
 
-	* {fr} Si le second tableau a des lignes {en} If second array belongs line(s)
+	* {fr} Si le second Tableau a des lignes {en} If second array belongs line(s)
 	lnRowsSrce = iif(laEmpty(@m.taSrce) , 0, alen(taSrce, 1))
 	lnRowsDest = iif(laEmpty(@m.taDest) , 0, alen(taDest, 1)) && {fr} alen(taDest,1) Fonctionne pour 1 et 2 dimensions {en} alen(taDest,1) is compatible for 1 and 2 dimensions
 	lnResult = m.lnRowsDest + m.lnRowsSrce
@@ -98,11 +98,11 @@ if m.llResult
 		endif
 		if m.tlPrepend
 			for m.liRowSrce = 1 to m.lnRowsSrce
-				ains(taDest, 1) && {fr} ajoute au début du tableau {en} insert at the beginning of the array
+				ains(taDest, 1) && {fr} ajoute au début du Tableau {en} insert at the beginning of the array
 			endfor
 		endif
 
-		* {fr} Pour chaque ligne du tableau source {en} for each line of the array
+		* {fr} Pour chaque ligne du Tableau source {en} for each line of the array
 		for m.liRowSrce = 1 to m.lnRowsSrce
 
 			liRowDest = iif(m.tlPrepend, m.liRowSrce, m.lnRowsDest + m.liRowSrce)
@@ -114,7 +114,7 @@ if m.llResult
 					taDest[m.liRowDest, m.liColSrce] = taSrce[m.liRowSrce, m.liColSrce]
 				endfor
 
-			case m.llColsDest && {fr} tableau destination à 2 dimensions, tableau source à 1 dimension {en} target array has 2 dimensions, source array has only one
+			case m.llColsDest && {fr} Tableau destination à 2 dimensions, Tableau source à 1 dimension {en} target array has 2 dimensions, source array has only one
 				taDest[m.liRowDest, 1] = taSrce[m.liRowSrce]
 
 			otherwise && {fr} les 2 tableaux ont 1 dimension {en} each array has one dimension
@@ -133,8 +133,8 @@ return m.lnResult
 * --------------------------------------
 procedure aAbarray_Test_a && {fr} pour construire les Array de test {en} to build the test environment
 lparameters ;
-  taTest; && {fr} premier tableau {en} first array
-, taTest1 && {fr} second tableau {en} second array
+  taTest; && {fr} premier Tableau {en} first array
+, taTest1 && {fr} second Tableau {en} second array
 
 dimension taTest[3,3]
 taTest = .f.
@@ -173,7 +173,7 @@ loUnitTest.assert(6, alen(laTest, 1))
 return m.loUnitTest.Result()
 
 * ===================================================================
-function aSubstract && {fr} Soustrait les éléments d'un tableau à un autre {en} remove some elements from an array to another
+function aSubstract && {fr} Soustrait les éléments d'un Tableau à un autre {en} remove some elements from an array to another
 lparameters ;
   taDest; && @ {fr} Résultat {en} Result
 , taSrce && @ {fr} Tableau contenant les lignes à soustraire de taDest {fr} array with lines to remove from taDest
@@ -224,7 +224,7 @@ loUnitTest.assert('bar', laDest[3])
 return loUnitTest.Result()
 
 * ===================================================================
-function aFilter && {fr} Filtre les éléments d'un tableau par un autre {en} Filters the elements of an array by another array
+function aFilter && {fr} Filtre les éléments d'un Tableau par un autre {en} Filters the elements of an array by another array
 lparameters ;
   taDest; && @ {fr} Résultat {en} result
 , taSrce; && @ {fr} Tableau contenant les lignes filtrant taDest {en} array with lines used to filter taDest
@@ -234,7 +234,7 @@ lparameters ;
 
 external array taDest, taSrce
 
-local lnResult as integer; && {fr} dimension du tableau résultat
+local lnResult as integer; && {fr} dimension du Tableau résultat
 , llResult as Boolean;
 , liDest, luDest;
 , lnSrce, liSrce;
@@ -326,7 +326,7 @@ loUnitTest.Test(.t., @m.laTest)
 return loUnitTest.Result()
 
 * ===================================================================
-function aRowDel && {fr} Supprime PHYSIQUEMENT une ligne d'un tableau {en} remove a line from an array
+function aRowDel && {fr} Supprime PHYSIQUEMENT une ligne d'un Tableau {en} remove a line from an array
 lparameters ;
   taResult; && @ {fr} Résultat {en} result
 , tnRow && {fr} n° de ligne à supprimer {en} number of the line to remove
@@ -360,7 +360,7 @@ endif
 return m.lnResult
 
 * ===================================================================
-function aRowMove && {fr} Déplace une ligne dans un tableau {fr} move one line inside an array
+function aRowMove && {fr} Déplace une ligne dans un Tableau {fr} move one line inside an array
 lparameters ;
   taResult; && @ {fr} Résultat {en} result
 , tnFrom; && {fr} n° de ligne à déplacer {en} number for the line to move
@@ -436,8 +436,8 @@ loUnitTest.assert('11', m.laResult[3, 1])
 return loUnitTest.Result()
 
 	* -------------------------------------------------------------
-	function aRowMove_test_a1 && {fr} tableau de test à 1 dimension
-	lparameters laResult && @ {fr} tableau
+	function aRowMove_test_a1 && {fr} Tableau de test à 1 dimension
+	lparameters laResult && @ {fr} Tableau
 	external array laResult
 
 	dimension laResult[6]
@@ -449,8 +449,8 @@ return loUnitTest.Result()
 	laResult[6] = '6'
 
 	* -------------------------------------------------------------
-	function aRowMove_test_a2 && {fr} tableau de test à 2 dimensions
-	lparameters laResult && @ {fr} tableau
+	function aRowMove_test_a2 && {fr} Tableau de test à 2 dimensions
+	lparameters laResult && @ {fr} Tableau
 
 	local lcResult
 	text TO lcResult NOSHOW PRETEXT 1+2
@@ -464,13 +464,13 @@ return loUnitTest.Result()
 	aLinesCols(@m.laResult, m.lcResult)
 
 * ===================================================================
-function aColDel && {fr} Supprime physiquement une colonne d'un tableau {en} remove one column from an array
+function aColDel && {fr} Supprime physiquement une Colonne d'un Tableau {en} remove one Column from an array
 lparameters ;
   taResult; && @ {fr} Résultat {en} Result
-, tnCol && {fr} n° de colonne à supprimer {en} number of the column to remove
+, tnCol && {fr} n° de Colonne à supprimer {en} number of the Column to remove
 external array taResult
 
-local lnRow, liRow, lnCol, llResult, lnResult && {fr} par analogie avec aDel(), 1 si la colonne est bien supprimée, 0 sinon {en} like aDel() return 1 if the column is successfull removed, otherwise 0
+local lnRow, liRow, lnCol, llResult, lnResult && {fr} par analogie avec aDel(), 1 si la Colonne est bien supprimée, 0 sinon {en} like aDel() return 1 if the Column is successfull removed, otherwise 0
 
 lnResult = 0
 llResult = .t.;
@@ -483,12 +483,12 @@ assert m.llResult message cAssertMsg(icase(;
 	))
 if m.llResult
 
-	* {fr} Convertir le tableau en mono-dimensionnel
+	* {fr} Convertir le Tableau en mono-dimensionnel
 	lnRow = alen(taResult, 1)
 	lnCol = alen(taResult, 2)
 	dimension taResult[m.lnRow * m.lnCol]
 
-	* {fr} Supprimer physiquement les cellules de la colonne à enlever
+	* {fr} Supprimer physiquement les cellules de la Colonne à enlever
 	for m.liRow = m.lnRow to 1 step -1
 		lnResult = adel(taResult, (m.liRow - 1) * m.lnCol + m.tnCol)
 		if m.lnResult = 0
@@ -496,7 +496,7 @@ if m.llResult
 		endif
 	endfor
 
- 	* {fr} Rétablir le tableau en 2 dimensions
+ 	* {fr} Rétablir le Tableau en 2 dimensions
 	if m.lnResult > 0
 		dimension taResult[m.lnRow, m.lnCol - 1]
 	endif
@@ -510,7 +510,7 @@ procedure aColDel_Test
 local loUnitTest as abUnitTest of abDev.prg, laTest[1]
 loUnitTest = newobject('abUnitTest', 'abDev.prg')
 
-* {fr} Supprimer la colonne de gauche
+* {fr} Supprimer la Colonne de gauche
 aColDel_Test_a(@m.laTest)
 loUnitTest.Test(1, @m.laTest, 1)
 loUnitTest.assert(alen(laTest, 2), 3)
@@ -519,7 +519,7 @@ loUnitTest.assert(laTest[2,1], "B")
 loUnitTest.assert(laTest[1,2], 3)
 loUnitTest.assert(laTest[2,2], "C")
 
-* {fr} Supprimer une colonne interne
+* {fr} Supprimer une Colonne interne
 aColDel_Test_a(@m.laTest)
 loUnitTest.Test(1, @m.laTest, 2)
 loUnitTest.assert(alen(laTest, 2), 3)
@@ -528,7 +528,7 @@ loUnitTest.assert(laTest[2,1], "A")
 loUnitTest.assert(laTest[1,2], 3)
 loUnitTest.assert(laTest[2,2], "C")
 
-* {fr} Supprimer la colonne de droite
+* {fr} Supprimer la Colonne de droite
 aColDel_Test_a(@m.laTest)
 loUnitTest.Test(1, @m.laTest, 4)
 loUnitTest.assert(alen(laTest, 2), 3)
@@ -570,11 +570,11 @@ ENDTEXT
 return aLinesCols(@m.laTest, m.lcTest, TABUL, 'ILCD')
 
 * ===================================================================
-function aColsDel && {fr} Supprime physiquement plusieurs colonnes d'un tableau {en} remove many columns from an array
+function aColsDel && {fr} Supprime physiquement plusieurs colonnes d'un Tableau {en} remove many columns from an array
 lparameters ;
   taResult; && @ {fr} Résultat {en} Result
-, tnCol1; && {fr} n° de la première colonne à supprimer {en} index of the first column to remove
-, tnCol2 && {fr} [dernière] N° de la dernière colonne à supprimer {en} [last] index of the last column to remove
+, tnCol1; && {fr} n° de la première Colonne à supprimer {en} index of the first Column to remove
+, tnCol2 && {fr} [dernière] N° de la dernière Colonne à supprimer {en} [last] index of the last Column to remove
 external array taResult
 
 local llResult, lnResult; && {fr} analogue à aDel() : 1 si les colonnes sont bien supprimées, 0 sinon {en} like aDel() if columns succesfull removed 1, otherwise 0
@@ -593,7 +593,7 @@ assert m.llResult message cAssertMsg(icase(;
 	))
 if m.llResult
 
-	* {fr} Régler les paramètres optionnels à leur valeur par défaut
+	* {fr} Régler les paramètres optionnels à leur Valeur par défaut
 	lnCols = alen(taResult, 2)
 	lnCol2 = iif(vartype(m.tnCol2) == 'N' and m.tnCol2 <= m.lnCols, m.tnCol2, m.lnCols)
 	lnCol2 = max(m.lnCol2, m.tnCol1)
@@ -601,13 +601,13 @@ if m.llResult
 	* {fr} Si la suppression des colonnes est possible
 	llResult = not (m.tnCol1 = 1 and m.lnCol2 = m.lnCols)
 	assert m.llResult message cAssertMsg(icase(;
-	cLangUser() = 'fr',	"Impossible de supprimer toutes les colonnes d'un tableau",; && copy-paste this line to add another language support
+	cLangUser() = 'fr',	"Impossible de supprimer toutes les colonnes d'un Tableau",; && copy-paste this line to add another language support
 						'Cannot remove all columns from an array'; && Default: English
 	))
 
 	if m.llResult
 
-		* {fr} Supprimer chaque colonne
+		* {fr} Supprimer chaque Colonne
 		for m.liCol = m.lnCol2 to m.tnCol1 step -1
 			lnResult = aColDel(@m.taResult, m.liCol)
 			if m.lnResult = 0
@@ -646,7 +646,7 @@ loUnitTest.assert(laTest[2,2], "B")
 return loUnitTest.Result()
 
 * ===================================================================
-function aVarType && {fr} Vartypes d'après un tableau ou une liste délimitée ou non {en} Vartypes from an array or a list delimited or not
+function aVarType && {fr} Vartypes d'après un Tableau ou une liste délimitée ou non {en} Vartypes from an array or a list delimited or not
 lparameters ;
   taResult; && @ {fr} Résultat {en} Result
 , tuTypes && @ {fr} (Var)types (array ou cListe) {en} (Var)types (array or cListe)
@@ -673,13 +673,13 @@ return icase(;
 
 
 * ===================================================================
-function aColsIns && {fr} Insère physiquement une ou plusieurs colonne(s) dans un tableau {en} Insert one or many columns inside an array
+function aColsIns && {fr} Insère physiquement une ou plusieurs Colonne(s) dans un Tableau {en} Insert one or many columns inside an array
 lparameters ;
   taResult; && @ {fr} Résultat {en} Result
-, tnColBef; && {fr} [dernière] n° de colonne APRÈS laquelle insérer la(es) nouvelle(s) colonne(s), 0 pour ajouter au début {en} [last] index of column AFTER we insert the new column(s), 0 to insert at the beginning
-, tnColsIns; && {fr} [1] NOmbre de colonnes à insérer {en} [1] number of column to insert
-, tuVal; && {fr} [.F. ou ueMpty(tutYpes)] VAleur des cellules ajoutées {en} [.F. or ueMpty(tutYpes)] VAlue of cells to insert
-, tuTypes && @ {fr} Types des colonnes (array ou liste) in 'CDGLNOQTUXYI' {en} Types of column (array or list) in 'CDGLNOQTUXYI'
+, tnColBef; && {fr} [dernière] n° de Colonne APRÈS laquelle insérer la(es) nouvelle(s) Colonne(s), 0 pour ajouter au début {en} [last] index of Column AFTER we insert the new Column(s), 0 to insert at the beginning
+, tnColsIns; && {fr} [1] NOmbre de colonnes à insérer {en} [1] number of Column to insert
+, tuVal; && {fr} [.F. ou ueMpty(tutYpes)] Valeur des cellules ajoutées {en} [.F. or ueMpty(tutYpes)] Value of cells to insert
+, tuTypes && @ {fr} Types des colonnes (array ou liste) in 'CDGLNOQTUXYI' {en} Types of Column (array or list) in 'CDGLNOQTUXYI'
 
 local llResult, lnResult; && {fr} Nombre de colonnes après l'insersion {en} number of columns after insertion
 , lnRow, liRow;
@@ -687,10 +687,10 @@ local llResult, lnResult; && {fr} Nombre de colonnes après l'insersion {en} numb
 
 lnResult = 0
 
-* {fr} Si un tableau a été passé
+* {fr} Si un Tableau a été passé
 llResult = type('taResult', 1) == 'A'
 assert m.llResult message cAssertMsg(textmerge(icase(;
-	cLangUser() = 'fr',	[tableau attendu en premier paramètre : <<cLitteral(m.taResult)>> !],; && copy-paste this line to add another language support
+	cLangUser() = 'fr',	[Tableau attendu en premier paramètre : <<cLitteral(m.taResult)>> !],; && copy-paste this line to add another language support
 						[array expected as the first parameter : <<cLitteral(m.taResult)>> !]; && Default: English
 	)))
 if m.llResult
@@ -698,7 +698,7 @@ if m.llResult
 	lnRow = alen(taResult, 1)
 	lnCol = alen(taResult, 2)
 
-	* {fr} Si tableau à une dim.
+	* {fr} Si Tableau à une dim.
 	if m.lnCol = 0
 
 		* {fr} Convertir à 2 dimensions
@@ -706,15 +706,15 @@ if m.llResult
 		dimension taResult[m.lnRow, m.lnCol]
 	endif
 
-	* {fr} Vérifier la validité du n° de colonne passé
+	* {fr} Vérifier la validité du n° de Colonne passé
 	if vartype(m.tnColBef) == 'N'
 		llResult = between(m.tnColBef, 0, m.lnCol)
 		assert m.llResult message cAssertMsg(textmerge(icase(;
-			cLangUser() = 'fr',	"le n° de colonne <<m.tnColBef>> est hors des limites du tableau.",; && copy-paste this line to add another language support
-								"index of column <<m.tnColBef>> outside the length of array."; && Default: English
+			cLangUser() = 'fr',	"le n° de Colonne <<m.tnColBef>> est hors des limites du Tableau.",; && copy-paste this line to add another language support
+								"index of Column <<m.tnColBef>> outside the length of array."; && Default: English
 			)))
 	else
-		tnColBef = m.lnCol && {fr} après la dernière colonne {en} after the last column
+		tnColBef = m.lnCol && {fr} après la dernière Colonne {en} after the last Column
 	endif
 endif
 
@@ -723,7 +723,7 @@ if m.llResult
 	tnColsIns = iif(vartype(m.tnColsIns) == 'N' and m.tnColsIns > 0, m.tnColsIns, 1)
 	lnResult = m.lnCol + m.tnColsIns
 
-	* {fr} Créer un tableau de travail
+	* {fr} Créer un Tableau de travail
 	local laTemp[m.lnRow, m.lnResult];
 	, laType[1], lnType;
 	, llColBeg, lnColIns, llColIns, llColInsTyped
@@ -731,7 +731,7 @@ if m.llResult
 	* {fr} Voir si le typage est demandé
 	lnType = aVarType(@m.laType, @m.tuTypes)
 
-	* {fr} Remplir le tableau de travail
+	* {fr} Remplir le Tableau de travail
 	for m.liCol = 1 to m.lnResult
 
 		llColBeg = m.liCol <= m.tnColBef
@@ -743,18 +743,18 @@ if m.llResult
 		for m.liRow = 1 to m.lnRow
 
 			laTemp[m.liRow, m.liCol] = icase(;
-				M.llColBeg, taResult[m.liRow, m.liCol],; && {fr} avant la(es) nouvelle(s) colonne(s) {en} before new column(s)
-				m.llColIns; && {fr} nouvelle(s) colonne(s) {en} new column(s)
+				M.llColBeg, taResult[m.liRow, m.liCol],; && {fr} avant la(es) nouvelle(s) Colonne(s) {en} before new Column(s)
+				m.llColIns; && {fr} nouvelle(s) Colonne(s) {en} new Column(s)
 							, iif(m.llColInsTyped;
 									, uEmpty(laType[m.lnColIns]);
 									, m.tuVal;
 							),;
-				taResult[m.liRow, m.liCol - m.tnColsIns]; && {fr} après la(es) nouvelle(s) colonne(s) {en} after new column(s)
+				taResult[m.liRow, m.liCol - m.tnColsIns]; && {fr} après la(es) nouvelle(s) Colonne(s) {en} after new Column(s)
 				)
 		endfor
 	endfor
 
-	* {fr} Copier le tableau de travail dans le résultat
+	* {fr} Copier le Tableau de travail dans le résultat
 	dimension taResult[m.lnRow, m.lnResult]
 	acopy(laTemp, taResult) && {fr} contrairement à ce que dit la doc, ne dimensionne pas correctement taResult
 endif
@@ -767,47 +767,47 @@ procedure aColsIns_Test && {fr} Teste aColsIns()
 local loUnitTest as abUnitTest of abDev.prg, laTest[1]
 loUnitTest = newobject('abUnitTest', 'abDev.prg')
 
-&& {fr} TABLEAU À UNE DIMENSION
+&& {fr} Tableau À UNE DIMENSION
 
 aColsIns_Test_a(@m.laTest, 3)
 	loUnitTest.Test(3, @m.laTest, 0, 2) && 2 colonnes au début
-	loUnitTest.assert(.f., laTest[3,1]) && 1ère colonne insérée
-	loUnitTest.assert(2, laTest[2,3]) && {fr} La colonne initiale est maintenant # 3
+	loUnitTest.assert(.f., laTest[3,1]) && 1ère Colonne insérée
+	loUnitTest.assert(2, laTest[2,3]) && {fr} La Colonne initiale est maintenant # 3
 
-&& {fr} TABLEAU À DEUX DIMENSIONS
+&& {fr} Tableau À DEUX DIMENSIONS
 
 && {fr} ajout au début
 aColsIns_Test_a(@m.laTest, 2, 3)
 	loUnitTest.Test(5, @m.laTest, 0, 2) && 2 colonnes au début (1,2)
 	loUnitTest.assert(6, laTest[2,5]) && {fr} donnée initiale
-	loUnitTest.assert(.f., laTest[1,2]) && 2ème colonne insérée
+	loUnitTest.assert(.f., laTest[1,2]) && 2ème Colonne insérée
 
 && {fr} ajout à l'intérieur
 aColsIns_Test_a(@m.laTest, 2, 3)
 	loUnitTest.Test(5, @m.laTest, 2, 2) && 2 colonnes après la 2 (3,4)
 	loUnitTest.assert(6, laTest[2,5]) && {fr} donnée initiale
-	loUnitTest.assert(.f., laTest[1,4]) && 2ème colonne insérée
+	loUnitTest.assert(.f., laTest[1,4]) && 2ème Colonne insérée
 
 && {fr} ajout à la fin
 aColsIns_Test_a(@m.laTest, 2, 3)
 	loUnitTest.Test(5, @m.laTest, , 2) && 2 colonnes à la fin (4,5)
 	loUnitTest.assert(6, laTest[2,3]) && {fr} donnée initiale
-	loUnitTest.assert(.f., laTest[2,5]) && 2ème colonne insérée
+	loUnitTest.assert(.f., laTest[2,5]) && 2ème Colonne insérée
 
-	&& {fr} ajout à la fin avec valeur imposée
+	&& {fr} ajout à la fin avec Valeur imposée
 	aColsIns_Test_a(@m.laTest, 2, 3)
 		loUnitTest.Test(5, @m.laTest, , 2, 'test') && 2 colonnes à la fin (4,5)
 		loUnitTest.assert(6, laTest[2,3]) && {fr} donnée initiale
-		loUnitTest.assert('test', laTest[2,5]) && 2ème colonne insérée
+		loUnitTest.assert('test', laTest[2,5]) && 2ème Colonne insérée
 
 	&& {fr} ajout à la fin avec type imposé
 	aColsIns_Test_a(@m.laTest, 2, 3)
 		loUnitTest.Test(5, @m.laTest, , 2, , 'IC') && 2 colonnes à la fin (4,5)
 		loUnitTest.assert(6, laTest[2,3]) && {fr} donnée initiale
-		loUnitTest.assert('', laTest[2,5]) && 2ème colonne insérée
+		loUnitTest.assert('', laTest[2,5]) && 2ème Colonne insérée
 
 	* --------------------------------------
-	procedure aColsIns_Test_a && {fr} Initialise le tableau de test avec aElement()
+	procedure aColsIns_Test_a && {fr} Initialise le Tableau de test avec aElement()
 	lparameters taTest, tnRows, tnCols
 	external array taTest
 	if empty(m.tnCols)
@@ -823,10 +823,10 @@ aColsIns_Test_a(@m.laTest, 2, 3)
 * ===================================================================
 function laEqual && {fr} Deux tableaux sont identiques {en} Two arrays are equals
 lparameters ;
-  ta1; && @ {fr} tableau 1 {en} array 1
-, ta2; && @ {fr} tableau 2 {en} array 2
+  ta1; && @ {fr} Tableau 1 {en} array 1
+, ta2; && @ {fr} Tableau 2 {en} array 2
 , tlCase; && {fr} [.F.] SI élements de type caractère, ignorer la casse, les diacritiques et les espaces de fin {en} IF type 'C', case insensitive and ending spaces are ignored
-, taDelta && @ {fr} tableau différentiel {en} array of differences
+, taDelta && @ {fr} Tableau différentiel {en} array of differences
 tlCase = lTrue(m.tlCase)
 external array ta1, ta2, taDelta
 
@@ -912,10 +912,10 @@ loUnitTest.assert('tete,Tête', cListOfArray(@m.laDelta,, -1))
 return loUnitTest.Result()
 
 * ===================================================================
-function laOccurs && {fr} Un tableau à une dimension est une ligne d'un tableau à 2 dim. {en} an array at one dimension is a line of an array at two dimensions
+function laOccurs && {fr} Un Tableau à une dimension est une ligne d'un Tableau à 2 dim. {en} an array at one dimension is a line of an array at two dimensions
 lparameters ;
-  ta1; && @ {fr} tableau 1 à une dimension {en} array 1 with one dimension
-, ta2; && @ {fr} tableau 2 à deux dimensions {en} array 2 with two dimensions
+  ta1; && @ {fr} Tableau 1 à une dimension {en} array 1 with one dimension
+, ta2; && @ {fr} Tableau 2 à deux dimensions {en} array 2 with two dimensions
 , tlCase && [.F.] {fr} Élements caractère : Comparer en ignorant la casse, les diacritiques et les espaces de fin {fr} Type 'C' : compare case insensitive and don't care of the terminal spaces
 external array ta1, ta2
 
@@ -930,7 +930,7 @@ assert m.llResult message cAssertMsg(textmerge(icase(;
 	)))
 if m.llResult
 
-	* {fr} Si le second tableau est à 2 dims et les deux tableaux ont le même nombre de colonnes
+	* {fr} Si le second Tableau est à 2 dims et les deux tableaux ont le même nombre de colonnes
 	lnCol = alen(ta2, 2)
 	llResult = m.lnCol > 0 and alen(ta1) = m.lnCol
 	assert m.llResult message cAssertMsg(textmerge(icase(;
@@ -939,15 +939,15 @@ if m.llResult
 	)))
 	if m.llResult
 
-		* {fr} Pour chaque ligne du second tableau
+		* {fr} Pour chaque ligne du second Tableau
 		dimension laRow[m.lnCol]
 		for liRow = 1 to alen(ta2, 1)
 
-			* {fr} Extraire la ligne dans un tableau temporaire
+			* {fr} Extraire la ligne dans un Tableau temporaire
 			acopy(ta2, laRow, aelement(ta2, m.liRow, 1), m.lnCol)
 			dimension laRow[m.lnCol] && {fr} Acopy() dimensionne laRow comme ta2
 
-			* {fr} Si la ligne est identique au tableau 1, terminé
+			* {fr} Si la ligne est identique au Tableau 1, terminé
 			llResult = laEqual(@m.laRow, @m.ta1, m.tlCase)
 			if m.llResult
 				exit
@@ -963,7 +963,7 @@ function aDistinct && {fr} Tableau dont chaque ligne est unique {en} array where
 lparameters taResult && @ {fr} Tableau {en} array
 external array taResult
 
-local lnResult; && {fr} Nombre de lignes du tableau après dédoublonnage {en} number of lines after removing duplicates lines
+local lnResult; && {fr} Nombre de lignes du Tableau après dédoublonnage {en} number of lines after removing duplicates lines
 , llResult;
 , lnCol, liCol;
 , laRow[1], liRow, liRow_;
@@ -971,7 +971,7 @@ local lnResult; && {fr} Nombre de lignes du tableau après dédoublonnage {en} num
 
 lnResult = 0
 
-* {fr} Si tableau
+* {fr} Si Tableau
 llResult = type('taResult', 1) == 'A'
 assert m.llResult message cAssertMsg(textmerge(icase(;
 	cLangUser() = 'fr',	[Tableau attendu au lieu de <<cLitteral(taResult)>>],; && copy-paste this line to add another language support
@@ -1019,7 +1019,7 @@ if m.llResult
 			endif
 		endfor
 
-		* {fr} Retailler le tableau
+		* {fr} Retailler le Tableau
 		if m.lnCol > 0
 			dimension taResult[m.lnResult, m.lnCol]
 		else
@@ -1054,21 +1054,28 @@ loUnitTest.Test(2, @m.laTest)
 return m.loUnitTest.Result()
 
 * ===================================================================
-function aLookup && {fr} Valeur d'une colonne d'un tableau selon une clé cherchée dans une autre colonne {en} Value found in an array column based on a key sought in another column
+function aLookup && {fr} Valeur d'une Colonne d'un Tableau selon une clé cherchée dans une autre Colonne {en} Value found in an array Column based on a key sought in another Column
 lparameters ;
-  taSrce; && @ {fr} TAbleau source {en} ARray source
-, tuVal; && {fr} VAleur à trouver {en} VAlue to find
-, tnColIn; && {fr} COlonne où chercher {en} COlumn where is the key
-, tnColOut; && {fr} COlonne où trouver {en} COlumn where is the value
-, tnFlags && [15] {fr} nFlags selon options de aScan() {en} nFlags as in aScan()
+  taSrce; && @ {fr} Tableau source {en} Source Array
+, tuVal; && {fr} Valeur à trouver {en} Value to find
+, tnColIn; && {fr} Colonne où chercher {en} Column where is the key
+, tnColOut; && {fr} Colonne où se trouve le résultat {en} Column where result is
+, tnFlags; && [15] {fr} nFlags selon options de aScan() {en} nFlags as in aScan()
+, tlSearch; && [.F.] {fr} Trouver la première valeur de m.tuVal {en} Search all values in m.tuVal
+, tcValsExclude; && [''] (m.tlSearch) {fr} Valeurs à exclure du résultat {en} Values to be excluded
+
 external array taSrce
-tnFlags = iif(vartype(m.tnFlags) == 'N' and between(m.tnFlags, 0, 15), m.tnFlags, 15)
+tnFlags = Bitor(Iif(ga_Type_IsInteger(m.tnFlags) and between(m.tnFlags, 0, 15), m.tnFlags, 15), 8)
 
 local luResult; && {en} Value found {fr} Valeur trouvée
 , llResult;
 , liResult;
+, aVal[1];
+, aValExcl[1];
+, iVal;
+, cVal;
 
-luResult = .null. && {en} if value not found in array {fr} Si valeur pas trouvée dans le tableau
+luResult = .null. && {en} if Value not found in array {fr} Si Valeur pas trouvée dans le Tableau
 
 llResult = type('taSrce', 1) == 'A';
  and vartype(m.tnColIn) == 'N';
@@ -1080,23 +1087,68 @@ assert m.llResult message cAssertMsg(textmerge(icase(;
 	cLangUser() = 'fr',	"Au moins un paramètre invalide",; && copy-paste this line to add another language support
 											"At least one parameter is invalid"; && Default: English
 	)))
-if m.llResult
-	liResult = ascan(taSrce, m.tuVal, 1, -1, m.tnColIn, m.tnFlags)
+do case
+case !m.llResult
+
+case lTrue(m.tlSearch) and ga_Type_IsChar(m.tuVal, .T.)
+	ALines(m.aValExcl, Iif(ga_Type_IsChar(m.tcValsExclude, .T.), m.tcValsExclude, ''), 5, ',')
+	for iVal = 1 to ALines(m.aVal, m.tuVal, 5, ',', ';')
+		cVal = m.aVal[m.iVal]
+		try
+			tuVal = Evaluate(m.cVal)
+		catch
+			tuVal = m.cVal
+		endtry
+		liResult = Ascan(taSrce, m.tuVal, 1, -1, m.tnColIn, m.tnFlags)
+		if m.liResult > 0
+			luResult = taSrce[m.liResult, m.tnColOut]
+			luResult = Iif(Empty(Ascan(m.aValExcl, m.luResult, 1, -1, 1, 7)), m.luResult, .null.)
+			if !IsNull(m.luResult)
+				exit
+			endif
+		endif
+	endfor
+
+otherwise
+	liResult = Ascan(taSrce, m.tuVal, 1, -1, m.tnColIn, m.tnFlags)
 	luResult = iif(m.liResult > 0;
 		, taSrce[m.liResult, m.tnColOut];
 		, m.luResult;
 		)
-endif
+endcase
 
 return m.luResult
+endfunc
 
 * ===================================================================
-function aSelect && {fr} Lignes d'un tableau selon une clé {en} Lines from an array conform to a key
+function aLookups && {fr} Valeur d'une Colonne d'un Tableau selon la première clé trouvée dans une autre Colonne {en} Value found in an array Column matching the first key found in another Column
 lparameters ;
-  taSrce; && @ {fr} TAbleau source {en} ARray source
-, taDest; && @ {fr} TAbleau destination {en} ARray target
-, tnCol; && {fr} COlonne où chercher {en} COlumn where to find
-, tuVal; && {fr} VAleur à trouver {en} VAlue to search
+  taSrce; && @ {fr} Tableau source {en} Source Array
+, tcVals; && {fr} Valeurs à trouver par ordre de priorité {en} Values to find, in priority order
+, tnColIn; && {fr} Colonne où chercher {en} Column where is the key
+, tnColOut; && {fr} Colonne où se trouve le résultat {en} Column where result is
+, tnFlags; && [15] {fr} nFlags selon options de aScan() {en} nFlags as in aScan()
+, tcValsExclude; && [''] {fr} Valeurs à exclure du résultat {en} Values to be excluded
+
+return aLookup(;
+	 @m.taSrce; && @ {fr} Tableau source {en} Source Array
+	, m.tcVals; && {fr} Valeurs à trouver par ordre de priorité {en} Values to find, in priority order
+	, m.tnColIn; && {fr} Colonne où chercher {en} Column where is the key
+	, m.tnColOut; && {fr} Colonne où se trouve le résultat {en} Column where result is
+	, m.tnFlags; && [15] {fr} nFlags selon options de aScan() {en} nFlags as in aScan()
+	, .T.; && [.F.] {fr} Trouver la première valeur de m.tcVals {en} Search all values in m.tcVals
+	, m.tcValsExclude; && [''] {fr} Valeurs à exclure du résultat {en} Values to be excluded
+	)
+
+endfunc
+
+* ===================================================================
+function aSelect && {fr} Lignes d'un Tableau selon une clé {en} Lines from an array conform to a key
+lparameters ;
+  taSrce; && @ {fr} Tableau source {en} Source Array
+, taDest; && @ {fr} Tableau destination {en} ARray target
+, tnCol; && {fr} Colonne où chercher {en} Column where to find
+, tuVal; && {fr} Valeur à trouver {en} Value to search
 , tnFlags && [15] {fr} nFlags selon options de aScan() {en} nFlags as in aScan()
 external array taSrce, taDest
 tnFlags = iif(vartype(m.tnFlags) == 'N' and between(m.tnFlags, 0, 15), m.tnFlags, 15)
@@ -1114,7 +1166,7 @@ assert m.llResult message cAssertMsg(textmerge(icase(;
 	)))
 if m.llResult
 
-	* {fr} Si la valeur existe
+	* {fr} Si la Valeur existe
 	liResult = ascan(taSrce, m.tuVal, 1, -1, m.tnCol, m.tnFlags)
 	if m.liResult > 0
 
@@ -1144,7 +1196,7 @@ loUnitTest.Test(2, @m.laSrce, @m.laDest, 2, 'commandbutton')
 return m.loUnitTest.Result()
 
 * ===================================================================
-function aClear && {fr} Vide un tableau {en} Return an empty array
+function aClear && {fr} Vide un Tableau {en} Return an empty array
 lparameters taResult && @ {fr} Tableau {en} Array
 
 if type('taResult', 1) == 'A'
@@ -1169,15 +1221,15 @@ loUnitTest.Test(.t., @m.laTest)
 return loUnitTest.Result()
 
 * ===================================================================
-function aRowCopyIns && {fr} Copie une ligne d'un tableau et l'insère dans un autre à une position donnée {en} Copy one line from an array and insert it in another array at a specific position
+function aRowCopyIns && {fr} Copie une ligne d'un Tableau et l'insère dans un autre à une position donnée {en} Copy one line from an array and insert it in another array at a specific position
 lparameters ;
   taDest; && @ {fr} Résultat {en} Result
-, taSrce; && @ {fr} tableau source des lignes copiées dans taDest {en} array source from where one line is inserted in taDest
+, taSrce; && @ {fr} Tableau source des lignes copiées dans taDest {en} Source Array from where one line is inserted in taDest
 , tiDest; && [dernière] {fr} N° de ligne APRÈS laquelle insérer la ligne copiée, 0 pour insérer au début {en} index of line AFTER the line is inserted
-, tiSrce   && [1] {fr} n° de la ligne du tableau source à copier dans la destination {en} index of line from source array to be copied in taDest
+, tiSrce   && [1] {fr} n° de la ligne du Tableau source à copier dans la destination {en} index of line from source array to be copied in taDest
 external array taDest, taSrce
 
-local lnCol, liCol, llResult, lnResult && {fr} nombre de lignes du tableau destination {en} number of lines of target array
+local lnCol, liCol, llResult, lnResult && {fr} nombre de lignes du Tableau destination {en} number of lines of target array
 
 lnResult = 0
 llResult = type('taDest', 1) == 'A' and type('taSrce', 1) == 'A'
@@ -1219,7 +1271,7 @@ endif
 return m.lnResult
 
 * ===================================================================
-function aAdd && {fr} Ajoute un élément à un tableau à UNE dimension {en} Add one element to an array with one dimension
+function aAdd && {fr} Ajoute un élément à un Tableau à UNE dimension {en} Add one element to an array with one dimension
 lparameters ;
   taResult; && @ {fr} Résultat {en} Result
 , tuElt; && {fr} élément à ajouter {en} element to append
@@ -1233,14 +1285,14 @@ local llResult, lu, lnResult && {fr} nombre de lignes du Résultat {en} number of
 lnResult = 0
 llResult = type('taResult', 1) == 'A'
 assert m.llResult message cAssertMsg(textmerge(icase(;
-	cLangUser() = 'fr',	[tableau attendu en premier paramètre : <<cLitteral(m.taResult)>> !],;
+	cLangUser() = 'fr',	[Tableau attendu en premier paramètre : <<cLitteral(m.taResult)>> !],;
 											[array expected as the first parameter : <<cLitteral(m.taResult)>> !]; && Default: English
 	)))
 if m.llResult
 
 	llResult = alen(taResult, 2) = 0
 	assert m.llResult message cAssertMsg(textmerge(icase(;
-		cLangUser() = 'fr',	[tableau à une dimension attendu : <<cLitteral(m.taResult)>> !],; && copy-paste this line to add another language support
+		cLangUser() = 'fr',	[Tableau à une dimension attendu : <<cLitteral(m.taResult)>> !],; && copy-paste this line to add another language support
 												[array with one dimension only expected : <<cLitteral(m.taResult)>> !]; && Default: English
 		)))
 	if m.llResult
@@ -1275,7 +1327,7 @@ return m.lnResult
 endfunc
 
 * ===================================================================
-function aPop && {fr} Supprime le premier élément d'un tableau à UNE dimension {en} Remove the first element from an array with one dimension
+function aPop && {fr} Supprime le premier élément d'un Tableau à UNE dimension {en} Remove the first element from an array with one dimension
 lparameters taResult && @ {fr} Résultat {en} Result
 external array taResult
 
@@ -1303,11 +1355,11 @@ endif
 return m.lnResult
 
 * ===================================================================
-function aPush && {fr} Ajoute un élément à la fin d'un tableau à UNE dimension {en} Append an element at the bottom of an array with dimension ONE
+function aPush && {fr} Ajoute un élément à la fin d'un Tableau à UNE dimension {en} Append an element at the bottom of an array with dimension ONE
 lparameters ;
   taResult; && @ {fr} Résultat {en} Result
 , tuElt; && {fr} élément à ajouter {en} element to add
-, tlUnique && [.F.] {fr} Ne pas ajouter l'élément au tableau s'il y est déjà {en} don't add it, if it exists already
+, tlUnique && [.F.] {fr} Ne pas ajouter l'élément au Tableau s'il y est déjà {en} don't add it, if it exists already
 external array taResult
 
 local llResult, lnResult
@@ -1363,13 +1415,13 @@ loUnitTest.assert(@m.laExpected, @m.laResult)
 return loUnitTest.Result()
 
 * ===================================================================
-function aLocate && {fr} Cherche plusieurs valeurs dans un tableau à 2 dimensions [à la manière de LOCATE FOR] {en} Search many values inside an array with 2 dimensions like the command LOCATE FOR
+function aLocate && {fr} Cherche plusieurs valeurs dans un Tableau à 2 dimensions [à la manière de LOCATE FOR] {en} Search many values inside an array with 2 dimensions like the command LOCATE FOR
 lparameters ;
   taIn; && @ {fr} Tableau où chercher {en} Array where to search
-, taFor; && @ {fr} Valeurs à chercher dans l'ordre des colonnes ; .NULL. pour ignorer une colonne {en} Values to search in order of columns ; .NULL. to avoid a column
-, tlCaseNo; && [.F.] {fr} Chercher les valeurs caractères en ignorant la casse {en} Search characters value case insensitive
-, tlExactNo; && [.F.] {fr} Chercher les valeurs caractères en EXACT OFF {en} Search characters value with SET EXACT OFF
-, liColKey; && [search] {fr} colonne ou se trouve la clé {en} column where the key sits
+, taFor; && @ {fr} Valeurs à chercher dans l'ordre des colonnes ; .NULL. pour ignorer une Colonne {en} Values to search in order of columns ; .NULL. to avoid a Column
+, tlCaseNo; && [.F.] {fr} Chercher les valeurs caractères en ignorant la casse {en} Search characters Value case insensitive
+, tlExactNo; && [.F.] {fr} Chercher les valeurs caractères en EXACT OFF {en} Search characters Value with SET EXACT OFF
+, liColKey; && [search] {fr} Colonne ou se trouve la clé {en} Column where the key sits
 
 external array taIn, taFor
 
@@ -1396,7 +1448,7 @@ assert m.llResult message cAssertMsg(textmerge(icase(;
 	)))
 if m.llResult and not laEmpty(@m.taIn)
 
-	* {fr} Si au moins une valeur à chercher est non nulle (clé)
+	* {fr} Si au moins une Valeur à chercher est non nulle (clé)
 	lnCol = alen(m.taFor)
 	liColKey = cast(m.liColKey as integer)
 	if between(m.liColKey, 1, m.lnCol) and !isnull(m.taFor[m.liColKey])
@@ -1424,7 +1476,7 @@ if m.llResult and not laEmpty(@m.taIn)
 		llResult = .f.
 		do while .t.
 
-			* {fr} Si la clé existe dans le tableau
+			* {fr} Si la clé existe dans le Tableau
 			liRow = ascan(m.taIn, m.luKey, m.liRow + 1, -1, m.liColKey, m.lnFlags)
 			if m.liRow > 0
 
@@ -1510,10 +1562,10 @@ endif
 return m.lnResult
 
 * ===================================================================
-function aColsDelim && {fr} Tableau à 2 dim d'après un tableau à une dimension contenant du texte délimité {en} Array with 2 dimensins from an array with one dimension containing delimited text
+function aColsDelim && {fr} Tableau à 2 dim d'après un Tableau à une dimension contenant du texte délimité {en} Array with 2 dimensins from an array with one dimension containing delimited text
 lparameters ;
-  taRow; && @ {fr} TAbleau à traiter et résultat en retour {en} ARray to use and to return
-, tcSeps; && [,;<CHr(9)>|] {fr} Séparateur de colonnes (plus rapide en le précisant) {en} COlumn delimiter (faster when indicated)
+  taRow; && @ {fr} Tableau à traiter et résultat en retour {en} ARray to use and to return
+, tcSeps; && [,;<CHr(9)>|] {fr} Séparateur de colonnes (plus rapide en le précisant) {en} Column delimiter (faster when indicated)
 , tuTypes && @ {fr} Types des colonnes (array ou liste) in 'CDGLNOQTUXYI' - les colonnes non précisées restent en caractères {en} Columns type (array or list) in 'CDGLNOQTUXYI' - when not indicated stay in character
 external array taRow, tuTypes
 
@@ -1526,7 +1578,7 @@ local lnResult; && {fr} nombre de lignes {en} number of lines
 
 llResult = not laEmpty(@m.taRow) and alen(taRow,2) <= 1
 assert m.llResult message cAssertMsg(textmerge(icase(;
-	cLangUser() = 'fr',	[le premier paramètre doit être un tableau à une dimension non vide : <<cLitteral(@m.taRow)>>],; && copy-paste this line to add another language support
+	cLangUser() = 'fr',	[le premier paramètre doit être un Tableau à une dimension non vide : <<cLitteral(@m.taRow)>>],; && copy-paste this line to add another language support
 						[first parameter must be an array with one dimension and not empty : <<cLitteral(@m.taRow)>>]; && Default: English
 	)))
 if m.llResult
@@ -1550,7 +1602,7 @@ if m.llResult
 				, aColsDelim_nColsSep(m.lcRow, @m.laSep, @m.lcSep);
 				))
 	endfor
-* {fr} ASSERT Lenc(m.lcSep) = 1 MESSAGE cAssertMsg(Textmerge([<<Proper(Program())>>() n'a trouvé aucun séparateur, le tableau aura une seule colonne]))
+* {fr} ASSERT Lenc(m.lcSep) = 1 MESSAGE cAssertMsg(Textmerge([<<Proper(Program())>>() n'a trouvé aucun séparateur, le Tableau aura une seule Colonne]))
 
 	* {fr} Si le typage est demandé, forcer le nombre de colonnes à la spécification de types
 	lnType = aVarType(@m.laType, @m.tuTypes)
@@ -1608,7 +1660,7 @@ if lenc(m.tcSep) = 0
 else
 	llResult = lenc(m.lcSepMax) = 0 or m.lcSepMax == m.tcSep
 	assert m.llResult message cAssertMsg(textmerge(icase(;
-	cLangUser() = 'fr',	[Séparateur de colonne ambigu, veuillez préciser '<<m.lcSepMax>>' ou '<<m.tcSep>>'],; && copy-paste this line to add another language support
+	cLangUser() = 'fr',	[Séparateur de Colonne ambigu, veuillez préciser '<<m.lcSepMax>>' ou '<<m.tcSep>>'],; && copy-paste this line to add another language support
 											[Column delimiter unusable, please explain '<<m.lcSepMax>>' or '<<m.tcSep>>']; && Default: English
 	)))
 	return iif(m.llResult, m.lnResult, 0)
@@ -1621,7 +1673,7 @@ function aLinesCols && {fr} Tableau à 2 dim d'après un texte multiligne délimité
 lparameters ;
   taResult; && @ {fr} Résultat {en} Result
 , tcTxt; && {fr} TExte multiligne tabulé {en} TAbulated multiline text
-, tcSep; && [,;<CHr(9)>|] {fr} Séparateur de colonnes (plus rapide en le précisant) {en} COlumn separator (faster when specified)
+, tcSep; && [,;<CHr(9)>|] {fr} Séparateur de colonnes (plus rapide en le précisant) {en} Column separator (faster when specified)
 , tuTypes && {fr} Types des colonnes (array ou liste) in 'CDGLNOQTUXYI' - les colonnes non précisées restent en caractères {en} Columns type (array or list) in 'CDGLNOQTUXYI' - when not indicated stay in character
 external array taResult, tuTypes
 

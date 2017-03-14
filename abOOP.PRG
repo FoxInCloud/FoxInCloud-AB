@@ -667,9 +667,10 @@ tcClassLib = iif(lower(justext(m.tcClassLib)) == 'prg', forceext(m.tcClassLib, '
 tiResult = 0
 
 local llResult as Boolean;
+, abOnError as abOn of abDev.prg;
 , loSets as abSetsMaintain of abDev.prg;
 , loException as exception;
-, loForm as form
+, loForm as form;
 
 llResult = ga_Type_IsChar(m.tcClass, .t.)
 if m.llResult
@@ -677,10 +678,11 @@ if m.llResult
 *assert !Lower(m.tcClass) == 'baseform' && 4 Feb 2014
 
 	tcClass = alltrim(m.tcClass)
-	loSets = newobject('abSetsMaintain', 'abDev.prg';
+	loSets = NewObject('abSetsMaintain', 'abDev.prg';
 		, .null.; && && [.null.] {en} type of SETs - .null.: all, .T.: scoped to the dataSession, .F.: global (not scoped to the dataSession)
 		, !wlAutomation(); && tlProcClass [.F.] {en} also save Set("Procedure") & Set("Classlib")
 		)
+	abOnError = NewObject('abOn', 'abDev.prg', '', 'error', '') && 2017-02-15 thn -- {FiC V 2.24.0-beta.6} {fr} 
 
 	try
 		try
@@ -958,11 +960,11 @@ if m.llResult
 	assert m.llResult message cAssertMsg(textmerge([le premier paramètre (<<cLitteral(@m.taObjects)>>) doit être un tableau]))
 	if m.llResult
 
-		if vartype(m.plRecurse) == 'U' and not (lTrue(m.tlAdd))
-			aClear(@m.taObjects)
-			private plRecurse
-			plRecurse = .t.
-		endif
+if Vartype(m.plRecurse) == 'U' and !lTrue(m.tlAdd)
+	aClear(@m.taObjects)
+	private plRecurse
+	plRecurse = .T.
+endif
 
 		llClass = vartype(m.tcClasses) == 'C' and not empty(m.tcClasses)
 

@@ -766,14 +766,16 @@ lparameters ;
   tuData ; && {fr} Valeur à convertir en littéral (type supportés : tous soit CDGLNOQTUXY)
 , tlRTrim; && [.F.] {fr} si type C, ôter les espaces à droite
 , tnTronc; && [aucun] {fr} si type C, nombre de caractères de troncature
-, tlXML && [.F.] {fr} Encoder pour XML
+, tlXML; && [.F.] {fr} Encoder pour XML
+, tlObjRecurseNot; && [.F.] {fr} Ne pas récurser dans les membres et propriétés de type objet
 
 return cLitteral(;
 	 @m.tuData;
 	, m.tlRTrim;
 	, m.tnTronc;
 	, m.tlXML;
-)
+	, m.tlObjRecurseNot;
+	)
 
 * ===================================================================
 function cLitteral && {fr} Littéral VFP
@@ -782,6 +784,7 @@ lparameters ;
 , tlRTrim; && [.F.] {fr} si type C, ôter les espaces à droite
 , tnTronc; && [aucun] {fr} si type C, nombre de caractères de troncature
 , tlXML; && [.F.] {fr} Encoder pour XML
+, tlObjRecurseNot; && [.F.] {fr} Ne pas récurser dans les membres et propriétés de type objet
 
 #if .f. && {fr} Vartype VFP9
 	C && {fr} Character, Memo, Varchar, Varchar (Binary)
@@ -797,10 +800,14 @@ lparameters ;
 	y && {fr} Currency
 #endif
 
+tlRTrim = lTrue(m.tlRTrim)
+tlXML = lTrue(m.tlXML)
+tlObjRecurseNot = lTrue(m.tlObjRecurseNot)
+
 local lcVarType
 lcVarType = vartype(m.tuData)
 
-return icase(;
+return ICase(;
 	type('tuData', 1) == 'A',;
 		'[' + cListOfArray(@m.tuData, ', ',-1,.t.,.t.,.t.,.t.) + ']',;
 	M.lcVarType == 'C',;
@@ -814,7 +821,7 @@ return icase(;
 	M.lcVarType == 'X',;
 		'.NULL.',;
 	M.lcVarType == 'O',;
-		cLitteral_O(m.tuData, m.tlRTrim, m.tnTronc, m.tlXML),;
+		cLitteral_O(m.tuData, m.tlRTrim, m.tnTronc, m.tlXML, m.tlObjRecurseNot),;
 	M.lcVarType == 'G',;
 		'General',;
 	M.lcVarType == 'Q',;
@@ -829,9 +836,6 @@ lparameters ;
 , tlRTrim; && [.F.] {fr} si type C, ôter les espaces à droite
 , tnTronc; && [aucun] {fr} si type C, nombre de caractères de troncature
 , tlXML && [.F.] {fr} Encoder pour support XML
-
-tlRTrim = lTrue(m.tlRTrim)
-tlXML   = lTrue(m.tlXML)
 
 local lcResult as string;
 , llTronc as Boolean;
@@ -951,12 +955,18 @@ lparameters ;
   tuData; && {fr} Nombre  à convertir en littéral
 , lcVarType
 
-return chrtran(;
-	iif(m.lcVarType = 'Y';
-	, '$' + alltrim(str(m.tuData, 200, 6));
-	, transform(m.tuData);
-	);
-	, set("Point"), '.') && {fr} Gregory Adam http://www.atoutfox.org/nntp.asp?ID=0000008895
+local result as String
+
+result = chrtran(;
+	  iif(m.lcVarType = 'Y';
+		, '$' + alltrim(str(m.tuData, 200, 6));
+		, transform(m.tuData);
+		);
+	, set("Point"), '.'; && {fr} Gregory Adam http://www.atoutfox.org/nntp.asp?ID=0000008895
+	)
+
+return Iif('.' $ m.result, Trim(m.result, '0'), m.result)
+endfunc
 
 * -----------------------------------------------------------------
 function cLitteral_O && {fr} Littéral VFP de type objet
@@ -965,6 +975,7 @@ lparameters ;
 , tlRTrim; && [.F.] {fr} si type C, ôter les espaces à droite
 , tnTronc; && [aucun] {fr} si type C, nombre de caractères de troncature
 , tlXML; && [.F.] {fr} Encoder pour XML
+, tlObjRecurseNot; && [.F.] {fr} Ne pas récurser dans les membres et propriétés de type objet
 
 local lcResult;
 , loObject;
@@ -990,8 +1001,8 @@ case type('m.toObject.class') == 'C' and type('m.toObject.classLibrary') == 'C' 
 		, nEvl(m.toObject.ParentClass, 'ParentClass: ' + cL(m.toObject.ParentClass));
 		, 'Class: ' + cL(m.toObject.class);
 		, nEvl(m.toObject.ClassLibrary, 'ClassLibrary:' + cL(m.toObject.ClassLibrary));
-		, iif(type('m.toObject.Parent') == 'O', 'location: ' + sys(1272, m.toObject), '');
-		, cLitteral_O_cProps(m.toObject, m.tlRTrim, m.tnTronc, m.tlXML);
+		, Iif(type('m.toObject.Parent.Name') == 'C', 'parent: ' + m.toObject.Parent.Name, '');
+		, cLitteral_O_cProps(m.toObject, m.tlRTrim, m.tnTronc, m.tlXML, m.tlObjRecurseNot);
 		)
 
 case type('m.toObject.Application') == 'O' and type('m.toObject.Application.Name') == 'C' && {fr} and ! 'foxpro' $ Lower(m.toObject.Application.Name) && {fr} COM object? eg 'Microsoft Excel'
@@ -1004,7 +1015,7 @@ otherwise && {fr} Empty Object
 
 	lcResult = cWords(', ';
 		, 'class: "Empty"';
-		, cLitteral_O_cProps(m.toObject, m.tlRTrim, m.tnTronc, m.tlXML);
+		, cLitteral_O_cProps(m.toObject, m.tlRTrim, m.tnTronc, m.tlXML, m.tlObjRecurseNot);
 		)
 endcase
 
@@ -1018,11 +1029,13 @@ lparameters ;
 , tlRTrim; && [.F.] {fr} si type C, ôter les espaces à droite
 , tnTronc; && [aucun] {fr} si type C, nombre de caractères de troncature
 , tlXML; && [.F.] {fr} Encoder pour XML
+, tlObjRecurseNot; && [.F.] {fr} Ne pas récurser dans les membres et propriétés de type objet
 
 local lcResult as string;
 , aProp[1];
 , cProp as string;
 , lProp as Boolean;
+, uProp as Variant;
 , aa[1];
 , lArray as Boolean;
 
@@ -1049,9 +1062,14 @@ if amembers(aProp, m.toObject) > 0 && {fr} can be an empty object without proper
 		lcResult = m.lcResult + iif(.T.; && and !pemstatus(m.toObject, m.cProp, 6); && {en} not inherited
 			and pemstatus(m.toObject, m.cProp, 0); && {fr} modified
 			, ', ' + lower(m.cProp) + ': ' + iif(m.lProp;
-				, iif(m.lArray;
-					, cL(@m.aa, m.tlRTrim, m.tnTronc, m.tlXML);
-					, cL(evaluate('m.toObject.' + m.cProp), m.tlRTrim, m.tnTronc, m.tlXML);
+				, iCase(;
+					m.lArray,;
+						cL(@m.aa, m.tlRTrim, m.tnTronc, m.tlXML, m.tlObjRecurseNot),;
+					InList(m.cProp, Upper('ActiveForm'), Upper('ActiveControl'));
+					 or !varSet(@m.uProp, Evaluate('m.toObject.' + m.cProp));
+					 or m.tlObjRecurseNot and Vartype(m.uProp) == 'O',;
+						[object],;
+						cL(m.uProp, m.tlRTrim, m.tnTronc, m.tlXML, m.tlObjRecurseNot);
 					);
 				, '[protected or hidden]';
 				);
@@ -1385,55 +1403,53 @@ function uEmpty && {fr} Valeur vide selon les différents Type()
 lparameters ;
   tuType; && {fr} Type de valeur, ou valeur si m.tlValue
 , tlValue && [.F.] {fr} tuType contient une valeur
+
 tlValue = lTrue(m.tlValue)
 
 #if .f. && {fr} Types supportés
 A	array (only returned when the optional 1 parameter is included)
-Ã¼	B	double
-Ã¼	C	character, varchar, varchar (Binary)
-Ã¼	D	date
-Ã¼	f	float
+B	double
+C	character, varchar, varchar (Binary)
+D	date
+F	float
 G	general
-Ã¼	I	integer
-Ã¼	L	Logical
-Ã¼	M	memo
-Ã¼	n	Numeric, float, double, or integer
+I	integer
+L	Logical
+M	memo
+N	Numeric, float, double, or integer
 O	object
-Ã¼	Q	varbinary
-s	screen
-Ã¼	t	datetime
+Q	varbinary
+S	screen
+T	datetime
 U	Undefined type of expression or cannot evaluate expression.
-Ã¼	V	varchar
-Ã¼	W	blob
-Ã¼	y	currency
+V	varchar
+W	blob
+Y	currency
 #endif
 
-local lcType, llResult, luResult
-luResult = .null.
+local lcType, llResult
 
-if m.tlValue
+do case
+case m.tlValue
 	lcType = vartype(m.tuType)
-	llResult = .t.
-else
-	if vartype(m.tuType) == 'C' and len(m.tuType) = 1
-		lcType = upper(m.tuType)
-		llResult = m.lcType $ 'BCDFILMNTVQWY' && 13 types
-	endif
-	assert m.llResult message cAssertMsg(textmerge("Spécification de type non supportée : <<cLitteral(m.tuType)>>"))
-endif
-if m.llResult
+	llResult = .T.
+case Vartype(m.tuType) == 'C' and varSet(@m.lcType, Upper(Alltrim(m.tuType))) and Lenc(m.lcType) = 1
+	llResult = m.lcType $ 'BCDFILMNQTVWY' && 13 types
+endcase
 
-	luResult = icase(.f., null;
-		, m.lcType $ 'CMV', space(iif(m.tlValue, lenc(m.tuType), 0));
-		, m.lcType $ 'BFNYI', iif(m.tlValue, m.tuType * 0, iif(m.lcType == 'Y', $0, 0));
-		, m.lcType $ 'D', ctod('');
-		, m.lcType $ 'T', ctot('');
-		, m.lcType $ 'L', .f.;
-		, m.lcType $ 'QW', 0H; && {fr} Blob, Varbinary
-		, .null.)
-endif
+assert m.llResult message cAssertMsg(textmerge("Spécification de type non supportée : <<cL(m.tuType)>>"))
 
-return m.luResult
+return ICase(;
+ !m.llResult, .null.,;
+	m.lcType $ 'CMV', space(iif(m.tlValue, lenc(m.tuType), 0)),;
+	m.lcType $ 'BFNYI', iif(m.tlValue, m.tuType * 0, iif(m.lcType == 'Y', $0, 0)),;
+	m.lcType $ 'D', ctod(''),;
+	m.lcType $ 'T', ctot(''),;
+	m.lcType $ 'L', .f.,;
+	m.lcType $ 'QW', 0H,; && {fr} Blob, Varbinary
+	.null.;
+	)
+endfunc
 
 * ===================================================================
 function cLitteralNum && {fr} Littéral numérique d'après une chaine de caractères représentant un nombre
