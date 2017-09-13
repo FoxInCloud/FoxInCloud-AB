@@ -997,7 +997,7 @@ return m.lnResult
 procedure AliasReuse && {fr} Rouvre un alias dans un autre mode
 lparameters ;
   tcAlias; && {fr} Alias
-, tcMode; && [''] 'Exclusive' | 'Shared' | 'Noupdate' | '' (=Set("EXCLUSIVE"))
+, tcMode; && [''] 'Exclusive' | 'Shared' | 'Noupdate' | ''
 , tlAgain; && [.F.] {fr} AGAIN
 , tcAliasNew; && [m.tcAlias] {fr} Nouvel Alias
 , tiWorkArea; && [0] {fr} Work area && 2016-09-01 thn -- {FiC V 2.22.0-beta.5} {en} added
@@ -1020,7 +1020,7 @@ if used(m.tcAlias)
 
 		tcMode = upper(left(ltrim(evl(m.tcMode, '')), 1))
 		tlAgain = iif(lTrue(m.tlAgain) and not m.tcMode == 'E', 'AGAIN', '')
-		tcMode = icase(m.tcMode == 'E', 'EXCLUSIVE', m.tcMode == 'S', 'SHARED', m.tcMode == 'R', 'READONLY', '')
+		tcMode = ICase(m.tcMode == 'E', 'EXCLUSIVE', m.tcMode == 'S', 'SHARED', m.tcMode $ 'RN', 'NOUPDATE', '')
 
 		lnSelect = select(0)
 		select (m.tcAlias)
@@ -1032,7 +1032,7 @@ if used(m.tcAlias)
 		lcField = set("Fields")
 		lcFields = set("Fields", 1)
 
-		lcMode = icase(IsExclusive(), 'EXCLUSIVE', isreadonly(), 'READONLY', 'SHARED')
+		lcMode = ICase(IsExclusive(), 'EXCLUSIVE', IsReadonly(), 'NOUPDATE', 'SHARED')
 		llAgain = aused(laUsed, .null., m.lcTable) > 1 && {fr} et encore il faudrait vérifier chaque session de données !
 		lcAgain = iif(m.llAgain, 'AGAIN', '')
 
@@ -1903,23 +1903,24 @@ return m.llResult
 * ========================================
 function nField && {fr} Position d'un champ dans l'alias courant ou spécifié
 lparameters ;
-  tcField ; && {fr} Nom du champ dont l'existence est a verifier
-, tuTable && [Alias()] {fr} Alias ou adresse de la table où l'existence du champ est à verifier
-local lnResult
+  tcField; && {fr} Nom du champ dont l'existence est a verifier
+, tuTable; && [Alias()] {fr} Alias ou adresse de la table où l'existence du champ est à verifier
+
+local lnResult as Integer;
+, lcAlias, llAlias;
+, lcField, liField;
+
 lnResult = 0
 
-if vartype(m.tcField) = 'C' ;
- and !empty(m.tcField)
+if vartype(m.tcField) = 'C' and !empty(m.tcField)
 
-	local lcAlias, llAlias
 	lcAlias = cAlias(m.tuTable, @m.llAlias)
 
 	if used(m.lcAlias)
-		local lcField, lnField
 		lcField = upper(alltrim(m.tcField))
-		for m.lnField = 1 to fcount(m.lcAlias)
-			if field(m.lnField, m.lcAlias) == m.lcField
-				lnResult = m.lnField
+		for liField = 1 to fcount(m.lcAlias)
+			if field(m.liField, m.lcAlias) == m.lcField
+				lnResult = m.liField
 				exit
 			endif
 		endfor
@@ -3095,7 +3096,11 @@ lparameters ;
 , tiAutoIncNext; && [none] aField(17) {en} NextValue for autoincrementing
 , tiAutoIncStep; && [none] aField(18) {en} Step for autoincrementing
 
-local llResult, lcResult
+local lcResult;
+, llResult;
+, lcLen;
+, lcDec;
+
 lcResult = ''
 
 llResult = vartype(m.tcField) == 'C'
@@ -3114,20 +3119,22 @@ if m.llResult
 
 		lcResult = c2Words(m.tcField, space(1), m.tcType)
 
-		if not m.tcType $ VFP9_FIELD_TYPES_FIXED_LEN ;
-		 and vartype(m.tuLen) $ 'CN'
+		if !m.tcType $ VFP9_FIELD_TYPES_FIXED_LEN and vartype(m.tuLen) $ 'CN'
 
-			local lcLen, lcDec
-			lcLen = alltrim(iif(vartype(m.tuLen) = 'C', m.tuLen, str(m.tuLen)))
-
-			if m.tcType $ VFP9_FIELD_TYPES_WITH_DEC ;
-			 and vartype(m.tuDec) $ 'CN'
+			lcLen = Alltrim(ICase(;
+				m.tcType = 'B',; && 2017-06-14 thn -- {FiC V 2.25.0-beta.6} {fr} added
+					'',;
+				vartype(m.tuLen) = 'C',;
+					m.tuLen,;
+					str(m.tuLen);
+				))
+			lcDec = ''
+			if m.tcType $ VFP9_FIELD_TYPES_WITH_DEC and Vartype(m.tuDec) $ 'CN'
 				lcDec = alltrim(iif(vartype(m.tuDec) = 'C', m.tuDec, str(m.tuDec)))
-				lcDec = iif(val(m.lcDec) = 0, '', m.lcDec)
-			else
-				lcDec = ''
+				lcDec = iif(val(m.lcDec) = 0 and !m.tcType == 'B', '', m.lcDec)
 			endif
-			lcResult = textmerge([<<m.lcResult>>(<<m.lcLen>><<Iif(Empty(m.lcDec), '', ',' + m.lcDec)>>)])
+
+			lcResult = textmerge([<<m.lcResult>>(<<c2Words(m.lcLen, ',', m.lcDec)>>)])
 		endif
 
 		lcResult = lcResult + textmerge([];
@@ -3165,9 +3172,12 @@ lparameters ;
   tcField; && {fr} Champ
 , tcTable; && {fr} Table
 , tlNullIgnore; && [.F.] {fr} Ignorer le réglage SET NULL du champ
-, tlNameIgnore && [.F.] {fr} Ignorer le nom du champ
+, tlNameIgnore; && [.F.] {fr} Ignorer le nom du champ
 
-local lcAlias, llAlias, laField[1], lnField, llResult, lcResult
+local lcResult;
+, llResult;
+, lcAlias, llAlias;
+, laField[1], lnField;
 
 lcResult = ''
 lcAlias = cAlias(m.tcTable, @m.llAlias)
@@ -3181,12 +3191,12 @@ if m.llResult
 	if m.llResult
 
 		lcResult = cFieldExp(;
-				  iif(lTrue(m.tlNameIgnore), '', laField[m.lnField, AFIELDS_NAME]);
-				, laField[m.lnField, AFIELDS_TYPE];
-				, laField[m.lnField, AFIELDS_WIDTH];
-				, laField[m.lnField, AFIELDS_PRECISION];
-				, iif(lTrue(m.tlNullIgnore), .null., laField[m.lnField, AFIELDS_NULL]);
-				)
+			  iif(lTrue(m.tlNameIgnore), '', laField[m.lnField, AFIELDS_NAME]);
+			, laField[m.lnField, AFIELDS_TYPE];
+			, laField[m.lnField, AFIELDS_WIDTH];
+			, laField[m.lnField, AFIELDS_PRECISION];
+			, iif(lTrue(m.tlNullIgnore), .null., laField[m.lnField, AFIELDS_NULL]);
+			)
 	endif
 endif
 
@@ -4113,10 +4123,10 @@ if m.success
 			assert m.success message cAssertMsg(textmerge([Impossible d'accéder à la table '<<m.tcTable>>' en mode exclusif]))
 		endif
 		if m.success
+			select (m.lcAlias) && {fr} abSelect(...) plus haut
 
 			* {fr} Si la structure doit changer && /!\ supporter ALTER COLUMN ... NULL
 			if m.llFields
-
 				* {fr} Supprimer les tags avant de supprimer les champs qui pourraient y être impliqués
 				if m.llTags
 					for liTag = 1 to m.lnTags && {fr} EACH lcTag IN laTag
@@ -4143,7 +4153,6 @@ if m.success
 				tlAdjusted = .t.
 			endif
 
-			select (m.lcAlias) && {fr} abSelect(...) plus haut
 		else
 			tcResult = textmerge(icase(;
 				cLangUser() = 'fr', [Impossible d'accéder à la table '<<m.tcTable>>' en mode exclusif],; && copy-paste this line to add another language support
@@ -4431,7 +4440,8 @@ return m.lcResult
 procedure aFields_ && {fr} aFields() d'après un tableau ou une liste ou selon syntaxe CREATE TABLE
 lparameters ;
   taResult; && @ {fr} Résultat selon aFields()
-, tuFields && @A|C Spécification de champs dans l'ordre de aFields(), tabulé ou délimité par ';|\t', ou selon syntaxe CREATE TABLE
+, tuFields; && @a|C Spécification de champs dans l'ordre de aFields(), tabulé ou délimité par ';|\t', ou selon syntaxe CREATE TABLE
+
 external array taResult, tuFields
 
 local lnCols, lnRow, lnResult && {fr} Nombre de champs
@@ -4587,13 +4597,22 @@ local lnCols, liTag, lcSetCollate, lnResult && {fr} Nombre d'indexes
 if aClear(@m.taResult)
 
 	lnResult = icase(;
-		type('tuTagInfo', 1) == 'A', icase(;
-			laEmpty(@m.tuTagInfo), 0,;
-			alen(tuTagInfo, 2) <= 1, min(acopy(tuTagInfo, taResult), 0) + aColsDelim(@m.taResult, aTAGINFO_SEPS),;
-			between(alen(tuTagInfo, 2), 3, 6), min(acopy(tuTagInfo, taResult), 0) + alen(taResult, 1),; && {en} tuTagInfo is already in aTagInfo() format
-			-1),;
-		vartype(m.tuTagInfo) == 'C', aLinesCols(@m.taResult, cCommentStripped(cInLineCommentStripped(m.tuTagInfo)), aTAGINFO_SEPS),; && TEXT TO tuTagInfo ... ENDTEXT
-		-1)
+		type('tuTagInfo', 1) == 'A',;
+			ICase(;
+			laEmpty(@m.tuTagInfo),;
+				0,;
+			alen(tuTagInfo, 2) <= 1,;
+				min(acopy(tuTagInfo, taResult), 0) + aColsDelim(@m.taResult, aTAGINFO_SEPS),;
+			between(alen(tuTagInfo, 2), 3, 6),;
+				min(acopy(tuTagInfo, taResult), 0) + alen(taResult, 1),; && {en} tuTagInfo is already in aTagInfo() format
+				-1;
+			),;
+		!ga_Type_IsChar(m.tuTagInfo),;
+			-1,;
+		!empty(m.tuTagInfo),;
+			aLinesCols(@m.taResult, cCommentStripped(cInLineCommentStripped(m.tuTagInfo)), aTAGINFO_SEPS),; && TEXT TO tuTagInfo ... ENDTEXT
+			0;
+		)
 
 	assert m.lnResult >= 0 message cAssertMsg(textmerge([Spécification d'index invalide <<cLitteral(m.tuTagInfo)>>]))
 	lnResult = max(m.lnResult, 0)
@@ -4803,7 +4822,8 @@ lparameters ;
 
 tlNULL = .null.
 
-local lcFieldExp, lnLens, laLens[1], lcNULL, llResult
+local llResult;
+, lcFieldExp, lnLens, laLens[1], lcNULL
 
 llResult = vartype(m.tcFieldExp) == 'C' and not empty(m.tcFieldExp)
 assert m.llResult message cAssertMsg(textmerge([Description de champ invalide : <<cLitteral(m.tcFieldExp)>>]))
@@ -4993,7 +5013,7 @@ return  0 < iif(pcount() = 1;
 * ========================================
 function aRelationSrce && {fr} Relations dont un alias est la source
 lparameters ;
-  taRelation; && {fr} Relations [1- Relational Expression, 2- Target Alias]
+  taRelation; && {en} Relations [1- Relational Expression, 2- Target Alias]
 , tcAlias; && [Alias()] {fr} Alias à examiner
 , tlExtended; && [.F., .T. if m.tlCascade] {fr} Relations [1- Relational Expression, 2- Target Alias, 3- Target Index Expression, 4- Source Alias]
 , tlCascade && [.F.] {en} Explore target alias as source alias
@@ -5186,7 +5206,10 @@ tcAlias = evl(m.tcAlias, alias())
 
 local laRelation[1], lnSelect, llResult
 
-llResult = used(m.tcAlias) and aRelationSrce(@m.laRelation, m.tcAlias) > 0
+llResult = used(m.tcAlias) and 0 < aRelationSrce(;
+	 @m.laRelation; && {en} Relations [1- Relational Expression, 2- Target Alias]
+	, m.tcAlias;
+	)
 if m.llResult
 
 	this.cAlias = m.tcAlias
@@ -5233,47 +5256,63 @@ lparameters ;
 local liResult as integer;
 , llUsed;
 , laResult[1];
-, loDeleted;
-, loTalk;
+, llDeleted;
+, llTalk;
 , loRecno;
 , lcFilter
 
-liResult = .null.
-loDeleted = abSet('DELETED', 'OFF')
-loTalk = abSet('TALK', 'OFF')
+tcAlias = evl(m.tcAlias, alias())
+tcAlias = Iif(Used(m.tcAlias), m.tcAlias, cAlias(m.tcAlias, @m.llUsed))
 
-tcAlias = cAlias(evl(m.tcAlias, alias()), @m.llUsed)
+llDeleted = Set("Deleted") == 'ON'
+if m.llDeleted
+	set deleted off
+endif
+
+llTalk = Set("Talk") == 'ON'
+if m.llTalk
+	set talk off
+endif
 
 do case
 case !used(m.tcAlias)
+	liResult = .null.
 
-case RecCount(m.tcAlias) < 1000
+case .T. && RecCount(m.tcAlias) < 1000
 
 	select max(&tcField) from (m.tcAlias) into array laResult && 50 ms pour 14.000 enr.
-	liResult = evl(laResult[1], 0)
+	liResult = nvl(evl(laResult[1], 0), 0)
 
 case IsExclusive(m.tcAlias) or used('_iAutoInc')
 
-		loRecno = abRecno(m.tcAlias)
-		lcFilter = filter(m.tcAlias)
+	loRecno = abRecno(m.tcAlias)
+	lcFilter = filter(m.tcAlias)
 
-		set filter to in (m.tcAlias)
-		calculate max(&tcField) in (m.tcAlias) to liResult && 32 ms pour 14.000 enr. avec affichage du résultat, 31 ms sans
-		set filter to &lcFilter in (m.tcAlias)
+	set filter to in (m.tcAlias)
+	calculate max(&tcField) in (m.tcAlias) to liResult && 32 ms pour 14.000 enr. avec affichage du résultat, 31 ms sans
+	set filter to &lcFilter in (m.tcAlias)
 
 otherwise
 
-		use (dbf(m.tcAlias)) in 0 again shared alias _iAutoInc && {fr} évite SET FILTER
-		calculate max(&tcField) in _iAutoInc to liResult
-		use in _iAutoInc
+	use (dbf(m.tcAlias)) in 0 again shared alias _iAutoInc && {fr} évite SET FILTER
+	calculate max(&tcField) in _iAutoInc to liResult
+	use in _iAutoInc
 
 endcase
+
+if m.llDeleted
+	set deleted on
+endif
+if m.llTalk
+	set talk on
+endif
 
 if m.llUsed
 	use in (m.tcAlias)
 endif
 
 return nvl(m.liResult, 0) + evl(m.tiIncrement, 1)
+endfunc
 
 * ========================================
 function cSelectSQL && {fr} Construit une instruction SELECT-SQL à partir de ses clauses
@@ -6716,7 +6755,7 @@ define class nRecnoAbs_Test as abUnitTest of abDev.prg
 enddefine
 
 * ========================================
-function abOrder
+function abOrder && {en} saves, changes and restores Order()
 lparameters ;
   result; && @ result
 , cAlias; && [Alias()]

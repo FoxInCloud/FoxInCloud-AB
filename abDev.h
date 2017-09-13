@@ -44,7 +44,7 @@
 
 * {fr} Dossiers à exclure des traitements batch
 #define FOLDERS_EXCLUDE	'save,_save,old,_old,bak,back,_back,tmp,_tmp,temp,_temp,ancien,_ancien,anciens,_anciens,sauve,_sauve';
-	 + ',source,_source,script,scripts,image,images,screenshots,doc,docs,test,_gsData_,.git,test,tests'
+	 + ',src,source,_source,script,scripts,image,images,screenshots,doc,docs,test,_gsData_,.git,test,tests'
 
 *!*	declare integer ShellExecute IN Shell32.dll; && {fr} If the function succeeds, it returns a value greater than 32
 *!*		  integer nWinHandle; && {fr} A handle to the parent window used for displaying a UI or error messages. This value can be NULL if the operation is not associated with a window.

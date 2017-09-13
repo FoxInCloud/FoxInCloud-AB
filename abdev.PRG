@@ -3892,7 +3892,13 @@ if m.llResult
 					m.lcTypeDest == 'N', val(m.tuValue),;
 					m.lcTypeDest == 'Y', ntom(val(m.tuValue)),;
 					m.lcTypeDest == 'I', int(val(m.tuValue)),;
-					m.lcTypeDest == 'L', icase(inlist(m.tuValue, 'T', '.T.', 'VRAI', 'TRUE'), .t., empty(m.tuValue) or inlist(m.tuValue, 'F', '.F.', 'FAUX', 'FALSE'), .f., evaluate(m.tuValue)),;
+					m.lcTypeDest == 'L', icase(;
+						inlist(m.tuValue, 'T', '.T.', 'VRAI', 'TRUE'),;
+							.t.,;
+						empty(m.tuValue) or inlist(m.tuValue, 'F', '.F.', 'FAUX', 'FALSE'),;
+							.f.,;
+							evaluate(m.tuValue);
+							),;
 					m.lcTypeDest $ 'DT', iif(left(m.tuValue, 1) = '{', evaluate(m.tuValue), uValue_TD(m.tuValue, m.lcTypeDest)),;
 					.null.)
 				if m.lcTypeDest $ 'DT' && {fr} Ctod() et Ctot() peuvent produire un résultat invalide
@@ -4867,7 +4873,7 @@ do while .t.
 		endif
 	endif
 
-	tnElapsed = 0
+	tnElapsed = 0 && see https://www.sweetpotatosoftware.com/blog/index.php/2005/06/29/execution-time-for-vfp/ and http://fox.wikis.com/wc.dll?Wiki~csnwHighResTimer
 	for liAttempt = 1 to m.lnAttempt
 
 		* {fr} Restaurer les paramètres
@@ -4885,12 +4891,12 @@ do while .t.
 			endif
 		endfor
 
-* {fr} Exécuter la procédure / fonction
-* ===========================================================
+		* {fr} Exécuter la procédure / fonction
+		* ===========================================================
 		lnSeconds = seconds()
 		luResult = evaluate(this.cModule + '(' + m.tcParms + ')')
 		tnElapsed = m.tnElapsed + nMS(m.lnSeconds) && {fr} millisecondes
-* ===========================================================
+		* ===========================================================
 
 	endfor
 
@@ -5817,14 +5823,14 @@ if .t.;
 		, '';
 		)
 
-	tuItem = '';
-		+ iif(left(m.tuItem, lenc(m.lcHeader)) == m.lcHeader, '', m.lcHeader);
-		+ m.tuItem
+	tuItem = iif(leftc(m.tuItem, lenc(m.lcHeader)) == m.lcHeader, '', m.lcHeader) + m.tuItem
 
-	tcResult = '';
-		+ iif(lTrue(m.tlPrepend);
-		  , c2Words(m.tuItem, iif(m.tlLine, CRLF, CRLF2), m.tcResult);
-		  , c2Words(m.tcResult, iif(m.tlLine, CRLF, CRLF2), m.tuItem);
+	tcResult = ICase(;
+		Lenc(m.tcResult) + Lenc(m.tuItem) > VFP_VAR_SIZE_MAX,;
+			Trim(m.tcResult, '.') + '...',;
+		lTrue(m.tlPrepend),;
+			c2Words(m.tuItem, iif(m.tlLine, CRLF, CRLF2), m.tcResult),;
+			c2Words(m.tcResult, iif(m.tlLine, CRLF, CRLF2), m.tuItem);
 		  )
 
 endif
@@ -6334,7 +6340,7 @@ if vartype(m.version) # 'C'
 	version = m.result
 endif
 
-return createobject('abSemVer', @m.result, m.version, m.loose)
+return CreateObject('abSemVer', @m.result, m.version, m.loose) && Evl(, .null.) && 2017-04-24 thn -- {FiC V 2.25.0-beta.4} {en} all similar functions should do the same
 endfunc
 
 * -----------------
@@ -6378,13 +6384,13 @@ loose = .null.
 raw = .null.
 version = .null.
 
-&& {en} these are actually numbers
+&& {en} these are numbers
 major = .null.
 minor = .null.
 patch = .null.
 
 dimension prerelease[1], build[1]
-prerelease = .null. && {en} array of prerelease(s) identifier(s) and number(s) && {fr} keep as lower case
+prerelease = .null. && {en} array of prerelease(s) identifier(s) and number(s), keep as lower case
 build = .null. && {en} array of build numbers
 
 && {en} FoxInCloud extensions
@@ -6409,7 +6415,7 @@ local success as Boolean;
 
 success = this.Init_(@m.cResult, m.version, m.loose)
 
-* {fr} assert m.success message cAssertMsg(m.cResult)
+* assert m.success message cAssertMsg(m.cResult)
 = m.success or cResultAdd(@m.result, m.cResult)
 
 return m.success
@@ -6456,7 +6462,7 @@ endif
 
 oSubMatch = m.oRegExp.matches[3]
 
-&& {fr} these are actually numbers
+&& {en} these are actually numbers
 this.major = cast(m.oSubMatch.item(1) as i) && .Item() évite les erreur de project manager
 this.minor = cast(m.oSubMatch.item(2) as i)
 this.patch = cast(m.oSubMatch.item(3) as i)
@@ -6495,7 +6501,7 @@ if m.this.lPreRelease
 				cPreReleases = '';
 					+ Evl(Leftc(m.cPreReleases, m.iPreRelease), 'beta'); && 2015-09-25 thn InstallShield support: prerelease must be a number
 					+ '.';
-					+ Cast(Cast(Substr(m.cPreReleases, m.iPreRelease + 1) as I) as  m) && {fr} removes leading 0 if any
+					+ Cast(Cast(Substr(m.cPreReleases, m.iPreRelease + 1) as I) as  m) && {en} removes leading 0 if any
 				nPreRelease = 2
 				exit
 			endif
@@ -6572,7 +6578,7 @@ addproperty(this.oPattern, 'MAINVERSION', '';
 
 addproperty(this.oPattern, 'MAINVERSIONLOOSE', '';
 	+ '(' + this.oPattern.NUMERICIDENTIFIERLOOSE + ')\.';
-	+ '(' + this.oPattern.NUMERICIDENTIFIERLOOSE + ')(?:\.'; && {fr} thn 2015-09-25 {en} back compat.: allow for patch figure missing (eg. '2.20beta')
+	+ '(' + this.oPattern.NUMERICIDENTIFIERLOOSE + ')(?:\.'; && {en} thn 2015-09-25 {en} back compat.: allow for patch figure missing (eg. '2.20beta')
 	+ '(' + this.oPattern.NUMERICIDENTIFIERLOOSE + '))?';
 	)
 
@@ -6765,7 +6771,7 @@ comparePre = .null.
 other = this.oSemVer(m.other)
 if this.lSemVer(m.other)
 
-  * {fr} NOT having a prerelease is > having one
+  * {en} NOT having a prerelease is > having one
   do case
   case !m.this.lPreRelease and !m.other.lPreRelease
     return 0
@@ -6823,7 +6829,7 @@ return ascan(m.this.prerelease, 'beta')
 endfunc
 
 * -----------------
-function lBeta(iBeta) && {fr} beta prerelease
+function lBeta(iBeta) && {en} beta prerelease
 iBeta = this.iBeta()
 return m.iBeta > 0
 endfunc
@@ -7031,7 +7037,7 @@ return m.success
 endfunc
 
 * =============================
-enddefine && {fr} CLASS abSemVer
+enddefine && CLASS abSemVer
 * =============================
 
 * -----------------

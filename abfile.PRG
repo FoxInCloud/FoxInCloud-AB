@@ -52,13 +52,19 @@ endproc
 
 * ========================================
 procedure FileReadOnlySet && {fr} Règle l'attribut 'lecture seule' d'un fichier
-lparameters tcFile, tlReadOnly
+lparameters ;
+  tcFile;
+, tlReadOnly;
+, tlGet;
 
 local success as Boolean;
 , loFiler as filer.FileUtil;
 , loFile;
 
-if File(m.tcFile)
+tlGet = lTrue(m.tlGet)
+success = Iif(m.tlGet, .null., m.success)
+
+if File(Evl(m.tcFile, ''))
 
 	tcFile = FullPath(m.tcFile)
 	loFiler = CreateObject('Filer.FileUtil') && {fr} home(1) + '\tools\filer\Filer.dll'
@@ -68,20 +74,30 @@ if File(m.tcFile)
 	loFiler.find(0) && {fr} Charge la collection de fichiers
 	if m.loFiler.Files.count = 1
 		loFile = m.loFiler.Files.Item(1)
-		tlReadOnly = lTrue(m.tlReadOnly)
-		m.loFile.attr = m.loFile.attr + ICase(;
-			!m.tlReadOnly and mod(m.loFile.attr, 2) > 0,; && {fr} uneven = read only
-				- 1,;
-			 m.tlReadOnly and mod(m.loFile.attr, 2) = 0,; && {fr} even = read-write
-				+ 1,;
-				0;
-			)
-		success = .T.
+		if m.tlGet
+			success = mod(m.loFile.attr, 2) > 0 && {en} uneven = read only
+		else
+			tlReadOnly = lTrue(m.tlReadOnly)
+			m.loFile.attr = m.loFile.attr + ICase(;
+				!m.tlReadOnly and mod(m.loFile.attr, 2) > 0,; && {en} uneven = read only
+					- 1,;
+				 m.tlReadOnly and mod(m.loFile.attr, 2) = 0,; && {en} even = read-write
+					+ 1,;
+					0;
+				)
+			success = .T.
+		endif
 	endif
 endif
 
 return m.success
 endproc
+
+* ========================================
+function FileReadOnlyGet && {fr} Lit l'attribut 'lecture seule' d'un fichier
+lparameters tcFile
+return FileReadOnlySet(m.tcFile, , .T.)
+endfunc
 
 * ========================================
 procedure tFileSet && {fr} règle la date et heure d'un fichier
@@ -301,8 +317,8 @@ endproc
 * ========================================
 procedure FilesCopy && {fr} Copie des fichiers d'un dossier [et ses sous-dossiers] dans un autre dossier
 lparameters ;
-  tcFileSkels; && {fr} Masques de fichiers à traiter
-, tcFolderSrce; && {fr} Adresse du dossier oû sont les fichiers
+  tcFileSkels; && ['*.*'] {fr} Masques de fichiers à traiter
+, tcFolderSrce; && {fr} Adresse du dossier où sont les fichiers
 , tcFolderDest; && {fr} Adresse du dossier destination
 , tlSubFolders; && [.F.] {fr} Traiter les fichiers dans les sous-dossiers source
 , tcSubFoldersExcl; && [''] {fr} Sous-dossiers source à exclure de la recherche (séparés par ',')
@@ -316,7 +332,7 @@ tcFolderSrce = addbs(cFileCased(m.tcFolderSrce, .t.))
 tcFolderDest = addbs(iif(directory(m.tcFolderDest), cFileCased(m.tcFolderDest, .t.), m.tcFolderDest))
 
 tnResult = FilesProc(;
-	  m.tcFolderSrce; && {fr} Adresses des dossiers oû les fichiers sont à chercher
+	  m.tcFolderSrce; && {fr} Adresses des dossiers où les fichiers sont à chercher
 	, 'FileCopy'; && {fr} Procédure à appliquer à chaque fichier trouvé (son premier paramètre est l'adresse du fichier)
 	, m.tcFileSkels; && ['*.*'] {fr} Masques de fichiers à traiter (séparés par ',')
 	, m.tlSubFolders; && [.F.] {fr} Traiter les fichiers dans les sous-dossiers
@@ -328,6 +344,7 @@ tnResult = FilesProc(;
 	)
 
 return empty(m.lcResult) or cResultAdd(@m.tcResult, m.lcResult)
+endproc
 
 * ========================================
 procedure FileCopy && {fr} Copie un fichier en créant le(s) dossier(s) si nécessaire
@@ -421,7 +438,7 @@ endproc
 * ========================================
 function CopyFile(tcFileName, tcCopyFileName, tnFailIfExists) && http://www.berezniker.com/content/pages/visual-foxpro/copy-move-rename-file-preserving-destination-name-case
 declare long CopyFile in WIN32API String SourceFileName, String DestFileName, long bFailIfExists
-return CopyFile(m.tcFileName, m.tcCopyFileName, m.tnFailIfExists) # 0
+return !Empty(CopyFile(m.tcFileName, m.tcCopyFileName, m.tnFailIfExists))
 endfunc
 
 * ========================================
@@ -462,7 +479,7 @@ if m.llResult
 			 	if m.llWild
 				 	copy file (m.tcFileSrce) to (m.tcFileDest)
 			 	else
-				 	llResult = CopyFile(cFileCased(m.tcFileSrce), m.tcFileDest)
+				 	llResult = !Empty(CopyFile(cFileCased(m.tcFileSrce), m.tcFileDest, 0))
 			 	endif
 				if lFiles(m.tcFileDest) && {fr} assure que le fichier a été copié avant de supprimer la source
 					delete file (m.tcFileSrce)
@@ -496,7 +513,7 @@ endproc
 * ========================================
 procedure FileStrTran && {fr} Remplace une chaîne dans un fichier selon StrTran()
 lparameters ;
-  tcFile; && {fr} fichier oû chercher
+  tcFile; && {fr} fichier où chercher
 , cExpressionSought; && {fr} chaîne à remplacer
 , cReplacement; && [''] {fr} chaîne remplaçante
 , nStartOccurrence; && [1] {fr} première occurrence à traiter
@@ -639,7 +656,7 @@ function aFiles_ && {fr} Fichiers selon un ou plusieurs squelette dans un dossie
 lparameters ;
   taFiles; && @ {fr} Adresses des Fichiers
 , tcFileSkels; && {fr} Masques de fichiers à traiter
-, tcFolder; && {fr} Adresse du dossier oû les fichiers sont à chercher
+, tcFolder; && {fr} Adresse du dossier où les fichiers sont à chercher
 , tlSubFolders; && [.F.] {fr} Traiter les fichiers dans les sous-dossiers
 , tcSubFoldersExcl && [m.tlSubFolders, ''] {fr} Sous-dossiers à exclure (séparés par ',')
 
@@ -655,13 +672,11 @@ local lnResult as Integer;
 
 lnResult = 0
 
-if .t.;
- and aClear(@m.taFiles);
- and alines(m.laFileSkel, m.tcFileSkels, 5, ',', ';') > 0
+if aClear(@m.taFiles) and alines(m.laFileSkel, m.tcFileSkels, 5, ',', ';') > 0
 
 	if m.tlSubFolders and aSubFolders(; && {fr} Sous-dossiers d'un dossier /!\ Récursive
 			  @m.laFolder; && @ {fr} taSubFolders Sous-dossiers selon aDir()
-			, m.tcFolder; && {fr} tcFolder [dossier courant] Adresse du dossier oû rechercher les sous-dossiers
+			, m.tcFolder; && {fr} tcFolder [dossier courant] Adresse du dossier où rechercher les sous-dossiers
 			, m.tcSubFoldersExcl; && {fr} tcFoldersExcl [''] sous-dossiers à exclure et/ou squelette des fichiers attendus dans les dossiers à inclure
 			, .t.; && {fr} tvRecurse [.F.] Récurser dans les sous-sous-dossiers etc., si N, nombre de niveaux de récursion
 			, .t.; && {fr} tlAddrOnly [.F.] Ne garder que les adresses des dossiers (supprimer date, taille, etc.)
@@ -696,17 +711,58 @@ local loTest as abUnitTest of abDev.prg, aa[1]
 loTest = newobject('abUnitTest', 'abDev.prg')
 
 loTest.Test(7, @m.aa, '*.pjx', DOS_AWSAMPLES, .T.)
-&& FIC\FicDemo\ficdemo.pjx
-&& FIC\FicTuto\fictuto.pjx
-&& TASTRADE\Adapted\fttprod.pjx
-&& TASTRADE\Adapted\ftttest.pjx
-&& TASTRADE\Adapted\tastradeFIC.pjx
-&& TASTRADE\Sandbox\tastradefic.pjx
-&& TASTRADE\_Original\tastradeFIC.pjx
+&& 1- FIC\FicDemo\ficdemo.pjx
+&& 2- FIC\FicTuto\fictuto.pjx
+&& 3- Tastrade\Adapted\fttprod.pjx
+&& 4- Tastrade\Adapted\ftttest.pjx
+&& 5- Tastrade\Adapted\tastradeFIC.pjx
+&& 6- Tastrade\Sandbox\tastradefic.pjx
+&& 7- Tastrade\_Original\tastradeFIC.pjx
 
 _cliptext = '&' + '& ' + Strtran(cListOfArray(@m.aa, CRLF + '&' + '& '), DOS_AWSAMPLES,'',1,-1,1)
 
 return loTest.result()
+endproc
+
+* ========================================
+function cSubFolderFileSkelsMax && {fr} sous-dossier qui contient le plus de fichiers répondant à un ou plusieurs masque(s)
+lparameters ;
+  tcFileSkels; && {fr} masque(s) de fichiers à chercher
+, tcFolder; && [dossier courant] {fr} Adresse du dossier où rechercher les fichiers
+, tcFoldersExcl; && [''] {fr} sous-dossiers à exclure
+
+tcFolder = cFileCased(Evl(m.tcFolder, Sys(5) + Curdir()))
+
+local lcResult;
+, lnFolder, lnFolder_;
+, laFolder[1], liFolder, lcFolder;
+, laFile[1];
+
+lcResult = ''
+lnFolder_ = 0
+for liFolder = 1 to aSubFolders(@m.laFolder, m.tcFolder,,, .T.)
+	lcFolder = m.laFolder[m.liFolder]
+	lnFolder = aFiles_(@m.laFile, m.tcFileSkels, m.lcFolder, .T., m.tcFoldersExcl)
+	lcResult = Iif(m.lnFolder > m.lnFolder_, m.lcFolder, m.lcResult)
+	lnFolder_ = Max(m.lnFolder, m.lnFolder_)
+endfor
+
+return m.lcResult
+endfunc
+
+* ----------------------------------------------
+procedure cSubFolderFileSkelsMax_Test && {fr} Teste cSubFolderFileSkelsMax()
+
+local loTest as abUnitTest of abDev.prg, lcFolder
+loTest = newobject('abUnitTest', 'abDev.prg')
+
+lcFolder = DOS_AWSAMPLES + 'Tastrade\_Original\'
+
+loTest.Test(m.lcFolder + 'Class\', '*.vcx', m.lcFolder)
+loTest.Test(m.lcFolder + 'Form\', '*.scx', m.lcFolder)
+
+return loTest.result()
+endproc
 
 * ========================================
 function lFileAddrSkeleton && {fr} Squelette d'adresse de fichier valide
@@ -773,25 +829,48 @@ return iif(vartype(m.tcFile1Addr)=='C';
 * ========================================
 procedure FilesDir && {en} Stores files found in a folder [and sub-folders optionally] into a table {fr} Répertorie des fichiers dans un dossier [et ses sous-dossiers]
 lparameters ;
-  tcFileSkels; && {en} Files skeletons to find {fr} Masques de fichiers à traiter
-, tcFolders; && {en} Folder where to find {fr} Adresse du dossier oû les fichiers sont à chercher
+  tcFileSkels; && ['*.*'] {en} Files skeletons to find {fr} Masques de fichiers à traiter
+, tcFolders; && {en} Folder where to find {fr} Adresse du dossier où les fichiers sont à chercher
 , tlSubFolders; && [.F.] {en} search in sub-folders {fr} Traiter les fichiers dans les sous-dossiers
 , tcSubFoldersExcl; && [m.tlSubFolders, ''] {en} sub-folders to exclude from the search {fr} Sous-dossiers à exclure (séparés par ',')
 , tcTable; && @ {en} Result table name where files found are registered {fr} Table répertoire de fichiers : table ou curseur ; si vide, nouveau curseur ; Alias en retour
 , tcFieldsExtra; && [aucun] {en} Additional fields to the table {fr} spécifications de champs à ajouter à la table
 , tcTagsExtra; && [aucun] {en} Additional indexes to the table {fr} spécifications d'index à ajouter à la table (cf. aTagInfo_())
+, tlChecksumSizeNo; && [.F.] {en} do not compute file's checksum and size {fr} ne pas calculer le checksum et la taille des fichiers
+, tlWaitWindow; && [.F.] {en} display a wait window {fr} afficher une fenêtre d'avancement
+, tcProc; && [FileDir] {en} procedure processing file -- make sure to call FileDir() {fr} procédure traitant le fichier qui doit appeler FileDir()
 
 local lnResult as Integer; && {en} number of files found, -1 if error {fr} Nombre de fichers répertoriés, -1 si erreur
-, loDeleted as abSet of abDev.prg
+, loDeleted as abSet of abDev.prg;
+, aFolder[1], nFolder, cFolder;
 
-tcTable = FilesDirCursor(m.tcTable, m.tcFieldsExtra)
+lnResult = -1
 
-loDeleted = abSet('DELETED', 'OFF')
-delete all in (m.tcTable) && {fr} cf. FileDir()
+private plWaitWindow
+plWaitWindow = lTrue(m.tlWaitWindow)
 
-lnResult = iif(used(m.tcTable);
-	, FilesProc(m.tcFolders, 'FileDir', m.tcFileSkels, m.tlSubFolders, m.tcSubFoldersExcl, m.tcTable);
-	, -1)
+tcTable = FilesDirCursor(m.tcTable, m.tcFieldsExtra, m.tcTagsExtra)
+if used(m.tcTable)
+
+	loDeleted = abSet('DELETED', 'OFF')
+
+	if ALines(aFolder, Upper(m.tcFolders), 5, ',', ';') > 0
+		for each cFolder in m.aFolder
+			nFolder = Lenc(m.cFolder)
+			delete in (m.tcTable) for Upper(Leftc(mAddr, m.nFolder)) == m.cFolder && {fr} cf. FileDir()
+		endfor
+	endif
+
+	lnResult = FilesProc(;
+		  m.tcFolders;
+		, Iif(ga_Type_IsChar(m.tcProc, .T.), m.tcProc, 'FileDir');
+		, m.tcFileSkels;
+		, m.tlSubFolders;
+		, m.tcSubFoldersExcl;
+		, m.tcTable;
+		, m.tlChecksumSizeNo; && [.F.] {en} do not compute file's checksum and size {fr} ne pas calculer le checksum et la taille des fichiers
+		)
+endif
 
 return m.lnResult
 endproc
@@ -822,10 +901,20 @@ function FilesDirCursor_cFields && {fr} Champs de la table ou curseur d'inventai
 lparameters tcFieldsExtra && [aucun] {fr} spécifications de champs à ajouter à la table
 
 return c2Words(;
-					[FILEDIR I, cNAME C(106), cSTEM C(100), cEXT C(5), mADDR M, nBYTES I NULL, tMOD T, tDIR T, CHECKSUM C(12) NULL]; && 100 est largement suffisant pour Abaque
+					  [FILEDIR I];
+				+ [, cNAME V(200)];
+				+ [, cSTEM V(200)];
+				+ [, cEXT V(10)]; && 'sqlite'
+				+ [, mADDR M]; && max Windows file name length: 260 && https://msdn.microsoft.com/en-us/library/windows/desktop/aa365247(v=vs.85).aspx
+				+ [, nBYTES B(0) NULL];
+				+ [, CHECKSUM C(12) NULL];
+				+ [, lMOD L];
+				+ [, tMOD T NULL];
+				+ [, tDIR T];
 				, ',';
 				, evl(m.tcFieldsExtra, '');
 				)
+endfunc
 
 * ========================================
 function FilesDirCursor_cTags && {fr} Indexes de la table ou curseur d'inventaire de fichiers
@@ -834,7 +923,7 @@ lparameters tcTagsExtra && [aucun] {fr} spécifications d'index à ajouter à la ta
 local lcResult
 text TO lcResult TEXTMERGE NOSHOW FLAGS 1 PRETEXT 3 && {fr} selon aTagInfo() && && {fr} Tag; Type; Key; Filter; Order; Collation
 	FILEDIR;CANDIDATE;;;;MACHINE
-	FILECK;CANDIDATE; <<cFilesDirCursorCKexpr('mADDR')>>;;;MACHINE
+	FILECK;CANDIDATE;<<cFilesDirCursorCKexpr('mADDR')>>;;;MACHINE
 	cNAME;;;;;MACHINE
 	cSTEM;;;;;MACHINE
 	cEXT;;;;;MACHINE
@@ -850,36 +939,61 @@ return m.lcResult
 * ========================================
 function cFilesDirCursorCKexpr && {fr} Expression de clé candidate sur une table d'inventaire de fichiers
 lparameters tcAddr
-return textmerge([Padr(Upper(Rtrim(<<m.tcAddr>>)), 200)])
+return textmerge([Padr(Upper(Rightc(Rtrim(<<m.tcAddr>>), 200)), 200)])
+endfunc
 
 * ========================================
 procedure FileDir && {fr} Répertorie un fichier
 lparameters ;
-  tcFile; && {fr} Adresse du fichier
-, tcAlias; && {fr} Répertoire de fichiers
-, tcError && @ {fr} Erreur en retour (cumulative)
+  tcFile as String; && {fr} Adresse du fichier
+, tcAlias as String; && {fr} Répertoire de fichiers
+, tlChecksumSizeNo; && [.F.] {en} do not compute file's checksum and size {fr} ne pas calculer le checksum et la taille des fichiers
+, tcError as String; && @ {fr} Erreur en retour (cumulative)
+
 tcFile = alltrim(m.tcFile)
 
-local loDeleted as abSet, loException as exception, lnBytes, ltFile, lcCheckSum, llResult
+local llResult as Boolean;
+, llDeleted as Boolean;
+, loException as exception;
+, lnBytes;
+, ltFile;
+, lcCheckSum;
 
-llResult = file(m.tcFile)
-if m.llResult
+llResult = file(m.tcFile, 1) && 1 allows you to check for hidden or system files
+if m.llResult or cResultAdd(@m.tcError, Textmerge(Iif(Lenc(m.tcFile) >= 260; && https://msdn.microsoft.com/en-us/library/windows/desktop/aa365247(v=vs.85).aspx
+	, [File '<<m.tcFile>>' can't be processed as its path length (<<Lenc(m.tcFile)>>) reaches or exceeds the limit of 260 characters];
+	, [File '<<m.tcFile>>' can't be found on disk];
+	)))
 
-	loDeleted = abSet('DELETED', 'OFF')
-	lnBytes = nFileSize(m.tcFile, .t.) && < 1 ms
-	ltFile = tFile(m.tcFile, .t.)
-	lcCheckSum = iif(m.lnBytes < VFP_VAR_SIZE_MAX, cFileCheckSum(m.tcFile, .t.), .null.)
+	llDeleted = Set('DELETED') == 'ON'
+	if m.llDeleted
+		set deleted off
+	endif
+
+	tlChecksumSizeNo = lTrue(m.tlChecksumSizeNo)
+	ltFile = tFile(m.tcFile, .T.)
+	lnBytes = Iif(m.tlChecksumSizeNo;
+		, -1;
+		, nFileSize(m.tcFile); && nFileSize(m.tcFile, .t.) && < 1 ms
+		)
+	lcCheckSum = Iif(!m.tlChecksumSizeNo and m.lnBytes < VFP_VAR_SIZE_MAX;
+		, cFileCheckSum(m.tcFile, .T.);
+		, .null.;
+		)
 
 	try
-
 
 		if seek(evaluate(cFilesDirCursorCKexpr('m.tcFile')), m.tcAlias, 'FILECK')
 
 			recall in (m.tcAlias)
+			replace in (m.tcAlias);
+				lMOD with .F.
 
-			if not lower(evaluate(m.tcAlias + '.mAddr')) == lower(m.tcFile) && {fr} évite le MEMO bloat
+			if not evaluate(m.tcAlias + '.mAddr') == m.tcFile && {fr} évite le MEMO bloat
 				replace in (m.tcAlias);
-					mAddr with m.tcFile
+					mAddr with m.tcFile;
+					lMOD with .T.;
+
 			endif
 
 			if evaluate(m.tcAlias + '.nBYTES') # m.lnBytes;
@@ -890,7 +1004,8 @@ if m.llResult
 					nBYTES with m.lnBytes;
 					tMOD with m.ltFile;
 					CHECKSUM with m.lcCheckSum;
-					tDIR with datetime()
+					tDIR with datetime();
+					lMOD with .T.;
 
 			endif
 
@@ -906,6 +1021,7 @@ if m.llResult
 					, tMOD;
 					, tDIR;
 					, CHECKSUM;
+					, lMOD;
 					);
 			 values (;
 			 			iAutoInc(m.tcAlias, 'FILEDIR');
@@ -917,16 +1033,20 @@ if m.llResult
 					, m.ltFile;
 					, datetime();
 					, m.lcCheckSum;
+					, .T.;
 					)
 		endif
 
 	catch to loException
-
 		llResult = cResultAdd(@m.tcError, cException(m.loException))
 	endtry
+	if m.llDeleted
+		set deleted on
+	endif
 endif
 
 return m.llResult
+endproc
 
 *==============================================
 function FileMemo(tcFile) && {fr} Fichier mémo associé à un fichier-table VFP
@@ -1100,6 +1220,7 @@ return '';
 		m.tcLangUser = 'fr', 	'GO',; && copy-paste this line to add another language support
 													'GB'; && default: English
 		)
+endfunc
 
 *==============================================
 function cFileSizeMB && {fr} Taille d'un fichier en Méga Octets
@@ -1109,6 +1230,7 @@ lparameters ;
 , tcLangUser && [cLangUser()] {fr} Langue de l'utilisateur
 
 return cMB(nFileSize(m.tcFile, m.tlMemo))
+endfunc
 
 *==============================================
 function nFileSizeTotal && {fr} Taille d'un fichier et de ses fichiers associés
@@ -1119,23 +1241,24 @@ return nFileSize(;
 	, .t.; && {fr} tlMemo Tenir compte du fichier memo associé éventuel
 	, .t.; && {fr} tlCDX Tenir compte du fichier CDX associé éventuel
 	)
+endfunc
 
 *==============================================
 function nFileSize && {fr} Taille d'un fichier en octets
 lparameters ;
   tcFile; && {fr} Fichier
 , tlMemo; && @ [.F.] {fr} Ajouter la taille du fichier memo associé éventuel @ le fichier memo existe
-, tlCDX; && @ [.F.] {fr} Ajouter la taille du fichier CDX associé éventuel @ le fichier CDX existe
+, tlCDX;  && @ [.F.] {fr} Ajouter la taille du fichier CDX associé éventuel @ le fichier CDX existe
 
 local lnResult; &&  && {fr} Taille du fichier en octets
+, llResult;
 , lcMemo;
 , lcCDX;
 , llCompatible;
 , lnMemoWidth;
 , lHandle;
-, llResult
 
-* {fr} If file can be found
+* {en} If file can be found
 llResult = vartype(m.tcFile) == 'C' and file(m.tcFile)
 assert m.llResult message cAssertMsg(textmerge([Invalid File Address Specification: <<m.tcFile>>]))
 if m.llResult
@@ -1156,10 +1279,20 @@ if m.llResult
 			lnMemoWidth = set("Memowidth")
 			set compatible on
 		endif
+
+#if .F. && for files larger than 2 GB
+o = CreateObject('scripting.filesystemobject')
+ofile = o.GetFile(m.tcFile)
+ofile.Size
+#endif
+		
+		* ======================================
 		lnResult = 0;
 			+ fsize(m.tcFile);
 			+ iif(m.tlMemo, fsize(m.lcMemo), 0);
 			+ iif(m.tlCDX, fsize(m.lcCDX), 0)
+		* ======================================
+
 	catch
 		llResult = .f.
 	finally
@@ -1172,7 +1305,7 @@ if m.llResult
 	if !m.llResult
 
 		lHandle = fopen(justfname(m.tcFile), 10)
-		llResult = lHandle # -1
+		llResult = m.lHandle # -1
 		if m.llResult
 
 			lnResult = fseek(m.lHandle, 0, 2)
@@ -1205,6 +1338,7 @@ if m.llResult
 endif
 
 return iif(m.llResult, m.lnResult, .null.)
+endfunc
 
 *----------------------------------------
 procedure nFileSize_Test && {fr} teste nFileSize()
@@ -1230,11 +1364,15 @@ function cFileCheckSum && {fr} Checksum du contenu d'un fichier avec, le cas éch
 lparameters ;
   tcFile; && {fr} Fichier
 , tlMemo; && [.F.] {fr} Inclure le memo associé éventuel
-, tnPadr && [none] {fr} Longueur à padder
+, tnPadr; && [none] {fr} Longueur à padder
+
 tcFile = evl(m.tcFile, '')
 tlMemo = lTrue(m.tlMemo)
 
-local tnFile, lcFile, llFile, lnFile, llResult, lcResult
+local lcResult;
+, llResult;
+, tnFile;
+, lcFile, llFile, lnFile
 
 lcResult = .null.
 
@@ -1293,13 +1431,14 @@ return iif(m.llResult and vartype(m.tnPadr) == 'N' and m.tnPadr > 0;
 	, padr(m.lcResult, m.tnPadr);
 	, m.lcResult;
 	)
+endfunc
 
 * ========================================
 procedure FilesRename && {fr} Renomme des fichiers dans un dossier [et ses sous-dossiers]
 lparameters ;
   tcFileSkels; && {fr} Masques de fichiers à traiter (séparés par ',')
 , tcFileNew; && {fr} Nouveau nom
-, tcFolders; && {fr} Adresses des dossiers oû les fichiers sont à chercher
+, tcFolders; && {fr} Adresses des dossiers où les fichiers sont à chercher
 , tlSubFolders; &&	[.F.] {fr} Traiter les fichiers dans les sous-dossiers
 , tcSubFoldersExcl && [m.tlSubFolders, ''] {fr} Sous-dossiers à exclure (séparés par ',')
 
@@ -1328,7 +1467,7 @@ return m.llResult
 procedure FilesDelete && {fr} Alias de FilesDel()
 lparameters ;
   tcFileSkels; && {fr} Masques de fichiers à traiter
-, tcFolders; && {fr} Adresses des dossiers oû sont les fichiers
+, tcFolders; && {fr} Adresses des dossiers où sont les fichiers
 , tlSubFolders; && [.F.] {fr} Traiter les fichiers dans les sous-dossiers
 , tcSubFoldersExcl; && [m.tlSubFolders, ''] {fr} Sous-dossiers à exclure de la recherche (séparés par ',')
 , tlRecycle; && [.F.] {fr} Placer les fichiers supprimés dans la corbeille
@@ -1349,7 +1488,7 @@ return FilesDel(;
 procedure FilesDel && {fr} Supprime des fichiers dans un dossier [et ses sous-dossiers]
 lparameters ;
   tcFileSkels; && {fr} Masques de fichiers à traiter
-, tcFolders; && {fr} Adresses des dossiers oû sont les fichiers
+, tcFolders; && {fr} Adresses des dossiers où sont les fichiers
 , tlSubFolders; && [.F.] {fr} Traiter les fichiers dans les sous-dossiers
 , tcSubFoldersExcl; && [m.tlSubFolders, ''] {fr} Sous-dossiers à exclure (séparés par ',')
 , tlRecycle; && [.F.] {fr} Placer les fichiers supprimés dans la corbeille
@@ -1450,11 +1589,10 @@ endtry
 
 return m.llResult
 
-
 * ========================================
 procedure FilesProc && {fr} Applique une procédure à tous les fichiers d'un dossier [et de ses sous-dossiers] - jusqu'à 19 paramètres peuvent être passés à la procédure
 lparameters ;
-  tcFolders; && {fr} Adresses des dossiers oû les fichiers sont à chercher
+  tcFolders; && {fr} Adresses des dossiers où les fichiers sont à chercher
 , tcProc; && {fr} Procédure à appliquer à chaque fichier trouvé (son premier paramètre est l'adresse du fichier)
 , tcFileSkels; && ['*.*'] {fr} Masques de fichiers à traiter (séparés par ',')
 , tlSubFolders; &&	[.F.] {fr} Traiter les fichiers dans les sous-dossiers
@@ -1483,20 +1621,33 @@ tcFileSkels = iif(vartype(m.tcFileSkels) == 'C', alltrim(m.tcFileSkels), [*.*])
 tlSubFolders = lTrue(m.tlSubFolders)
 tcSubFoldersExcl = iif(m.tlSubFolders and vartype(m.tcSubFoldersExcl)=='C', upper(m.tcSubFoldersExcl), '')
 
-local llResult, lnResult && {fr} Nombre de fichiers traités
+local lnResult; && {fr} Nombre de fichiers traités
+, llResult;
+, llWaitWindow as Boolean;
+, laSkels[1], lnSkels, lcSkel;
+, lnDocs, laDocs[1], laDocsSkel[1];
+, lnDoc, lcDoc, lcDocAddr, llDoc;
+, laFolders[1], lcFolder;
+, laSubFolders[1], lnSubFolders, lnSubFolder;
+, lcProcParms, liProcParm;
+, lnOdometer as Integer;
+
 lnResult = 0
+llWaitWindow = Vartype(m.plWaitWindow) == 'L' and m.plWaitWindow
+lnOdometer = Set("Odometer")
+if !Vartype(m.pnFilesProc) == 'N'
+	private pnFilesProc
+	pnFilesProc = 0
+endif
 
 * {fr} Si les paramètres requis sont valides
-llResult = vartype(m.tcFolders)=='C' and not empty(m.tcFolders);
-			 and vartype(m.tcProc) == 'C' and not empty(m.tcProc) && {fr} comment vérifier que la procédure est accessible ?
-assert m.llResult message cAssertMsg(textmerge([Les dossiers <<cLitteral(@tcFolders)>> ou la procédure <<cLitteral(@tcProc)>> est invalide]))
+llResult = ga_Type_IsChar(m.tcFolders, .T.) and ga_Type_IsChar(m.tcProc, .T.) && {fr} comment vérifier que la procédure est accessible ?
+assert m.llResult message cAssertMsg(textmerge([Les dossiers <<cLitteral(@tcFolders)>> ou la procédure <<cLitteral(@m.tcProc)>> est invalide]))
 if m.llResult
 
-	local laSkels[1], lnSkels, lcSkel, lnDocs, laDocs[1], laDocsSkel[1], laSubFolders[1], lnSubFolders, lnSubFolder
 	lnSkels = alines(laSkels, m.tcFileSkels, .t., ',')
 
 	* {fr} Pour chaque dossier
-	local laFolders[1], lcFolder
 	alines(laFolders, m.tcFolders, 1, [,], [;])
 	for each lcFolder in laFolders
 
@@ -1504,13 +1655,17 @@ if m.llResult
 		llResult = lDir(m.lcFolder, .T.)
 		assert m.llResult message cAssertMsg(textmerge([le dossier '<<m.lcFolder>>' n'existe pas]))
 		if m.llResult
+
 			lcFolder = addbs(cFileCased(fullpath(m.lcFolder)))
 			aClear(@m.laDocs)
 			lnDocs = 0
 
 			* {fr} Tabuler les fichiers situés dans le dossier et répondant au(x) squelette(s)
+			If m.llWaitWindow
+				wait cTronc("Getting a directory of files in folder " + cL(m.lcFolder), 250) window nowait noclear timeout 2
+			endif
 			for each lcSkel in laSkels
-				if adir(laDocsSkel,  m.lcFolder + m.lcSkel, '', 1) > 0 && {fr} pas de dossier && {fr} capitalization on disk
+				if adir(laDocsSkel,  m.lcFolder + m.lcSkel, '', 1) > 0 && {fr} pas de dossier && {en} 1: capitalization on disk
 					lnDocs = aAppend(@m.laDocs, @m.laDocsSkel)
 				endif
 			endfor
@@ -1519,13 +1674,17 @@ if m.llResult
 			* {fr} Si recherche dans les sous-dossiers demandée,
 			if m.tlSubFolders
 
+				If m.llWaitWindow
+					wait cTronc("Reading subfolders of " + cL(m.lcFolder), 250) window nowait noclear timeout 2
+				endif
+
 				* {fr} Si sous-dossier(s) dans le dossier
 				lnSubFolders = aSubFolders(@m.laSubFolders, m.lcFolder, m.tcSubFoldersExcl)
 				if m.lnSubFolders > 0
 
 					* {fr} Supprimer l'adresse du dossier de départ && {fr} par cohérence avec le aDir() ci-dessus
 					for lnSubFolder = 1 to m.lnSubFolders
-						laSubFolders[m.lnSubFolder, 1] = strtran(laSubFolders[m.lnSubFolder, 1], m.lcFolder, '', 1, -1, 1)
+						laSubFolders[m.lnSubFolder, 1] = strtran(laSubFolders[m.lnSubFolder, 1], m.lcFolder, '', 1, -1, 1) && 1 - Search is case-insensitive and replacement is performed with exact cReplacement text.
 					endfor
 					asort(laSubFolders, 1, -1, 0, 1) && {fr} ascending, case insensitive
 
@@ -1538,18 +1697,14 @@ if m.llResult
 			if m.lnDocs > 0
 
 				* {fr} Préparer la chaine de paramètres à passer à la procédure
-				local lcProcParms, lnProcParms, lnProcParm
-				lnProcParms = pcount() - 5; && {fr} les paramètres commencent en 6è position
-																+ 1 && {fr} les n° de paramètres commencent à 2
 				lcProcParms = ''
-				if m.lnProcParms >= 2
-					for lnProcParm = 2 to m.lnProcParms
-						lcProcParms = textmerge([<<m.lcProcParms>>, @m.tuProcParm<<Padl(m.lnProcParm, 2, '0')>>])
-					endfor
-				endif
+				for liProcParm = 2 to pcount();
+						- 5; && {fr} les paramètres commencent en 6è position
+						+ 1 && {fr} les n° de paramètres commencent à 2
+					lcProcParms = textmerge([<<m.lcProcParms>>, @m.tuProcParm<<Padl(m.liProcParm, 2, '0')>>])
+				endfor
 
 				* {fr} Pour chaque "document" (fichier ou sous-dossier)
-				local lnDoc, lcDoc, lcDocAddr, llDoc
 				for lnDoc = 1 to m.lnDocs
 					lcDoc = laDocs[m.lnDoc, 1]
 					lcDocAddr = m.lcFolder + m.lcDoc
@@ -1557,16 +1712,23 @@ if m.llResult
 					* {fr} Si dossier exploitable, récurser le cas échéant
 					if 'D' $ upper(laDocs[m.lnDoc, 5])
 
-						if m.tlSubFolders and not inlist(m.lcDoc, '.', '..')
-						 	lnResult = m.lnResult + ; && {fr} récursion
-						 		evaluate('FilesProc(m.lcDocAddr, m.tcProc, m.tcFileSkels, m.tlSubFolders, m.tcSubFoldersExcl' + m.lcProcParms + ')')
+						if m.tlSubFolders and !inlist(m.lcDoc, '.', '..')
+						 	lnResult = m.lnResult; && {fr} récursion
+						 		+ evaluate('FilesProc(m.lcDocAddr, m.tcProc, m.tcFileSkels, m.tlSubFolders, m.tcSubFoldersExcl' + m.lcProcParms + ')')
 						endif
 
 					* {fr} Sinon (fichier), appliquer la procédure indiquée
 					else
-
-						llDoc = evaluate(textmerge([<<m.tcProc>>(m.lcDocAddr <<m.lcProcParms>>)]))
+						
+						* ========================================================================
+						llDoc = Evaluate(Textmerge([<<m.tcProc>>(m.lcDocAddr <<m.lcProcParms>>)]))
+						* ========================================================================
+						
 						lnResult = m.lnResult + iif(m.llDoc, 1, 0)
+						pnFilesProc = m.pnFilesProc + iif(m.llDoc, 1, 0)
+						If m.llWaitWindow and (m.pnFilesProc < m.lnOdometer or Empty(m.pnFilesProc%m.lnOdometer))
+							wait cTronc("File # " + Ltrim(Transform(m.pnFilesProc, '999,999')) + ': ' + m.lcDocAddr, 250) window nowait noclear timeout 2 && The length of cMessageText can be up to 255 characters
+						endif
 					endif
 				endfor
 			endif
@@ -1575,13 +1737,14 @@ if m.llResult
 endif
 
 return m.lnResult
+endproc
 
 * -------------------------------
 procedure FilesProc_Test && {fr} Teste FilesProc()
 
 local loTest as abUnitTest
 loTest = newobject('abUnitTest', 'abDev.prg')
-loTest.Test(, getdir(curdir(),'',"Oû sont les fichiers Excel à traiter ?", 16), ;
+loTest.Test(, getdir(curdir(),'',"Où sont les fichiers Excel à traiter ?", 16), ;
 						'FilesProc_Test_Proc', '*.xls', .t., '', date())
 
 return loTest.result()
@@ -1622,12 +1785,13 @@ else
 endif
 
 return m.lcResult
+endfunc
 
 * ========================================
 function aSubFolders && {fr} Sous-dossiers d'un dossier /!\ Récursive
 lparameters ;
   taSubFolders; && @ {fr} Sous-dossiers selon aDir()
-, tcFolder; && [dossier courant] {fr} Adresse du dossier oû rechercher les sous-dossiers
+, tcFolder; && [dossier courant] {fr} Adresse du dossier où rechercher les sous-dossiers
 , tcFoldersExcl; && [''] {fr} sous-dossiers à exclure et/ou squelette des fichiers attendus dans les dossiers à inclure
 , tvRecurse; && [.F.] {fr} Récurser dans les sous-sous-dossiers etc., si N, nombre de niveaux de récursion
 , tlAddrOnly; && [.F.] {fr} Ne garder que les adresses des dossiers (supprimer date, taille, etc.)
@@ -1693,12 +1857,13 @@ if m.llResult
 		* {fr} Pour chaque sous-dossier
 		lcDefault = sys(5) + curdir()
 		set default to (m.tcFolder)
-		lnResult = adir(laFolders, '', 'D', 1) && '' makes aDir() return Folders
+		lnResult = ADir(laFolders, '', 'D', 1) && '' makes aDir() return Folders && {en} 1: capitalization on disk
 		set default to (m.lcDefault)
 
 		llRecurse = iif(m.lcTypeRecurse == 'N', m.pnRecurse < m.tvRecurse, m.tvRecurse)
 		lnSubFolders = 0
 		for lnFolder = m.lnResult to 1 step -1
+
 			lcFolder = laFolders[m.lnFolder, 1]
 			lcPath = m.tcFolder + addbs(m.lcFolder)
 
@@ -1759,7 +1924,7 @@ return m.lnResult
 function aSubFolders_lExcluded && {fr} Un sous-dossiers répond à un des masques d'exclusion /!\ privée de aSubFolders()
 lparameters ;
   aFoldersExcl; && @ {fr} Sous-dossiers selon aDir()
-, lcFolder; && [dossier courant] {fr} Adresse du dossier oû rechercher les sous-dossiers
+, lcFolder; && [dossier courant] {fr} Adresse du dossier où rechercher les sous-dossiers
 
 external array aFoldersExcl
 local cFoldersExcl
@@ -1776,10 +1941,11 @@ endfunc
 function cFolder && {fr} Dossier d'une Adresse
 lparameters tcAddress && {fr} adresse
 
-local lcPath, lcResult
+local lcResult, lcPath
 
 lcResult = ''
-if vartype(m.tcAddress) == 'C' and not empty(m.tcAddress)
+
+if ga_Type_IsChar(m.tcAddress, .T.)
 	lcPath = justpath(m.tcAddress)
 	lcResult = substr(m.lcPath, ratc('\', m.lcPath)+1)
 endif
@@ -1815,7 +1981,7 @@ local laFiles[1], lcFolder, lcResult
 lcResult = ''
 if lFileAddrSkeleton(m.tcSkeleton)
 
-	adir(laFiles, m.tcSkeleton, '', 1)
+	adir(laFiles, m.tcSkeleton, '', 1) && {en} 1: capitalization on disk
 	lcResult = cListOfArray(@m.laFiles, m.tcSep, 1)
 
 	* {fr} Si dossiers contenus
@@ -1953,7 +2119,7 @@ if vartype(m.tcFile) == 'C' and (file(m.tcFile) or directory(m.tcFile))
 		case m.lcWord == '.' && 2016-02-24 thn -- {en} added
 		case m.lcWord == '..' && 2016-02-24 thn -- {en} added
 			lcResult = Leftc(m.lcResult, Ratc('\', m.lcResult)-1)
-		case varSet(@m.lcResult, m.lcResult + '\') and adir(laFiles, m.lcResult + m.lcWord, [HSD], 1) > 0 && 1 : Display represents original Case in names
+		case varSet(@m.lcResult, m.lcResult + '\') and adir(laFiles, m.lcResult + m.lcWord, [HSD], 1) > 0 && {en} 1: capitalization on disk
 			lcResult = m.lcResult + laFiles[1]
 		otherwise
 			llResult = .F.
@@ -1963,7 +2129,7 @@ if vartype(m.tcFile) == 'C' and (file(m.tcFile) or directory(m.tcFile))
 
 	if m.llResult
 		if not lTrue(m.tlFullPath) and not '~' $ m.tcFile
-			lcResult = rightc(m.lcResult, lenc(m.tcFile)) && {fr} au cas oû l'adresse indiquée était partielle
+			lcResult = rightc(m.lcResult, lenc(m.tcFile)) && {fr} au cas où l'adresse indiquée était partielle
 		endif
 		if m.llBS
 			lcResult = addbs(m.lcResult)
@@ -2058,7 +2224,7 @@ loTest.Test(.f., "J:\aDossier\3592 VD Vignettes\Client\prop15|Ecl.pdf")
 return loTest.result()
 
 * ========================================*******************************
-function c83Address && {fr} Version courte (8.3) de l'adresse d'un fichier/dossier EXISTANT
+function c83address && {fr} Version courte (8.3) de l'adresse d'un fichier/dossier EXISTANT
 lparameter tcPath && {fr} Adresse supposée longue (> 8.3)
 
 local lcResult;
@@ -2080,7 +2246,7 @@ if vartype(m.tcPath) == 'C'
 
 		* {fr} Lire l'adresse courte
 		declare Integer GetShortPathName in Win32API;
-		  String @lpszLongPath,	;
+		  String @lpszLongPath,;
 		  String @lpszShortPath,;
 		  Integer cchBuffer
 		lnLength = 260
@@ -2095,13 +2261,21 @@ if vartype(m.tcPath) == 'C'
 endif
 
 return m.lcResult
+endfunc
 
 * ========================================
 function cFileFreshest && {fr} Adresse de la dernière version d'un fichier d'après son n° de version (suffixe de la racine du nom)
 lparameters ;
   tcFileAddrSkel; && {fr} squelette d'adresse du fichier à trouver (sans n° de version)
-, tnVersion && @ {fr} n° de la version la plus récente
-local lcResult
+, tnVersion; && @ {fr} n° de la version la plus récente
+
+local lcResult;
+, lcPath;
+, lcStem, lcExt;
+, lcSkel;
+, lnFile, laFiles[1], liFile;
+, lcSuffixe;
+
 lcResult = ''
 tnVersion = 0
 
@@ -2109,12 +2283,10 @@ tnVersion = 0
 if vartype(m.tcFileAddrSkel)='C' ;
  and ! empty(m.tcFileAddrSkel)
 
-	local lcPath
 	lcPath = addbs(justpath(tcFileAddrSkel))
 	if empty(m.lcPath) or lDir(m.lcPath, .T.)
 
 		* {fr} Lire la racine du nom sans le n° de version éventuel
-		local lcStem, lcExt
 		lcStem = upper(juststem(m.tcFileAddrSkel))
 		lcExt = upper(justext(m.tcFileAddrSkel))
 		do while val(right(m.lcStem, 1)) # 0
@@ -2122,18 +2294,15 @@ if vartype(m.tcFileAddrSkel)='C' ;
 		enddo
 
 		* {fr} Si au moins un fichier a la même racine de nom
-		local lcSkel, lnFiles
-		local array laFiles[1]
 		lcSkel = m.lcStem + iif (right (m.lcStem, 1) = '*', '', '*') + '.' + m.lcExt
-		lnFiles = adir(laFiles, m.lcPath + m.lcSkel)
-		if m.lnFiles > 0
+		lnFile = adir(laFiles, m.lcPath + m.lcSkel)
+		if m.lnFile > 0
 
 			* {fr} Pour chaque fichier trouvé,
-			local lnFile, lcSuffixe
-			for lnFile = m.lnFiles to 1 step -1
+			for liFile = m.lnFile to 1 step -1
 
 				* {fr} Lire le suffixe du stem du fichier
-				lcSuffixe = strtran(upper(juststem(laFiles[lnFile, 1])), m.lcStem, '') && {fr} élimine la 'racine'
+				lcSuffixe = strtran(upper(juststem(laFiles[m.liFile, 1])), m.lcStem, '') && {fr} élimine la 'racine'
 				lcSuffixe = chrtran(m.lcSuffixe, ' _-', '') && {fr} élimine d'éventuels caractères de séparation
 
 				* {fr} Si le suffixe n'est composé que de chiffres ou est vide (fichier original)
@@ -2141,27 +2310,27 @@ if vartype(m.tcFileAddrSkel)='C' ;
 				 or empty(m.lcSuffixe)
 
 					* {fr} Stocker le numéro de version dans la deuxième colonne du tableau (à la place de la taille)
-					laFiles[lnFile, 2] = val(m.lcSuffixe)
+					laFiles[m.liFile, 2] = val(m.lcSuffixe)
 
 				* {fr} Sinon, supprimer le fichier de la liste
 				else
-					adel(laFiles, m.lnFile)
-					lnFiles = m.lnFiles - 1
+					adel(laFiles, m.liFile)
+					lnFile = m.lnFile - 1
 				endif
 			endfor
 
 			* {fr} Si au moins un fichier est valide
-			if m.lnFiles > 0
+			if m.lnFile > 0
 
 				* {fr} Ignoer les fichiers invalides
-				dimension laFiles[m.lnFiles, Alen(laFiles, 2)]
+				dimension laFiles[m.lnFile, Alen(laFiles, 2)]
 
 				* {fr} Trier les fichiers valides par n° de version croissant
 				asort(laFiles, 2) && {fr} Trie sur la deuxième colonne
 
 				* {fr} Le dernier fichier est celui cherché
-				lcResult = m.lcPath + laFiles[m.lnFiles, 1]
-				tnVersion = laFiles[m.lnFiles, 2]
+				lcResult = m.lcPath + laFiles[m.lnFile, 1]
+				tnVersion = laFiles[m.lnFile, 2]
 			endif
 		endif
 	endif
@@ -2293,7 +2462,7 @@ return m.lnResult
 * ========================================
 function nFileSize_Folder && Taille des fichiers dans un dossier
 lparameters ;
-  tcFolders; && {fr} Adresses des dossiers oû les fichiers sont à chercher
+  tcFolders; && {fr} Adresses des dossiers où les fichiers sont à chercher
 , tlSubFolders; && [.F.] {fr} Traiter les fichiers dans les sous-dossiers
 , tcSubFoldersExcl; && [m.tlSubFolders, ''] {fr} Sous-dossiers à exclure (séparés par ',')
 , tcFileSkels; && ['*.*'] {fr} Masques de fichiers à traiter (séparés par ',')
@@ -2313,7 +2482,7 @@ if Pcount() = 2 and !',' $ m.tcFolders and !';' $ m.tcFolders and m.tlSubFolders
 else
 
 	FilesProc(; && {fr} Applique une procédure à tous les fichiers d'un dossier [et de ses sous-dossiers] - jusqu'à 19 paramètres peuvent être passés à la procédure
-		  m.tcFolders; && tcFolders {fr} Adresses des dossiers oû les fichiers sont à chercher
+		  m.tcFolders; && tcFolders {fr} Adresses des dossiers où les fichiers sont à chercher
 		, 'nFileSize_Folder_File'; && tcProc {fr} Procédure à appliquer à chaque fichier trouvé (son premier paramètre est l'adresse du fichier)
 		, m.tcFileSkels; && tcFileSkels ['*.*'] {fr} Masques de fichiers à traiter (séparés par ',')
 		, m.tlSubFolders; &&	tlSubFolders [.F.] {fr} Traiter les fichiers dans les sous-dossiers
@@ -2330,7 +2499,7 @@ endfunc
 * ========================================
 function nFileSize_Folder_File
 lparameters ;
-  tcFile; && {fr} Adresses des dossiers oû les fichiers sont à chercher
+  tcFile; && {fr} Adresses des dossiers où les fichiers sont à chercher
 , nFileSize_Folder; && @ {fr} Taille des fichiers dans un dossier
 , tnFile; && @ {fr} nombre de fichiers trouvés
 
@@ -2604,5 +2773,25 @@ endif
 return m.success
 endfunc
 
+* ========================================
+function abFopen(tcFile)
+local abFopen as abFopen of abFile.prg
+abFopen = CreateObject('abFopen', m.tcFile)
+return m.abFopen
+endfunc
 
-
+* ========================================
+define class abFopen as GA_LIGHTWEIGHT_CLASS
+iHandle = .F.
+procedure init
+	lparameters tcFile
+	this.iHandle = Fopen(m.tcFile)
+	return this.iHandle
+endproc
+procedure destroy
+	if Vartype(this.iHandle) == 'N'
+		return Fclose(this.iHandle)
+	endif
+endproc
+enddefine
+* ========================================

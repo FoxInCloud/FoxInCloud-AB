@@ -1422,8 +1422,10 @@ tlAutomation = lTrue(m.tlAutomation)
 && {fr} Les colonnes masquées ou sans nom ne sont pas importées
 && {fr} Les colonnes servant à une concaténation sont tronquées
 
-local llResult, lcResult && {fr} Adresse de la table créée OU nom du curseur OU message d'erreur
+local lcResult; && {fr} Adresse de la table créée OU nom du curseur OU message d'erreur
+, llResult;
 
+lcResult = ''
 *================================================================
 * {fr} Date      Par   Action
 * ---------	----	----------------------------------------------------------------------------------
@@ -1438,8 +1440,7 @@ local llResult, lcResult && {fr} Adresse de la table créée OU nom du curseur OU 
 * 26/11/02	TN		Optimisation et restructuration
 *================================================================
 
-lcResult = ''
-llResult = vartype(m.tcXLWBaddr) == 'C'
+llResult = Vartype(m.tcXLWBaddr) == 'C'
 if m.llResult
 
 	* {fr} Si un classeur existe selon le masque spécifié
@@ -1886,11 +1887,13 @@ lparameters ;
 , tlNonVerifDernVers; && [.F.] {fr} Ne pas prendre la dernière version du classeur Excel
 , tlImportForce; && [.F.] {fr} Importer même si le classeur est plus ancien que la table
 , tcFolder; && [''] {fr} sous-dossier où placer les tables
+, tlAutomation; && [.F.] {fr} Utiliser l'automation Excel (permet la conversion de types)
 
 external array taXL8tables
 tlNonVerifDernVers = lTrue(m.tlNonVerifDernVers)
 tlImportForce = lTrue(m.tlImportForce)
 tcFolder = Alltrim(Evl(m.tcFolder, ''))
+tlAutomation = lTrue(m.tlAutomation)
 
 aClear(@m.taXL8tables)
 
@@ -1935,7 +1938,7 @@ if m.llResult
 
 				* {fr} Si la feuille peut être importée dans une table
 				llUpdate = .f.
-				lcDBFaddr = XL8table(m.lcXLWBaddr, m.lcXLWS, @m.llUpdate, m.tlImportForce)
+				lcDBFaddr = XL8table(m.lcXLWBaddr, m.lcXLWS, @m.llUpdate, m.tlImportForce,,, m.tlAutomation)
 				if file(m.lcDBFaddr)
 
 					* {fr} Le cas échéant, déplacer dans le dossier destination

@@ -1260,7 +1260,7 @@ else
 															'in '; && default: English
 					);
 			);
-		+ nEvl(evl(m.nAgo, ''), ltrim(str(m.nAgoS))+ ' ');
+		+ nEvl(evl(m.nAgo, ''), ltrim(str(m.nAgoS))+ Chr(160));
 		+ iif(m.nAgoS > 1 and !m.lShort;
 			, trim(m.cAgo, 's') + 's';
 			, m.cAgo;

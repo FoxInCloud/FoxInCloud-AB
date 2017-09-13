@@ -1147,7 +1147,7 @@ endif
 * =============================================================
 function wcSCXfile && {fr} Name of a form file from a FoxInCloud name {fr} Nom d'un fichier écran d'après son nom FoxInCloud
 lparameters tcForm
-tcForm = Lower(Alltrim(m.tcForm))
+tcForm = Lower(Alltrim(Evl(m.tcForm, '')))
 return Iif(Rightc(m.tcForm, 4) == '_scx';
 	, Leftc(m.tcForm, Lenc(m.tcForm)-4) + '.scx';
 	, m.tcForm;
@@ -1416,9 +1416,11 @@ case wlLAN() && {en} desktop mode
 		) as L)
 
 case wlAJAX(@m.loAJAX) && {en} web mode, AJAX request
+*set step on
 	return m.loAJAX.dialogAdd(;
 		  m.toForm;
 		, Iif(ga_Type_IsChar(m.tuFormCallBack, .T.), m.tuFormCallBack, .F.); && 2016-12-13 thn -- {FiC V 2.23.0-beta.8} {en} added for call-back support
+		, .null.; && [this.oCntl, contrôle courant] {fr} Contrôle ayant déclenché le dialogue modal
 		)
 
 otherwise
@@ -2001,6 +2003,7 @@ hidden ;
 , cProc; && 2016-08-19 thn -- {FiC V 2.22.0-beta.3} {en} deprecated
 , cClas; && 2016-08-19 thn -- {FiC V 2.22.0-beta.3} {en} deprecated
 , cError;
+, cShutD;
 , oISX;
 , cIcon;
 , cCaption;
@@ -2011,6 +2014,7 @@ hidden ;
 protected array aScreenProp[1]
 
 cError = On('Error')
+cShutD = On('ShutDown')
 
 * ---------------------
 procedure Init
@@ -2077,35 +2081,6 @@ endif
 return DoDefault(@m.result)
 endproc
 
-*---------------------------------------------------------------------------
-protected procedure set && {fr} Effectue un réglage d'environnement
-lparameters ;
-  tcSetting; && {fr} Nom du SET à régler
-, tvValueNew; && {fr} Valeur à régler
-, tnSetting; && {en} Setting number when appropriate for tcSetting, as of 2nd parameter of set()
-, tlChangeAlways; && [.T.] {en} Change setting even if required value is current
-, tlSupported; && [this.lSupported] {en} assume abSet() supports this setting
-
-&& 2016-08-18 thn -- {FiC V 2.22.0-beta.3} {en} added
-&& 2016-10-21 thn -- {FiC V 2.22.0-beta.8} {en} deprecated by abSetsMaintain() -- plain SETs are now supported
-
-* set step on 
-
-local abSet as abSet of abDev.prg
-
-return Iif(Vartype(this.oSets) == 'O';
-	, varSet(@m.abSet, abSet(.null.)) and abSet.Set(m.tcSetting, m.tvValueNew);
-	, DoDefault(;
-		  m.tcSetting; && {fr} Nom du SET à régler
-		, m.tvValueNew; && {fr} Valeur à régler
-		, m.tnSetting; && {en} Setting number when appropriate for tcSetting, as of 2nd parameter of set()
-		, m.tlChangeAlways; && [.T.] {en} Change setting even if required value is current
-		, m.tlSupported; && [this.lSupported] {en} assume abSet() supports this setting
-		);
-	)
-
-endproc
-
 * ---------------------
 procedure Destroy
 
@@ -2138,9 +2113,11 @@ IF m.this.lDevMode
 		SetProcClassRestore(m.this.cClas, .T.) && modify command abDev
 	endif
 	
-	local cError
-	cError = this.cError
-	on error &cError
+	local cOn
+	cOn = this.cError
+	on error &cOn
+	cOn = this.cShutD
+	on shutdown &cOn
 
 	pop menu _mSysMenu && set sysmenu to default
 	pop key
@@ -2163,6 +2140,35 @@ IF m.this.lDevMode
 endif
 
 return DoDefault()
+endproc
+
+*---------------------------------------------------------------------------
+protected procedure set && {fr} Effectue un réglage d'environnement
+lparameters ;
+  tcSetting; && {fr} Nom du SET à régler
+, tvValueNew; && {fr} Valeur à régler
+, tnSetting; && {en} Setting number when appropriate for tcSetting, as of 2nd parameter of set()
+, tlChangeAlways; && [.T.] {en} Change setting even if required value is current
+, tlSupported; && [this.lSupported] {en} assume abSet() supports this setting
+
+&& 2016-08-18 thn -- {FiC V 2.22.0-beta.3} {en} added
+&& 2016-10-21 thn -- {FiC V 2.22.0-beta.8} {en} deprecated by abSetsMaintain() -- plain SETs are now supported
+
+* set step on 
+
+local abSet as abSet of abDev.prg
+
+return Iif(Vartype(this.oSets) == 'O';
+	, varSet(@m.abSet, abSet(.null.)) and abSet.Set(m.tcSetting, m.tvValueNew);
+	, DoDefault(;
+		  m.tcSetting; && {fr} Nom du SET à régler
+		, m.tvValueNew; && {fr} Valeur à régler
+		, m.tnSetting; && {en} Setting number when appropriate for tcSetting, as of 2nd parameter of set()
+		, m.tlChangeAlways; && [.T.] {en} Change setting even if required value is current
+		, m.tlSupported; && [this.lSupported] {en} assume abSet() supports this setting
+		);
+	)
+
 endproc
 
 *!*		* ---------------------

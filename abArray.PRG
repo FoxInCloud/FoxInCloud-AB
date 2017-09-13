@@ -52,6 +52,51 @@ endif
 return m.lnResult
 
 * ===================================================================
+function aCopy_ && {en} Copy an array into another while making sure dimensions match
+lparameters ;
+  taSrce; && @ {fr} Source des lignes copiées dans taDest {en} array to copy into taDest
+, taDest; && @ {fr} tableau résultat {en} Result array
+, nFirstSourceElement; && [1] {en} see Acopy() documentation
+, nNumberElements; && [all] {en} see Acopy() documentation
+, nFirstDestElement; && [1] {en} see Acopy() documentation
+
+external array taSrce, taDest && {fr} pour le gestionnaire de projet {en} for the project manager
+
+local lnResult; && {fr} nombre de lignes du Résultat {en} number of lines of the array taDest
+, llResult;
+
+lnResult = 0
+
+* {fr} Si des tableaux ont bien été passés {en} if parameters are really array
+llResult = type('taDest',1) == 'A' and type('taSrce', 1) == 'A'
+assert m.llResult message cAssertMsg(icase(;
+	cLangUser() = 'fr',	'Les deux paramètres taDest et taSrce doivent être des tableaux',; && copy-paste this line to add another language support
+											'The type of parameters taDest and taSrce must be array'; && Default: English
+	))
+if m.llResult
+
+	if Alen(taSrce, 2) > 0
+		dimension taDest[Alen(taSrce, 1), Alen(taSrce, 2)]
+	else
+		dimension taDest[Alen(taSrce)]
+	endif
+	
+	lnResult = Pcount()
+	lnResult = ICase(;
+		m.lnResult = 2,;
+			Acopy(taSrce, taDest),;
+		m.lnResult = 3,;
+			Acopy(taSrce, taDest, m.nFirstSourceElement),;
+		m.lnResult = 4,;
+			Acopy(taSrce, taDest, m.nFirstSourceElement, m.nNumberElements),;
+			Acopy(taSrce, taDest, m.nFirstSourceElement, m.nNumberElements, m.nFirstDestElement);
+		)
+endif
+
+return m.lnResult
+endfunc
+
+* ===================================================================
 function aAppend && {fr} Ajoute les lignes d'un Tableau à un autre {en} Appends line from an array to another
 lparameters ;
   taDest; && @ {fr} Résultat {en} Result array
@@ -63,7 +108,8 @@ external array taDest, taSrce && {fr} pour le gestionnaire de projet {en} for th
 tlUnique = lTrue(m.tlUnique)
 tlPrepend = lTrue(m.tlPrepend)
 
-local llResult, lnResult; && {fr} nombre de lignes du Résultat {en} number of lines of the array taDest
+local lnResult; && {fr} nombre de lignes du Résultat {en} number of lines of the array taDest
+, llResult;
 , lnRowsSrce, liRowSrce;
 , lnRowsDest, liRowDest;
 , lnColsSrce, llColsSrce, liColSrce;

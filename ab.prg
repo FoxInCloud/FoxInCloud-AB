@@ -118,13 +118,13 @@ loTest.Test(.T.)
 RETURN loTest.Result()
 
 * --------------------------------------------------
-PROCEDURE AB_Tests && {fr} teste les modules de la classe AB
+PROCEDURE AB_Tests && {en} tests all modules in AB layer {fr} teste les modules de la couche AB
 
 local success as Boolean;
 , loAsserts as abSet of abDev.prg;
 , laPrg[1], lcPrg
 
-success = aABprgs(laPrg) > 0
+success = aABprgs(@m.laPrg) > 0
 if m.success
 
 	CLEAR
@@ -577,6 +577,7 @@ LPARAMETERS ;
 nR = Bitand(0xff, m.nRGB)
 nG = Bitand(0xff, Bitrshift(m.nRGB, 8))
 nB = Bitand(0xff, Bitrshift(m.nRGB, 16))
+endfunc
 
 * =================================
 FUNCTION cRGB && {fr} Composants "R,G,B" d'une couleur

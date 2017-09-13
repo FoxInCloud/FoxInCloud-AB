@@ -167,6 +167,8 @@ procedure cWords_test
 local loTest as abUnitTest of abDev.prg
 loTest = newobject('abUnitTest', 'abDev.prg')
 
+* m.loTest.coverageSet()
+
 loTest.Test('10/.F./VFP', '/', '', 10, .f., 'VFP')
 
 local array laW[6]
@@ -283,7 +285,7 @@ local loTest as abUnitTest of abDev.prg
 loTest = newobject('abUnitTest', 'abDev.prg')
 
 loTest.Test('TOTO EST ENERVE', 'toto est  énervé')
-loTest.Test([CA C EST SUR LE SAVOIR FAIRE D ABAQUE EST IMMENSE], [Ã‡a c'est  sùr, le savoir-faire d'Abaque est immense])
+loTest.Test([CA C EST SUR LE SAVOIR FAIRE D ABAQUE EST IMMENSE], [Ã‡a c'est  sûr, le savoir-faire d'Abaque est immense])
 loTest.Test(space(50), .null., 50)
 
 return loTest.Result()
@@ -988,8 +990,7 @@ lcResult = ''
 
 do case
 
-case type('m.toObject.class') == 'C' and type('m.toObject.classLibrary') == 'C' && {fr} FoxPro Object
-
+case type('m.toObject.class') == 'C' and type('m.toObject.classLibrary') == 'C' && Visual FoxPro Object
 	&& All Visual FoxPro base classes except the Empty class have the following minimum set of properties: 
 	&& - Class Property 
 	&& - BaseClass Property 
@@ -997,10 +998,10 @@ case type('m.toObject.class') == 'C' and type('m.toObject.classLibrary') == 'C' 
 	&& - ParentClass Property 
 	
 	lcResult = cWords(', ';
-		, 'BaseClass: ' + Iif(PemStatus(m.toObject, 'BaseClass', 2), 'N/A', cL(m.toObject.BaseClass));
-		, nEvl(m.toObject.ParentClass, 'ParentClass: ' + cL(m.toObject.ParentClass));
-		, 'Class: ' + cL(m.toObject.class);
-		, nEvl(m.toObject.ClassLibrary, 'ClassLibrary:' + cL(m.toObject.ClassLibrary));
+		, 'BaseClass: ' + Iif(PemStatus(m.toObject, 'BaseClass', 2), 'N/A', cLitteral(m.toObject.BaseClass));
+		, nEvl(m.toObject.ParentClass, 'ParentClass: ' + cLitteral(m.toObject.ParentClass));
+		, 'Class: ' + cLitteral(m.toObject.class);
+		, nEvl(m.toObject.ClassLibrary, 'ClassLibrary:' + cLitteral(m.toObject.ClassLibrary));
 		, Iif(type('m.toObject.Parent.Name') == 'C', 'parent: ' + m.toObject.Parent.Name, '');
 		, cLitteral_O_cProps(m.toObject, m.tlRTrim, m.tnTronc, m.tlXML, m.tlObjRecurseNot);
 		)
@@ -1046,8 +1047,8 @@ if amembers(aProp, m.toObject) > 0 && {fr} can be an empty object without proper
 	for each cProp in m.aProp
 
 		lProp = !pemstatus(m.toObject, m.cProp, 2) && {fr} protected
-		lArray = m.lProp and type('m.toObject.' + m.cProp, 1) == 'A'
 
+		lArray = m.lProp and type('m.toObject.' + m.cProp, 1) == 'A'
 		do case
 		case !m.lArray
 		case alen(m.toObject.&cProp, 2) > 0
@@ -1055,21 +1056,21 @@ if amembers(aProp, m.toObject) > 0 && {fr} can be an empty object without proper
 		otherwise
 			dimension aa[Alen(m.toObject.&cProp, 1)]
 		endcase
-
 		if m.lArray
 			acopy(m.toObject.&cProp, m.aa)
 		endif
+
 		lcResult = m.lcResult + iif(.T.; && and !pemstatus(m.toObject, m.cProp, 6); && {en} not inherited
-			and pemstatus(m.toObject, m.cProp, 0); && {fr} modified
+			and pemstatus(m.toObject, m.cProp, 0); && {en} modified
 			, ', ' + lower(m.cProp) + ': ' + iif(m.lProp;
 				, iCase(;
 					m.lArray,;
-						cL(@m.aa, m.tlRTrim, m.tnTronc, m.tlXML, m.tlObjRecurseNot),;
+						cLitteral(@m.aa, m.tlRTrim, m.tnTronc, m.tlXML, m.tlObjRecurseNot),; && /!\ recursion
 					InList(m.cProp, Upper('ActiveForm'), Upper('ActiveControl'));
 					 or !varSet(@m.uProp, Evaluate('m.toObject.' + m.cProp));
 					 or m.tlObjRecurseNot and Vartype(m.uProp) == 'O',;
 						[object],;
-						cL(m.uProp, m.tlRTrim, m.tnTronc, m.tlXML, m.tlObjRecurseNot);
+						cLitteral(m.uProp, m.tlRTrim, m.tnTronc, m.tlXML, m.tlObjRecurseNot); && /!\ recursion
 					);
 				, '[protected or hidden]';
 				);
@@ -1166,7 +1167,7 @@ lparameters cList, cDelim
 local aa[1]
 return Iif(alines(aa, Evl(m.cList, ''), 5, Evl(m.cDelim, ',')) > 0;
 	, cListOfArray(@m.aa,,,.T.);
-	, cL(m.cList);
+	, cLitteral(m.cList);
 	)
 endfunc
 
@@ -1607,8 +1608,10 @@ loTest.Test('', null)
 
 return loTest.Result()
 
+#define PASSWORD_SPECIAL_CHAR	'!#$%&*()_+-={}|[]\";' + ['<>?,./]
+
 * ===================================================================
-function cRandPW && {fr} Mot de passe aléatoire sùr selon indications Windows
+function cRandPW && {fr} Mot de passe aléatoire sûr selon indications Windows
 lparameters ;
   tnLength; && [14] {fr} Nombre de caractères
 , tnSep && [0] {fr} Espacer par groupe tnSep caractères à partir de la droite
@@ -1617,12 +1620,12 @@ tnLength = iif(vartype(m.tnLength) = 'N' and m.tnLength > 0, m.tnLength, 14)
 local lcCars, lnCars, lnCar, lnSep, lcResult
 
 * {fr} Générer une suite de caractères 'aléatoires' autorisés dans les mots de passe Windows
-lcCars = ;
-	'abcdefghikklmnopqrstuvwxyz' + ;
-	'ABCDEFGHIKKLMNOPQRSTUVWXYZ' + ;
-	'0123456789$' +;
-	'!#$%&*()_+-={}|[]\";' +;
-	['<>?,./]
+lcCars = '';
+	+ 'abcdefghikklmnopqrstuvwxyz';
+	+ 'ABCDEFGHIKKLMNOPQRSTUVWXYZ';
+	+ '0123456789';
+	+ PASSWORD_SPECIAL_CHAR
+
 lnCars = len(m.lcCars)
 lcResult = ''
 rand(-1)
@@ -1645,6 +1648,60 @@ if vartype(m.tnSep) == 'N' and between(m.tnSep, 1, m.tnLength-1)
 endif
 
 return m.lcResult
+endfunc
+
+* ===================================================================
+function lPasswordSafe && {fr} Un mot de passe est sûr
+lparameters ;
+  result as String; && @ {en} result
+, cPW as String; && {en} password for check
+, nChar as Integer; && [10] {en} minimum length in characters, at least 7
+, lStrong as Boolean; && [10] {en} minimum length in characters, at least 7
+
+local abRegExp as abRegExp of abTxt.prg, lcSpecial
+
+result = ''
+
+return .T.;
+ and (ga_Type_IsChar(m.cPW, .T.) or !varSet(@m.result, 'password should be a non-empty string'));
+ and varSet(@m.cPW, Alltrim(m.cPW));
+ and varSet(@m.nChar, Iif(ga_Type_IsPositiveInteger(m.nChar), Max(m.nChar, 7), 10));
+ and (Lenc(m.cPW) >= m.nChar or !varSet(@m.result, 'password should be at least ' + Cast(m.nChar as M) + ' characters long'));
+ and varSet(@m.abRegExp, abRegExp());
+ and m.abRegExp.setup('[A-Z]') and (m.abRegExp.test(m.cPW) or !varSet(@m.result, [password should contain at least one upper-case letter]));
+ and m.abRegExp.setup('[a-z]') and (m.abRegExp.test(m.cPW) or !varSet(@m.result, [password should contain at least one lower-case letter]));
+ and m.abRegExp.setup('[0-9]') and (m.abRegExp.test(m.cPW) or !varSet(@m.result, [password should contain at least one figure]));
+ and (!lTrue(m.lStrong) or m.abRegExp.setup('[' + Strtran(Strtran(Strtran(PASSWORD_SPECIAL_CHAR, '-', '\-'), '[', '\['), ']', '\]') + ']') and (m.abRegExp.test(m.cPW) or !varSet(@m.result, [password should contain at least one special character such as ] + PASSWORD_SPECIAL_CHAR)));
+ and .T.
+
+endfunc
+* -----------------------------------------------------------------
+procedure lPasswordSafe_Test && {fr} teste lPasswordSafe()
+
+local loTest as abUnitTest of abDev.prg, result as String
+loTest = newobject('abUnitTest', 'abDev.prg')
+
+loTest.Test(.F., @m.result, 'ABCDEFGHI')
+wWAIT(m.result, 'window nowait')
+
+loTest.Test(.F., @m.result, 'ABCDEFGHIJK')
+wWAIT(m.result, 'window nowait')
+
+loTest.Test(.F., @m.result, 'ABCDEFGHIJk')
+wWAIT(m.result, 'window nowait')
+
+loTest.Test(.T., @m.result, 'ABCDEFGHIJk0')
+wWAIT(m.result, 'window nowait')
+
+loTest.Test(.F., @m.result, 'ABCDEFGHIJk0', , .T.)
+wWAIT(m.result, 'window nowait')
+
+loTest.Test(.T., @m.result, 'ABCDEFGHIJk0!')
+wWAIT(m.result, 'window nowait')
+
+return loTest.Result()
+endproc
+
 
 * ===================================================================
 function lNumber && {fr} Chaine de caractères représente un nombre
@@ -2514,16 +2571,22 @@ endif
 external array taOps
 
 * -----------------------------------------------------------------
-procedure aOperands_Test
+procedure aOperands_Test && aOperands() unit test
 
 local loTest as abUnitTest of abDev.prg, laOps[1]
 loTest = newobject('abUnitTest', 'abDev.prg')
 
 loTest.Test(4, @m.laOps, 'toto = alias.field +fonction(alias.tutu)')
-* {fr} DISPLAY MEMORY LIKE laOps
+
 loTest.Test(5, @m.laOps, 'toto = alias.field +fonction(alias.tutu + 5)')
+loTest.assert('toto', m.laOps[1])
+loTest.assert('alias.field', m.laOps[2])
+loTest.assert('fonction', m.laOps[3])
+loTest.assert('alias.tutu', m.laOps[4])
+loTest.assert('5', m.laOps[5])
 
 return loTest.Result()
+endproc
 
 * ===================================================================
 function cVFPOpSepCarsList && {fr} Opérateurs et séparateurs VFP séparés par une ','
@@ -2583,8 +2646,8 @@ return sys(2015) + transform(int(rand()*1000), '@L 9999')
 * ===================================================================
 function abRegExp && {fr} Objet abRegExp
 lparameters ;
-  tcPattern; && [''] {fr} Expression régulière de recherche
-, tcFlags; && [''] {fr} commutateurs (igm)
+  tcPattern as String; && [''] {fr} Expression régulière de recherche
+, tcFlags as String; && [''] {fr} commutateurs (igm)
 
 local abRegExp as abRegExp of abTxt.prg
 
@@ -2940,8 +3003,9 @@ endproc
 protected procedure Execute_Pattern && {fr} Exécute un pattern unique
 lparameters ;
   tcIn; && {fr} Chaîne oû chercher
-, tlDebug && [.F.] {fr} Débuguer
-tlDebug = lTrue(m.tlDebug) or m.this.lDebug
+, tlDebug as Boolean && [.F.] {fr} Débuguer
+
+tlDebug = Vartype(m.tlDebug) == 'L' and m.tlDebug or m.this.lDebug
 
 .nSeconds = seconds()
 .nMatches = 0 && {fr} Nombre de Résultats
@@ -2951,7 +3015,7 @@ if not empty(.pattern)
 	local loResults, loResult, loSubMatches as collection, loSubMatch, lcHead
 
 	loResults = .oRegExp.Execute(@m.tcIn)
-	if m.loResults.count > 0
+	if Vartype(m.loResults) == 'O' and m.loResults.count > 0
 
 		dimension .Matches[m.loResults.Count, 5] && [1- index, 2- valeur, 3-submatches, 4-length, 5-line number] && 2016-11-16 thn -- {en} added 5-line number
 		for each loResult in m.loResults && {fr} GA ne met pas la clause 'foxobject'
@@ -2977,6 +3041,7 @@ endif
 = m.tlDebug and .Execute_Debug(@m.tcIn)
 
 return .nMatches
+endproc
 
 * -----------------------------------------------------------------
 protected procedure Execute_Debug && {fr} Affiche le déboguage de l'exécution courante
@@ -3118,7 +3183,6 @@ return cCRto(m.tcChain, '')
 * ===================================================================
 function cCRSpace && {fr} chaîne oû les sauts de ligne sont remplacés par un Space(1)
 lparameters tcChain && {fr} Chaîne
-
 return cCRto(m.tcChain, space(1))
 
 * ===================================================================
@@ -3167,14 +3231,14 @@ return cEscaped_XML(m.tcChain)
 * ===================================================================
 function cEscaped_XML(tcChain) && {fr} Encode les entités ignorées par le parser XML (&<>)
 
-return strtran(strtran(strtran(strtran(strtran(strtran(chrtran(m.tcChain; && {fr} http://www.w3.org/TR/2008/REC-xml-20081126/#charsets && {fr} Char ::=  #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]
-		, NON_XML, ''); && modify file abTxt.h
-		, [&], '&#38;'); && '&amp;'
-		, [<], '&#60;'); && '&lt;'
-		, [>], '&#62;'); && '&gt;'
-		, [&#38;#38;], '&#38;'); && {fr} encoded twice
-		, [&#38;#60;], '&#60;'); && {fr} encoded twice
-		, [&#38;#62;], '&#62;'); && {fr} encoded twice
+return strtran(strtran(strtran(strtran(strtran(strtran(chrtran(m.tcChain; && http://www.w3.org/TR/2008/REC-xml-20081126/#charsets Char ::=  #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]
+	, NON_XML, ''); && modify file abTxt.h
+	, [&], '&#38;'); && '&amp;'
+	, [<], '&#60;'); && '&lt;'
+	, [>], '&#62;'); && '&gt;'
+	, [&#38;#38;], '&#38;'); && {en} encoded twice
+	, [&#38;#60;], '&#60;'); && {en} encoded twice
+	, [&#38;#62;], '&#62;'); && {en} encoded twice
 
 && 		, '> <', '><')
 
@@ -3447,7 +3511,6 @@ tcChain = iif(vartype(m.tcChain) == 'C' and !m.lKeepHeadingSpaces;
 	)
 
 return m.tcChain
-
 endfunc
 
 *----------------------------------------------------
@@ -3467,7 +3530,8 @@ endfunc
 *----------------------------------------------------
 function addFS && {en} adds a forward Slash if none
 lparameters tcChain
-return trim(m.tcChain, ' ', '/') + '/'
+tcChain = trim(Evl(m.tcChain, ''), ' ', '/')
+return nEvl(m.tcChain, m.tcChain + '/')
 endfunc
 
 *----------------------------------------------------

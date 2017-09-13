@@ -227,7 +227,7 @@ return loTest.Result()
 function aItemsList && {en} Sets Listbox|Combobox.List[] from Array 
 lparameters ;
   taItems; && @ {fr} Éléments de .List[]
-, toList as listbox && {fr} Objet Listbox ou ComboBox
+, toList as listbox; && {fr} Objet Listbox ou ComboBox
 
 external array taItems
 
@@ -237,7 +237,7 @@ local lnResult as integer; && {fr} nombre d'éléments
 , llResult as Boolean;
 , loForm as form;
 , llDS as Boolean, liDS as integer;
-, luValue;
+, llValue, luValue;
 , lcAlias as string, lcField as string, llFldState as Boolean, lnFldState as integer;
 , lnCol as integer, liCol as integer;
 , liRow as integer;
@@ -264,7 +264,10 @@ if m.llResult
 
 			lnResult = alen(m.taItems, 1)
 
-			luValue = .value
+			llValue = Type('.value') # 'U'
+			if m.llValue
+				luValue = .value
+			endif
 			if m.llDS
 				lcField = JustField(.controlsource, @m.lcAlias)
 				llFldState = used(m.lcAlias) and cursorgetprop("Buffering", m.lcAlias) > 1
@@ -276,7 +279,9 @@ if m.llResult
 
 *			.rowsource = '' && 2015-12-07 -- thn -- work around Error 1152 (Cannot access the selected table) -- useless and dangerous - breaks .rowsourcetype = 3 && {fr} SQL-select
 			.rowsourcetype = 0 && {en} None
-			.clear
+			if .ListCount > 0
+				.clear
+			endif
 *			.ColumnCount = alen(m.taItems, 2) && {en} For a ComboBox or Listbox control, if you set ColumnCount to 0, the first column is displayed based on the RowSource property or on the items added with the AddItem method
 			lnCol = alen(m.taItems, 2) && 2016-09-21 thn -- {FiC V 2.22.0-beta.7} {en} do not change .ColumnCount
 
@@ -298,7 +303,9 @@ if m.llResult
 				endfor
 			endcase
 
-			.value = m.luValue
+			if m.llValue
+				.value = m.luValue
+			endif
 			if m.llFldState
 				setfldstate(m.lcField, m.lnFldState, m.lcAlias)
 			endif
@@ -369,14 +376,15 @@ if loCont(m.toCont)
 	local lnResult
 	with m.toCont as container
 
+		lnResult = .baseclass
 		lnResult = ICase(;
-			.baseclass == 'Pageframe',;
+			m.lnResult == 'Pageframe',;
 				.pageCount,;
-			.baseclass == 'Grid',;
-				.ColumnCount,;
-			inlist(.baseclass, 'Optiongroup', 'Commandgroup'),;
+			m.lnResult == 'Grid',;
+				.columnCount,;
+			inlist(m.lnResult, 'Optiongroup', 'Commandgroup'),;
 				.buttonCount,;
-			.baseclass == 'Formset',;
+			m.lnResult == 'Formset',;
 				.formCount,;
 				.controlCount;
 			)
@@ -409,17 +417,18 @@ if m.llResult
 
 		try
 
-		loResult = ICase(;
-			.baseclass == 'Pageframe',;
-				.pages(m.tiObject),;
-			.baseclass == 'Grid',;
-				.columns(m.tiObject),;
-			inlist(.baseclass, 'Optiongroup', 'Commandgroup'),;
-				.buttons(m.tiObject),;
-			.baseclass == 'Formset',;
-				.forms(m.tiObject),;
-				.controls(m.tiObject);
-			)
+			loResult = .baseclass
+			loResult = ICase(;
+				m.loResult == 'Grid',;
+					Iif(Type('.columns(1)') == 'O', .columns(m.tiObject), .null.),; && 2017-08-22 thn -- {FiC V 2.25.0-beta.8} {en} Type() added
+				m.loResult == 'Pageframe',;
+					.pages(m.tiObject),; && 2017-08-22 thn -- {FiC V 2.25.0-beta.8} {en} Iif(Type('.pages(1)') == 'O', .pages(m.tiObject), .null.)
+				inlist(m.loResult, 'Optiongroup', 'Commandgroup'),;
+					.buttons(m.tiObject),; && 2017-08-22 thn -- {FiC V 2.25.0-beta.8} {en} Iif(Type('.buttons(1)') == 'O', .buttons(m.tiObject), .null.)
+				m.loResult == 'Formset',;
+					.forms(m.tiObject),; && 2017-08-22 thn -- {FiC V 2.25.0-beta.8} {en} Iif(Type('.forms(1)') == 'O', .forms(m.tiObject), .null.)
+					.controls(m.tiObject); && 2017-08-22 thn -- {FiC V 2.25.0-beta.8} {en} Iif(Type('.controls(1)') == 'O', .controls(m.tiObject), .null.)
+				)
 
 		catch to loException && 2016-03-14 thn -- {en} {FiC V 2.21.0-beta.10} track the "columns is not an object" Error #1924 && Visual FoxPro disregards any THROW statements appearing in a CATCH WHEN lExpression clause.
 
@@ -453,7 +462,7 @@ if m.llResult
 					Ma seule piste pour l'instant est 2 requery() simultanés de la même vue pour le même utilisateur par 2 serveurs ; restent des points inexpliqués :
 					- pourquoi dans cette version et pas dans la précédente ? Ce genre de requery() simultanés était déjà possible
 					- pourquoi pour le même utilisateur et pas pour des utilisateurs différents (ce qui se produit en permanence)
-					Je vais tâcher de contourner comme suit : pendant une requête AJAX,
+					Contournement comme suit : pendant une requête AJAX,
 					- désactiver F5
 					- envoyer un avertissement - le temps que l'utilisateur réponde le risque devrait avoir disparu
 				#endif
@@ -942,7 +951,7 @@ tnConts = iif(vartype(m.tnConts) == 'N' and m.tnConts > 0, m.tnConts, 0)
 tlTabIndex = lTrue(m.tlTabIndex)
 tlEnabled = lTrue(m.tlEnabled)
 
-local lnResult; && {fr} Nombre d'objets trouvés
+local lnResult as Integer; && {fr} Nombre d'objets trouvés
 , llResult;
 , llClass;
 , liObject;
