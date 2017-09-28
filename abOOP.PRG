@@ -804,25 +804,27 @@ lparameters ;
   toObject; && {fr} Objet supposé
 , tcClasses && {fr} Classe(s) à satisfaire (ou) -class: ne doit pas appartenir à cette classe
 
-local loClass[1], laClass[1], lcClass
+local succIncl, succExcl;
+, loClass[1], laClass[1], lcClass
 
 if .t.;
- and vartype(m.toObject) == 'O';
- and vartype(m.tcClasses) == 'C';
- and aclass(loClass, m.toObject) > 0;
- and alines(laClass, m.tcClasses, 5, ',', ';') > 0 && 1+4
+ and Vartype(m.toObject) == 'O';
+ and Vartype(m.tcClasses) == 'C';
+ and AClass(loClass, m.toObject) > 0;
+ and ALines(laClass, m.tcClasses, 5, ',', ';') > 0 && 1+4
 
+	succExcl = .T.
+	succIncl = .null.
 	for each lcClass in laClass
-		if iif(leftc(m.lcClass, 1) == '-';
-			, 0 = ascan(loClass, ltrim(m.lcClass, '-'), 1, -1, 1, 7); && 1+2+4 = case insensitive, exact on
-			, 0 < ascan(loClass, m.lcClass, 1, -1, 1, 7);
-			)
-			return .t.
+		if leftc(m.lcClass, 1) == '-'
+			succExcl = m.succExcl and Empty(ascan(loClass, ltrim(m.lcClass, '-'), 1, -1, 1, 7)) && 1+2+4 = case insensitive, exact on
+		else
+			succIncl = Nvl(m.succIncl, .F.) or !Empty(ascan(loClass, m.lcClass, 1, -1, 1, 7))
 		endif
 	endfor
 endif
 
-return .f.
+return m.succExcl and Nvl(m.succIncl, .T.)
 endfunc
 
 * ------------------------------------------
@@ -836,6 +838,9 @@ loTest = newobject('abUnitTest', 'abDev.prg')
 
 loTest.Test(.t., newobject('awlst', 'aw' + '.vcx'), 'Listbox') && {fr} évite d'embarquer aw.vcx dans un projet ab
 loTest.Test(.t., newobject('awfrm', 'aw' + '.vcx'), 'form') && {fr} évite d'embarquer aw.vcx dans un projet ab
+loTest.Test(.t., newobject('awfrm', 'aw' + '.vcx'), '-listbox,-textbox') && {fr} évite d'embarquer aw.vcx dans un projet ab
+loTest.Test(.t., newobject('awfrm', 'aw' + '.vcx'), '-listbox,-textbox,awFrm') && {fr} évite d'embarquer aw.vcx dans un projet ab
+loTest.Test(.f., newobject('awtxt', 'aw' + '.vcx'), 'awtxt,-listbox,-textbox,awFrm') && {fr} évite d'embarquer aw.vcx dans un projet ab
 
 return loTest.Result()
 

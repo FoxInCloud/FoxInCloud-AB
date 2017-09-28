@@ -1578,7 +1578,7 @@ return loUnitTest.Result()
 function aLitteral && {fr} Tableau d'après une liste de litteraux {en} Array from a list of strings
 lparameters ;
   taResult; && @ {fr} Résultat {en} Result
-, tc; && {fr} COnstantes séparées par une ',' ou un point ',' {en} STrings delimited by coma or dot.
+, tc; && {fr} Litteraux séparées par une ',' ou un point ',' {en} Strings delimited by coma or dot.
 , tiCols && [0] {fr} Nombre de colonnes {en} Number of columns
 external array taResult
 

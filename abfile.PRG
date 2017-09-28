@@ -881,20 +881,27 @@ lparameters ;
   tcTable; && @ {fr} Table ou curseur pour répertoire de fichiers ; si vide, nouveau curseur
 , tcFieldsExtra; && [aucun] {fr} spécifications de champs à ajouter à la table
 , tcTagsExtra; && [aucun] {fr} spécifications d'index à ajouter à la table (cf. aTagInfo_())
-, tcAlias && @ [JustStem(m.tcTable)] {fr} Alias d'ouverture
+, tcAlias; && @ [JustStem(m.tcTable)] {fr} Alias d'ouverture
+, tlCreated; && @ [idem] {fr} La table a été créée
+, tlAdjusted; && @ [idem] {fr} La structure de la table et/ou ses indexes ont été ajustés
+, tcResult; && @ {fr} Résultat
 
 local llResult as Boolean
 
-llResult = TableFreeCreateOrAdjust(;
+llResult = TableFreeCreateOrAdjust(; && modify command abData
 			evl(m.tcTable, sys(2015));
-		, @m.tcAlias;
+		,@m.tcAlias;
 		, FilesDirCursor_cFields(m.tcFieldsExtra);
 		, FilesDirCursor_cTags(m.tcTagsExtra);
+		,@m.tlCreated; && @ [idem] {fr} La table a été créée
+		,@m.tlAdjusted; && @ [idem] {fr} La structure de la table et/ou ses indexes ont été ajustés
+		,@m.tcResult; && @ [''] {fr} Résultat
 		)
 
 assert m.llResult message cAssertMsg(textmerge([le curseur ou la table '<<m.tcTable>>' ne peut être ouvert ou créé]))
 
 return iif(m.llResult, m.tcAlias, '')
+endproc
 
 * ========================================
 function FilesDirCursor_cFields && {fr} Champs de la table ou curseur d'inventaire de fichiers
@@ -1825,7 +1832,7 @@ if m.llResult
 		if vartype(m.pnFoldersExcl) == 'U'
 
 			tcFolder = cFileCased(m.tcFolder)
-			aClear(@taSubFolders) && {fr} Vide le résultat
+			aClear(@m.taSubFolders) && {fr} Vide le résultat
 			* {fr} Tabuler les dossiers à exclure et/ou les masques de fichiers à trouver dans les dossiers
 			private pnFoldersExcl, paFoldersExcl, pnFileSkel, paFileSkel, pnRecurse
 			dimension paFoldersExcl[1], paFileSkel[1]
@@ -1876,7 +1883,7 @@ if m.llResult
 
 				* {fr} Si récursion demandée, compter les sous-dossiers
 				lnSubFolders = m.lnSubFolders + iif(m.llRecurse;
-					, aSubFolders(@taSubFolders, m.lcPath, m.tcFoldersExcl, m.tvRecurse, m.tlAddrOnly);
+					, aSubFolders(@m.taSubFolders, m.lcPath, m.tcFoldersExcl, m.tvRecurse, m.tlAddrOnly);
 					, 0)
 
 				if m.pnFileSkel > 0
@@ -1907,7 +1914,7 @@ if m.llResult
 			endif
 
 			* {fr} Ajouter les dossiers au résultat
-			aAppend(@taSubFolders, @m.laFolders,, .t.) && {fr} bottom up
+			aAppend(@m.taSubFolders, @m.laFolders,, .t.) && {fr} bottom up
 		endif
 
 		lnResult = m.lnResult + m.lnSubFolders

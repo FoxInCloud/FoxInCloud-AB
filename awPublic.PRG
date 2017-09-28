@@ -1998,16 +1998,17 @@ oConfigApp = .null. && {en} App configuration object - see xxxServer.prg!xxxAppC
 oAppConfig = .null. && {en} App configuration object - see xxxServer.prg!xxxAppConfig {fr} Objet de configuration de l'application - voir xxxServer.prg!xxxAppConfig
 
 hidden ;
-  cPath; && 2016-08-19 thn -- {FiC V 2.22.0-beta.3} {en} deprecated
-, cDefa; && 2016-08-19 thn -- {FiC V 2.22.0-beta.3} {en} deprecated
-, cProc; && 2016-08-19 thn -- {FiC V 2.22.0-beta.3} {en} deprecated
-, cClas; && 2016-08-19 thn -- {FiC V 2.22.0-beta.3} {en} deprecated
+  cPath; && 2016-08-19 thn -- {FiC V 2.22.0-beta.3} {en} deprecated by abSetsMaintain()
+, cDefa; && 2016-08-19 thn -- {FiC V 2.22.0-beta.3} {en} deprecated by abSetsMaintain()
+, cProc; && 2016-08-19 thn -- {FiC V 2.22.0-beta.3} {en} deprecated by abSetsMaintain()
+, cClas; && 2016-08-19 thn -- {FiC V 2.22.0-beta.3} {en} deprecated by abSetsMaintain()
 , cError;
 , cShutD;
 , oISX;
 , cIcon;
 , cCaption;
 , iWindowState;
+, oScreen; && as empty && 2017-09-21 thn -- {FiC V 2.25.0-beta.9} {en} added 
 , oKey; &&  as Collection
 , oSets; && as abSetsMaintain of abDev.prg
 
@@ -2068,9 +2069,27 @@ if m.this.wlLAN
 endif
 
 if m.this.lDevMode
+
+	#IF .F. && 2017-09-21 thn -- {FiC V 2.25.0-beta.9} {en} WIP
+	local aa[1], ab[1], ac[1], cProp, uProp && 2017-09-21 thn -- {FiC V 2.25.0-beta.9} {en} added 
+	AMembers(aa, _screen, 0, 'G+N') && native public
+	AMembers(ab, _screen, 0, 'G+R') && read-only
+	aLitteral(@m.ac, Upper(["forms", "formCount", "name", "tabindex", "macdesktop"])) && weird
+	this.oScreen = CreateObject('Empty')
+	if aFilter(@m.aa, @m.ab,,, .T.) > 0 and aFilter(@m.aa, @m.ac,,, .T.) > 0
+		for each cProp in m.aa
+			uProp = Evaluate('_Screen.' + m.cProp)
+			if !Vartype(m.uProp) == 'O'
+				AddProperty(this.oScreen, m.cProp, m.uProp)
+			endif
+		endfor
+	endif
+	#ENDIF
+
 	this.cIcon = _Screen.Icon
 	this.cCaption = _Screen.Caption
 	this.iWindowState = _Screen.WindowState
+
 	this.Set('ASSERTS', 'ON')
 	this.Set('CONSOLE', 'OFF')
 	push menu _mSysMenu  && set sysmenu save
@@ -2125,9 +2144,22 @@ IF m.this.lDevMode
 	_Screen.Icon = m.this.cIcon
 	_Screen.Caption = m.this.cCaption
 	_Screen.WindowState = m.this.iWindowState
+
+	#IF .F. && 2017-09-21 thn -- {FiC V 2.25.0-beta.9} {en} WIP
+	local aa[1], cProp, uProp && 2017-09-21 thn -- {FiC V 2.25.0-beta.9} {en} added 
+	if AMembers(m.aa, this.oScreen) > 0
+		for each cProp in m.aa
+			uProp = Evaluate('this.oScreen.' + m.cProp)
+			if !luEqual(m.uProp, Evaluate('_Screen.' + m.cProp))
+				store m.uProp to ('_Screen.' + m.cProp)
+			endif
+		endfor
+	endif
+	#ENDIF && 2017-09-21 thn -- {FiC V 2.25.0-beta.9} {en} WIP
+
 	this.oISX = .null.
 
-	&& 2017-02-23 thn -- {FiC V 2.24.0-beta.10} {fr} added
+	&& 2017-02-23 thn -- {FiC V 2.24.0-beta.10} {fr} added remove custom _screen properties added since .Init()
 	local aScreenProp[1], iScreenProp, cScreenProp
 	for iScreenProp = 1 to AMembers(m.aScreenProp, _Screen, 0, 'U')
 		cScreenProp = m.aScreenProp[m.iScreenProp]
