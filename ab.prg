@@ -72,7 +72,7 @@ ELSE
 
 		SET PROCEDURE TO &lcFXPs ADDITIVE
 			
-		IF lTrue(m.tlGAno)
+		IF Vartype(m.tlGAno) == 'L' and m.tlGAno
 			RELEASE PROCEDURE abGA
 		ENDIF
 
