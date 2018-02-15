@@ -105,6 +105,20 @@ return loClass(m.toAppHost, 'awAppHost')
 endfunc
 
 * =============================================================
+function wlHTMLgen && {fr} Un objet de génération de HTML est disponible
+lparameters toHTMLgen as awHTMLgen of awHTML.prg
+
+local success, oAppHost as awAppHost of awAppHost.fxp
+
+success = wlAppHost(@m.oAppHost)
+toHTMLgen = Iif(m.success, m.oAppHost.oHTMLgen, .null.)
+success = m.success and loClass(m.toHTMLgen, 'awHTMLgen')
+toHTMLgen = Iif(m.success, m.toHTMLgen, .null.)
+
+return m.success
+endfunc
+
+* =============================================================
 function wlSession && {fr} Une session est ouverte pour l'utilisateur courant
 lparameters oSession
 return Vartype(m.Session) == 'O' AND loClass(m.Session, 'awSession') and varSet(@m.oSession, m.Session)
@@ -210,11 +224,12 @@ endfunc
 * =============================================================
 function wcIconFA && [see http://fontawesome.io/] {en} HTML for a 'font awesome' icon {fr} HTML d'une icône 'Font Awesome'
 lparameters ;
-  cIcon as String; && @ {en} pick name from http://getbootstrap.com/components/#glyphicons-glyphs @: CSS class
-, cStyle as String; && @ [''] {en} in: 'muted', 'primary', 'info', 'success', 'danger', 'warning'; out: CSSclass && http://getbootstrap.com/css/#buttons-options, http://getbootstrap.com/css/#helper-classes-colors
-, uSize; && [0|''] 1-'lg'|2-'2x'| … 9-'9x'
-, fixedWidth; && [.F.] {en} Fixed width for vertical alignment
-, cOthers; && see http://fontawesome.io/examples/
+  cIcon as String; && @ {en} pick name from http://getbootstrap.com/components/#glyphicons-glyphs @: full CSS class
+, cClass as String; && @ [''] {en} in: 'muted', 'primary', 'info', 'success', 'danger', 'warning'; @: CSS class && http://getbootstrap.com/css/#buttons-options, http://getbootstrap.com/css/#helper-classes-colors
+, uSize as Variant; && [0|''] 1-'lg'|2-'2x'| … 9-'9x'
+, fixedWidth as Boolean; && [.F.] {en} Fixed width for vertical alignment
+, cOthers as String; && [''] eg. fa-rotate-90, see http://fontawesome.io/examples/
+, cStyle as String; && [''] inline style directive
 
 #if .F.
 && {en} example: insert in any text
@@ -233,18 +248,20 @@ if ga_Type_IsChar(m.cIcon, .T.) and wlAppHost(@m.oAppHost) and m.oAppHost.lFontA
 	cIcon = Lower(Alltrim(m.cIcon))
 	cIcon = nEvl(m.cIcon, Iif(Left(m.cIcon, 3) == 'fa-', '', 'fa-') + m.cIcon)
 
-	cStyle = Iif(ga_Type_IsChar(m.cStyle, .T.), ' text-' + Lower(Alltrim(m.cStyle)), '')
-
+	cClass = Iif(ga_Type_IsChar(m.cClass, .T.), ' text-' + Lower(Alltrim(m.cClass)), '')
 	uSize = wcIcon_cSize(m.uSize)
-	
 	fixedWidth = Iif(lTrue(m.fixedWidth), ' fa-fw', '')
-
 	cOthers = Iif(ga_Type_IsChar(m.cOthers, .T.), Lower(Alltrim(m.cOthers)), '')
 
 	uSize = nEvl(m.uSize, ' ' + m.uSize)
 	cOthers = nEvl(m.cOthers, ' ' + m.cOthers)
-	return Textmerge([<span class="fa <<m.cIcon>><<m.cStyle>><<m.uSize>><<m.fixedWidth>><<m.cOthers>>" aria-hidden="true"></span> ])
+	cStyle = Iif(ga_Type_IsChar(m.cStyle, .T.), ' style="' + Alltrim(m.cStyle, '"', ' ') + '"', '')
+
+	cIcon = 'fa ' + m.cIcon + m.cClass + m.uSize + m.fixedWidth + m.cOthers
+
+	return Textmerge([<span class="<<m.cIcon>>"<<m.cStyle>> aria-hidden="true"></span> ])
 else
+	cIcon = ''
 	return ''
 endif
 endfunc
@@ -253,7 +270,7 @@ endfunc
 function wcIconGI
 lparameters ;
   cIcon as String; && @ {en} pick name from http://getbootstrap.com/components/#glyphicons-glyphs @: CSS class
-, cStyle as String; && @ [''] {en} in: 'muted', 'primary', 'info', 'success', 'danger', 'warning'; out: CSSclass && http://getbootstrap.com/css/#buttons-options, http://getbootstrap.com/css/#helper-classes-colors
+, cClass as String; && @ [''] {en} in: 'muted', 'primary', 'info', 'success', 'danger', 'warning'; out: CSSclass && http://getbootstrap.com/css/#buttons-options, http://getbootstrap.com/css/#helper-classes-colors
 , uSize; && [0|''] 1-'lg'|2-'2x'| … 9-'9x'
 
 local oAppHost as awAppHost of awAppHost.fxp
@@ -261,10 +278,12 @@ local oAppHost as awAppHost of awAppHost.fxp
 if ga_Type_IsChar(m.cIcon, .T.) and wlAppHost(@m.oAppHost) and m.oAppHost.lBootstrapAdd
 	cIcon = Lower(Alltrim(m.cIcon))
 	cIcon = nEvl(m.cIcon, Iif(Leftc(m.cIcon, Len('glyphicon-')) == 'glyphicon-', '', 'glyphicon-') + m.cIcon)
-	cStyle = Iif(ga_Type_IsChar(m.cStyle, .T.), ' text-' + Lower(Alltrim(m.cStyle)), '')
+	cClass = Iif(ga_Type_IsChar(m.cClass, .T.), 'text-' + Lower(Alltrim(m.cClass)), '')
 	uSize = wcIcon_cSize(m.uSize)
-	return Textmerge([<span class="glyphicon <<m.cIcon>><<m.cStyle>><<m.uSize>>" aria-hidden="true"></span> ])
+	cIcon = cWords(' ', 'glyphicon', m.cIcon, m.cClass, m.uSize)
+	return Textmerge([<span class="<<m.cIcon>>" aria-hidden="true"></span> ])
 else
+	cIcon = ''
 	return ''
 endif
 endfunc
@@ -307,12 +326,13 @@ if Vartype(m.toControl) == 'O'
 
 && {fr} http://ablogaboutcode.com/2011/06/14/how-javascript-loading-works-domcontentloaded-and-onload/
 
-	return Textmerge([function <<m.lcFonction>>(){var o = $('<<m.lcID>>'); if(true &];
-		+ [& !FoxInCloud.aReqsPend.length &];
-		+ [& !FoxInCloud.focusEvent &];
-		+ [& o &];
-		+ [& typeof o.focus === 'function' &];
-		+ [& true) o.focus();};<<m.lcFonction>>.defer();]) && {fr} removed self-executing function (function(){})(); && {fr} Prototype#defer(): Schedules the function to run as soon as the interpreter is idle
+	return Textmerge([function <<m.lcFonction>>(){];
+			+ [true &];
+			+ [& !FoxInCloud.aReqsPend.length &];
+			+ [& !FoxInCloud.focusEvent &];
+			+ [& jQuery('#<<m.lcID>>').focus();];
+		+ [};];
+		+ [window.setTimeout(<<m.lcFonction>>, 10);]) && {fr} Prototype#defer(): Schedules the function to run as soon as the interpreter is idle uses 10 ms
 else
 	return  ''
 endif
@@ -525,7 +545,7 @@ case wlAJAX(@m.loAJAX) and wlAppHost(@m.loAppHost) && {fr} requête en cours
 									m.loAppHost.oForm(m.loAppHost.cFrmMBclass, .T., .T., m.eMessageText, m.nDialogBoxType, m.cTitleBarText, m.nTimeout);
 		)
 	success = loClass(m.loForm, 'awFrmMB')
-	assert m.success message cAssertMsg(Textmerge(ICase(;
+	assert m.success or !Vartype(m.loForm) == 'O' message cAssertMsg(Textmerge(ICase(;
 		cLangUser() = 'fr',	[Votre classe d'écran de "MessageBox" '<<m.loForm.Class>>' devrait dériver de 'aw.vcx!awFrmMB'],; && copy-paste this line to add another language support
 												[Your "MessageBox" form class '<<m.loForm.Class>>' should derive from 'aw.vcx!awFrmMB']; && Default: English
 		)))
@@ -1101,13 +1121,41 @@ return ICase(;
 	m.result = 07, 'Russian',;
 	m.result = 33, 'French',;
 	m.result = 34, 'Spanish',;
-	m.result = 39, 'Czech',;
+	InList(m.result, 39, 42), 'Czech',; && VFPx help
 	InList(m.result, 48, 49), 'German',; && 2014-04-11 - Uwe Haberman
-	m.result = 55, 'Korean',;
+	InList(m.result, 55, 82), 'Korean',; && VFPx help
 	m.result = 86, 'Simplified Chinese',;
 	m.result = 88, 'Traditional Chinese',;
 	Version(3) + ' is unknown';
 	)
+* =============================================================
+function wcParmsLit && {fr} Paramètres en littéral
+lparameters ;
+  tnParm AS Number; && {fr} Nombre de paramètres
+, t01,t02,t03,t04,t05,t06,t07,t08,t09,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19,t20
+
+tnParm = Iif(Vartype(m.tnParm) == 'N', Int(m.tnParm), 0)
+IF m.tnParm > 0
+
+	LOCAL lcResult as String;
+	, lnParm as Integer;
+	, liParm as Integer;
+
+	lnParm = Max(Pcount() - 1, 0)
+	lcResult = ''
+	FOR liParm = 1 TO m.tnParm
+		lcResult = m.lcResult;
+			+ Iif(m.liParm > 1, ', ', '');
+			+ Iif(m.liParm <= m.lnParm;
+				, cL(Evaluate('m.t' + Padl(m.liParm, 2, '0')));
+				, 't' + Padl(m.liParm, 2, '0');
+				)
+	ENDFOR
+	return m.lcResult
+else
+	return ''
+endif
+endfunc
 
 * =============================================================
 function wcParms && {fr} Chaîne de paramètres standard pour appel délégué d'une procédure, fonction ou méthode
@@ -1117,7 +1165,6 @@ lparameters ;
 , t01,t02,t03,t04,t05,t06,t07,t08,t09,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19,t20 && [N/A] {fr} nom corrigés des paramètres
 
 tnParm = Iif(Vartype(m.tnParm) == 'N', Int(m.tnParm), 0)
-
 IF m.tnParm > 0
 
 	LOCAL lcResult as String;
@@ -1143,6 +1190,7 @@ IF m.tnParm > 0
 else
 	return ''
 endif
+endfunc
 
 * =============================================================
 function wcSCXfile && {fr} Name of a form file from a FoxInCloud name {fr} Nom d'un fichier écran d'après son nom FoxInCloud
@@ -1444,7 +1492,7 @@ if wlAJAX(@m.oAJAX)
 
 else
 	return ShellExecute(; && {en} If the function succeeds, it returns a value greater than 32
-	      .null.; && {en} integer A handle to the parent window used for displaying a UI or error messages. This value can be NULL if the operation is not associated with a window.
+	      0; && .null. && {en} integer A handle to the parent window used for displaying a UI or error messages. This value can be NULL if the operation is not associated with a window.
 	    , 'open'; && {fr} cOperation string
 	    	; && {en} edit: Launches an editor and opens the document for editing. If lpFile is not a document file, the function will fail.
 				; && {en} explore: Explores a folder specified by lpFile.
@@ -2066,6 +2114,8 @@ endif
 if m.this.wlLAN
 	Sys(3050, 1, 512*1024^2)
 	Sys(3050, 2, 512*1024^2)
+else
+	set tableprompt off
 endif
 
 if m.this.lDevMode
@@ -2092,7 +2142,7 @@ if m.this.lDevMode
 
 	this.Set('ASSERTS', 'ON')
 	this.Set('CONSOLE', 'OFF')
-	push menu _mSysMenu  && set sysmenu save
+	push menu _mSysMenu && set sysmenu save
 	push key
 	wait clear
 endif
@@ -2572,8 +2622,10 @@ endproc
 
 *--------------------------------------------
 procedure Resize
+
 IF (Type('m.thisForm.wlHTMLgen') == 'L' AND m.thisForm.wlHTMLgen)
 	return .F. && {en} default: ignore event in Web mode && {fr} subclass: return <JavaScript> to process on client
+	&& 2018-02-05 thn -- {FiC V 2.26.1-beta.9} {en} always returns .T. whatever value is returned
 ENDIF
 
 && {fr} subclass: your code here
@@ -3547,13 +3599,15 @@ if m.delta # 0 and aoClassCont(@m.aCntl, m.toCont,, .F.) > 0
 				Left_ = .Left
 				Width_ = .Width
 
+* setStepOn(Lower(.Name) == 'myemail')
+
 				.Left = Round(ICase(;
-					   BitTest(.Anchor, 5); && Left RELATIVE - Anchors control to left border of container and maintains relative distance between the left border.
-					or BitTest(.Anchor, 8),; && Horizontal Fixed Size - Anchors center of control relative to left and right borders but remains fixed in size.
-						.Left * m.ratio,;
-					!BitTest(.Anchor, 1) and BitTest(.Anchor, 3),; && Right ABSOLUTE - Anchors control to right border of container and does not change the distance between the right border.
-						.Left + m.delta,;
-						.Left; && Left absolute
+					   BitTest(m.nAnchor, 5); && Left RELATIVE - Anchors control to left border of container and maintains relative distance between the left border.
+					or BitTest(m.nAnchor, 8),; && Horizontal Fixed Size - Anchors center of control relative to left and right borders but remains fixed in size.
+						m.Left_ * m.ratio,;
+					!BitTest(m.nAnchor, 1) and BitTest(m.nAnchor, 3),; && Right ABSOLUTE - Anchors control to right border of container and does not change the distance between the right border.
+						m.Left_ + m.delta,;
+						m.Left_; && Left absolute
 					), 0)
 
 				if (.F.;
@@ -3568,7 +3622,7 @@ if m.delta # 0 and aoClassCont(@m.aCntl, m.toCont,, .F.) > 0
 				endif
 			endwith
 
-			if !InList(m.oCntl.BaseClass, 'Optiongroup', 'Commandgroup'); && 2016-08-05 thn -- {FiC V 2.22.0-beta.2} {en} .Anchor works even with !Form.Visible
+			if !InList(m.oCntl.BaseClass, 'Optiongroup', 'Commandgroup', 'Container'); && 2016-08-05 thn -- {FiC V 2.22.0-beta.2} {en} for these classes, .Anchor works even with !Form.Visible
 			 and loCont(m.oCntl)
 				wAnchorResizeWidth(; && /!\ recursion
 					  m.oCntl;
@@ -3617,7 +3671,7 @@ if m.delta # 0 and aoClassCont(@m.aCntl, m.toCont,, .F.) > 0
 
 			with m.oCntl as awTxt of aw.vcx
 
-* setStepOn(.wcID == 'pagedgrid_scx-grid-grid') && 2016-10-11 thn -- {FiC V 2.22.0-beta.8} {en} 
+* assert !(.wcID == 'pagedgrid_scx-grid-grid') && 2016-10-11 thn -- {FiC V 2.22.0-beta.8} {en} 
 
 				nAnchor = .Anchor && optimization
 				Top = .Top
@@ -3644,7 +3698,7 @@ if m.delta # 0 and aoClassCont(@m.aCntl, m.toCont,, .F.) > 0
 				endif
 			endwith
 
-			if !InList(m.oCntl.BaseClass, 'Optiongroup', 'Commandgroup'); && 2016-08-05 thn -- {FiC V 2.22.0-beta.2} {en} .Anchor works even with !Form.Visible
+			if !InList(m.oCntl.BaseClass, 'Optiongroup', 'Commandgroup', 'Container'); && 2016-08-05 thn -- {FiC V 2.22.0-beta.2} {en} .Anchor works even with !Form.Visible
 			 and loCont(m.oCntl)
 				wAnchorResizeHeight(; && /!\ recursion
 					  m.oCntl;

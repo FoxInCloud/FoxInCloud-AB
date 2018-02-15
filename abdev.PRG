@@ -1443,9 +1443,10 @@ return DoDefault()
 * ------------------------------------
 procedure SystemInfo && {fr} Peuple les informations système
 
- declare GetSystemInfo in win32api string @lcSystemInfo
  local lcSysInfo
- m.lcSysInfo = space(36)
+
+ declare GetSystemInfo in win32API string @lcSystemInfo
+ lcSysInfo = space(36)
  GetSystemInfo(@m.lcSysInfo)
 
  this.nOEMid = StrToLong(left(m.lcSysInfo, 4))
@@ -1475,22 +1476,25 @@ procedure SystemInfo && {fr} Peuple les informations système
  case this.nProcessorType = PROCESSOR_ALPHA_21064
     this.cProcessorName = "ALPHA 21064"
  endcase
+endproc
 
 * ------------------------------------
 procedure MemoryInfo && {fr} Peuple les informations mémoire
 
- declare GlobalMemoryStatus in win32api string @lcMemStat
  local lcMemStat
- m.lcMemStat = LongToStr(32) + replicate(chr(0), 28)
- GlobalMemoryStatus(@m.lcMemStat)
 
- this.nMemLoad = StrToLong(substr(m.lcMemStat, 5, 4))
- this.nMemPhysTot = StrToLong(substr(m.lcMemStat, 9, 4))
- this.nMemPhysAvail = StrToLong(substr(m.lcMemStat, 13, 4))
- this.nPageFileTot = StrToLong(substr(m.lcMemStat, 17, 4))
- this.nPageFileAvail = StrToLong(substr(m.lcMemStat, 21, 4))
- this.nMemVirtualTot = StrToLong(substr(m.lcMemStat, 25, 4))
- this.nMemVirtualAvail = StrToLong(substr(m.lcMemStat, 29, 4))
+ declare GlobalMemoryStatusEx in win32API string @lcMemStat && 2017-12-14 -- http://www.tek-tips.com/viewthread.cfm?qid=1443657
+ lcMemStat = longToStr(64) + Replicate(Chr(0), 60)
+ GlobalMemoryStatusEx(@m.lcMemStat)
+
+ this.nMemLoad = StrToDlong(substr(m.lcMemStat, 5, 4))
+ this.nMemPhysTot = StrToDlong(substr(m.lcMemStat, 9, 8))
+ this.nMemPhysAvail = StrToDlong(substr(m.lcMemStat, 17, 8))
+ this.nPageFileTot = StrToDlong(substr(m.lcMemStat, 25, 8))
+ this.nPageFileAvail = StrToDlong(substr(m.lcMemStat, 33, 8))
+ this.nMemVirtualTot = StrToDlong(substr(m.lcMemStat, 41, 8))
+ this.nMemVirtualAvail = StrToDlong(substr(m.lcMemStat, 49, 8)) && 57
+endproc
 
 * ------------------------------------
 procedure ProcessorInfo && {fr} Peuple les informations sur le processeur
@@ -1530,6 +1534,7 @@ for each loItem in loItems
 	this.cVersion = alltrim(loItem.version)
 	this.nVoltageCaps = loItem.VoltageCaps
 endfor
+endproc
 
 enddefine && {fr} CLASS abMachineInfo
 
@@ -1609,25 +1614,25 @@ lnSeconds = seconds() - m.lnSeconds
  ,64)
 
 * ------------------------------------
- function LongToStr && {fr} Représentation ASCII d'un entier 32 bits positif
- lparameters tnLongVal && {fr} Entier 32 bits positif
+function LongToStr && {fr} Représentation ASCII d'un entier 32 bits positif
+lparameters tnLongVal && {fr} Entier 32 bits positif
 
- local i, lnLongVal, lcResult
+local i, lnLongVal, lcResult
 
- lcResult = ''
- lnLongVal = m.tnLongVal
- for i = 24 to 0 step -8
-    lcResult = chr(int(m.lnLongVal/(2^m.i))) + m.lcResult
-    lnLongVal = mod(m.lnLongVal, (2^m.i))
- endfor
+lcResult = ''
+lnLongVal = m.tnLongVal
+for i = 24 to 0 step -8
+  lcResult = chr(int(m.lnLongVal/(2^m.i))) + m.lcResult
+  lnLongVal = mod(m.lnLongVal, (2^m.i))
+endfor
 
- return lcResult
+return lcResult
 
 * ------------------------------------
 function StrToLong && {fr} Entier 32 bits positif d'après sa représentation ASCII
 lparameters tcLongStr && {fr} Représentation ASCII d'un entier 32 bits positif
 
-local i, lcLongStr, lnResult
+local lnResult, i, lcLongStr
 lnResult = 0
 lcLongStr = m.tcLongStr
 for i = 0 to 24 step 8
@@ -1636,6 +1641,19 @@ for i = 0 to 24 step 8
 endfor
 
 return lnResult
+
+* ------------------------------------
+function StrTodLong && {fr} Entier 64 bits positif d'après sa représentation ASCII
+lparameters tcLongStr && {fr} Représentation ASCII d'un entier 64 bits positif
+
+&& 2017-12-14 -- http://www.tek-tips.com/viewthread.cfm?qid=1443657
+Local lnResult, lnPos
+lnResult = 0
+for lnPos = 8 TO 1 STEP -1
+	lnResult = 256*m.lnResult + Asc(Substr(m.tcLongStr, m.lnPos,1))
+next
+
+return m.lnResult
 
 * ------------------------------------
 function cBarsSecs && {fr} Une barre pour 50 ms
@@ -1708,7 +1726,7 @@ return m.llResult
 * ------------------------------------
 procedure ProjectFilesRemove && {fr} Ôte des fichiers du projet courant
 lparameters ;
-  tcFileMask; && [*.*] {fr} Expression régulière indiquant le masque de fichier à traiter
+  tcFileRegEx; && [*.*] {fr} Expression régulière indiquant le masque de fichier à traiter
 , tnResult; && @ {fr} Nombre de fichiers traités
 , tcFileType; && [''] {fr} déplacer vers cette section
 
@@ -1736,7 +1754,7 @@ if m.llResult
 
 			* {fr} Donner leur valeur par défaut aux paramètres
 			lcCarsNot = CAR_INT_DS_NOM_FICH
-			lcFileMask = alltrim(uDefault(m.tcFileMask, textmerge('[^<<m.lcCarsNot>>]+\.[^<<m.lcCarsNot>>]+')))
+			lcFileMask = alltrim(uDefault(m.tcFileRegEx, textmerge('[^<<m.lcCarsNot>>]+\.[^<<m.lcCarsNot>>]+')))
 			llInclude = iif(pcount() >=2 and vartype(m.tlInclude) $ 'LX', m.tlInclude, .t.)
 			tcFileType = Iif(ga_Type_IsChar(tcFileType, .T.) and varSet(@m.tcFileType, Alltrim(m.tcFileType)) and InList(m.tcFileType, FILETYPE_DATABASE,FILETYPE_FREETABLE,FILETYPE_QUERY,FILETYPE_FORM,FILETYPE_REPORT,FILETYPE_LABEL,FILETYPE_CLASSLIB,FILETYPE_PROGRAM,FILETYPE_APILIB,FILETYPE_APPLICATION,FILETYPE_MENU,FILETYPE_TEXT,FILETYPE_OTHER); && see foxpro.h
 				, m.tcFileType;
@@ -1962,7 +1980,7 @@ lparameters tcCodeLine && {fr} Ligne de code ; si @, retournée sans commentaire 
 
 local lcResult; && {fr} Commentaire dans la ligne de code
 , llResult;
-, lnAt, lnAt1;
+, lnAt, lnAt_;
 
 lcResult = ''
 
@@ -1973,21 +1991,20 @@ assert m.llResult message cAssertMsg(textmerge([Line de code invalide : <<m.tcCo
 if m.llResult
 
 	* {fr} Si la ligne comporte un commentaire
-	
-	lnAt = at_c('*', m.tcCodeLine)
-	if m.lnAt > 0
-		lnAt1 = m.lnAt + 1
+	lnAt = at_c('*', Ltrim(m.tcCodeLine))
+	if m.lnAt = 1
+		lnAt_ = m.lnAt + 1
 	else
 		lnAt = at_c(replicate('&', 2), m.tcCodeLine)
 		if m.lnAt > 0
-			lnAt1 = m.lnAt + 2
+			lnAt_ = m.lnAt + 2
 		endif
 	endif
 	if m.lnAt > 0
 
 		* {fr} Extraire le commentaire et le supprimer
 		lcResult = m.tcCodeLine
-		lcResult = alltrim(substrc(m.lcResult, m.lnAt1))
+		lcResult = alltrim(substrc(m.lcResult, m.lnAt_))
 		lcResult = upper(substrc(m.lcResult, 1, 1)) + substrc(m.lcResult, 2) && {fr} capitalise le premier caractère
 		tcCodeLine = substrc(m.tcCodeLine, 1, m.lnAt - 1) && {fr} Ligne sans le commentaire
 	endif
@@ -2207,7 +2224,7 @@ enddefine && {fr} CLASS abOn
 * =================================================
 
 * =================================================
-function labSet as Boolean
+function labSet as Boolean && {en} abSet object created
 lparameters ;
   toObj as abSet of abDev.prg,; && @ {en} abSet Object back
 	tcSetting; && {en} Setting to perform
@@ -2219,9 +2236,10 @@ lparameters ;
 toObj = abSet(m.tcSetting, m.tvValueNew, m.tnSetting, m.tlChangeAlways, m.tlSupported)
 
 return vartype(m.toObj) == 'O'
+endfunc
 
 * =================================================
-function abSet as abSet of abDev.prg
+function abSet as abSet of abDev.prg && {en} abSet object
 lparameters ;
   tcSetting; && {en} Setting to perform
 , tvValueNew; && {en} Value to set, .T. to toggle ON - OFF
@@ -2993,7 +3011,7 @@ return m.success
 endproc
 
 *---------------------------------------------------------------------------
-procedure set as Boolean
+procedure set as Boolean && {en} perform a SETting
 lparameters lcSet, lnSet, luSet
 
 && {fr} Public car appelé par modify command awPublic > awSets.Set()
@@ -3174,7 +3192,7 @@ if type('m.toException.BaseClass') == 'C';
 	with m.toException as exception
 
 		lcResult = '"' + .LineContents + '"'
-		lcResult = iif(_vfp.startmode = 0;
+		lcResult = iif(Empty(_vfp.StartMode);
 			, textmerge(icase(;
 					cLangUser() = 'fr',	[(<<Iif('...' $ .LineContents, 'code source N/D', m.lcResult)>>)],; && copy-paste this line to add another language support
 															[(<<Iif('...' $ .LineContents, 'source code N/A', m.lcResult)>>)]; && default: English
@@ -3193,10 +3211,14 @@ if type('m.toException.BaseClass') == 'C';
 		lcMessage = m.lcMessage + Iif(Empty(m.lcMessage) or Empty(m.lcUserValue), '', ' - ') + m.lcUserValue && c2Words() may not be available
 		lcLine = Iif(Vartype(.LineNo) == 'N', Ltrim(Transform(.LineNo, '999,999')), .LineNo)
 
-		lcResult = textmerge(icase(;
-			cLangUser() = 'fr',	[Méthode ou procédure <<.Procedure>>() : erreur n° <<.ErrorNo>> ("<<m.lcMessage>>") à la ligne n° <<m.lcLine>>],; && copy-paste this line to add another language support
-													[Method or procedure <<.Procedure>>(): error #<<.ErrorNo>> ("<<m.lcMessage>>") at code line #<<m.lcLine>>]; && default: English
-			)) + ' ' + m.lcResult
+		lcResult = c2Words(;
+			  textmerge(icase(;
+				cLangUser() = 'fr',	[Méthode ou procédure <<.Procedure>>() : erreur n° <<.ErrorNo>> ("<<m.lcMessage>>") à la ligne n° <<m.lcLine>>],; && copy-paste this line to add another language support
+														[Method or procedure <<.Procedure>>(): error #<<.ErrorNo>> ("<<m.lcMessage>>") at code line #<<m.lcLine>>]; && default: English
+				));
+			, ' ';
+			, m.lcResult;
+			)
 	endwith
 endif
 
@@ -3294,6 +3316,7 @@ lparameters ;
 , tcResult; && @ [''] {fr} Résultat de la compilation
 , tcClause; && [''] {fr} Clauses de compilation (pour *.prg)
 , tnResult && @ [0] {fr} nombre d'erreurs de compilation
+
 tcResult = ''
 tcClause = evl(m.tcClause, '')
 tnResult = 0
@@ -3313,7 +3336,7 @@ if m.llResult
 	loNotify = abSet('NOTIFY', 'OFF') && {fr} supprime le thermomètre d'avancement
 
 	* {fr} Tenter la compilation
-	tcFileAddr = fullpath(m.tcFileAddr)
+	tcFileAddr = fullpath(m.tcFileAddr) && upper()
 	lcExt = justext(m.tcFileAddr)
 	try
 
@@ -3326,20 +3349,20 @@ if m.llResult
 				set procedure to (m.tcFileAddr) additive
 			endif
 
-		case m.lcExt = 'VCX'
-			clear classlib (m.tcFileAddr) && {fr} par sécurité
+		case m.lcExt == 'VCX'
+			clear classlib (m.tcFileAddr) && {fr} par sécurité && 2017-11-24 thn -- {fr} mais ça ne marche pas : 16:51:57 - (004) Compiling 'c:\work_foxincloud\common\foxpro\vfpclasses\tlcclasses.vcx' - acoop.fxp!Awadapter.filescompile() - FAILURE: Filecompile() - Method or procedure filecompile(): error #3 ("File is in use") at code line #3,331 ("compile classlib (m.tcFileAddr)") - File 'TLCCLASSES.VCX'
 			compile classlib (m.tcFileAddr)
 
-		case m.lcExt = 'SCX'
+		case m.lcExt == 'SCX'
 			compile form (m.tcFileAddr)
 
-	 	case m.lcExt = 'FRX'
+	 	case m.lcExt == 'FRX'
 			compile report (m.tcFileAddr)
 
-	 	case m.lcExt = 'LBX'
+	 	case m.lcExt == 'LBX'
 			compile label (m.tcFileAddr)
 
-		case m.lcExt = 'DBC'
+		case m.lcExt == 'DBC'
 			loSet = abSet('DATABASE', '',,, .t.)
 			compile database (m.tcFileAddr)
 
@@ -3398,6 +3421,7 @@ if m.llResult
 endif
 
 return m.llResult
+endproc
 
 * ========================================
 procedure ProcEmpty && {fr} Sert à mesurer le temps moyen d'appel d'une procédure
@@ -4430,7 +4454,7 @@ case !m.llForce;
 
 case !m.llForce
 
-	declare integer GetUserDefaultUILanguage in Win32API
+	declare integer GetUserDefaultUILanguage in win32API
 	loShell = createobject('wScript.Shell')
 
 	lcResult = alltrim(getwordnum('';
@@ -5568,8 +5592,10 @@ return '';
 endfunc
 
 * ==============================
-function cIndentedNo && Texte non indenté && /!\ à modifier pour fonctionner en multi-lignes
+function cIndentedNo && {fr} Texte non indenté
 lparameters tcCode
+
+&& /!\ to do : adapter au multi-lignes
 
 return ltrim(icase(;
 		CRLF $ m.tcCode,;
@@ -5609,6 +5635,12 @@ return iif(empty(m.tcCode);
 function lDevMode && {fr} Mode développement
 return _vfp.startmode = 0;
  and not inlist(lower(justext(cModuleInfo(sys(16, 0), 'Address'))), 'app', 'exe')
+endfunc
+
+* ==============================
+function lDevModeAB && {fr} Mode développement Abaque
+return lDevMode() and File('az.prg')
+endfunc
 
 * ===================================================================
 function cAssertMsg && {fr} MESSAGE pour ASSERT limité à 120 caractères sous les IDE non-US
@@ -6038,14 +6070,20 @@ store m.in to out && {fr} http://blogs.msdn.com/b/calvin_hsia/archive/2004/12/14
 endproc
 
 * =============================================
+procedure varSetc(out, in) as Boolean && {fr} assigne une variable et retourne une chaine vide
+varSet(@m.out, m.in)
+return ''
+endproc
+
+* =============================================
 function iInc(int, inc) as integer && {fr} incrémente une variable
 int = m.int + evl(m.inc, 1)
 return m.int
 endproc
 
 * =============================================
-procedure setStepOn(condition as Boolean) as Boolean
-if (cast(Nvl(m.condition, .F.) as L) or empty(pcount())) && {fr} and lDevMode() useless
+procedure setStepOn(condition as Boolean) as Boolean && {en} execute SET STEP ON within a Boolean expression
+if (cast(Nvl(m.condition, .F.) as L) or empty(pcount())) && and lDevMode() useless
 	set step on
 endif
 endproc
@@ -6106,7 +6144,7 @@ endif
 endfunc
 
 * =============================================
-function RC4(cTexte, cClef)
+function RC4(cTexte, cClef) && {en} RC4 encryption
 
 *!*    Objet : Implémention en VisualFoxPro de l'algorithme de cryptage RC4
 *!*    Auteur : C.Chenavier
@@ -6335,7 +6373,7 @@ lparameters ;
 , version as string; && {fr} version à analyser
 , loose as Boolean; && [.F.]
 
-if vartype(m.version) # 'C'
+if vartype(m.version) # 'C' && 2 parameters
 	loose = m.version
 	version = m.result
 endif
@@ -6522,7 +6560,7 @@ this.format
 endproc
 
 * -----------------
-procedure format
+procedure format && {en} format version as String
 
 this.versionMMPint = Int(0;
 	+ m.this.major * 10^6;
@@ -6824,7 +6862,7 @@ return icase(;
 endfunc
 
 * -----------------
-protected function iBeta
+hidden function iBeta
 return ascan(m.this.prerelease, 'beta')
 endfunc
 
@@ -6904,18 +6942,18 @@ return !empty(this.compareMinor(m.other))
 endfunc
 
 * -----------------
-function inspect
+function inspect && {en} readable version
 return '<SemVer "' + this.version + '">'
 endfunc
 
 * -----------------
-protected function prereleaseClear
+hidden function prereleaseClear
 dimension this.prerelease[1]
 this.prerelease = .null.
 this.lPreRelease = .f.
 
 * -----------------
-function inc
+function inc && {en} increment version
 lparameters ;
   release; && [''] {en} type of release
 , Identifier; && ['beta'] {en} if m.release = 'pre..' pre-release identifier such as 'beta'
@@ -7314,14 +7352,15 @@ return ga_Type_IsChar(m.cIP, .T.);
 endfunc
 
 * -----------------
-function DwordOfInt && DWORD from an integer
+function dWordOfInt && {en} DWORD from an integer
 lparameters nValue && integer (unsigned)
 return Chr(Mod(m.nValue,256)) + Chr(Int(m.nValue/256)) && binary string
 endfunc
 
 * -----------------
-function abPathAdd(cPath)
+function abPathAdd(cPath) && {en} abPathAdd object
 return CreateObject('abPathAdd', m.cPath)
+endfunc
 * -----------------
 define class abPathAdd as GA_LIGHTWEIGHT_CLASS of abGA.prg && {fr} ajoute un élément à Set('Path') et l'ôte au .destroy()
 hidden cPath
@@ -7333,7 +7372,7 @@ return PathRemove(this.cPath)
 enddefine
 
 * -----------------
-function abProcAdd(cProc)
+function abProcAdd(cProc) && {en} abProcAdd object
 return CreateObject('abProcAdd', m.cProc)
 * -----------------
 define class abProcAdd as GA_LIGHTWEIGHT_CLASS of abGA.prg && {fr} ajoute un élément à Set('Procedure') et l'ôte au .destroy()
@@ -7346,7 +7385,7 @@ return ProcedureRemove(this.cProc)
 enddefine
 
 * -----------------
-function abWait(cMsg)
+function abWait(cMsg) && {en} abWait object
 return CreateObject('abWait', m.cMsg)
 * -----------------
 define class abWait as GA_LIGHTWEIGHT_CLASS of abGA.prg
@@ -7439,7 +7478,7 @@ endfunc
 *!*  MessageBox(SHA1("ceci est un test")="71438dc237b45f04759c41e1b2d34f42a46318f3")
 
 * ---------------------------------------------
-FUNCTION SHA1 && RSA-SHA1 digital signature
+FUNCTION SHA1 && {en} RSA-SHA1 digital signature
 LPARAMETERS cMessage
 
 PRIVATE HO, H1, H2, H3, H4
@@ -7492,7 +7531,7 @@ RETURN Lower(SUBSTR(TRANSFORM(H0,"@0"),3) + ;
 		)
 
 * ---------------------------------------------
-PROCEDURE SHA1_ProcessBloc
+PROCEDURE SHA1_ProcessBloc && {en} SHA1() private
 LPARAMETERS cBloc
 
 LOCAL I, A, B, C, D, E, nTemp
@@ -7565,17 +7604,16 @@ H1 = H1 + B
 H2 = H2 + C
 H3 = H3 + D
 H4 = H4 + E
-
-RETURN
+endfunc
 
 * ---------------------------------------------
-FUNCTION BitLRotate
+FUNCTION BitLRotate && {en} rotates bits around
 LPARAMETERS nBits, nWord
 RETURN BITLSHIFT(m.nWord, m.nBits) + BITRSHIFT(m.nWord, (32 - (m.nBits)))
 endfunc
 
 * ---------------------------------------------
-function nOfcDWord && Number from a Signed DWORD or Integer binary string
+function nOfcDWord && {en} Number from a Signed DWORD or Integer binary string
 lparameters tcDWord, tlSigned
 
 local i, nOfcDWord
@@ -7593,7 +7631,7 @@ return m.nOfcDWord
 endfunc
 
 * ---------------------------------------------
-function aVFPsets && VFP Sets
+function aVFPsets && {en} VFP Sets
 lparameters ;
   aVFPsets; && @ {en} VFP Sets
 , tlSetsType; && [.null.] {en} type of SETs .T.: scoped to the dataSession, .F.: global, .null.: all
@@ -7739,7 +7777,7 @@ return ALines(m.aVFPsets, Upper(m.cSets), 5)
 endfunc
 
 *---------------------------------------------------------------------------
-function uVFPsetValue as Variant
+function uVFPsetValue as Variant && {en} current value of a SET
 lparameters lcSet, lnSet
 
 return icase(;

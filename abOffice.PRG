@@ -714,7 +714,9 @@ return m.lnResult
 * -------------------------------------------------------------
 function oXL && {fr} Référence à un objet Excel.Application
 
-local lcWindow, loResult as Excel.application
+local loResult as Excel.application;
+, lcWindow;
+
 loResult = .null.
 
 * {fr} Si Excel est déjà instancié dans la variable standard (publique ou privée)
@@ -745,6 +747,7 @@ else
 endif
 
 return m.loResult
+endfunc
 
 * -------------------------------------------------------------
 function oXLWB && {fr} Référence à un objet Excel.WorkBook
@@ -775,16 +778,18 @@ case vartype(m.tuXLWB)=='C' ;
 
 	* {fr} Démarrer Excel
 	loXL = oXL()
+	do case
+	case !Vartype(m.loXL) == 'O'
 
 	* {fr} Si le classeur existe
-	if lFile(m.tuXLWB)
+	case lFile(m.tuXLWB)
 
 		* {fr} Ouvrir le classeur
 		loResult = m.loXL.Workbooks.open(fullpath(m.tuXLWB), 0) && 0: Ne met à jour aucune référence
 		tlOpened = .t.
 
 	* {fr} Sinon (le classeur n'existe pas)
-	else
+	otherwise
 
 		* {fr} Si l'adresse du classeur est valide
 		llResult = lDir(justpath(m.tuXLWB), .T.)
@@ -794,7 +799,7 @@ case vartype(m.tuXLWB)=='C' ;
 			loResult = m.loXL.Workbooks.add()
 			tlCreated = .t.
 		endif
-	endif
+	endcase
 endcase
 
 return m.loResult
@@ -1969,7 +1974,7 @@ return m.lnResult
 endproc
 
 * =====================================
-define class abWord as relation
+define class abWord as GA_LIGHTWEIGHT_CLASS && {en} wrapper around Microsoft Word
 * =====================================
 
 && {fr} Read/write
@@ -2063,15 +2068,19 @@ return icase(;
 	this.cDefaultFolder + justfname(m.tcFile))
 
 * -------------------------------------
-function oDoc && {fr} Ouvre un document et fournit sa référence
+function oDoc && {fr} référence à un document Word, l'ouvre si nécessaire
 lparameters ;
   tcFileSrce; && {fr} Document source
 , tcClassSrce; && {fr} Classe de conversion si l'extension est ambiguÃ«
 , tcPassWord && [''] {fr} mot de passe à l'ouverture
+
 tcPassWord = iif(vartype(m.tcPassWord) == 'C', m.tcPassWord, '')
 
-local llResult, lnFormat, loExcept as exception, loResult as word.document
+local loResult as word.document;
+, llResult, lnFormat, loExcept as exception
+
 loResult = .null.
+
 llResult = vartype(m.tcFileSrce) == 'C' and file(m.tcFileSrce)
 assert m.llResult message cAssertMsg(textmerge([<<Program()>> - Le fichier <<m.tcFileSrce>> est introuvable]))
 if m.llResult
@@ -2094,6 +2103,7 @@ if m.llResult
 endif
 
 return m.loResult
+endproc
 
 * -------------------------------------
 hidden function oDocDefault && {fr} Document par défaut

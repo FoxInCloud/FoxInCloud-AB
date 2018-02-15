@@ -13,7 +13,7 @@
 * {en} This permission notice shall be entirely included in all copies or substantial portions of the Software
 * =====================================================
 * (c) Gregory Adam 
-* Last build: 10/03/2016 11:53:34 by ThierryNivelet
+* Last build: 12/19/2017 11:14:34 by ThierryNivelet
 
 && ga_Collection
 * Gregory Adam 2010
@@ -3292,8 +3292,6 @@ protected function init()
 	
 	local obj
 	
-
-	
 	do case
 	case !m.success
 	
@@ -3316,8 +3314,8 @@ protected function init()
 	endcase
 		
 	return m.success
-	
 endfunc
+
 *_______________________________________________________________________________
 function Clear()
 
@@ -3347,21 +3345,18 @@ function Clear()
 			Successor	I	check (Successor>0) ;
 		)
 	
-	
 		index on bintoc(Predecessor) + bintoc(Successor) tag Id candidate
 
 	endcase
 	
 	return m.success
 endfunc
+
 *_______________________________________________________________________________
 function AddArc(successor, predecessor)
 
-	
-	local success
+	local success, successorID, predecessorID
 	success = true
-	
-	local successorId, predecessorId
 	
 	with m.this
 		do case
@@ -3371,7 +3366,7 @@ function AddArc(successor, predecessor)
 			assert false
 			success = false
 		
-		case !.GetId(m.successor, @m.successorId)
+		case !.GetID(m.successor, @m.successorID)
 			assert false
 			success = false
 		
@@ -3381,18 +3376,18 @@ function AddArc(successor, predecessor)
 			assert false message 'Cycle'
 			success = false
 			
-		case !.GetId(m.predecessor, @m.predecessorId)
+		case !.GetID(m.predecessor, @m.predecessorID)
 			assert false
 			success = false
 		
-		case indexseek(	bintoc(m.predecessorId) + bintoc(m.successorId), ;
+		case indexseek(	bintoc(m.predecessorID) + bintoc(m.successorID), ;
 						false, ;
 						'RelationCursor', ;
 						'Id' ;
 					)
 		
-		case	(NodeCursor.Id <> m.successorId) ;
-			and	!seek(m.successorId, 'NodeCursor')
+		case	(NodeCursor.Id <> m.successorID) ;
+			and	!seek(m.successorID, 'NodeCursor')
 			
 			assert false
 			success = false
@@ -3404,8 +3399,8 @@ function AddArc(successor, predecessor)
 			(	Predecessor, ;
 				Successor ;
 			) values ;
-			(	m.predecessorId, ;
-				m.successorId ;
+			(	m.predecessorID, ;
+				m.successorID ;
 			)
 		
 		endcase
@@ -3415,8 +3410,9 @@ function AddArc(successor, predecessor)
 	return m.success
 
 endfunc
+
 *_______________________________________________________________________________
-protected function GetId(node, id)
+protected function GetID(node, id)
 
 	local success
 	success = true
@@ -3456,6 +3452,8 @@ endfunc
 	n: >= 0	: ok, n = # of elements in aa
 	n: <0	: error, there is a cycle,  abs(n) = # of elements in aa
 #endif
+
+*_______________________________________________________________________________
 function Sort(aa)
 
 	external array aa
@@ -3471,7 +3469,7 @@ function Sort(aa)
 	case !m.success
 
 	&& cycles
-	case !m.this.SortToQueue( @m.queueobj)
+	case !m.this.SortToQueue(@m.queueobj)
 		success = false
 	
 	endcase
@@ -3488,6 +3486,7 @@ function Sort(aa)
 	return iif(m.success, m.n, -m.n)
 
 endfunc
+
 *_______________________________________________________________________________
 function SortToQueue( queueobj)
 
@@ -3536,6 +3535,7 @@ function SortToQueue( queueobj)
 	return m.success
 
 endfunc
+
 *_______________________________________________________________________________
 protected function BuildProcessQueue(processQueueObj)
 
@@ -3561,8 +3561,8 @@ protected function BuildProcessQueue(processQueueObj)
 	endcase
 	
 	return m.success
-
 endfunc
+
 *_______________________________________________________________________________
 protected function BuildOutputQueue(processQueueObj, outputQueueObj)
 
@@ -3614,6 +3614,7 @@ protected function BuildOutputQueue(processQueueObj, outputQueueObj)
 	return m.success
 
 endfunc
+
 *_______________________________________________________________________________
 protected function BuildCycleInfo(queueObj)
 
@@ -3727,7 +3728,6 @@ enddefine
 *===============================================================================
 *===============================================================================
 *===============================================================================
-
 && ga_Type
 * Gregory Adam 2010
 *_______________________________________________________________________________
@@ -4315,7 +4315,7 @@ function MemFileShow(FileName, FunctionName)
 
 
 		case inlist(m.VariableType, T_CURRENCY)
-			declare	VOID	RtlMoveMemory in win32api double @Dest, Char @Src, Size_T BytesToCopy
+			declare	VOID RtlMoveMemory in win32api double @Dest, Char @Src, Size_T BytesToCopy
 			declare integer sprintf in msvcrt.dll string@, string@, double
 			
 			VariableValue = 0.00

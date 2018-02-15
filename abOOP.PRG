@@ -68,7 +68,7 @@ if vartype(m.toObject) == 'O' and vartype(m.tcContClass) == 'C'
 
 		else
 
-			if pemstatus(m.loParent, 'Parent', 5) and type('m.loParent.Parent') == 'O' && {fr} Vartype(m.loParent.Parent) ne marche pas [Parent n'est pas un objet]
+			if PEMstatus(m.loParent, 'Parent', 5) and type('m.loParent.Parent') == 'O' && {fr} Vartype(m.loParent.Parent) ne marche pas [Parent n'est pas un objet]
 				loParent = m.loParent.parent
 			else
 				exit
@@ -363,7 +363,7 @@ lparameters toCont as container && {fr} Objet supposé conteneur
 
 return .t.;
 	and lMethod(m.toCont, 'AddObject'); && .AddObject() n'existe que dans les conteneurs ...
-	and !pemstatus(m.toCont, 'AddObject', 4); && {fr} not user defined, donc native ...
+	and !PEMstatus(m.toCont, 'AddObject', 4); && {fr} not user defined, donc native ...
 	and !m.toCont.baseclass == 'Olecontrol' && {fr} vu le 23/10/13 avec les contrôles DBItech
 
 * ========================================
@@ -747,7 +747,7 @@ lparameters ;
 , tcPEM;
 , lObjAdd; && [.F.] {fr} ajouter le nom de l'objet lui-même
 
-return Iif(Vartype(m.toObject) == 'O' and ga_Type_IsChar(m.tcPEM, .T.) and PemStatus(m.toObject, m.tcPEM, 5);
+return Iif(Vartype(m.toObject) == 'O' and ga_Type_IsChar(m.tcPEM, .T.) and PEMstatus(m.toObject, m.tcPEM, 5);
 	, cClasses(m.toObject, ', ', m.tcPEM, m.lObjAdd);
 	, .null.;
 	)
@@ -786,9 +786,10 @@ return ICase(;
 		)
 
 * ========================================
-function loClasses && /!\ 12/02/09 - dépréciée, utiliser loClass()
+function loClasses && {fr} Un objet hérite d'au moins une classe dans une liste (dépréciée par loClass())
 lparameters toObject, tcClasses && {fr} Objet, Classe(s)
 return loClass(m.toObject, m.tcClasses) && {fr} Rétro compatibilité
+endfunc
 
 * ========================================
 function loEmpty && {fr} Un objet est de la classe Empty
@@ -797,6 +798,7 @@ return .t.;
 	and vartype(m.toObject) == 'O';
 	and not lProperty(m.toObject, 'BaseClass');
 	and empty(comclassinfo(m.toObject))
+endfunc
 
 * ========================================
 function loClass && {fr} Un objet hérite d'au moins une classe dans une liste
@@ -843,6 +845,7 @@ loTest.Test(.t., newobject('awfrm', 'aw' + '.vcx'), '-listbox,-textbox,awFrm') &
 loTest.Test(.f., newobject('awtxt', 'aw' + '.vcx'), 'awtxt,-listbox,-textbox,awFrm') && {fr} évite d'embarquer aw.vcx dans un projet ab
 
 return loTest.Result()
+endfunc
 
 * ====================
 function loBaseClass && {fr} Un objet VFP est de la classe de base spécifiée
@@ -853,7 +856,7 @@ lparameters ;
 return ;
 			vartype(m.toObject) == 'O' ;
 	and	vartype(m.tcBaseClass) == 'C' ;
-	and	pemstatus(m.toObject, 'BaseClass', 5) ;
+	and	PEMstatus(m.toObject, 'BaseClass', 5) ;
 	and	lower(m.toObject.baseclass) == lower(alltrim(m.tcBaseClass))
 
 * ====================
@@ -1119,7 +1122,7 @@ lcResult = ''
 
 llResult = .t.;
  and vartype(m.toObject) == 'O';
- and pemstatus(m.toObject, 'FontName', 5)
+ and PEMstatus(m.toObject, 'FontName', 5)
 if m.llResult
 
 	with m.toObject as label
@@ -1143,7 +1146,7 @@ lparameters ;
 local llResult && {fr} Mise à jour OK
 
 llResult = vartype(m.toObject) == 'O';
- and pemstatus(m.toObject, 'FontName', 5);
+ and PEMstatus(m.toObject, 'FontName', 5);
  and vartype(m.tcFontStyle) == 'C'
 if m.llResult
 	tcFontStyle = upper(alltrim(m.tcFontStyle))
@@ -1280,8 +1283,8 @@ return .t.;
  and iif(',' $ m.tcMember or ';' $ m.tcMember;
  	, lMembers(m.toObject, m.tcMember);
  	, .t.;
-		and pemstatus(m.toObject, m.tcMember, 5);
-		and upper(left(pemstatus(m.toObject, m.tcMember, 3), 1)) == 'O';
+		and PEMstatus(m.toObject, m.tcMember, 5);
+		and upper(left(PEMstatus(m.toObject, m.tcMember, 3), 1)) == 'O';
 	  and (Pcount() < 3 or varSet(@m.toMember, evaluate('m.toObject.' + m.tcMember)));
 	)
 endfunc
@@ -1341,8 +1344,8 @@ return .t.;
  and iif(',' $ m.tcProp or ';' $ m.tcProp;
  	, lProperties(m.toObject, m.tcProp);
  	, .t.;
-		and pemstatus(m.toObject, m.tcProp, 5);
-		and upper(left(pemstatus(m.toObject, m.tcProp, 3), 1)) == 'P';
+		and PEMstatus(m.toObject, m.tcProp, 5);
+		and upper(left(PEMstatus(m.toObject, m.tcProp, 3), 1)) == 'P';
 	)
 endfunc
 
@@ -1372,7 +1375,7 @@ return m.llResult
 endfunc
 
 * ========================================
-function lPropHidden && {fr} Un objet est doté d'un propriété cachée [PemStatus(obj, prop, 2) retourne seulement les propriétés PROTECTED]
+function lPropHidden && {fr} Un objet est doté d'un propriété cachée [PEMstatus(obj, prop, 2) retourne seulement les propriétés PROTECTED]
 lparameters ;
   toObject; && {fr} Objet VFP
 , tcProp && {fr} propriété
@@ -1380,7 +1383,7 @@ lparameters ;
 local array laProp[1]
 
 return .t.;
-	and amembers(laProp, m.toObject, 0, 'H')  > 0;
+	and aMembers(laProp, m.toObject, 0, 'H')  > 0;
 	and ascan(laProp, alltrim(m.tcProp), 1, -1, 1, 7) > 0
 
 * ========================================
@@ -1403,16 +1406,16 @@ if Type('m.tObject.BaseClass') == 'C' and ga_Type_IsChar(m.tcProp, .T.)
 			!m.llClass,;
 				m.tObject,;
 			Vartype(m.luClass) == 'O',;
-				GetPem(m.luClass, 'Class'),;
-				GetPem(m.luClass, 'ParentClass');
+				getPEM(m.luClass, 'Class'),;
+				getPEM(m.luClass, 'ParentClass');
 				)
 		do case
-		case !(PemStatus(m.luClass, m.tcProp, 5) and Upper(Left(PemStatus(m.luClass, m.tcProp, 3), 1)) == 'P');
-			or Vartype(m.luClass) == 'C' and GetPem(m.luClass, 'Class') == m.lcBaseClass
+		case !(PEMstatus(m.luClass, m.tcProp, 5) and Upper(Left(PEMstatus(m.luClass, m.tcProp, 3), 1)) == 'P');
+			or Vartype(m.luClass) == 'C' and getPEM(m.luClass, 'Class') == m.lcBaseClass
 			exit
 		case .T.;
-		 and varSet(@m.luProp, GetPem(m.luClass, m.tcProp));
-		 and varSet(@m.luPropClass, GetPem(GetPem(m.luClass, Iif(Vartype(m.luClass) == 'O', 'Class', 'ParentClass')), m.tcProp)); && 2016-11-25 thn -- {FiC V 2.23.0-beta.5} {en} PemStatus(m.luClass, m.tcProp, 0) does not seem to work on classes
+		 and varSet(@m.luProp, getPEM(m.luClass, m.tcProp));
+		 and varSet(@m.luPropClass, getPEM(getPEM(m.luClass, Iif(Vartype(m.luClass) == 'O', 'Class', 'ParentClass')), m.tcProp)); && 2016-11-25 thn -- {FiC V 2.23.0-beta.5} {en} PEMstatus(m.luClass, m.tcProp, 0) does not seem to work on classes
 		 and !luEqual(m.luProp, m.luPropClass)
 			success = .T.
 			exit
@@ -1438,8 +1441,8 @@ return .t.;
 	and vartype(m.tcMethod) == 'C';
 	and not empty(m.tcMethod);
 	and lProperty(m.toObject, 'BaseClass'); && {fr} C'est un objet VFP
-	and	pemstatus(m.toObject, m.tcMethod, 5); && {fr} tcMethod existe dans toObject
- 	and	upper(left(pemstatus(m.toObject, m.tcMethod, 3), 1)) $ evl(left(upper(alltrim(evl(m.tcEventMethod, ''))), 1), 'EM'); && {fr} tcMethod est un Événement ou une Méthode
+	and	PEMstatus(m.toObject, m.tcMethod, 5); && {fr} tcMethod existe dans toObject
+ 	and	upper(left(PEMstatus(m.toObject, m.tcMethod, 3), 1)) $ evl(left(upper(alltrim(evl(m.tcEventMethod, ''))), 1), 'EM'); && {fr} tcMethod est un Événement ou une Méthode
  	and .t.
 
 endfunc
@@ -1473,7 +1476,7 @@ endfunc
 
 #if .f. && {fr} inutile
 	local aa[1], i
- 	and amembers(m.aa, m.toObject, 1, 'N') > 0; && {fr} Native members && {fr} il faut vérifier que l'utilisateur n'a pas créé une méthode du même nom qu'un événement
+ 	and aMembers(m.aa, m.toObject, 1, 'N') > 0; && {fr} Native members && {fr} il faut vérifier que l'utilisateur n'a pas créé une méthode du même nom qu'un événement
  	and varStore(@m.i, ascan(m.aa, m.tcEvent, 1, -1, 1, 15));
  	and m.i > 0;
  	and	upper(left(m.aa[m.i, 2], 1)) == 'E';
@@ -1522,7 +1525,7 @@ if lMethod(m.toObject, m.tcMethod) && {fr} toObject has tcMethod
 		))
 
 	llResult = iif(m.llResult;
-		, pemstatus(m.toObject, m.tcMethod, 0); && {fr} tcMethod contient du code /!\ SUPPORTE SEULEMENT LES CLASSES VISUELLES
+		, PEMstatus(m.toObject, m.tcMethod, 0); && {fr} tcMethod contient du code /!\ SUPPORTE SEULEMENT LES CLASSES VISUELLES
 		, .null.; && {fr} don't know
 		)
 endif
@@ -1536,7 +1539,7 @@ local loTest as abUnitTest of abDev.prg
 
 loTest = newobject('abUnitTest', 'abDev.prg')
 
-loTest.Test(.f., newobject('form'), 'init') && {fr} PemStatus(,,0) ne marche pas avec une classe programmée PK ?
+loTest.Test(.f., newobject('form'), 'init') && {fr} PEMstatus(,,0) ne marche pas avec une classe programmée PK ?
 loTest.Test(.f., newobject('form'), 'foo')
 
 loTest.Test(.t., newobject('awFrm', 'aw'+'.vcx'), 'init') && {fr} évite d'embarquer aw.vcx dans le projet
@@ -1639,23 +1642,23 @@ if vartype(m.toObj) == 'O'
 		, newobject(m.toObj.class, m.toObj.classlibrary);
 		, createobject('Empty');
 		)
-	if amembers(laProp, m.toObj) > 0
+	if aMembers(laProp, m.toObj) > 0
 		for each lcProp in laProp
 
 			llResult = .t.
 
 			do case
 
-			case varSet(@m.llUserDef, pemstatus(m.toObj, m.lcProp, 4)); && user defined
+			case varSet(@m.llUserDef, PEMstatus(m.toObj, m.lcProp, 4)); && user defined
 			and (.f.;
-			 or pemstatus(m.toObj, m.lcProp, 1); && {fr} read-only
-			 or pemstatus(m.toObj, m.lcProp, 2); && {fr} protected
+			 or PEMstatus(m.toObj, m.lcProp, 1); && {fr} read-only
+			 or PEMstatus(m.toObj, m.lcProp, 2); && {fr} protected
 			 or m.llClass and !m.llUserDef and ',' + m.lcProp + ',' $ ',BASECLASS,CLASS,CLASSLIBRARY,CONTROLCOUNT,CONTROLS,NAME,OBJECTS,OBJECT,PARENT,PARENTCLASS,';
 			 )
 
 			case .t.;
-			 and varSet(@m.llUserDef, m.llUserDef and !pemstatus(m.toObj, m.lcProp, 6)); && {en} property is user defined in object and not in parent class if any
-			 and varSet(@m.llModif, pemstatus(m.toObj, m.lcProp, 0)); && {fr} propriété modifiée
+			 and varSet(@m.llUserDef, m.llUserDef and !PEMstatus(m.toObj, m.lcProp, 6)); && {en} property is user defined in object and not in parent class if any
+			 and varSet(@m.llModif, PEMstatus(m.toObj, m.lcProp, 0)); && {fr} propriété modifiée
 			 and varSet(@m.llArray, type('m.toObj.' + m.lcProp, 1) == 'A');
 			 and varSet(@m.luProp, iif(m.llArray, .null., evaluate('m.toObj.' + m.lcProp))); && and setStepOn(Vartype(m.luProp) == 'O')
 			 and m.llUserDef;
@@ -1694,10 +1697,10 @@ if vartype(m.toObj) == 'O'
 				endcase
 				llResult = acopy(m.toObj.&lcProp, m.loResult.&lcProp) > 0
 
-			case m.llModif and !(m.llClassLib and luEqual(m.luProp, getpem(m.toObj.class, m.lcProp)))
+			case m.llModif and !(m.llClassLib and luEqual(m.luProp, getPEM(m.toObj.class, m.lcProp)))
 				store m.luProp to ('m.loResult.' + m.lcProp)
 
-			case m.llArray && {fr} PemStatus() does not detect for changes in specific array elements if the array is passed.
+			case m.llArray && {fr} PEMstatus() does not detect for changes in specific array elements if the array is passed.
 				llResult = acopy(m.toObj.&lcProp, m.loResult.&lcProp) > 0
 
 			endcase
@@ -1884,9 +1887,9 @@ if m.llResult
 
 		llFIC = lMethod(m.toObj, 'wPropGet') and lProperty(m.toObj, 'wcPropSave') && {fr} FoxInCloud object
 		lcResult = textmerge("<#o#><#c#><<Iif(m.llEmpty, '', m.toObj.Class)>></#c#><#cl#><<Iif(m.llEmpty, '', m.toObj.ClassLibrary)>></#cl#>")
-		lnProp = amembers(laProp, m.toObj, 0, 'GPH') && {fr} public, protected and hidden && {fr} without ", 0, 'GPH')", AMembers() omits protected and hidden properties
+		lnProp = aMembers(laProp, m.toObj, 0, 'GPH') && {fr} public, protected and hidden && {fr} without ", 0, 'GPH')", aMembers() omits protected and hidden properties
 		if m.lnProp > 0
-			amembers(laPropPH, m.toObj, 0, 'PH') && {fr} protected and hidden only
+			aMembers(laPropPH, m.toObj, 0, 'PH') && {fr} protected and hidden only
 
 			for liProp = 1 to m.lnProp
 * {fr} FOR EACH lcProp IN laProp && {fr} exactement le même temps de réponse
@@ -1894,7 +1897,7 @@ if m.llResult
 				if .t.;
 				 and varSet(@m.lcProp, lower(m.laProp[m.liProp])); && {fr} Lower(m.lcProp)
 				 and (m.llEmpty or .T.;
-				  and pemstatus(m.toObj, m.lcProp, 0); && {fr} property has changed compared to its parent class && {fr} OK pour les propriétés protégées
+				  and PEMstatus(m.toObj, m.lcProp, 0); && {fr} property has changed compared to its parent class && {fr} OK pour les propriétés protégées
 				  and cXMLofObject_lPropSave(m.toObj, m.lcProp, m.llFIC);
 				  );
 
@@ -2033,7 +2036,7 @@ function cXMLofObject_lPropSave(toObj, tcProp, llFIC) && [privée de cXMLofObject
 local lcProp as string
 lcProp = ',' + lower(m.tcProp) + ','
 return .t.;
- and !pemstatus(m.toObj, m.tcProp, 1); && {fr} Read-only
+ and !PEMstatus(m.toObj, m.tcProp, 1); && {fr} Read-only
  and !m.lcProp $ ',' + chrtran(lower('wcPropSave,_MemberData,Name'), ' ', '') + ','; && ,dataSession,dataSessionID
  and (!m.llFIC or m.lcProp $ ',' + Lower(chrtran(nvl(m.toObj.wcPropSave, ''), ' ', '')) + ',');
 
@@ -2171,8 +2174,7 @@ lparameters ;
 , toResult as object; && [NewObject(class, classlib)] {en} Result object to populate {fr} Objet résultat à peupler
 , tcResult as string; && @ {en} Cumulative result {fr} Résultat (cumulatif)
 
-local ;
-  toResult as object; && {fr} object, .null. if error
+local toResult as object; && {fr} see above
 , llResult as Boolean;
 , lcResult as string;
 , llChild as Boolean;
@@ -2257,14 +2259,14 @@ lparameters ;
 local llResult as Boolean;
 , lcResult as string;
 ;
-, lcClass, lcClassLib, loClass;
+, loClass, lcClass, lcClassLib;
 , llEmpty;
 , laProp[1], lcProp, llProp, luProp, luProp_;
 
 #if .f.
 o = createobject('empty')
 addproperty(o, 'test')
-? pemstatus(o, 'test', 0) && .T. && {fr} Toutes les propriétés d'un objet Empty étant marquées modifiées, cXMLofObject() les a toutes listées
+? PEMstatus(o, 'test', 0) && .T. && {fr} Toutes les propriétés d'un objet Empty étant marquées modifiées, cXMLofObject() les a toutes listées
 #endif
 
 * {fr} Recycler l'objet existant en razant ses propriétés ou créer un nouvel objet
@@ -2285,70 +2287,64 @@ llObject = .t.;
   )
 
 && {fr} Voir ce qui est le plus rapide, remettre toutes les propriétés à leur valeur par défaut ou recréer un objet ...
-&& 2015-03-19 thn - si l'objet existe il vaut mieux le conserver car le supprimer/recréer exécuterait les méthodes .Destroy() et .Init() qui peuvent parfaitement se planter ...
-&& 2014-12-23 thn
-&& - objets empty : recréer systématiquement
-&& - objets dérivés d'une classe :
-&&   . supprimer les propriétés éventuellement ajoutées à l'objet
-&&   . remettre les autres propriétés à la valeur de la classe,
-
-if !m.llEmpty
-	try
-		loClass = newobject(m.lcClass, m.lcClassLib)
-	catch
-		loClass = newobject(m.lcClass, m.lcClassLib, 0)
-	endtry
-endif
+&& {fr} 2015-03-19 thn - si l'objet existe il vaut mieux le conserver car le supprimer/recréer exécute les méthodes .Destroy() et .Init() qui peuvent parfaitement se planter ...
+&& {fr} 2014-12-23 thn
+&& {fr} - objets empty : recréer systématiquement
+&& {fr} - objets dérivés d'une classe :
+&& {fr}   . supprimer les propriétés éventuellement ajoutées à l'objet
+&& {fr}   . remettre les autres propriétés à la valeur de la classe,
 
 toResult = iCase(;
 	m.llEmpty,; && {fr} objets empty : recréer systématiquement
 		createobject('Empty'),;
 	m.llObject,;
 		m.toResult,;
-		m.loClass;
+	varSet(@m.loClass, objectOfXML_object_oClass(m.lcClass, m.lcClassLib)),;
+		m.loClass,;
+		.null.;
 	)
 
 assert Vartype(m.toResult) == 'O'
 
-llFIC = lMethod(m.toResult, 'wPropReset') and lProperty(m.toResult, 'wcPropSave') && {fr} FoxInCloud object
+llFIC = lMethod(m.toResult, 'wPropReset') and lProperty(m.toResult, 'wcPropSave') && {en} FoxInCloud object
 
 #if .f.
 toResult = createobject('relation')
 lcProp = 'test'
-? amembers(aa, m.toResult, 0, 'GPH')
+? aMembers(aa, m.toResult, 0, 'GPH')
 addproperty(m.toResult, m.lcProp, 'test')
-? amembers(aa, m.toResult, 0, 'GPH')
-? pemstatus(m.toResult, m.lcProp, 4) && .T.
-? pemstatus(m.toResult, 'Class', 4) && .F.
+? aMembers(aa, m.toResult, 0, 'GPH')
+? PEMstatus(m.toResult, m.lcProp, 4) && .T.
+? PEMstatus(m.toResult, 'Class', 4) && .F.
 suspend
 #endif
 
 * {fr} Si un objet a été passé, remettre ses propriétés à leur valeur par défaut
 if m.llObject;
  and !m.llEmpty;
- and amembers(laProp, m.toResult, 0, 'GPH') > 0
+ and aMembers(laProp, m.toResult, 0, 'GPH') > 0
 
 	for each lcProp in laProp
 		= .f.;
 		 	or .t.;
-		 		and !pemstatus(m.toResult, m.lcProp, 4); && {fr} not user defined
+		 		and !PEMstatus(m.toResult, m.lcProp, 4); && {en} not user defined
 		 		and ',' + m.lcProp + ',' $ ',BASECLASS,CLASS,CLASSLIBRARY,CONTROLCOUNT,CONTROLS,NAME,OBJECTS,OBJECT,PARENT,PARENTCLASS,';
 		 	or .t.;
-		 		and pemstatus(m.toResult, m.lcProp, 4); && {fr} custom property ...
-		 		and !pemstatus(m.toResult, m.lcProp, 6); && ... added to the object (not inherited from the class)
+		 		and  PEMstatus(m.toResult, m.lcProp, 4); && {en} custom property ...
+		 		and !PEMstatus(m.toResult, m.lcProp, 6); && ... added to the object (not inherited from the class)
 		 		and removeproperty(m.toResult, m.lcProp);
-		 	or pemstatus(m.toResult, m.lcProp, 1); && {fr} Read-only
-		 	or .t.; && {fr} and setStepOn(Lower(m.lcProp) == 'keysort')
-			 and pemstatus(m.toResult, m.lcProp, 0); && {fr} modified
-			 and varSet(@m.luProp, getpem(m.toResult, m.lcProp));
-			 and varSet(@m.luProp_, getpem(m.loClass, m.lcProp)); && {fr} GetPem(m.toResult.Class, m.lcProp)
+		 	or PEMstatus(m.toResult, m.lcProp, 1); && {en} Read-only
+		 	or .t.; && and setStepOn(Lower(m.lcProp) == 'keysort')
+			 and PEMstatus(m.toResult, m.lcProp, 0); && {en} modified
+			 and varSet(@m.luProp,  getPEM(m.toResult, m.lcProp));
+			 and varSet(@m.luProp_, getPEM(m.toResult.Class, m.lcProp)); &&  && 2018-01-10 thn -- {FiC V 2.26.1-beta.1} {en} replaced getPEM(m.loClass, m.lcProp) by getPEM(m.toResult.Class, m.lcProp)
 			 and !luEqual(m.luProp, m.luProp_); && {fr} Propriété changée par rapport à la classe
-			 and iif(pemstatus(m.toResult, m.lcProp, 2); && {fr} protected property
+			 and iif(PEMstatus(m.toResult, m.lcProp, 2); && {en} protected property
 				, iif(m.llFIC;
 					, m.toResult.wPropReset(m.lcProp);
 					, .f.;
 					);
-				, addproperty(m.toResult, m.lcProp, iif(vartype(m.luProp_) == 'O'; && {fr} sets property to value in class
+				, addproperty(m.toResult, m.lcProp, iif(vartype(m.luProp_) == 'O'; && {en} sets property to value in class
 					, oClone(m.luProp_);
 					, m.luProp_;
 					)));
@@ -2356,6 +2352,17 @@ if m.llObject;
 	endfor
 endif
 endproc
+
+* ========================================
+function objectOfXML_object_oClass(lcClass, lcClassLib, loClass) && {en} [objectOfXML_object() private] class instance {fr}  [privée de objectOfXML_object()] instance d'une classe
+&& 2018-01-10 thn -- {FiC V 2.26.1-beta.1} {en} created
+try
+	loClass = newobject(m.lcClass, m.lcClassLib, 0)
+catch
+	loClass = newobject(m.lcClass, m.lcClassLib)
+endtry
+return m.loClass
+endfunc
 
 * ========================================
 procedure objectOfXML_lChild as Boolean && {en} identifies child object patterns in XML [objectOfXML() private] {fr} repère les objets enfants dans le XML [privée de objectOfXML()] 
@@ -2492,8 +2499,8 @@ for each lcProp in laProp
 	llProp = .f.;
 	 or not lProperty(m.toResult, m.lcProp);
 	 or not (.f.;
-		or pemstatus(m.toResult, m.lcProp, 1); && {fr} Read-Only
-		or pemstatus(m.toResult, m.lcProp, 2); && {fr} Protected
+		or PEMstatus(m.toResult, m.lcProp, 1); && {fr} Read-Only
+		or PEMstatus(m.toResult, m.lcProp, 2); && {fr} Protected
 		);
 	 or m.llFIC && {fr} en dernier!
 	lcProp = iif(m.llProp, m.lcProp, icase(;
@@ -2579,7 +2586,7 @@ return m.llResult
 endproc
 
 * ========================================
-procedure objectOfXML_colItems as Boolean && {en} restores collection items from XML from cXMLofObject() {fr} restaure les éléments d'une collection d'après le XML de cXMLofObject()
+procedure objectOfXML_colItems as Boolean && {en} restores collection items from XML built by cXMLofObject() {fr} restaure les éléments d'une collection d'après le XML de cXMLofObject()
 lparameters ;
   tcXML as string; && {en} XML produced by cXMLofObject() {fr} XML produit par cXMLofObject()
 , toResult as object; && {en} Collection Object to populate {fr} Objet Collection à peupler
@@ -2720,7 +2727,7 @@ loTest.Test(oClone(m.loObj);
 ? m.lcResult
 
 
-loObj = newobject('objectOfXML_Test_towBus', 'abOOP.prg') && 2015-03-19 http://support.west-wind.com/default.asp?Thread=4B00KYJP3&MsgId=4B00KYJP4
+loObj = createobject('objectOfXML_Test_towBus') && 2015-03-19 http://support.west-wind.com/default.asp?Thread=4B00KYJP3&MsgId=4B00KYJP4
 lcResult = ''
 loTest.Test(oClone(m.loObj), cXMLofObject(m.loObj), m.loObj, @m.lcResult)
 ? m.lcResult
@@ -2737,10 +2744,11 @@ define class objectOfXML_Test_towBus as custom && 2015-03-19 http://support.west
 		cDefaultShiftStartTime1 = "08:00AM"
 		cDefaultShiftStartTime2 = "04:00PM"
 		cPathDBC = "data\" && {fr} Changed this assignment because previous value was invalid - Lott - 03/12/2015
+		tag = 'test' && property inherited from the class && 2018-01-10 thn -- {FiC V 2.26.1-beta.1} {en} added 
 	enddefine
 
 * ========================================
-function oObjPropsPublic
+function oObjPropsPublic && {fr} objet avec les propriétés publiques d'un autre objet
 lparameters oObj
 
 local Result as object;
@@ -2750,11 +2758,11 @@ local Result as object;
 , cProp as string;
 
 Result = .null.
-if vartype(m.oObj) == 'O' and amembers(aProp, m.oObj, 0, 'G') > 0
+if vartype(m.oObj) == 'O' and aMembers(aProp, m.oObj, 0, 'G') > 0
 	Result = createobject('Empty')
 	for each cProp in aProp
 		if !(.f.;
-		 or pemstatus(m.oObj, m.cProp, 1); && {fr} Read-only
+		 or PEMstatus(m.oObj, m.cProp, 1); && {fr} Read-only
 		 or m.cProp == 'NAME';
 		 )
 			success = addproperty(m.Result, m.cProp, evaluate('m.oObj.' + m.cProp))
@@ -2764,6 +2772,7 @@ if vartype(m.oObj) == 'O' and amembers(aProp, m.oObj, 0, 'G') > 0
 endif
 
 return m.Result
+endfunc
 
 * ========================================
 function cObjAddrNorm(tcObjAddr) && {fr} Adresse d'objet normalisée
@@ -2779,7 +2788,7 @@ local Result as object;
 , uProp as Variant;
 
 Result = m.oTrgt
-if vartype(m.Result) == 'O' and vartype(m.oDefault) == 'O' and amembers(aProp, m.oDefault) > 0
+if vartype(m.Result) == 'O' and vartype(m.oDefault) == 'O' and aMembers(aProp, m.oDefault) > 0
 	for each cProp in m.aProp
 		uProp = evaluate('m.oDefault.' + m.cProp)
 		if !lProperty(m.oTrgt, m.cProp) or vartype(evaluate('m.oTrgt.' + m.cProp), .t.) # vartype(m.uProp, .t.)
@@ -2864,7 +2873,7 @@ return iif(m.oControl.baseclass == 'Form' and varSet(@m.Sys1271, sys(1271, m.oCo
 endfunc
 
 * -----------------------------------------
-function iBindEventFlag as integer &&
+function iBindEventFlag as integer && {fr} option (nFlags) d'un bindEvent()
 lparameters oSrce, cEvent, oTrgt, cDelegate
 
 local iBindEventFlag as integer;
@@ -2931,7 +2940,7 @@ local Result as integer; && {fr} Number of methods found
 , cTypes as string;
 
 Result = 0
-nMember = amembers(;
+nMember = aMembers(;
 	m.aMethod;
 	, m.oSrce;
 	, 1; && {fr} Array contains the names of the properties of the object or class, as well as the methods and member objects. The resulting array is two-dimensional with the second column specifying what type of member is listed in the first column. The possible values for the second column are Property, Event, Method, or Object.
@@ -2976,17 +2985,17 @@ cPEMcased = evl(m.cPEM, .null.)
 
 if vartype(m.oSrce) == 'O';
  and vartype(m.cPEM) == 'C';
- and pemstatus(m.oSrce, m.cPEM, 5);
+ and PEMstatus(m.oSrce, m.cPEM, 5);
  and aclass(m.laClass, m.oSrce) > 0;
 
-	cXML = iif(pemstatus(m.oSrce, '_memberdata', 5), getpem(m.oSrce, '_memberdata'), '')
+	cXML = iif(PEMstatus(m.oSrce, '_memberdata', 5), getPEM(m.oSrce, '_memberdata'), '')
 	for each cClass in m.laClass
 		lClass = .f.
 		try
-			lClass = pemstatus(m.cClass, '_memberdata', 5)
+			lClass = PEMstatus(m.cClass, '_memberdata', 5)
 		catch
 		endtry
-		cXML = m.cXML + iif(m.lClass, getpem(m.cClass, '_memberdata'), '')
+		cXML = m.cXML + iif(m.lClass, getPEM(m.cClass, '_memberdata'), '')
 	endfor
 	if !empty(m.cXML)
 
@@ -3130,7 +3139,7 @@ local oDSofForm as DataEnvironment;
 oDSofForm = .null.
 
 if Vartype(m.oForm) == 'O'
-	for iMember = 1 to AMembers(aa, m.oForm, 2)
+	for iMember = 1 to aMembers(aa, m.oForm, 2)
 		oMember = Evaluate('m.oForm.' + m.aa[m.iMember])
 		if m.oMember.baseClass == 'Dataenvironment'
 			oDSofForm = m.oMember
@@ -3156,4 +3165,26 @@ return .T.;
  and varSet(@m.oPgf, m.oPage.Parent);
  and m.oPgf.ActivePage = m.oPage.PageOrder
 
+endfunc
+
+* ------------------------------------
+function nTreeNodeDesc as Integer && {en} number of descendants of a treeView node
+lparameters node as MSComctlLib.INode, tlRecurse
+
+&& 2017-10-27 thn -- {FiC V 2.26.0-beta.1} {en} created
+
+local result
+result = 0
+
+do while !IsNull(m.node)
+	result = m.result;
+		+ Iif(m.tlRecurse, 1, 0);
+		+ iif(IsNull(m.node.child);
+		, 0;
+		, nTreeNodeDesc(m.node.Child, .T.);
+		)
+	node = Iif(m.tlRecurse, m.node.Next, .null.)
+enddo
+
+return m.result
 endfunc

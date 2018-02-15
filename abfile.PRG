@@ -54,50 +54,72 @@ endproc
 procedure FileReadOnlySet && {fr} Règle l'attribut 'lecture seule' d'un fichier
 lparameters ;
   tcFile;
-, tlReadOnly;
-, tlGet;
+, tlReadOnly; && [.null.] {en} .null.: read, .F.: set read-write, .T.: set read-only
 
 local success as Boolean;
-, loFiler as filer.FileUtil;
-, loFile;
+, llGet;
+, oFSO  as "Scripting.FileSystemObject";
+, oFile as "Scripting.File";
 
-tlGet = lTrue(m.tlGet)
-success = Iif(m.tlGet, .null., m.success)
-
+tlReadOnly = Iif(Pcount()> 1, m.tlReadOnly, .null.)
+llGet = IsNull(m.tlReadOnly)
+success = Iif(m.llGet, .null., .F.)
 if File(Evl(m.tcFile, ''))
 
-	tcFile = FullPath(m.tcFile)
-	loFiler = CreateObject('Filer.FileUtil') && {fr} home(1) + '\tools\filer\Filer.dll'
-	loFiler.SearchPath = JustPath(m.tcFile)
-	loFiler.FileExpression = JustFname(m.tcFile)
+	oFSO = CreateObject("Scripting.FileSystemObject")
+	if Vartype(m.oFSO) == 'O'
 
-	loFiler.find(0) && {fr} Charge la collection de fichiers
-	if m.loFiler.Files.count = 1
-		loFile = m.loFiler.Files.Item(1)
-		if m.tlGet
-			success = mod(m.loFile.attr, 2) > 0 && {en} uneven = read only
-		else
-			tlReadOnly = lTrue(m.tlReadOnly)
-			m.loFile.attr = m.loFile.attr + ICase(;
-				!m.tlReadOnly and mod(m.loFile.attr, 2) > 0,; && {en} uneven = read only
-					- 1,;
-				 m.tlReadOnly and mod(m.loFile.attr, 2) = 0,; && {en} even = read-write
-					+ 1,;
-					0;
-				)
+		* Define constants for file attributes
+		#DEFINE FA_READONLY 	1	&& Read-only file.
+	 
+		oFile = oFSO.GetFile(FullPath(m.tcFile)) && lcFile is the name of the file
+
+		do case
+		case m.llGet
+			success = BITAND(m.oFile.Attributes, FA_READONLY) > 0
+		case lTrue(m.tlReadOnly)
+			oFile.Attributes = BITOR(m.oFile.Attributes, FA_READONLY) && set the read-only flag
 			success = .T.
-		endif
+		otherwise
+			oFile.Attributes = BITAND(m.oFile.Attributes, BITNOT(FA_READONLY)) && remove the read-only flag
+			success = .T.
+		endcase
+		* oFile.Attributes = BITXOR(oFile.Attributes, FA_READONLY) && Flip read-only flag
 	endif
 endif
 
 return m.success
 endproc
 
+* -----------------------
+procedure FileReadOnlySet_Test
+
+local loTest as abUnitTest of abDev.prg
+loTest = newobject('abUnitTest', 'abDev.prg')
+
+loTest.Test(.T., Home(1) + 'genMenu.prg', .T.)
+loTest.Test(.T., Home(1) + 'genMenu.prg', .F.)
+
+return loTest.result()
+endproc
+
+
 * ========================================
 function FileReadOnlyGet && {fr} Lit l'attribut 'lecture seule' d'un fichier
 lparameters tcFile
-return FileReadOnlySet(m.tcFile, , .T.)
+return FileReadOnlySet(m.tcFile, .null.)
 endfunc
+
+* -----------------------
+procedure FileReadOnlyGet_Test
+
+local loTest as abUnitTest of abDev.prg
+loTest = newobject('abUnitTest', 'abDev.prg')
+
+loTest.Test(.F., Home(1) + 'genMenu.prg')
+
+return loTest.result()
+endproc
 
 * ========================================
 procedure tFileSet && {fr} règle la date et heure d'un fichier
@@ -185,8 +207,8 @@ ENDIF
 tFile = Evl(m.tFile, Datetime())
 tFile = m.tFile - Iif(lTrue(m.lGMT), nGMToffsetMin()*60, 0)
 
-cSysTime = ;
-	DwordOfInt(Year(m.tFile)); && modify command abDev
+cSysTime = '';
++ DwordOfInt(Year(m.tFile)); && modify command abDev
 + DwordOfInt(Month(m.tFile));
 + DwordOfInt(Dow(m.tFile,0));
 + DwordOfInt(Day(m.tFile));
@@ -436,15 +458,17 @@ return m.llResult
 endproc
 
 * ========================================
-function CopyFile(tcFileName, tcCopyFileName, tnFailIfExists) && http://www.berezniker.com/content/pages/visual-foxpro/copy-move-rename-file-preserving-destination-name-case
+function CopyFile(tcFileName, tcCopyFileName, tnFailIfExists) && {en} Win32 API copy file, preserves case
+&& http://www.berezniker.com/content/pages/visual-foxpro/copy-move-rename-file-preserving-destination-name-case
 declare long CopyFile in WIN32API String SourceFileName, String DestFileName, long bFailIfExists
-return !Empty(CopyFile(m.tcFileName, m.tcCopyFileName, m.tnFailIfExists))
+return CopyFile(m.tcFileName, m.tcCopyFileName, m.tnFailIfExists)
 endfunc
 
 * ========================================
-function MoveFile(tcFileName, tcNewFileName) && http://www.berezniker.com/content/pages/visual-foxpro/copy-move-rename-file-preserving-destination-name-case
+function MoveFile(tcFileName, tcNewFileName) && {en} Win32 API move file, preserves case
+&& http://www.berezniker.com/content/pages/visual-foxpro/copy-move-rename-file-preserving-destination-name-case
 declare long MoveFile IN WIN32API String SourceFileName, String DestFileName
-return MoveFile(tcFileName, tcNewFileName) # 0
+return MoveFile(tcFileName, tcNewFileName)
 endfunc
 
 * ========================================
@@ -494,7 +518,7 @@ if m.llResult
 			 	if m.llWild
 				 	rename (m.tcFileSrce) to (m.tcFileDest) && {fr} déplace le(s) fichier(s)
 			 	else
-				 	llResult = MoveFile(cFileCased(m.tcFileSrce), m.tcFileDest)
+				 	llResult = !Empty(MoveFile(cFileCased(m.tcFileSrce), m.tcFileDest))
 			 	endif
 			endif
 
@@ -650,6 +674,7 @@ endif
 return m.lnResult
 
 external array taFiles
+endfunc
 
 * ========================================
 function aFiles_ && {fr} Fichiers selon un ou plusieurs squelette dans un dossier [et ses sous-dossiers]
@@ -674,13 +699,13 @@ lnResult = 0
 
 if aClear(@m.taFiles) and alines(m.laFileSkel, m.tcFileSkels, 5, ',', ';') > 0
 
-	if m.tlSubFolders and aSubFolders(; && {fr} Sous-dossiers d'un dossier /!\ Récursive
+	if m.tlSubFolders and 0 < aSubFolders(; && {fr} Sous-dossiers d'un dossier /!\ Récursive
 			  @m.laFolder; && @ {fr} taSubFolders Sous-dossiers selon aDir()
 			, m.tcFolder; && {fr} tcFolder [dossier courant] Adresse du dossier où rechercher les sous-dossiers
 			, m.tcSubFoldersExcl; && {fr} tcFoldersExcl [''] sous-dossiers à exclure et/ou squelette des fichiers attendus dans les dossiers à inclure
 			, .t.; && {fr} tvRecurse [.F.] Récurser dans les sous-sous-dossiers etc., si N, nombre de niveaux de récursion
 			, .t.; && {fr} tlAddrOnly [.F.] Ne garder que les adresses des dossiers (supprimer date, taille, etc.)
-			) > 0
+			)
 		aPush(@m.laFolder, m.tcFolder)
 	else
 		laFolder = m.tcFolder
@@ -1055,36 +1080,36 @@ endif
 return m.llResult
 endproc
 
-*==============================================
+* ==============================================
 function FileMemo(tcFile) && {fr} Fichier mémo associé à un fichier-table VFP
 
 local lcExt
 
-lcExt = lower(justext(m.tcFile))
+lcExt = Lower(JustExt(m.tcFile))
 
-return icase(;
+return ICase(;
 	m.lcExt == 'vcx',;
-		forceext(m.tcFile, 'vct'),;
+		ForceExt(m.tcFile, 'vct'),;
 	m.lcExt == 'scx',;
-		 forceext(m.tcFile, 'sct'),;
+		ForceExt(m.tcFile, 'sct'),;
 	m.lcExt == 'mnx',;
-		 forceext(m.tcFile, 'mnt'),;
+		ForceExt(m.tcFile, 'mnt'),;
 	m.lcExt == 'frx',;
-		 forceext(m.tcFile, 'frt'),;
+		ForceExt(m.tcFile, 'frt'),;
 	m.lcExt == 'lbx',;
-		 forceext(m.tcFile, 'lbt'),;
+		ForceExt(m.tcFile, 'lbt'),;
 	m.lcExt == 'pjx',;
-		 forceext(m.tcFile, 'pjt'),;
+		ForceExt(m.tcFile, 'pjt'),;
 	m.lcExt == 'dbc',;
-		 forceext(m.tcFile, 'dct'),;
+		ForceExt(m.tcFile, 'dct'),;
 	.t.;
-	and inlist(m.lcExt, 'dbf', 'vmx'); && 'vmx' pour Visual Fox Extend
-	and lFPT(m.tcFile),; && modify command abData
-		forceext(m.tcFile, 'fpt'),;
+	 and InList(m.lcExt, 'dbf', 'vmx'); && 'vmx' pour Visual Fox Extend
+	 and lFPT(m.tcFile),; && modify command abData
+		ForceExt(m.tcFile, 'fpt'),;
 		'';
 	)
 
-*==============================================
+* ==============================================
 function FileIndex(tcFile) && {fr} Fichier index associé à un fichier-table VFP
 
 local lcExt
@@ -1099,8 +1124,9 @@ return icase(;
 	m.lcExt == 'mnx', forceext(m.tcFile, 'mpr'),; && {fr} just a workaround
 	'';
 )
+endfunc
 
-*==============================================
+* ==============================================
 function tFile && {fr} Date et heure de dernière modification d'un fichier et/ou de ses fichiers liés
 lparameters ;
   tcFile; && {fr} Fichier
@@ -1137,7 +1163,7 @@ return Iif(File(m.tlMemo);
 
 endfunc
 
-*==============================================
+* ==============================================
 function tFile_ && {fr} Date et heure de dernière modification d'un fichier et/ou de ses fichiers liés /!\ privée de tFile()
 lparameters tcFile && {fr} Fichier
 
@@ -1161,8 +1187,8 @@ RETURN EVALUATE('';
 	)
 endfunc
 
-*==============================================
-function cFileSizeTotal && {fr} Taille d'un fichier et de ses fichiers associés
+* ==============================================
+function cFileSizeTotal && {fr} Taille d'un fichier et de ses fichiers associés, formatté avec unité
 lparameters tcFile && {fr} Fichier
 
 return cFileSize(;
@@ -1171,8 +1197,8 @@ return cFileSize(;
 	, .t.; && {fr} tlCDX Tenir compte du fichier CDX associé éventuel
 	)
 
-*==============================================
-function cFileSize && {fr} Taille d'un fichier
+* ==============================================
+function cFileSize && {fr} Taille d'un fichier formattée avec unité
 lparameters ;
   tcFile; && {fr} Fichier
 , tlMemo; && [.F.] {fr} Tenir compte du fichier memo associé éventuel @ le fichier memo existe
@@ -1186,15 +1212,15 @@ return icase(;
 	not vartype(m.result) == 'N',;
 		'N/A',;
 	m.result >= 1024^3,;
-		ltrim(transform(m.result/1024^3, '9,999.9 GB')),;
+		ltrim(transform(m.result/1024^3, '9,999.9' + Chr(160) + 'GB')),;
 	m.result >= 1024^2,;
-		ltrim(transform(m.result/1024^2, '9,999.9 MB')),;
+		ltrim(transform(m.result/1024^2, '9,999.9' + Chr(160) + 'MB')),;
 	m.result > 1024,;
-		ltrim(transform(m.result/1024, '9,999.9 kB')),;
-		ltrim(transform(m.result, '9,999 B'));
+		ltrim(transform(m.result/1024, '9,999.9' + Chr(160) + 'kB')),;
+		ltrim(transform(m.result, '9,999' + Chr(160) + 'B'));
 	)
 
-*==============================================
+* ==============================================
 function cMB && {fr} Valeur en Méga Octets
 lparameters ;
   tnSize;
@@ -1205,13 +1231,13 @@ tcLangUser = cLangUser(m.tcLangUser)
 
 return '';
 	+ ltrim(transform(m.tnSize/2^20, '999.99'));
-	+ Iif(lTrue(m.tlHTML), '&nbsp;', ' ');
+	+ Chr(160); && Iif(lTrue(m.tlHTML), '&nbsp;', ' ')
 	+ icase(;
 		m.tcLangUser = 'fr', 	'MO',; && copy-paste this line to add another language support
 													'MB'; && default: English
 		)
 
-*==============================================
+* ==============================================
 function cGB && {fr} Valeur en Giga Octets
 lparameters ;
   tnSize;
@@ -1222,14 +1248,14 @@ tcLangUser = cLangUser(m.tcLangUser)
 
 return '';
 	+ ltrim(transform(m.tnSize/2^30, '999.99'));
-	+ Iif(lTrue(m.tlHTML), '&nbsp;', ' ');
+	+ Chr(160); && Iif(lTrue(m.tlHTML), '&nbsp;', ' ')
 	+ icase(;
 		m.tcLangUser = 'fr', 	'GO',; && copy-paste this line to add another language support
 													'GB'; && default: English
 		)
 endfunc
 
-*==============================================
+* ==============================================
 function cFileSizeMB && {fr} Taille d'un fichier en Méga Octets
 lparameters ;
   tcFile; && {fr} Fichier
@@ -1239,7 +1265,7 @@ lparameters ;
 return cMB(nFileSize(m.tcFile, m.tlMemo))
 endfunc
 
-*==============================================
+* ==============================================
 function nFileSizeTotal && {fr} Taille d'un fichier et de ses fichiers associés
 lparameters tcFile && {fr} Fichier
 
@@ -1250,12 +1276,13 @@ return nFileSize(;
 	)
 endfunc
 
-*==============================================
+* ==============================================
 function nFileSize && {fr} Taille d'un fichier en octets
 lparameters ;
   tcFile; && {fr} Fichier
 , tlMemo; && @ [.F.] {fr} Ajouter la taille du fichier memo associé éventuel @ le fichier memo existe
 , tlCDX;  && @ [.F.] {fr} Ajouter la taille du fichier CDX associé éventuel @ le fichier CDX existe
+, result;  && @ [''] {fr} erreur éventuelle
 
 local lnResult; &&  && {fr} Taille du fichier en octets
 , llResult;
@@ -1284,7 +1311,7 @@ if m.llResult
 		llCompatible = set("Compatible") == 'OFF'
 		if m.llCompatible
 			lnMemoWidth = set("Memowidth")
-			set compatible on
+			set compatible db4 && on && 2017-11-16 thn -- {FiC V 2.26.0-beta.3} {en} workaround error "too many parameters"
 		endif
 
 #if .F. && for files larger than 2 GB
@@ -1300,7 +1327,8 @@ ofile.Size
 			+ iif(m.tlCDX, fsize(m.lcCDX), 0)
 		* ======================================
 
-	catch
+	catch to result
+		result = cException(m.result)
 		llResult = .f.
 	finally
 		if m.llCompatible and set("Compatible") == 'ON'
@@ -1344,6 +1372,7 @@ ofile.Size
 	endif
 endif
 
+result = Iif(m.llResult, '', m.result)
 return iif(m.llResult, m.lnResult, .null.)
 endfunc
 
@@ -1366,7 +1395,7 @@ loTest.Test(.null., cModuleInfo(sys(16), 'Address')) && {fr} file can't be acces
 
 return loTest.result()
 
-*========================================
+* ========================================
 function cFileCheckSum && {fr} Checksum du contenu d'un fichier avec, le cas échéant, son fichier lié
 lparameters ;
   tcFile; && {fr} Fichier
@@ -1508,7 +1537,8 @@ tlRecycle = lTrue(m.tlRecycle)
 
 local llResult as Boolean;
 , lcResult as String;
-, laFolders[1], lcFolder, laSubFolders[1], lcSubFolder
+, laFolders[1], lcFolder;
+, laSubFolders[1], lcSubFolder, liSubFolder
 
 tnResult = FilesProc(;
 	  m.tcFolders;
@@ -1527,8 +1557,9 @@ llResult = empty(m.lcResult) or cResultAdd(@m.tcResult, m.lcResult)
 if m.llResult and lTrue(m.tlFolderEmptyDel) and alines(laFolders, m.tcFolders, 1, ',', ';') > 0
 
 	for each lcFolder in m.laFolders
-		if m.tlSubFolders and aSubFolders(@m.laSubFolders, m.lcFolder, m.tcSubFoldersExcl, .t., .t.) > 0
-			for each lcSubFolder in m.laSubFolders
+		if m.tlSubFolders
+			for liSubFolder = aSubFolders(@m.laSubFolders, m.lcFolder, m.tcSubFoldersExcl, .t., .t.) to 1 step -1
+				lcSubFolder = m.laSubFolders[m.liSubFolder]
 				if lDirEmpty(m.lcSubFolder)
 					rd (m.lcSubFolder)
 				endif
@@ -1749,12 +1780,13 @@ endproc
 * -------------------------------
 procedure FilesProc_Test && {fr} Teste FilesProc()
 
-local loTest as abUnitTest
+local loTest as abUnitTest of abDev.prg
 loTest = newobject('abUnitTest', 'abDev.prg')
 loTest.Test(, getdir(curdir(),'',"Où sont les fichiers Excel à traiter ?", 16), ;
 						'FilesProc_Test_Proc', '*.xls', .t., '', date())
 
 return loTest.result()
+endproc
 
 * ------------------------------------
 	procedure FilesProc_Test_Proc && {fr} Procédure appelée par FilesProc_Test()
@@ -1983,9 +2015,12 @@ lparameters ;
   tcSkeleton; && {fr} squelette de fichiers
 , tcSep; && [,] {fr} séparateur de liste
 , tlRecurse && [.F.] {fr} Explorer les sous-dossiers éventuels
+
 tcSep = evl(m.tcSep, [,])
-local laFiles[1], lcFolder, lcResult
+
+local lcResult, laFiles[1], lcFolder
 lcResult = ''
+
 if lFileAddrSkeleton(m.tcSkeleton)
 
 	adir(laFiles, m.tcSkeleton, '', 1) && {en} 1: capitalization on disk
@@ -2003,6 +2038,7 @@ if lFileAddrSkeleton(m.tcSkeleton)
 endif
 
 return m.lcResult
+endfunc
 
 * ========================================
 function cFileAddressOK && {fr} Adresse de fichier possible dans un dossier (ajoute un suffixe au stem du fichier si nécessaire)
@@ -2347,36 +2383,29 @@ return m.lcResult
 
 * ========================================-----
 function oProjectFiles && {fr} Collection Files d'un projet
-lparameters ;
-  toProject && [Projet courant] {fr} Référence à un objet projet ou à sa collection 'Files'
-local loResult
-loResult = null
+lparameters toProject && [Projet courant] {fr} Référence à un objet projet ou à sa collection 'Files'
 
-local loResult
-do case
+return ICase(;
+	type('m.toProject.baseClass') == 'C';
+	 and lower(m.toProject.baseclass) == 'project',;
+		m.toProject.files,;
+	type('m.toProject.parent.baseClass') == 'C';
+	 and lower(m.toProject.parent.baseclass) == 'project',;
+		m.toProject,;
+	type('application.activeProject') == 'O',;
+	application.activeProject.files,;
+		.null.;
+	)
 
-case type('m.toProject.baseClass') == 'C' ;
- and lower(m.toProject.baseclass) == 'project'
-	loResult = m.toProject.files
-
-case type('m.toProject.parent.baseClass') == 'C' ;
- and lower(m.toProject.parent.baseclass) == 'project'
-	loResult = m.toProject
-
-otherwise
-	if type('application.activeProject') == 'O'
-		loResult = application.activeproject.files
-	endif
-endcase
-
-return m.loResult
+endfunc
 
 * ========================================-----
 procedure ProjectFileAdd && {fr} Ajoute un fichier à un projet ouvert s'il n'y est déjà
 lparameters ;
   tcFileAddr; && {fr} Adresse complète du fichier à ajouter au projet
 , toProject; && [Projet courant] {fr} Référence à un objet projet ou à sa collection 'Files'
-, tlInclude && [.F.] {fr} Inclure au projet
+, tlInclude; && [.F.] {fr} Inclure au projet
+
 local llResult
 
 * {fr} Si une adresse de fichier valide a bien été passée
@@ -2449,7 +2478,7 @@ endif
 
 return m.llResult
 
-*==============================================
+* ==============================================
 function nFileLines && {fr} Nombre de lignes dans un fichier
 lparameters ;
   tcFileAddr && {fr} Adresse du fichier
@@ -2467,7 +2496,7 @@ endif
 return m.lnResult
 
 * ========================================
-function nFileSize_Folder && Taille des fichiers dans un dossier
+function nFileSize_Folder && {fr} Taille des fichiers dans un dossier
 lparameters ;
   tcFolders; && {fr} Adresses des dossiers où les fichiers sont à chercher
 , tlSubFolders; && [.F.] {fr} Traiter les fichiers dans les sous-dossiers
@@ -2504,7 +2533,7 @@ return m.result
 endfunc
 
 * ========================================
-function nFileSize_Folder_File
+function nFileSize_Folder_File && {fr} (privée de nFileSize_Folder()) Taille d'un fichier dans un dossier
 lparameters ;
   tcFile; && {fr} Adresses des dossiers où les fichiers sont à chercher
 , nFileSize_Folder; && @ {fr} Taille des fichiers dans un dossier
@@ -2668,38 +2697,69 @@ endif
 return m.lcResult
 
 * ========================================
-function lFileWritable && {en} Wait for a given delay until a file can be accessed
+function lFileWritable && {en} Wait for a given delay until a file can be accessed (about 2 ms)
 lparameters ;
 	cFile; && {en} file to be accessed exclusively
-, nMS; && [Between(m.nMS, 50 ms, 5000 ms)] {en} wait delay
+, nMS; && @ [50 ms] {en} wait delay to gain write access to file -- Between(m.nMS, 50 ms, 5000 ms); @: nMS elapsed
 , nAttempt; && [10] {en} number of attempts to access
 
-local success;
+local success as Boolean;
 , nSeconds;
-, handle;
 , nSleepMS;
+, hFile;
+, cFileFPT, lFileFPT, hFileFPT;
+, cFileCDX, lFileCDX, hFileCDX;
 
-if file(m.cFile)
+nSeconds = seconds()
+if ga_Type_IsChar(m.cFile, .T.) and file(m.cFile) and !Used(cAliasUsed(m.cFile))
+
 	nMS = min(max(Iif(ga_Type_isPositiveInteger(m.nMS), m.nMS, 0), 50), 5000)
 	nAttempt = Iif(ga_Type_isPositiveInteger(m.nAttempt), m.nAttempt, 10)
 	nSleepMS = Max(Int(m.nMS / m.nAttempt), 10) && minimum 10 ms between attempts
-	nSeconds = seconds()
+
+	cFile = FullPath(m.cFile)
+	cFileFPT = FileMemo(m.cFile)
+	lFileFPT = File(m.cFileFPT)
+
+	cFileCDX = FileIndex(m.cFile)
+	lFileCDX = File(m.cFileCDX)
+
 	do while nMS(m.nSeconds) < m.nMS
-		handle = fopen(m.cFile)
-		if m.handle > -1
-			success = fclose(m.handle)
-			assert m.success
+		hFile = fopen(m.cFile, 2)
+		hFileFPT = Iif(m.lFileFPT, fopen(m.cFileFPT, 2), -1)
+		hFileCDX = Iif(m.lFileCDX, fopen(m.cFileCDX, 2), -1)
+		success = .T.;
+		 and m.hFile > -1;
+		 and (!m.lFileFPT or m.hFileFPT > -1);
+		 and (!m.lFileCDX or m.hFileCDX > -1)
+		Fclose(m.hFile)
+		Fclose(m.hFileFPT)
+		Fclose(m.hFileCDX)
+		if m.success
 			exit
 		else
 			Sleep(m.nSleepMS) && modify command ab
 		endif
 	enddo
-	nMS = nMS(m.nSeconds) && feedback
-	return m.success
 else
-	return .t.
+	success = .T.
 endif
+
+nMS = nMS(m.nSeconds) && feedback
+return m.success
 endfunc
+
+* -------------------------------
+procedure lFileWritable_Test && {fr} Teste lFileWritable()
+
+local loTest as abUnitTest of abDev.prg
+loTest = newobject('abUnitTest', 'abDev.prg')
+
+loTest.test(.T., 'awCopy.cdx')
+loTest.test(.T., 'C:\Program Files\VFP9\Tools\AB\WC\wwRequestLog.dbf')
+
+return loTest.result()
+endproc
 
 * ========================================
 function cFileTimeStampName && {en} Name of a file with a time stamp
@@ -2781,10 +2841,8 @@ return m.success
 endfunc
 
 * ========================================
-function abFopen(tcFile)
-local abFopen as abFopen of abFile.prg
-abFopen = CreateObject('abFopen', m.tcFile)
-return m.abFopen
+function abFopen(tcFile) && {en} abFopen Object
+return CreateObject('abFopen', m.tcFile)
 endfunc
 
 * ========================================
@@ -2802,3 +2860,28 @@ procedure destroy
 endproc
 enddefine
 * ========================================
+
+
+* ==============================================
+function tFolder && {fr} Date et heure de dernière modification des fichiers d'un dossier
+lparameters tcFolder && {fr} Dossier
+
+local tResult as Datetime;
+, laFile[1];
+, liFile;
+, lcTime;
+
+tResult = .null.
+
+if ga_Type_IsChar(m.tcFolder, .T.) and Directory(m.tcFolder) and ADir(laFile, Addbs(m.tcFolder) + '*.*') > 0
+	for liFile = 1 to Alen(laFile, 1)
+		tResult = laFile[m.liFile, 3]
+		lcTime  = laFile[m.liFile, 4]
+		laFile[m.liFile, 3] = Datetime(Year(m.tResult), Month(m.tResult), Day(m.tResult), Cast(GetWordNum(m.lcTime, 1, ':') as I), Cast(GetWordNum(m.lcTime, 2, ':') as I), Cast(GetWordNum(m.lcTime, 3, ':') as I))
+	endfor
+	Asort(m.laFile, 3, -1, 1)
+	tResult = m.laFile[1, 3]
+endif
+
+return m.tResult
+endfunc

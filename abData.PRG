@@ -194,9 +194,10 @@ lKeepOpened = .f.
 * ---------------------------------------------------
 procedure init && {fr} Change la zone de travail
 lparameters ;
-  tuSelect; && [0] {fr} Zone de travail / alias à sélectionner, ou table à ouvrir et sélectionner
+  tuSelect; && [0] {fr} Zone de travail / alias à sélectionner, ou table à ouvrir et sélectionner; @ alias
 , tlKeepOpened; && [.F.] {fr} Si la table est ouverte, laisser ouverte en sortie
-, tcError && @ [''] {fr} Erreur éventuelle
+, tcError; && @ [''] {fr} Erreur éventuelle
+
 tuSelect = evl(m.tuSelect, 0)
 
 local lcType, lcTable, llOpened, llResult
@@ -213,7 +214,7 @@ if m.llResult
 		this.lTable = .f.;
 		 or (not empty(dbc()) and indbc(m.tuSelect, "TABLE"));
 		 or file(m.lcTable);
-		 or file(cDBCTableAddr(m.tuSelect))
+		 or file(cDBCtableAddr(m.tuSelect))
 
 		llResult = m.this.lTable
 	endif
@@ -243,6 +244,7 @@ endif
 tcError = iif(m.llResult, '', m.tcError)
 
 return m.llResult
+endproc
 
 * ---------------------------------------------------
 procedure destroy && {fr} Rétablit la zone de travail initiale et referme la table si this.Init() l'a ouverte
@@ -252,13 +254,14 @@ select (m.this.nSelect)
 if m.this.lOpened and not m.this.lKeepOpened
 	use in select(m.this.cAlias)
 endif
+endproc
 
 * =================================================
 enddefine && {fr} CLASS abSelect
 * =================================================
 
 * ========================================
-function cDBCTableAddr && {fr} Adresse d'une table dans un DBC
+function cDBCtableAddr && {fr} Adresse d'une table dans un DBC
 lparameters tcDBCTable && 'DBC!Table'
 
 local lcTable, lcDBC, loDBC as abSet, llDBC, llResult, lcResult
@@ -304,6 +307,7 @@ lparameters ;
 , tlExclusive; && [.F.] {fr} Ouvrir la table en exclusif
 , tcError; && @ [''] {fr} Erreur éventuelle
 , tcAlias; && [default] {fr} Alias sous lequel ouvrir la table
+, nMS; && @ [50 ms] {en} wait delay to gain write access to table -- Between(m.nMS, 50 ms, 5000 ms); @: nMS elapsed
 
 tlOpened = .f.
 tcAlias = upper(iif(ga_Type_IsChar(m.tcAlias, .t.) and lVFPName(m.tcAlias), m.tcAlias, ''))
@@ -315,6 +319,7 @@ local lcResult as string; && {fr} Alias sous lequel la table est ouverte
 , lnSelect; && {fr} pas de abSelect() pour optimiser
 , loException as exception;
 , llAlias as Boolean;
+, loDefault as abSet of abDev.prg;
 
 lcResult = ''
 
@@ -341,7 +346,7 @@ otherwise && {fr} Sinon (adresse de table sur le disque ou dans une base de donn
 	do case
 
 	case '!' $ m.tuTable && {fr} DB!Table
-		lcTable = cDBCTableAddr(m.tuTable)
+		lcTable = cDBCtableAddr(m.tuTable)
 		store file(m.lcTable) to llTable, llDBC
 
 	case not empty(dbc()) and indbc(m.tuTable, "TABLE") && {fr} Table d'une base de données
@@ -361,12 +366,13 @@ otherwise && {fr} Sinon (adresse de table sur le disque ou dans une base de donn
 
 		* {fr} Si la table n'est pas ouverte
 		lcResult = cAliasUsed(m.lcTable)
-		if empty(m.lcResult) or (m.llAlias and !m.lcResult == m.tcAlias)
+		if (Empty(m.lcResult) or (m.llAlias and !m.lcResult == m.tcAlias)) and (Empty(m.nMS) or lFileWritable(m.lcTable, m.nMS))
 
 			* {fr} Ouvrir la table
 			lcTable = iif(m.llDBC, m.tuTable, m.lcTable)
 			lnSelect = select(0)
 			tcAlias = iif(m.llAlias, iif(empty(m.lcResult), '', 'again ') + 'alias ' + m.tcAlias, '')
+			loDefault = Iif(m.llDBC, .null., abSet('Default', JustPath(m.lcTable))) && 2017-11-24 thn -- {FiC V 2.26.0-beta.5} {en} added to ease dbc retrieval
 			select 0
 			try
 				use (m.lcTable) shared &tcAlias && {fr} shared added 20/06/13
@@ -645,7 +651,7 @@ if used(m.tcAlias)
 
 		.cFilter = filter()
 		if aTagInfoEn(@m.aa) > 0
-			dimension .aTagInfos[alen(m.aa, 1), alen(m.aa, 2)]
+			dimension .aTagInfos[Alen(m.aa, 1), Alen(m.aa, 2)]
 			Acopy(m.aa, .aTagInfos)
 		endif
 		.cOrder = order()
@@ -716,8 +722,8 @@ try
 					set key to range &lcValue1, &lcValue2
 				endif
 			endif
-			if alen(.aRelationSrce) > 1
-				for liValue = 1 to alen(.aRelationSrce, 1)
+			if Alen(.aRelationSrce) > 1
+				for liValue = 1 to Alen(.aRelationSrce, 1)
 					lcValue1 = .aRelationSrce[m.liValue, 1]
 					lcValue2 = .aRelationSrce[m.liValue, 2]
 					success = lTableExpr(m.lcValue1)
@@ -742,7 +748,7 @@ try
 					endif
 				endfor
 			endif
-			if m.success and alen(.aRelationTrgt) > 1
+			if m.success and Alen(.aRelationTrgt) > 1
 				lcValue1 = .aRelationTrgt[1] && {fr} Relational expression
 				lcValue2 = .aRelationTrgt[2] && {fr} Source Alias
 				set relation to &lcValue1 into (.cAlias) in (m.lcValue2)
@@ -988,7 +994,7 @@ if aClear(@m.taUsed)
 	endfor
 	set datasession to m.lnDS_
 
-	lnResult = iif(laEmpty(@m.taUsed), 0, alen(m.taUsed))
+	lnResult = iif(laEmpty(@m.taUsed), 0, Alen(m.taUsed))
 endif
 
 return m.lnResult
@@ -1143,7 +1149,7 @@ lcResult = ''
 lcAlias = cAlias(m.tuTable, @m.llAlias)
 if Used(m.lcAlias)
 
-	tlExcl = not m.llAlias and IsExclusive(m.lcAlias) && {fr} L'alias était déjà ouvert et en exclusif
+	tlExcl = !m.llAlias and IsExclusive(m.lcAlias) && {fr} L'alias était déjà ouvert et en exclusif
 	lcResult = iif(IsExclusive(m.lcAlias) or AliasReuse(m.lcAlias, 'EXCLUSIVE');
 		, m.lcAlias;
 		, '';
@@ -1375,7 +1381,7 @@ if m.llParms
 				lnDest1 = m.lnDest1 + 1
 				dimension laDest[m.lnDest1, Alen(laDest,2)]
 				local j
-				for m.j = 1 to alen(laDest,2)
+				for m.j = 1 to Alen(laDest,2)
 					laDest[m.lnDest1, m.j] = laSrce[m.lnField, m.j]
 				endfor
 				llAdjust = .t.
@@ -1670,8 +1676,8 @@ if m.llResult
 
 			* {fr} Vérifier les dimensions du tableau
 			local lnRows, lnCols, lnRow, lnCol
-			lnRows = alen(taArray, 1)
-			lnCols = alen(taArray, 2)
+			lnRows = Alen(taArray, 1)
+			lnCols = Alen(taArray, 2)
 			if m.lnCols = 1
 				dimension taArray[m.lnRows]
 			endif
@@ -1875,7 +1881,7 @@ if m.llResult
 		scatter to laRec fields except &tcFieldsIgnore
 
 		* {fr} Pour chaque champ
-		for m.lnField = 1 to alen(laRec)
+		for m.lnField = 1 to Alen(laRec)
 			luValue = laRec[m.lnField]
 
 			if vartype(m.luValue) == 'C';
@@ -3234,22 +3240,20 @@ lparameters ;
 , tcSep; && [','] {fr} Séparateur entre champs
 , tlNullIgnore; && [.F.] {fr} Ignorer le réglage SET NULL du champ
 
-local Result as string;
+local result as string;
 , cAlias as string;
 , lAlias as Boolean;
 , laField[1];
 
-Result = ''
-
 cAlias = cAlias(m.tuTable, @m.lAlias)
-if used(m.cAlias)
 
-	afields(laField, m.cAlias)
-	Result = cFieldsExp(@m.laField, m.tlParenth, m.tcSep, m.tlNullIgnore)
+result = Iif(Used(m.cAlias) and AFields(laField, m.cAlias) > 0;
+	, cFieldsExp(@m.laField, m.tlParenth, m.tcSep, m.tlNullIgnore);
+	, '';
+	)
 
-	if m.lAlias
-		use in (m.cAlias)
-	endif
+if m.lAlias
+	use in (m.cAlias)
 endif
 
 return m.result
@@ -3307,7 +3311,7 @@ llResult = type('taFields', 1) == 'A'
 assert m.llResult message cAssertMsg(textmerge([Tableau attendu : <<cLitteral(@m.taFields)>>]))
 if m.llResult
 
-	lnCol = alen(taFields, 2)
+	lnCol = Alen(taFields, 2)
 	llResult = m.lnCol >= 4
 	assert m.llResult message cAssertMsg(textmerge([Au moins 4 colonnes attendues dans le tableau : <<cLitteral(@m.taFields)>>]))
 	if m.llResult
@@ -3316,7 +3320,7 @@ if m.llResult
 		tlNullIgnore = (lTrue(m.tlNullIgnore)) or m.lnCol = 4
 
 		* {fr} Pour chaque champ
-		for liField = 1 to alen(taFields, 1)
+		for liField = 1 to Alen(taFields, 1)
 
 			lcFieldExp = cFieldExp(;
 					taFields[m.liField, 1];
@@ -3673,7 +3677,7 @@ external array taIdxFields
 
 * {fr} S'assurer que le tableau a le nombre de colonnes nécessaire
 local lnCols
-lnCols = alen(taIdxFields, 2)
+lnCols = Alen(taIdxFields, 2)
 if m.lnCols < 6
 	aColsIns(@m.taIdxFields, m.lnCols, 6 - m.lnCols)
 endif
@@ -3684,7 +3688,7 @@ afields(laFields)
 
 * {fr} Pour chaque champ à indexer
 local lnIdxFields, lnIdxField, lcField, lnField, lcType, lnWidth, lnPrec, lcIndexExp, lnIndexExp
-lnIdxFields = alen(taIdxFields, 1)
+lnIdxFields = Alen(taIdxFields, 1)
 for m.lnIdxField = 1 to m.lnIdxFields
 	lcField = taIdxFields[m.lnIdxField, 1]
 
@@ -4175,7 +4179,7 @@ if m.success
 
 	if m.success and m.llTags
 
-		assert not m.llZap message cAssertMsg(textmerge([on va zapper '<<m.lcAlias>>'...<<CRLF>>Presser 'Cancel' pour arrêter le programme<<CRLF>>Presser 'Ignore' pour continuer]))
+		assert not m.llZap message cAssertMsg(textmerge([on va zapper '<<m.lcAlias>>'...] + CRLF + [Presser 'Cancel' pour arrêter le programme] + CRLF + [Presser 'Ignore' pour continuer]))
 		if m.llZap
 			zap && {fr} SELECT plus haut ou CREATE TABLE a sélectionné la table
 		endif
@@ -4285,7 +4289,7 @@ tlTagInfo = not laEmpty(@m.taTagInfo)
 if m.tlTagInfo
 
 	* {fr} Pour chaque tag d'index spécifié
-	for tnTag = 1 to alen(taTagInfo, 1)
+	for tnTag = 1 to Alen(taTagInfo, 1)
 
 		lcTag 		= taTagInfo[m.tnTag, 1]
 		lcType 		= taTagInfo[m.tnTag, 2]
@@ -4348,7 +4352,7 @@ endif
 
 * {fr} Pour chaque tag existant
 if m.llTagInfo
-	for lnTag = 1 to alen(laTagInfo, 1)
+	for lnTag = 1 to Alen(laTagInfo, 1)
 		lcTag = laTagInfo[m.lnTag, 1]
 
 		* {fr} Si le tag n'est pas spécifié, supprimer
@@ -4380,7 +4384,7 @@ if used(m.tcAlias)
 	afields(laField, m.tcAlias)
 
 	* {fr} Pour chaque champ spécifié
-	for lnFieldSpec = 1 to alen(taFieldSpec, 1)
+	for lnFieldSpec = 1 to Alen(taFieldSpec, 1)
 
 		lcField = taFieldSpec[m.lnFieldSpec, 1]
 
@@ -4416,7 +4420,7 @@ if used(m.tcAlias)
 	endfor
 
 	* {fr} Pour chaque champ de la table
-	for lnField = 1 to alen(laField, 1)
+	for lnField = 1 to Alen(laField, 1)
 		lcField = laField[m.lnField, 1]
 
 		* {fr} Si le champ n'est pas spécifié
@@ -4457,7 +4461,7 @@ if aClear(@m.taResult)
 
 	case type('tuFields', 1) == 'A'
 
-		lnResult = alen(tuFields, 2)
+		lnResult = Alen(tuFields, 2)
 
 		lnResult = icase(;
 			m.lnResult = 1,;
@@ -4481,7 +4485,7 @@ if aClear(@m.taResult)
 	if m.lnResult > 0
 
 		* {fr} Compléter au format aFields()
-		lnCols = alen(taResult, 2)
+		lnCols = Alen(taResult, 2)
 		if m.lnCols < 18
 			lnCols = 18 - m.lnCols
 			aColsIns(@m.taResult,, m.lnCols,, rightc(aFIELDS_VARTYPES, m.lnCols))
@@ -4601,10 +4605,10 @@ if aClear(@m.taResult)
 			ICase(;
 			laEmpty(@m.tuTagInfo),;
 				0,;
-			alen(tuTagInfo, 2) <= 1,;
+			Alen(tuTagInfo, 2) <= 1,;
 				min(acopy(tuTagInfo, taResult), 0) + aColsDelim(@m.taResult, aTAGINFO_SEPS),;
-			between(alen(tuTagInfo, 2), 3, 6),;
-				min(acopy(tuTagInfo, taResult), 0) + alen(taResult, 1),; && {en} tuTagInfo is already in aTagInfo() format
+			between(Alen(tuTagInfo, 2), 3, 6),;
+				min(acopy(tuTagInfo, taResult), 0) + Alen(taResult, 1),; && {en} tuTagInfo is already in aTagInfo() format
 				-1;
 			),;
 		!ga_Type_IsChar(m.tuTagInfo),;
@@ -4619,7 +4623,7 @@ if aClear(@m.taResult)
 	if m.lnResult > 0
 
 		* {fr} Ajuster au format de aTagInfo()
-		lnCols = alen(taResult, 2)
+		lnCols = Alen(taResult, 2)
 		if m.lnCols < 6
 			aColsIns(@m.taResult,, 6 - m.lnCols, '')
 		endif
@@ -4801,7 +4805,7 @@ if m.llResult
 			local laFields[1], lnField
 			afields(laFields, m.tcAlias)
 			lnField = ascan(laFields, m.tcField, 1, -1, 1, 2+4)
-			lnResult = alen(laFields, 2)
+			lnResult = Alen(laFields, 2)
 			dimension taFieldSpecs[m.lnResult]
 			acopy(laFields, taFieldSpecs, m.lnField, m.lnResult, 1)
 		endif
@@ -5029,7 +5033,7 @@ local lnResult as integer; && {fr} Nombre de relations trouvées
 , lcRelation;
 , liRelation
 
-lnResult = iif(!m.tlCascade or laEmpty(@m.taRelation), 0, alen(m.taRelation, 1))
+lnResult = iif(!m.tlCascade or laEmpty(@m.taRelation), 0, Alen(m.taRelation, 1))
 
 if not empty(m.tcAlias)
 
@@ -5230,7 +5234,7 @@ if used(m.this.cAlias)
 
 	local liRelation, lcExpr, lcTarget, lnRecno
 
-	for liRelation = 1 to alen(this.aRelationSrce, 1)
+	for liRelation = 1 to Alen(this.aRelationSrce, 1)
 
 		lcTarget = this.aRelationSrce[m.liRelation, 2]
 		if used(m.lcTarget)
@@ -5955,7 +5959,7 @@ if alines(laFKsChild, upper(m.tcFKsChild), 1+4, ',') > 0
 
 	* {fr} Pour chaque relation
 	local lnRels, lnRel
-	lnRels = alen(taRelations, 1)
+	lnRels = Alen(taRelations, 1)
 	for lnRel = m.lnRels to 1 step -1
 
 		* {fr} Si l'enfant de la relation est la table indiquée et le tag enfant ne fait pas partie de ceux retenus
@@ -5982,8 +5986,8 @@ external array taJoins, taRelations, taTablesIgnore
 
 local lnRel, lnCols, lcTableParent, lnResult && {fr} Nombre de tables trouvées
 
-lnResult = iif(laEmpty(@m.taJoins), 0, alen(taJoins, 1))
-lnCols = alen(taRelations, 2)
+lnResult = iif(laEmpty(@m.taJoins), 0, Alen(taJoins, 1))
+lnCols = Alen(taRelations, 2)
 lnRel = 0
 
 * {fr} Pour chaque relation dont la table est enfant
@@ -6829,7 +6833,7 @@ enddefine && {fr} CLASS abOrder
 * ========================================
 
 * ========================================
-function abFilter(cAlias, cFilter, Result)
+function abFilter(cAlias, cFilter, result) && {en} abFilter object
 return createobject('abFilter', m.cAlias, m.cFilter, @m.result)
 
 * ========================================
@@ -7648,7 +7652,7 @@ llResult = used(m.lcAlias1) and used(m.lcAlias2)
 if m.llResult
 
 	llResult_ = afields(m.laField1, m.lcAlias1) = afields(m.laField2, m.lcAlias2)
-	= not m.llResult_ and cResultAdd(@m.tcResult, textmerge([Nombres de champs différents : <<ALEN(m.laField1, 1)>> / <<ALEN(m.laField1, 2)>>]))
+	= not m.llResult_ and cResultAdd(@m.tcResult, textmerge([Nombres de champs différents : <<Alen(m.laField1, 1)>> / <<Alen(m.laField1, 2)>>]))
 	llResult = m.llResult and m.llResult_
 
 	aColsDel(@m.laField1, 6)
@@ -7660,7 +7664,7 @@ if m.llResult
 	llResult = m.llResult and m.llResult_
 
 	llResult_ = aTagInfoEn(@m.laTag1, forceext(m.tcTable1, 'cdx'), m.lcAlias1) = aTagInfoEn(@m.laTag2, forceext(m.tcTable2, 'cdx'), m.lcAlias2)
-	= not m.llResult_ and cResultAdd(@m.tcResult, textmerge([Nombres d'indexes différents : <<ALEN(m.laTag1, 1)>> / <<ALEN(m.laTag2, 1)>>]))
+	= not m.llResult_ and cResultAdd(@m.tcResult, textmerge([Nombres d'indexes différents : <<Alen(m.laTag1, 1)>> / <<Alen(m.laTag2, 1)>>]))
 	llResult = m.llResult and m.llResult_
 
 	asort(m.laTag1)
@@ -7755,14 +7759,14 @@ if m.llResult
 
 	* {fr} Créer l'objet résultat
 	this.oResult = createobject('empty') && {fr} Résultat d'exécution sous forme d'objet
-	for lnResultItem = 1 to alen(this.aResultItems, 1)
+	for lnResultItem = 1 to Alen(this.aResultItems, 1)
 		addproperty(m.this.oResult, this.aResultItems[m.lnResultItem, 1], this.aResultItems[m.lnResultItem, 2])
 	endfor
 
 	* {fr} Créer le curseur résultats (qui contiendra un objet résultat par table)
 	lcResultItems = ''
 	this.cResultCursor = textmerge([<<m.this.name>>_<<Ttoc(Datetime(),1)>>])
-	for lnResultItem = 1 to alen(this.aResultItems, 1)
+	for lnResultItem = 1 to Alen(this.aResultItems, 1)
 		lcResultItems = c2Words(m.lcResultItems, ',', textmerge("<<this.aResultItems[m.lnResultItem, 1]>> <<this.aResultItems[m.lnResultItem, 3]>>"))
 	endfor
 	addproperty(m.this, 'abSelect', abSelect())
@@ -7841,7 +7845,7 @@ lnResultItem = aLinesCols(@m.laResultItem, m.lcResultItem, '|')
 liLangUser = 0
 if alines(laLang, 'en | fr | de | es | it | pt', 5, '|') > 0
 	liLangUser = ascan(laLang, m.this.cLangUser, 1, -1, 1, 7)
-	liLangUser = iif(m.liLangUser > alen(m.laResultItem, 2)- 3;
+	liLangUser = iif(m.liLangUser > Alen(m.laResultItem, 2)- 3;
 		, m.liLangUser;
 		, 0;
 		)
@@ -7878,7 +7882,7 @@ this.lResult = .T.
 this.cResult = ''
 
 local liResultItem
-for liResultItem = 1 to alen(this.aResultItems, 1)
+for liResultItem = 1 to Alen(this.aResultItems, 1)
 	store this.aResultItems[m.liResultItem, 2] to ('m.this.oResult.' + this.aResultItems[m.liResultItem, 1])
 endfor
 endproc
@@ -7900,7 +7904,7 @@ else
 endif
 
 *---------------------------------------
-protected procedure cResultAdd
+protected procedure cResultAdd && {fr} Ajoute au résultat
 lparameters tcResult
 
 local llResult
@@ -7930,7 +7934,7 @@ local lcResult, liResultItem, luResultItem
 lcResult = ''
 for liResultItem = 1 to iif(lTrue(m.tlSuccess) and m.this.oResult.lResult;
  , 2;
- , alen(this.aResultItems, 1);
+ , Alen(this.aResultItems, 1);
  )
 
 	luResultItem = evaluate('m.this.oResult.' + this.aResultItems[m.liResultItem, 1])
@@ -7958,7 +7962,7 @@ if .t.;
 
 	* {fr} Nouvelle base de données : tabuler les tables
 	local array laTables[1]
-	this.oResult.lDBCdest = ga_DBCTablesTree(@m.laTables, m.tcDBC) > 0 && {fr} aDBCTablesTree(@m.laTables, m.tcDBC) > 0
+	this.oResult.lDBCdest = ga_DBCTablesTree(@m.laTables, m.tcDBC) > 0 && modify command abGA
 	if this.oResult.lDBCdest
 
 		dimension this.aDBCdestTables[Alen(m.laTables)]
@@ -8069,7 +8073,7 @@ if m.this.lResult
 	this.aTablesIgnore(@m.laTablesIgnore, m.tcTablesIgnore)
 
 	* {fr} Pour chaque table destination
-	lnTable = alen(m.this.aDBCdestTables)
+	lnTable = Alen(m.this.aDBCdestTables)
 	dimension this.aResults[m.lnTable]
 	for m.liTable = 1 to m.lnTable
 
@@ -8117,7 +8121,7 @@ if m.this.lResult
 
 		* {fr} Enregistrer le résultat pour la table
 		this.aResults[m.liTable] = createobject('empty') && {fr} Résultat d'exécution sous forme d'objet
-		for liResultItem = 1 to alen(this.aResultItems, 1)
+		for liResultItem = 1 to Alen(this.aResultItems, 1)
 			lcResultItem = this.aResultItems[m.liResultItem, 1]
 			addproperty(this.aResults[m.liTable], m.lcResultItem, evaluate('this.oResult.' + m.lcResultItem))
 		endfor
@@ -8530,7 +8534,7 @@ if m.this.lResult
 							* {fr} Aligner le statut de suppression
 							llDeleted = .f.
 							if deleted(m.tcAliasSrce)
-								if not deleted(m.tcAliasDest)
+								if !deleted(m.tcAliasDest)
 									delete in (m.tcAliasDest)
 									this.oResult.nRecsDeleted = this.oResult.nRecsDeleted + 1
 									llDeleted = .t.
@@ -8717,7 +8721,7 @@ endif
 endproc
 
 * =============================================
-function cDBsetPropOfTableFields
+function cDBsetPropOfTableFields && {en} DBSetProp() instructions from a table's fields
 lparameters tuTable, tcProp
 
 tcProp = evl(m.tcProp, 'Comment')
@@ -8753,10 +8757,12 @@ return m.result
 endfunc
 
 * =============================================
-function cCollationOfCodePage
+function cCollationOfCodePage && {en} Collation sequence matching a code page
 lparameters uCodePage
+
 uCodePage = iif(empty(pcount()), alias(), m.uCodePage)
 uCodePage = iif(vartype(m.uCodePage) == 'C' and used(m.uCodePage), cpdbf(m.uCodePage), m.uCodePage)
+
 local cLangUser
 cLangUser = cLangUser()
 return upper(icase(;
@@ -8785,7 +8791,7 @@ return upper(icase(;
 	m.uCodePage = 1252 and m.cLangUser = 'sv',; && {fr} Windows ANSI
 		'swefin',;
 	m.uCodePage = 1252 and m.cLangUser = 'nl',; && {fr} Windows ANSI
-		'dutsch',;
+		'dutch',;
 	m.uCodePage = 1252,; && {fr} Windows ANSI
 		'general',;
 	m.uCodePage = 1253,; && {fr} Greek Windows
@@ -8956,3 +8962,18 @@ laField[m.lnField, 2] = m.result && {fr} nom du champ dans la table copiée (10 c
 
 return m.result
 endfunc
+
+* ---------------------------------------------
+procedure DBCclose && {fr} ferme une database si elle est ouverte
+lparameters tcDBC
+
+local success, oData
+if lFileAddress(m.tcDBC) and DBused(m.tcDBC)
+	oData = abSet('database', m.tcDBC)
+	close databases
+	success = !DBused(m.tcDBC)
+	assert m.success
+endif
+
+return m.success
+endproc

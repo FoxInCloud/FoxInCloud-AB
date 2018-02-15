@@ -142,32 +142,25 @@ return loTest.Result()
 function cYMDHMS && {fr} "Y,M,D[,H,M,S]" d'après une date ou dateTime
 lparameters ;
   tuDate; && [DateTime()] {fr} Date ou dateTime
-, tlJS && {fr} Javascript
+, tlJS && [.F.] {fr} Javascript
 
-local luDate, lcType, liJS, lcResult
+local llT
 
-luDate = iif(vartype(m.tuDate) $ 'DT', m.tuDate, datetime())
-lcType = vartype(m.luDate)
-liJS = iif(lTrue(m.tlJS), -1, 0) && {fr} base 0 en javascript
+tuDate = iif(vartype(m.tuDate) $ 'DT', m.tuDate, datetime())
+llT = vartype(m.tuDate) == 'T'
 
-lcResult = cWords(',' ;
-	, ltrim(str(year(m.luDate)));
-	, ltrim(str(month(m.luDate) + m.liJS));
-	, ltrim(str(day(m.luDate)));
+return cWords(',' ;
+	, ltrim(str(year(m.tuDate)));
+	, ltrim(str(month(m.tuDate) + iif(lTrue(m.tlJS), -1, 0))); && {fr} base 0 en javascript
+	, ltrim(str(day(m.tuDate)));
+	, Iif(m.llT, ltrim(str(hour(m.tuDate))), '');
+	, Iif(m.llT, ltrim(str(minute(m.tuDate))), '');
+	, Iif(m.llT, ltrim(str(sec(m.tuDate))), '');
 	)
-if m.lcType == 'T'
-	lcResult = cWords(',' ;
-		, m.lcResult;
-		, ltrim(str(hour(m.luDate) + m.liJS));
-		, ltrim(str(minute(m.luDate) + m.liJS));
-		, ltrim(str(sec(m.luDate) + m.liJS));
-		)
-endif
-
-return m.lcResult
+endfunc
 
 * ================================================
-function cY_M_D_H_M_S(tt)
+function cY_M_D_H_M_S(tt) && {en} datetime string separated by undescores
 return stuffc(stuffc(stuffc(stuffc(stuffc(Ttoc(Evl(m.tt, Datetime()), 1), 13, 0, '-'), 11, 0, '-'), 9, 0, '_'), 7, 0, '-'), 5, 0, '-')
 endfunc
 
@@ -474,7 +467,7 @@ loTest.Test('01/12/01', 37226)
 return loTest.Result()
 
 * ================================================
-function cAAAAMM && <Année>/<mois en 2 chiffres>
+function cAAAAMM && {fr} <Année>/<mois en 2 chiffres>
 lparameters tu && [Date()] {fr} Date ou date & heure ou nombre AAAAMM
 tu = evl(m.tu, date())
 
@@ -521,6 +514,22 @@ if m.lcType $ 'DT'
 endif
 
 return padr(m.lcResult, 15)
+endfunc
+
+* ================================================
+function cdLit(td, lHTML) && {en} "aaaa-mm-jj" from a date
+td = Chrtran(Alltrim(cLitteral(Evl(m.td, Date())), '{', '^', '}'), ' ', Chr(160))
+return Iif(lTrue(m.lHTML), Strtran(m.td, '-', '&#8209;'), m.td)
+endfunc
+
+* ================================================
+function ctLit(tt, lHTML, lShort) && {en} "aaaa-mm-jj hh:mm:ss" from a date-time
+tt = Evl(m.tt, Datetime())
+lShort = lTrue(m.lShort) and Ttod(m.tt) == Date()
+tt = Alltrim(cLitteral(m.tt), '{', '^', '}')
+tt = Iif(m.lShort, GetWordNum(m.tt, 2), Chrtran(m.tt, ' ', Chr(160)))
+return Iif(lTrue(m.lHTML), Strtran(m.tt, '-', '&#8209;'), m.tt)
+endfunc
 
 * ================================================
 function cDateOrder && {fr} Ordre d'une date (AAAAMMJJ)
@@ -628,7 +637,7 @@ lnWords = getwordcount(m.lcWords)
 llResult = m.lnWords > 1
 if m.llResult
 
-	lcResult = getwordnum(m.lcWords, 1) + ' ' + getwordnum(m.lcWords, 2)
+	lcResult = getwordnum(m.lcWords, 1) + Chr(160) + getwordnum(m.lcWords, 2)
 endif
 
 return m.lcResult
@@ -636,23 +645,32 @@ endfunc
 
 * ================================================
 function cMonthFR && {fr} Mois en français
-lparameters tnMonth && {fr} N° du mois
+lparameters tn && {fr} N° du mois
+return cMonthLoc(m.tn, 'fr')
+endfunc
 
+* ================================================
+function cMonthLoc && {fr} Mois localisé
+lparameters ;
+  tn; && {fr} N° du mois
+, cl  && [cLangUser()] {fr} Langue
+
+cl = Leftc(Lower(Alltrim(Iif(ga_Type_IsChar(m.cl, .T.), m.cl, cLangUser()))), 2)
 return icase(;
-	!vartype(m.tnMonth) == 'N', transform(m.tnMonth) + '?',;
-	m.tnMonth = 01, 'janvier',;
-	m.tnMonth = 02, 'février',;
-	m.tnMonth = 03, 'mars',;
-	m.tnMonth = 04, 'avril',;
-	m.tnMonth = 05, 'mai',;
-	m.tnMonth = 06, 'juin',;
-	m.tnMonth = 07, 'juillet',;
-	m.tnMonth = 08, 'août',;
-	m.tnMonth = 09, 'septembre',;
-	m.tnMonth = 10, 'octobre',;
-	m.tnMonth = 11, 'novembre',;
-	m.tnMonth = 12, 'décembre',;
-	textmerge('n° de mois non supporté : <<m.tnMonth>>');
+	!vartype(m.tn) == 'N', '¿' + transform(m.tn) + '?',;
+	m.tn = 01, iCase(m.cl == 'fr', 'janvier', m.cl == 'de', 'Januar', m.cl == 'es', 'enero', m.cl == 'it', 'gennaio', m.cl == 'pt', 'janeiro', 'January'),;
+	m.tn = 02, iCase(m.cl == 'fr', 'février', m.cl == 'de', 'Februar', m.cl == 'es', 'febrero', m.cl == 'it', 'febbraio', m.cl == 'pt', 'fevereiro', 'February'),;
+	m.tn = 03, iCase(m.cl == 'fr', 'mars', m.cl == 'de', 'März', m.cl == 'es', 'marzo', m.cl == 'it', 'marzo', m.cl == 'pt', 'março', 'March'),;
+	m.tn = 04, iCase(m.cl == 'fr', 'avril', m.cl == 'de', 'April', m.cl == 'es', 'abril', m.cl == 'it', 'aprile', m.cl == 'pt', 'abril', 'April'),;
+	m.tn = 05, iCase(m.cl == 'fr', 'mai', m.cl == 'de', 'Mai', m.cl == 'es', 'mayo', m.cl == 'it', 'maggio', m.cl == 'pt', 'maio', 'May'),;
+	m.tn = 06, iCase(m.cl == 'fr', 'juin', m.cl == 'de', 'Juni', m.cl == 'es', 'junio', m.cl == 'it', 'giugno', m.cl == 'pt', 'junho', 'June'),;
+	m.tn = 07, iCase(m.cl == 'fr', 'juillet', m.cl == 'de', 'Juli', m.cl == 'es', 'julio', m.cl == 'it', 'luglio', m.cl == 'pt', 'julho', 'July'),;
+	m.tn = 08, iCase(m.cl == 'fr', 'août', m.cl == 'de', 'August', m.cl == 'es', 'agosto', m.cl == 'it', 'agosto', m.cl == 'pt', 'agosto', 'August'),;
+	m.tn = 09, iCase(m.cl == 'fr', 'septembre', m.cl == 'de', 'September', m.cl == 'es', 'septiembre', m.cl == 'it', 'settembre', m.cl == 'pt', 'setembro', 'September'),;
+	m.tn = 10, iCase(m.cl == 'fr', 'octobre', m.cl == 'de', 'Oktober', m.cl == 'es', 'octubre', m.cl == 'it', 'ottobre', m.cl == 'pt', 'outubro', 'October'),;
+	m.tn = 11, iCase(m.cl == 'fr', 'novembre', m.cl == 'de', 'November', m.cl == 'es', 'noviembre', m.cl == 'it', 'novembre', m.cl == 'pt', 'novembro', 'November'),;
+	m.tn = 12, iCase(m.cl == 'fr', 'décembre', m.cl == 'de', 'Dezember', m.cl == 'es', 'diciembre', m.cl == 'it', 'dicembre', m.cl == 'pt', 'dezembro', 'December'),;
+	textmerge('n° de mois non supporté : <<m.tn>>');
 	)
 endfunc
 
@@ -733,12 +751,13 @@ return icase(;
 function nMonths && {fr} Nombre de mois entre deux dates ou dates-heure /!\ à renommer 'iMonths'
 lparameters ;
   tu1; && {fr} date ou date-heure de départ
-, tu2 && {fr} date ou date-heure d'arrivée
+, tu2  && {fr} date ou date-heure d'arrivée
 
-return iif(vartype(m.tu1) $ 'DT' and vartype(m.tu2) $ 'DT';
-		, month(m.tu2) - month(m.tu1) + (year(m.tu2) - year(m.tu1)) * 12;
-		, .null.;
-		)
+return Iif(vartype(m.tu1) $ 'DT' and vartype(m.tu2) $ 'DT';
+	, month(m.tu2) - month(m.tu1) + (year(m.tu2) - year(m.tu1)) * 12;
+	, .null.;
+	)
+endfunc
 
 * ---------------------------------------------------------
 procedure nMonths_test && {fr} Teste nMonths()
@@ -746,7 +765,8 @@ procedure nMonths_test && {fr} Teste nMonths()
 local loTest as abUnitTest of abDev.prg
 loTest = newobject('abUnitTest', 'abDev.prg')
 
-loTest.Test(5, date(2006, 9, 15), date(2007, 2, 1))
+loTest.Test(+5, date(2006, 9, 15), date(2007, 2, 1))
+loTest.Test(-5, date(2007, 2, 1), date(2006, 9, 15))
 
 return loTest.Result()
 
@@ -754,9 +774,12 @@ return loTest.Result()
 function nWeeks && {fr} Nombre de semaines (périodes de 7 jours) entre deux dates ou dates-heure
 lparameters ;
   tdt1; && {fr} date ou date-heure de départ
-, tdt2 && {fr} date ou date-heure d'arrivée
+, tdt2  && {fr} date ou date-heure d'arrivée
 
-local lcType1, lcType2, llResult, lnResult
+local lnResult;
+, llResult;
+, lcType1, lcType2
+
 lnResult = .null.
 
 lcType1 = vartype(m.tdt1)
@@ -875,10 +898,15 @@ endfunc
 
 * ================================================
 function cSecs && {en} number of seconds with unit formatted in current user language
-lparameters tnSecs && {en} number of seconds
+lparameters ;
+  tnSecs; && {en} number of seconds
+, tlShort; && [.F.] {en} abbreviated
+
+tlShort = lTrue(m.tlShort)
 
 local cLangUser
 cLangUser = cLangUser()
+
 return Ltrim(ICase(;
 	!Vartype(m.tnSecs) == 'N',;
 		'',;
@@ -893,12 +921,15 @@ return Ltrim(ICase(;
 				'9.99',;
 				'9.999';
 			));
-		+ ' ' + icase(;
-			m.cLangUser = 'fr',	'sec',; && copy-paste this line to add another language support
+		+ Chr(160) + icase(;
+			m.tlShort,;
+				's',;
 			m.cLangUser = 'de',	'sek',; && copy-paste this line to add another language support
 													'sec'; && default: English
 			);
-		+ iif(m.tnSecs >= 2, 's', '') + '.');
+		+ iif(m.tnSecs >= 2 and !m.tlShort, 's', '');
+		+ '.';
+		);
 		)
 endfunc
 
@@ -1097,6 +1128,8 @@ lparameters ;
 , lShort; && [.F.] {en} use abbreviations whenever possible
 , lAgoNo; && [.F.] {en} do not mention 'ago' {fr} pas de 'il y a'
 , lGMT; && [.F.] {en} GMT time {fr} heures GMT
+, cLangUser; && [cLangUser()] [.F.] {en} language {fr} langue
+, l1No; && [.F.] (m.lAgoNo) {en} do not mention '1' (eg. for 'last week') {fr} ne pas mentionner '1'
 
 local cAgo as string;
 , cType as string;
@@ -1104,11 +1137,11 @@ local cAgo as string;
 , ltdNow;
 , nAgo as integer;
 , nAgoS as integer;
-, cLangUser as string;
 
 lShort = lTrue(m.lShort)
 lAgoNo = lTrue(m.lAgoNo)
 cType = vartype(m.ttd)
+l1No = m.lAgoNo and lTrue(m.l1No)
 
 if !m.cType $ 'DT' or Empty(m.ttd)
 	return .null.
@@ -1127,7 +1160,7 @@ else
 	nAgoS = Iif(m.nAgoS < 10, 0, m.nAgoS) && {fr} moins de 10 secondes : à l'instant
 	nAgo = Iif(Empty(m.nAgoS), 0, m.nAgo)
 
-	cLangUser = cLangUser()
+	cLangUser = cLangUser(m.cLangUser)
 
 	do case
 
@@ -1232,7 +1265,7 @@ else
 													'week'; && default: English
 			);
 		)
-	otherwise
+	case between(m.ttd, gomonth(date(), -12), gomonth(date(), 12))
 		nAgoS = abs(nMonths(m.ltdNow, m.ttd))
 		cAgo = Iif(m.lShort;
 		, icase(;
@@ -1244,9 +1277,21 @@ else
 													'month'; && default: English
 			);
 		)
+	otherwise
+		nAgoS = abs(Year(m.ltdNow) - Year(m.ttd))
+		cAgo = Iif(m.lShort;
+		, icase(;
+			m.cLangUser = 'fr',	'an.',; && copy-paste this line to add another language support
+													'y.'; && default: English
+			);
+		, icase(;
+			m.cLangUser = 'fr',	'année',; && copy-paste this line to add another language support
+													'year'; && default: English
+			);
+		)
 	endcase
-
-	return '';
+	
+	return Chrtran('';
 		+ ICase(;
 			empty(m.nAgoS) or m.lAgoNo,;
 				'',;
@@ -1260,7 +1305,7 @@ else
 															'in '; && default: English
 					);
 			);
-		+ nEvl(evl(m.nAgo, ''), ltrim(str(m.nAgoS))+ Chr(160));
+		+ nEvl(evl(m.nAgo, ''), Iif(m.nAgoS = 1 and m.l1No, '', Ltrim(Str(m.nAgoS))+ Chr(160)));
 		+ iif(m.nAgoS > 1 and !m.lShort;
 			, trim(m.cAgo, 's') + 's';
 			, m.cAgo;
@@ -1278,7 +1323,7 @@ else
 															''; && default: English
 					);
 			);
-		+ ''
+		, ' ', Chr(160)) && non-breakable space
 
 endif
 endfunc

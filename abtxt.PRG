@@ -249,9 +249,9 @@ lparameters ;
 return cComparable(m.tc, m.tnLength)
 
 * ===================================================================
-function cComparable && Texte débarrassé de ses variantes typographiques pour comparaison
+function cComparable && {fr} Texte débarrassé de ses variantes typographiques pour comparaison
 lparameters ;
-  tc; && Texte source
+  tc; && {fr} Texte source
 , tnLength && [trim] {fr} Si > 0, le résultat est paddé à cette longueur (pour index)
 
 local lcChars, lcResult && Texte comparable
@@ -895,7 +895,7 @@ return m.lcResult
 endfunc
 
 * -----------------------------------------------------------------
-function cLitteral_C_(tcData)
+function cLitteral_C_(tcData) && {fr} privée de cLitteral_C() - chaîne avec délimiteurs
 
 return icase(;
 	not ["] $ m.tcData,;
@@ -1002,7 +1002,7 @@ case type('m.toObject.class') == 'C' and type('m.toObject.classLibrary') == 'C' 
 		, nEvl(m.toObject.ParentClass, 'ParentClass: ' + cLitteral(m.toObject.ParentClass));
 		, 'Class: ' + cLitteral(m.toObject.class);
 		, nEvl(m.toObject.ClassLibrary, 'ClassLibrary:' + cLitteral(m.toObject.ClassLibrary));
-		, Iif(type('m.toObject.Parent.Name') == 'C', 'parent: ' + m.toObject.Parent.Name, '');
+		, Iif(type('m.toObject.Parent') == 'O' and type('m.toObject.Parent.Name') == 'C', 'parent: ' + m.toObject.Parent.Name, '');
 		, cLitteral_O_cProps(m.toObject, m.tlRTrim, m.tnTronc, m.tlXML, m.tlObjRecurseNot);
 		)
 
@@ -1046,6 +1046,10 @@ if amembers(aProp, m.toObject) > 0 && {fr} can be an empty object without proper
 
 	for each cProp in m.aProp
 
+		if Lower(m.cProp) == '_memberdata'
+			loop
+		endif
+		
 		lProp = !pemstatus(m.toObject, m.cProp, 2) && {fr} protected
 
 		lArray = m.lProp and type('m.toObject.' + m.cProp, 1) == 'A'
@@ -1162,7 +1166,7 @@ return left(m.lcResult, len(m.lcResult)-1) && {fr} supprime la dernière ','
 endfunc
 
 * -----------------------------------------------------------------
-function cLitterals_List
+function cLitterals_List && {fr} Littéral d'une liste
 lparameters cList, cDelim
 local aa[1]
 return Iif(alines(aa, Evl(m.cList, ''), 5, Evl(m.cDelim, ',')) > 0;
@@ -1189,7 +1193,6 @@ lparameters ;
 , tlTrim; && [.F.] {fr} si type C, ôter les espaces à droite
 
 return strtran(cLitteralJS(m.tuData, m.tlTrim), '"', '&#34;') && {fr} échappe les guillements '"' par '&#34;' pour le HTML
-
 endfunc
 
 * -----------------------------------------------
@@ -1207,6 +1210,7 @@ loTest.Test(['&#34;Order id&#34;\nTrier : clic gauche\nFiltrer/chercher : clic d
 	)
 
 return m.loTest.Result()
+endproc
 
 * =============================================================
 function cLitteralJS && {fr} Littéral Javascript d'après une valeur VFP
@@ -1215,6 +1219,8 @@ lparameters ;
 , tlTrim; && [.F.] {fr} si type C, ôter les espaces à droite
 , tlJSON; && [.F.] {fr} produire un littéral compatible JSON
 , tlQuotesNo; && [.F.] {fr} si type C, ne pas entourer de guillemets (XML)
+
+external array tuData
 
 tlJSON = lTrue(m.tlJSON)
 
@@ -1303,13 +1309,24 @@ case m.lcVarType == 'O' && {fr} Objet
 	endif
 
 case m.lcVarType == 'A' && {fr} Array
-	if not laEmpty(@m.tuData)
-		local luElt
-		for each luElt in tuData
-			lcResult = m.lcResult + ', ' + cLitteralJS(m.luElt, m.tlTrim)
-		next
+	if !laEmpty(@m.tuData)
+		local luElt, liRow, lcRow, liCol
+		if Alen(m.tuData, 2) > 0
+			for liRow = 1 to Alen(m.tuData, 1)
+				lcResult = m.lcResult + ', ['
+				lcRow = ''
+				for liCol = 1 to Alen(m.tuData, 2)
+					lcRow = m.lcRow + ', ' + cLitteralJS(m.tuData[m.liRow, m.liCol], m.tlTrim, m.tlJSON)
+				endfor
+				lcResult = m.lcResult + Ltrim(m.lcRow, ',', ' ') + ']'
+			endfor
+		else
+			for each luElt in tuData
+				lcResult = m.lcResult + ', ' + cLitteralJS(m.luElt, m.tlTrim, m.tlJSON)
+			next
+		endif
 	endif
-	lcResult = '[' + substr(m.lcResult, 2) + ']'
+	lcResult = '[' + Ltrim(m.lcResult, ',', ' ') + ']'
 
 otherwise
 	assert .f. message cAssertMsg(textmerge([could not build a JavaScript constant from <<m.tuData>> of type <<m.lcVarType>>]))
@@ -2091,7 +2108,7 @@ if m.llResult and !empty(m.lcResult)
 		lnRat = ratc(m.lcOpen, m.lcResult)
 		if m.lnRat = 0 or m.tlReplace
 
-* ===================================================
+			* ===================================================
 			return iif(.f.;
 				 or m.lcRefType == 'X';
 				 or m.lcRefType == 'N' and lTrue(m.tlNoZero) and empty(m.tuRef);
@@ -2114,8 +2131,7 @@ if m.llResult and !empty(m.lcResult)
 						);
 					+ substr(cRefAppend_CLOSE, m.liOpen, 1);
 				 )
-* ===================================================
-
+				* ===================================================
 		endif
 	endfor
 
@@ -2760,11 +2776,11 @@ nPattern = 0 && {fr} n° du Pattern courant, cf. this.Pattern_Assign()
 
 && {fr} INTERNES
 protected;
-		oRegExp; && {fr} AS VBScript.RegExp
-	, nSeconds; && {fr} au début de this.Execute(), Seconds(); à la fin, durée
-	, lPatterns; && {fr} Patterns multiples, cf. this.Pattern_Assign()
-	, aPattern[1]; && {fr} Patterns multiples, cf. this.Pattern_Assign()
-	, lDebug && {fr} Afficher le résultat de this.execute() à l'écran et dans la fenêtre Debug
+	oRegExp; && {fr} AS VBScript.RegExp
+, nSeconds; && {fr} au début de this.Execute(), Seconds(); à la fin, durée
+, lPatterns; && {fr} Patterns multiples, cf. this.Pattern_Assign()
+, aPattern[1]; && {fr} Patterns multiples, cf. this.Pattern_Assign()
+, lDebug && {fr} Afficher le résultat de this.execute() à l'écran et dans la fenêtre Debug
 
 * -----------------------------------------------------------------
 protected procedure init
@@ -2799,12 +2815,14 @@ return && 2016-09-29 thn -- no default
 endproc
 
 * -----------------------------------------------------------------
-protected function cPatterns
+protected function cPatterns && {en} chainable patterns
 lparameters ;
   tcFunction; && {fr} Fonction qui 'fabrique' les patterns ('.xx' pour une méthode de cet objet ou 'xx' pour une fonction libre)
 , tcParms && {fr} Paramètres à passer à la fonction pour 'fabriquer' les Patterns
 
-local laParm[1], lcParm, lcResult
+local lcResult;
+, laParm[1];
+, lcParm
 
 lcResult = ''
 
@@ -2818,6 +2836,7 @@ if alines(laParm, m.tcParms) > 0 && {fr} cInLineCommentStripped(m.tcParms)
 endif
 
 return m.lcResult
+endfunc
 
 * -----------------------------------------------------------------
 hidden procedure Pattern_Assign
@@ -3020,7 +3039,7 @@ if not empty(.pattern)
 		dimension .Matches[m.loResults.Count, 5] && [1- index, 2- valeur, 3-submatches, 4-length, 5-line number] && 2016-11-16 thn -- {en} added 5-line number
 		for each loResult in m.loResults && {fr} GA ne met pas la clause 'foxobject'
 
-			* {fr} Objectifier les sub-matches
+			* {fr} Objectifier les sub-matches en base 1 (VFP)
 			loSubMatches = createobject('collection')
 			for each loSubMatch in loResult.SubMatches
 				loSubMatches.add(m.loSubMatch)
@@ -3174,6 +3193,7 @@ return strtran(strtran(strtran(strtran(m.tcChain;
 	, LFCR2, m.tcReplace); && modify file abTxt.h
 	, CR2, m.tcReplace); && modify file abTxt.h
 	, LF2, m.tcReplace) && modify file abTxt.h
+endfunc
 
 * ===================================================================
 function cCRDel && {fr} chaîne oû les sauts de ligne sont supprimés
@@ -3186,20 +3206,24 @@ lparameters tcChain && {fr} Chaîne
 return cCRto(m.tcChain, space(1))
 
 * ===================================================================
-function cOuiNon(tl) && {fr} oui ou non selon logique
+function cOuiNon(tl) && {fr} oui ou non selon une condition logique
 return iif(vartype(m.tl) $ 'LX', iif(m.tl, 'OUI', 'NON'), m.tl) && .NULL. <> .F.
+endfunc
 
 * ===================================================================
-function cOKKO(tl)
+function cOKKO(tl) && {fr} OK ou KO selon une condition logique
 return iif(vartype(m.tl) $ 'LX', iif(m.tl, 'OK', 'KO'), m.tl) && .NULL. <> .F.
+endfunc
 
 * ===================================================================
-function cYesNo(tl) && {fr} yes ou no selon logique
+function cYesNo(tl) && {fr} yes ou no selon une condition logique
 return iif(vartype(m.tl) $ 'LX', iif(m.tl, 'Yes', 'No'), m.tl) && .NULL. <> .F.
+endfunc
 
 * ===================================================================
-function cYes(tl) && {fr} yes ou vide selon logique
+function cYes(tl) && {fr} yes ou vide selon une condition logique
 return iif(vartype(m.tl) $ 'LX', iif(m.tl, 'Yes', ''), m.tl) && .NULL. <> .F.
+endfunc
 
 * ===================================================================
 function cFirstProper && {fr} Chaîne calée à gauche avec son premier caractère en majuscule
@@ -3214,6 +3238,7 @@ if vartype(m.tcChain) == 'C'
 endif
 
 return m.lcResult
+endfunc
 
 * ===================================================================
 function cEscaped && {fr} Chaîne compatible HTTP / XML
@@ -3223,14 +3248,15 @@ return iif(vartype(m.tcChain) == 'C';
 	, cEscaped_Misc(cEscaped_Punc(cEscaped_Base(m.tcChain)));
 	, '';
 	)
+endfunc
 
 * ===================================================================
 function cEscaped_Base(tcChain) && {fr} Encode les entités ignorées par le parser XML (&<>) && {fr} Alias de cEscaped_XML()
 return cEscaped_XML(m.tcChain)
+endfunc
 
 * ===================================================================
 function cEscaped_XML(tcChain) && {fr} Encode les entités ignorées par le parser XML (&<>)
-
 return strtran(strtran(strtran(strtran(strtran(strtran(chrtran(m.tcChain; && http://www.w3.org/TR/2008/REC-xml-20081126/#charsets Char ::=  #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]
 	, NON_XML, ''); && modify file abTxt.h
 	, [&], '&#38;'); && '&amp;'
@@ -3240,26 +3266,36 @@ return strtran(strtran(strtran(strtran(strtran(strtran(chrtran(m.tcChain; && htt
 	, [&#38;#60;], '&#60;'); && {en} encoded twice
 	, [&#38;#62;], '&#62;'); && {en} encoded twice
 
+endfunc
+
 && 		, '> <', '><')
 
 * ===================================================================
 function cEscaped_Punc(tcChain) && {fr} Encode les entités de ponctuation
-
-return strtran(strtran(strtran(strtran(strtran(strtran(m.tcChain;
+return cEscaped_Spac(strtran(strtran(m.tcChain;
 	, ["], '&#34;'); && '&quot;' && /!\ pb avec absiteLoc
 	, ['], '&#39;'); && '&apos;' && /!\ pb avec absiteLoc
+	)
+endfunc
+
+* ===================================================================
+function cEscaped_Spac(tcChain) && {fr} Encode les entités d'espacement
+return strtran(strtran(strtran(strtran(m.tcChain;
 	, POINTSUSP, replicate('.', 3)); && &hellip; ne semble pas supportée
 	, chr(150), '&#8211;'); && '&ndash;'
 	, chr(151), '&#8212;'); && '&mdash;'
-	, chr(160), '&#160;') && '&nbsp;'
+	, chr(160), '&#160;'); && '&nbsp;'
+
+endfunc
 
 * ===================================================================
 function cEscaped_Misc(tcChain) && {fr} Encode les entités diverses (€,™ etc.)
-
 return strtran(strtran(strtran(m.tcChain;
 	, chr(128), '&#8364;'); && '&euro;'
 	, chr(153), '&#8482;'); && '&trade;'
-	, chr(156), '&#339;') && '&oelig;'
+	, chr(156), '&#339;'); && '&oelig;'
+
+endfunc
 
 * ===================================================================
 function cUnescaped && {fr} Inverse de cEscaped()
@@ -3461,25 +3497,28 @@ return m.lcResult
 
 * -------------------------------
 function ParmsLit && {fr} paramètres en littéral
-lparameters Result; && @ {fr} paramètres en littéral
- ,t01,t02,t03,t04,t05,t06,t07,t08,t09,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19,t20
+lparameters result; && @ {fr} paramètres en littéral
+,t01,t02,t03,t04,t05,t06,t07,t08,t09,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19,t20
 
-Result = ''
+result = ''
 if pcount() > 1
 	local I
 	for I = 1 to pcount()-1
-		Result = m.Result + ', ' + cLitteral(evaluate('m.t' + padl(m.I, 2, '0')))
+		result = m.result + ', ' + cLitteral(evaluate('m.t' + padl(m.I, 2, '0')))
 	endfor
-	Result = substr(m.Result, 3)
+	result = substr(m.result, 3)
 endif
 
 *----------------------------------------------------
-function cCRLF2fix && {fr} Chaîne oû toutes les lignes se terminent par CRLF simple
+function cCRLF2fix && {fr} Chaîne où toutes les lignes se terminent par CRLF simple
 lparameters tcChain
 
 tcChain = cCRLFfix(m.tcChain)
 do while CRLF2 $ m.tcChain
 	tcChain = strtran(m.tcChain, CRLF2, CRLF)
+enddo
+do while CR2 $ m.tcChain
+	tcChain = strtran(m.tcChain, CR2, CR)
 enddo
 
 return m.tcChain
@@ -3514,7 +3553,7 @@ return m.tcChain
 endfunc
 
 *----------------------------------------------------
-function cCRLFfix_ && [privée de cCRLFfix()]
+function cCRLFfix_ && {fr} [privée de cCRLFfix()]
 lparameters tcChain, tcNewLine
 
 do while m.tcNewLine $ m.tcChain
@@ -3542,7 +3581,7 @@ endfunc
 
 *----------------------------------------------------
 function cStringsMasked && {fr} Chaîne oû les litteraux caractères sont masqués par _ga_StringParseBits_Class_.maskStrings()
-lparameters tcChain, Result && {en} in: .T. for JavaScript string, @out: .T. if success, else ga_StringParse_Object() instantiation result
+lparameters tcChain, result && {en} in: .T. for JavaScript string, @out: .T. if success, else ga_StringParse_Object() instantiation result
 
 local loParser, cResult
 
@@ -3550,11 +3589,11 @@ return iif(.t.;
 		and ga_Type_IsChar(m.tcChain, .t.);
 		and (.f.;
 			or ga_StringParse_Object(@m.loParser); && modify command abGA
-			or cResultAdd(@m.Result, GA_STRINGPARSE_CLASS + [ class instantiation failed!]);
+			or cResultAdd(@m.result, GA_STRINGPARSE_CLASS + [ class instantiation failed!]);
 			);
-		and (!lTrue(m.Result) or varSet(@m.tcChain, strtran(strtran(m.tcChain, '\"'), "\'")));
-		and varSet(@m.Result, m.loParser.maskStrings(@m.cResult, m.tcChain)); && modify command abGA
-		and m.Result;
+		and (!lTrue(m.result) or varSet(@m.tcChain, strtran(strtran(m.tcChain, '\"'), "\'")));
+		and varSet(@m.result, m.loParser.maskStrings(@m.cResult, m.tcChain)); && modify command abGA
+		and m.result;
 	, m.cResult;
 	, m.tcChain;
 	)
@@ -3568,10 +3607,10 @@ loTest = newobject('abUnitTest', 'abDev.prg')
 
 loTest.Test([Evl(m.test, ~~~~~~~~~~~~~~~~)], [Evl(m.test, "this is a test")]) && _cliptext = Replicate('~', Len('"this is a test"'))
 
-return loTest.Result()
+return loTest.result()
 
 * =================================
-function chunked
+function chunked && {en} chunked strings separated with CR LF
 lparameters ;
   raw; && {en} raw text
 , chunkLen && [76]
@@ -3670,12 +3709,12 @@ m.loTest.Test(m.lcExpected, m.lcTest, 'fr')
 
 * {fr} test 2 ----
 text to lcTest noshow
-functtion srceCodeWindow() { /* {en} displays source code from current HTML element into a child window {fr} affiche le HTML de l'élément courant dans une fenêtre fille */
+functtion sourceCodeWindow() { /* {en} displays source code from current HTML element into a child window {fr} affiche le HTML de l'élément courant dans une fenêtre fille */
 	// {en} displays source code from current HTML element into a child window {fr} affiche le HTML de l'élément courant dans une fenêtre fille
 ENDTEXT
 
 text to lcExpected noshow
-functtion srceCodeWindow() { /* displays source code from current HTML element into a child window */
+functtion sourceCodeWindow() { /* displays source code from current HTML element into a child window */
 	// displays source code from current HTML element into a child window
 ENDTEXT
 
@@ -3727,7 +3766,7 @@ endtext
 
 m.loTest.Test(m.lcExpected + CR, m.lcTest, 'fr', '//')
 
-return loTest.Result()
+return loTest.result()
 endproc
 
 * -------------------------------
@@ -3767,42 +3806,52 @@ tcTag = iif(vartype(m.tcTag) == 'C', upper(alltrim(m.tcTag)), '')
 tlExcept = lTrue(m.tlExcept)
 
 local lcResult;
-, lnTagBeg;
-, lnTagEnd;
+, liTagBeg;
+, liTagEnd;
+, llTagEnd;
 , lcTag;
-, lnOcc;
+, lcHTML;
+, lnOccBeg;
+, lnOccEnd;
 
 lcResult = iif(vartype(m.tcHTML) == 'C', m.tcHTML, '')
-
 if !empty(m.lcResult)
 
+	lnOccBeg = 0
 	do while .t.
+		lnOccBeg = m.lnOccBeg + 1
 
 		* {fr} Si balise cherchée ouvrante,
-		lnTagBeg = atcc('<' + m.tcTag, m.lcResult)
-		if m.lnTagBeg > 0
+		liTagBeg = atcc('<' + m.tcTag, m.lcResult, m.lnOccBeg)
+		if m.liTagBeg > 0
 
 			* {fr} Trouver la position de la balise fermante correspondante
-			lcTag = substrc(m.lcResult, m.lnTagBeg)
-			lnOcc = 1
+			lcHTML = substrc(m.lcResult, m.liTagBeg)
+			lnOccEnd = 1
 			do while .t. && /!\ bug boucle infinie
 
-				lnTagEnd = atcc('>', m.lcTag, m.lnOcc)
-				if occurs('<', leftc(m.lcTag, m.lnTagEnd)) = m.lnOcc
+				liTagEnd = atcc('>', m.lcHTML, m.lnOccEnd)
+				llTagEnd = m.liTagend > 0
+				if !m.llTagEnd or occurs('<', leftc(m.lcHTML, m.liTagEnd)) = m.lnOccEnd
 					exit
 				else
-					lnOcc = m.lnOcc + 1
+					lnOccEnd = m.lnOccEnd + 1
 				endif
 			enddo
 
-			* {fr} Supprimer la balise
-			lcTag = substrc(m.lcTag, 1, m.lnTagEnd)
-			lcResult = strtran(m.lcResult, m.lcTag, '', 1, 1, 1)
+			if m.llTagEnd
 
-			* {fr} Si balise fermante
-			lcTag = '</' + m.tcTag + '>'
-			if atcc(m.lcTag, m.lcResult) > 0
-				lcResult = strtran(m.lcResult, m.lcTag, '', 1, 1, 1)
+				lcTag = Substrc(m.lcHTML, 2, Evl(Atcc(' ', m.lcHTML), m.liTagEnd) - 2)
+				
+				* {fr} Supprimer la balise
+				lcHTML = substrc(m.lcHTML, 1, m.liTagEnd)
+				lcResult = strtran(m.lcResult, m.lcHTML, '', 1, 1, 1)
+
+				* {fr} Supprimer la balise fermante correspondante
+				lcHTML = '</' + m.tcTag + '>'
+				if atcc(m.lcHTML, m.lcResult) > 0
+					lcResult = strtran(m.lcResult, m.lcHTML, '', 1, 1, 1)
+				endif
 			endif
 
 		* {fr} Sinon, terminé
@@ -3812,7 +3861,8 @@ if !empty(m.lcResult)
 	enddo
 endif
 
-return cRepCharDel(alltrim(m.lcResult)) && {fr} Supprime les espaces répétés
+return strtran(alltrim(m.lcResult), '> <', '><')
+endfunc
 
 * -----------------------------------------------------------------
 procedure cTagStripped_Test && {fr} test unitaire cTagStripped()
@@ -3822,7 +3872,7 @@ loTest = newobject('abUnitTest', 'abDev.prg')
 
 loTest.Test([2 050 030], [<a href="javascript:void(0);" onmouseover="WindowOpen(event, '2 050 030', 300, 100, '<h2>Référence 2 050 030 ...</h2>');">2 050 030</a>], 'a')
 
-return loTest.Result()
+return loTest.result()
 
 * -------------------------------------------------------------
 function nChainFractLines && {fr} Nombre de lignes d'une chaîne de Caractères fractionnée pour justifier une largeur en mm
@@ -3889,7 +3939,7 @@ m.loTest.Test(Occurs(CR, m.lcOut); && 2015-12-17 13:12:32 thn --  modify class a
 	, ; && [100%] {fr} Chasse (déformation) en %
 	)
 
-RETURN loTest.Result()
+RETURN loTest.result()
 
 * -------------------------------------------------------------
 function cChainFract && {fr} Chaîne de Caractères fractionnée pour justifier une largeur en mm
