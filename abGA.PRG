@@ -13,7 +13,7 @@
 * {en} This permission notice shall be entirely included in all copies or substantial portions of the Software
 * =====================================================
 * (c) Gregory Adam 
-* Last build: 12/19/2017 11:14:34 by ThierryNivelet
+* Last build: 04/10/2018 14:36:03 by Thierry Nivelet
 
 && ga_Collection
 * Gregory Adam 2010
@@ -51,7 +51,6 @@ define class GA_COLLECTION_ZEROBASED_CLASS	as GA_COLLECTION_CLASS
 	LastIndex = 0
 *_______________________________________________________________________________
 function LastIndex_Access()
-	
 	return m.this.Count-1
 endfunc
 *_______________________________________________________________________________
@@ -113,9 +112,8 @@ function LastIndex_Access()
 	
 	return m.this.Count
 endfunc
+
 *_______________________________________________________________________________
-
-
 protected function Init()
 
 	local success
@@ -133,6 +131,7 @@ protected function Init()
 	return m.success
 
 endfunc
+
 *_______________________________________________________________________________
 protected function Destroy()
 
@@ -147,10 +146,11 @@ protected function Destroy()
 	
 	return DoDefault()
 endfunc
+
 *_______________________________________________________________________________
 function Clear()
-	
-	=Collection::Remove(-1)
+
+	return Collection::Remove(-1)
 
 endfunc
 *_______________________________________________________________________________
@@ -178,7 +178,7 @@ function Add(sValue, sKey)
 	case pcount() = 1
 		
 		try
-			if(!DoDefault(m.sValue) )
+			if !DoDefault(m.sValue)
 				assert false
 				success = false
 			endif
@@ -190,7 +190,7 @@ function Add(sValue, sKey)
 	otherwise
 
 		try
-			if(!DoDefault(m.sValue, m.sKey) )
+			if !DoDefault(m.sValue, m.sKey)
 				assert false
 				success = false
 			endif
@@ -202,8 +202,30 @@ function Add(sValue, sKey)
 	endcase
 	
 	return m.success
-	
 endfunc
+
+*_______________________________________________________________________________
+function Replace(ItemOrKey, sValue)
+
+	&& 2018-03-14 thn -- {FiC V 2.26.2-beta.3} {en} added
+
+	local success
+	
+	success = .T.;
+	 and this.TryGetValue(m.ItemOrKey);
+	 and this.Remove(m.ItemOrKey);
+	 and ICase(;
+	 	ga_Type_IsChar(m.ItemOrKey),;
+		 	this.Add(m.sValue, m.ItemOrKey),;
+		Empty(this.Count),;
+			this.Add(m.sValue),;
+			collection::Add(m.sValue,,, m.ItemOrKey-1);
+		)
+	
+	assert m.success
+	return m.success
+endfunc
+
 *_______________________________________________________________________________
 function AddKeyValue(key, value)
 
@@ -216,7 +238,6 @@ function AddKeyValue(key, value)
 	case !inlist(pcount(), 2)
 		assert false
 		success = false
-
 	
 	case !m.this.Add(m.value, m.key)
 		assert false
@@ -225,26 +246,24 @@ function AddKeyValue(key, value)
 	endcase
 	
 	return m.success
-	
 endfunc
+
 *_______________________________________________________________________________
 function TryGetValue(ItemOrKey, sValue)
 
 	local success
-	success = true
 	
 	try
 		sValue = m.this.Item(m.ItemOrKey)
+		success = true
 	
 	catch
 		&& assert false
-		success = false
-	
 	endtry
 	
 	return m.success
-	
 endfunc
+
 *_______________________________________________________________________________
 function TryGetIndex(key, index)
 
@@ -3469,7 +3488,7 @@ function Sort(aa)
 	case !m.success
 
 	&& cycles
-	case !m.this.SortToQueue(@m.queueobj)
+	case !m.this.SortToQueue( @m.queueobj)
 		success = false
 	
 	endcase
@@ -3938,24 +3957,24 @@ function Mem_Defined (VariableType, VariableName, VariableScope, VariableValue, 
 	case VariableType = 'A'
 		s = VariableScope + ' ' + VariableName + '[' + ltrim(str(VariableRow,18,0))
 		if( !empty(VariableCol) )
-			s = s + ', ' + ltrim(str(VariableCol,18,0))
+			s = m.s + ', ' + ltrim(str(m.VariableCol,18,0))
 		endif
-		s = s + ' ]'
-		?s
+		s = m.s + ' ]'
+		? m.s
 	
 	&& normal variable
 	case empty(VariableRow)
 		s = VariableType + ': ' + VariableScope + ' ' + VariableName
-		? s, VariableValue
+		? m.s, VariableValue
 	
 	&& array element
 	otherwise
 		s = VariableType + ': ' + VariableName + '[' + ltrim(str(VariableRow,18,0))
 		if( !empty(VariableCol) )
-			s = s + ', ' + ltrim(str(VariableCol,18,0))
+			s = m.s + ', ' + ltrim(str(VariableCol,18,0))
 		endif
-		s = s + ' ]'
-		? s, VariableValue
+		s = m.s + ' ]'
+		? m.s, VariableValue
 	endcase
 endfunc
 
@@ -4183,7 +4202,7 @@ function MemFileShow(FileName, FunctionName)
 			assert FALSE
 			success = FALSE
 		case m.c = 0x00
-			VariableScope = 'Public'
+			VariableScope = 'Public' && default variables also
 		case m.c = 0x01
 			VariableScope = 'Local'
 		otherwise
@@ -4315,7 +4334,7 @@ function MemFileShow(FileName, FunctionName)
 
 
 		case inlist(m.VariableType, T_CURRENCY)
-			declare	VOID RtlMoveMemory in win32api double @Dest, Char @Src, Size_T BytesToCopy
+			declare	VOID	RtlMoveMemory in win32api double @Dest, Char @Src, Size_T BytesToCopy
 			declare integer sprintf in msvcrt.dll string@, string@, double
 			
 			VariableValue = 0.00

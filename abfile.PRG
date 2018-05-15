@@ -2756,7 +2756,7 @@ local loTest as abUnitTest of abDev.prg
 loTest = newobject('abUnitTest', 'abDev.prg')
 
 loTest.test(.T., 'awCopy.cdx')
-loTest.test(.T., 'C:\Program Files\VFP9\Tools\AB\WC\wwRequestLog.dbf')
+loTest.test(.T., Home(1) + 'Tools\AB\WC\wwRequestLog.dbf')
 
 return loTest.result()
 endproc

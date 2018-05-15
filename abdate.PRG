@@ -330,21 +330,24 @@ function cMMAA && {fr} Date MM/AA à partir d'un date JJ/MM/AA avec ou sans JJ et
 lparameters ;
   tcDate; && @ {fr} Date complète [[JJ/]MM/]AA[AA]
 , tcMois; && @ [''] {fr} Mois séparé
-, tcAn	 && @ [''] {fr} An séparé
+, tcAn && @ [''] {fr} An séparé
 
-local lcResult
+local lcResult;
+, lnPosSepJM, lnPosSepMA;
+, llAnNul, llMoisNul;
+, lnAn, lcSiecle;
+
 lcResult = ''
 
-if  .f.;
- or vartype(m.tcDate) = 'C' and ! empty(m.tcDate) ;
- or vartype(m.tcMois) = 'C'  and ! empty(m.tcMois) ;
- or vartype(m.tcAn) = 'C' and ! empty(m.tcAn)
+if .f.;
+ or ga_Type_IsChar(m.tcDate, .T.);
+ or ga_Type_IsChar(m.tcMois, .T.);
+ or ga_Type_IsChar(m.tcAn, .T.)
 
 	if ! empty(m.tcDate)	 && {fr} Date fournie complète
 		tcDate = alltrim (m.tcDate)
 
-* {fr} Localiser les éventuels séparateurs entre jours, mois et année
-		local lnPosSepJM, lnPosSepMA
+		* {fr} Localiser les éventuels séparateurs entre jours, mois et année
 		lnPosSepJM = nAtSep (m.tcDate, DATE_SEP)
 		lnPosSepMA = nRAtSep (m.tcDate, DATE_SEP)
 		if m.lnPosSepMA > 1
@@ -358,7 +361,6 @@ if  .f.;
 		endif
 	endif
 
-	local llAnNul, llMoisNul
 	llMoisNul = empty(m.tcMois)
 	llAnNul = empty(m.tcAn) && 00 pour 2000 n'est pas un an nul
 	if m.llAnNul and !m.llMoisNul && {fr} l'année a été passée à la place du mois
@@ -369,7 +371,6 @@ if  .f.;
 
 * {fr} Année: Ajuster le siècle
 	if ! m.llAnNul and len (m.tcAn) <= 2 && {fr} Année à deux chiffres
-		local lnAn, lcSiecle
 		lnAn = val (m.tcAn)
 		lcSiecle = iif(m.lnAn <= 50,; && {fr} Année entre 2000 et 2050
 							'20', '19')
@@ -1428,7 +1429,7 @@ lparameters td
 return Ceiling(Month(m.td)/3)
 
 * ================================================
-function iDayMonthYear && {fr} position du jour, mois et année dans le format de date courant
+function iDayMonthYear && {en} day, month and year position in current date format {fr} position du jour, mois et année dans le format de date courant
 lparameters ;
   liDay; && {fr} position du jour
 , liMonth; && {fr} position du mois

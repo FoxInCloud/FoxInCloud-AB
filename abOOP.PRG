@@ -1916,13 +1916,13 @@ if m.llResult
 
 					 	if .f.;
 					 	 or (m.llwProp and m.toObj.wPropArray(m.lcProp) or type(m.lcProp_, 1) == 'A');
-					 	 or !varSet(@m.luValue, cXMLofObject_uValue(;
+					 	 or !varSet(@m.luValue, cXMLofObject_uValue(; && avoids else
 								  iif(m.llwProp;
 								  , m.toObj.wPropGet(m.lcProp);
 								  , evaluate(m.lcProp_);
 								  );
-								, @m.lcType;
-								, @m.tcResult;
+								,@m.lcType;
+								,@m.tcResult;
 								))
 
 					 		if m.llwProp
@@ -2022,7 +2022,7 @@ endfunc
 * -----------------------------------------
 function cXMLofObject_uValue(tuValue, tcType, tcResult) && [privée de cXMLofObject()] {fr} Valeur d'un type donné
 
-tcType = vartype(m.tuValue) && {fr} Vartype(m.tuValue, .T.)
+tcType = Vartype(m.tuValue) && Vartype(m.tuValue, .T.)
 tcType = iif(m.tcType == 'N' and ga_Type_IsInteger(m.tuValue), 'I', m.tcType)
 
 return iif(m.tcType == 'O';

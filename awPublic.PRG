@@ -920,13 +920,6 @@ IF m.success
 						DIMENSION laPropSave[m.lnPropSave]
 						laPropSave[m.lnPropSave] = m.lcProp
 				endcase
-
-&& 2016-05-27 thn -- {FiC V 2.21.1-beta.6} {en} 
-*!*				* {fr} Si la propriété existe dans l'objet
-*!*				IF lProperty(m.toObj, m.lcProp)
-*!*				ELSE
-*!*					success = .F. && {fr} important de laisser ainsi car une fois que success = .F., ne doit plus bouger
-*!*				ENDIF
 		ENDFOR
 		
 		* {fr} Remplacer les propriétés à sauvegarder
@@ -1588,39 +1581,39 @@ otherwise && Default: English
 
 	text to m.result noshow && =====================================================
 
-To adapt any menu command or function to LAN (desktop) mode and Web mode, pass it as a character string to ''wMenu()'';
+To adapt any menu command or function to LAN (desktop) mode and Web mode, pass it as a character string to `wMenu()`;
 (FoxInCloud Adaptation Assistant adapts all your menu instructions that way)
 
-<code lang="vfp">
+```foxpro
 DEFI POPU myPopup MARGIN	RELA SHADOW COLOR W+/B* && command before adaptation
 wMenu('DEFI POPU myPopup MARGIN	RELA SHADOW COLOR W+/B* ') && command after adaptation
 && note: wMenu() expands standard abbreviated Visual FoxPro keywords and parses any number of spaces or tabs around clauses
-</code>
+```
 
-Except ''ON SELECTION'' commands and ''SKIP FOR'' expressions, expressions inside clauses must be expressed as literals;
-To convert expressions to literals, simply place your instruction in ''Textmerge()'' and enclose expressions within ''"<<>>"''
+Except `ON SELECTION` commands and `SKIP FOR` expressions, expressions inside clauses must be expressed as literals;
+To convert expressions to literals, simply place your instruction in `Textmerge()` and enclose expressions within `"<<>>"`
 
-<code lang="vfp">
+```foxpro
 lcPrompt = "Display contents of myFile"
 DEFINE BAR 2 OF myPopup PROMPT m.lcPrompt SKIP FOR !FILE("myFile.ext") && command before adaptation
 wMenu(Textmerge('DEFINE BAR 2 OF myPopup PROMPT "<<m.lcPrompt>>" SKIP FOR !FILE("myFile.ext")')) && command after adaptation
-</code>
+```
 
-To make it even more simple, you can use the FoxInCloud ''cLitteral()'' function (aliased as ''cL'');
-''cLitteral()'' [alias cL()] supports expressions of any type:
+To make it even more simple, you can use the FoxInCloud `cLitteral()` function (aliased as `cL`);
+`cLitteral()` [alias cL()] supports expressions of any type:
 
-<code lang="vfp">
+```foxpro
 liBar = 2
 lcPrompt = "Display contents of myFile"
 DEFINE BAR m.liBar OF myPopup PROMPT m.lcPrompt SKIP FOR !FILE("myFile.ext") && command before adaptation
 wMenu(Textmerge('DEFINE BAR <<cL(m.liBar)>> OF myPopup PROMPT <<cL(m.lcPrompt)>> SKIP FOR !FILE("myFile.ext")')) && command after adaptation
-</code>
+```
 
 
-To control whether menu command execution is OK, you can chain your wMenu() command calls with ''.AND.'';
+To control whether menu command execution is OK, you can chain your wMenu() command calls with `.AND.`;
 If any error occurs, execution chain will stop on the offending instruction, and the second parameter passed by reference will hold the error message:
 
-<code lang="vfp">
+```foxpro
 local success, result
 success = .T.;
 	and wMenu('DEFI POPU myPopup MARGIN RELATIVE SHADOW COLOR W+/B*', @m.result);
@@ -1629,24 +1622,24 @@ assert m.success message m.result
 if m.success
 	...
 endif
-</code>
+```
 	
 Just before executing ACTIVATE commands such as:
-<code lang="vfp">
+```foxpro
 wMenu('ACTIVATE MENU|POPUP ...', @m.result)
 wMenu('ON PAD|BAR ... ACTIVATE MENU|POPUP xxx', @m.result)
-</code>
+```
 
-for a MENU or POPUP having ''SKIP FOR'' and/or ''ON SELECTION'' clauses relying on variables, e.g.
-<code lang="vfp">
+for a MENU or POPUP having `SKIP FOR` and/or `ON SELECTION` clauses relying on variables, e.g.
+```foxpro
 wMenu('ON SELECTION BAR 2 OF myPopup loMyForm.myMethod(m.myValue)', @m.result);
 wMenu('DEFINE PAD|BAR ... SKIP FOR myFunction(m.myValue)', @m.result)
-</code>
-(keywords such as ''this'' and ''thisform'' can't be used in ON SELECTION and SKIP FOR clauses as they execute outside of the form's context)
+```
+(keywords such as `this` and `thisform` can't be used in ON SELECTION and SKIP FOR clauses as they execute outside of the form's context)
 
-... Make sure to pass by reference an object as second parameter [@m.result], with properties holding any variable required for ''SKIP FOR'' and ''ON SELECTION'' clauses
+... Make sure to pass by reference an object as second parameter [@m.result], with properties holding any variable required for `SKIP FOR` and `ON SELECTION` clauses
 
-<code lang="vfp">
+```foxpro
 local success, result
 success = .T.;
 	and wMenu('DEFI POPU myPopup MARGIN RELATIVE SHADOW COLOR W+/B*', @m.result);
@@ -1659,12 +1652,12 @@ success = .T.;
 	and AddProperty(m.result, 'myBoolean', m.myBoolean);
 	and wMenu('ACTIVATE POPUP myPopup ... NOWAIT', @m.result) && m.result contains: - on call, the 'parameter object' - on return, error message if any, else .null.
 assert m.success message m.result
-</code>
+```
 
 Please note that, for parameters of type Object, ONLY references to form or form members are supported.
 e.g. if you need a reference to an object, make sure that this object is added to any container within the form, or the form itself:
 
-<code lang="vfp">
+```foxpro
 local loMyObject, success, result
 thisForm.AddObject('oObject', 'myCustom', InitParm)
 loMyObject = thisForm.oObject
@@ -1676,24 +1669,24 @@ success = .T.;
 	and AddProperty(m.result, 'myValue', m.myValue);
 	and wMenu('ACTIVATE POPUP myPopup ... NOWAIT', @m.result)
 assert m.success message m.result
-</code>
+```
 
 if you:
 - use the ACTIVATE MENU|POPUP <<b>><<u>>without the NOWAIT clause<</u>><</b>>,
 - expect some code to execute <<b>><<u>>after<</u>><</b>> MENU|POPUP gets DEACTIVATEd,
 
 Make sure to:
-- move the code located after the ACTIVATE MENU|POPUP command to another method (AKA ''call-back'' method) - this code move is similar to what you already do for code processing the response of a modal form
+- move the code located after the ACTIVATE MENU|POPUP command to another method (AKA `call-back` method) - this code move is similar to what you already do for code processing the response of a modal form
 - add 2 properties to the above-mentioned parameter object:
-	. ''woCallBack'': reference to the form member holding the call-back method, = this typically
-	. ''wcCallBack'': name of the call-back method, = 'wFormCallBack*' typically
+	. `woCallBack`: reference to the form member holding the call-back method, = this typically
+	. `wcCallBack`: name of the call-back method, = 'wFormCallBack*' typically
 
 Important:
-- if either ''.woCallBack'' or ''.wcCallBack'' is not passed or do not match a valid object and public method, the code you currently have after ''ACTIVATE MENU|POPUP'' *WILL NOT EXECUTE* in Web mode.
-- the call-back object (''.woCallBack'') MUST BE a form or a form member.
-- make sure not to use ''woCallBack'' or ''wcCallBack'' as variable names as defined above.
+- if either `.woCallBack` or `.wcCallBack` is not passed or do not match a valid object and public method, the code you currently have after `ACTIVATE MENU|POPUP` *WILL NOT EXECUTE* in Web mode.
+- the call-back object (`.woCallBack`) MUST BE a form or a form member.
+- make sure not to use `woCallBack` or `wcCallBack` as variable names as defined above.
 
-<code lang="vfp">
+```foxpro
 local loMyObject, success, result
 thisForm.AddObject('oObject', 'myCustom', InitParm)
 loMyObject = thisForm.oObject
@@ -1707,20 +1700,20 @@ success = .T.;
 	and AddProperty(m.result, 'wcCallBack', 'wFormCallBack'); && this.wFormCallBack() will execute when myPopup deactivates
 	and wMenu('ACTIVATE POPUP myPopup ...', @m.result)
 assert m.success message m.result
-</code>
+```
 
-''wMenu()'' also executes menu functions:
+`wMenu()` also executes menu functions:
 
-<code lang="vfp">
+```foxpro
 && function call before adaptation:
 ? Prmba( "myPopup", 2 )
 && function call after adaptation:
 ? wMenu('Prmba( "myPopup", 2 )', @m.result)
-</code>
+```
 
-If an error occurs, ''wMenu('menuFunction()', @m.result)'' returns ''.null.'' (In logical tests such as IF, Iif(), case, etc., VFP maps .null. to .F.)
+If an error occurs, `wMenu('menuFunction()', @m.result)` returns `.null.` (In logical tests such as IF, Iif(), case, etc., VFP maps .null. to .F.)
 
-<code lang="vfp">
+```foxpro
 local lcPrmBar, success
 lcPrmBar = wMenu('Prmba( "myPopup", 2 )', @m.result)
 success = not IsNull(m.lcPrmBar)
@@ -1728,11 +1721,9 @@ assert m.success message m.result
 if m.success
 	do something with m.lcPrmBar
 endif
-</code>
+```
 
 	endtext && =====================================================
-
-
 endcase
 
 return m.result
@@ -1862,6 +1853,7 @@ if m.llResult
 ENDIF
 
 return m.luResult
+endproc
 
 * ---------------------------------------
 function wMenu_lValid && {en} A Menu command or function is supported (2-3 ms)
@@ -2085,16 +2077,16 @@ if !this.lAutomation
 	set procedure to (m.this.classLibrary) additive
 endif
 
-this.oSets = Iif(this.lDevMode;
+this.oSets = Iif(this.lDevMode or lCallingModule('awAdapter');
 	, abSetsMaintain(; && 2016-08-18 thn -- {FiC V 2.22.0-beta.3} {en} added && modify command abDev
 		  Iif(this.wlLAN, .null., .F.); && [.null.] {en} type of SETs - .null.: all, .T.: scoped to the dataSession, .F.: global (not scoped to the dataSession)
-		, .T.; && [.F.] {en} also save Set("Procedure") & Set("Classlib")
+		, .T.; && [.F.] {en} also save Set("Procedure") and Set("Classlib")
 		);
 	, .null.;
 	)
 
 if Vartype(this.oSets) # 'O'
-	assert .F. && 2016-08-19 thn -- {FiC V 2.22.0-beta.3} {en} should no longer execute
+	assert .F. && 2016-08-19 thn -- {FiC V 2.22.0-beta.3} {en} should no longer execute && 2018-03-16 thn -- {FiC V 2.26.2-beta.3} {en} executes when starting server after FAA
 	this.cDefa = Addbs(Sys(5)) + Curdir()
 	this.cPath = Set("Path")
 	this.cProc = Set("Procedure")

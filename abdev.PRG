@@ -1135,10 +1135,10 @@ lcModule = loTest.Test(@m.lcAddress, -1)
 		enddefine
 
 * ========================================
-function cCallingModules && {fr} Modules appelants
+function cCallingModules && {en} Calling Modules {fr} Modules appelants
 lparameters ;
-  tlCurrent; && [.F.] {fr} Inclure le nom du module courant
-, tcInfo; && [Name] 'Name', 'Address', 'Path', 'Object' ou 'Lignée'
+  tlCurrent; && [.F.] {en} Include current module's name {fr} Inclure le nom du module courant
+, tcInfo; && [Name] {en} 'Name', 'Address', 'Path', 'Object' or 'Line up'
 , tlLineNo; && [.F.] {en} Add Line number in the object source file
 
 local lcResult;
@@ -3480,6 +3480,15 @@ function cPWRand_Test && {fr} Teste cPWRand
 ? cPWRand(15)
 
 * ========================================
+function abProject as abProject of abDev.prg && {fr} ouvre un projet et le referme automatiquement
+lparameters ;
+  tcPJX; && {fr} Adresse du projet
+, tcResult; && @ {fr} Résultat en cas d'échec
+
+return CreateObject('abProject', m.tcPJX, @m.tcResult)
+endfunc
+
+* ========================================
 define class abProject as GA_LIGHTWEIGHT_CLASS of abGA.prg && {fr} ouvre un projet et le referme automatiquement
 
 oProject = .null. && {fr} Référence au projet
@@ -3497,13 +3506,14 @@ this.oProject = oProject(m.tcPJX, @m.tcResult, @m.lOpened)
 this.lOpened = m.lOpened
 
 return vartype(m.this.oProject) == 'O'
+endProc
 
 * ----------------
 protected procedure destroy
-
 if Nvl(m.this.lOpened, .T.)
 	this.oProject.close
 endif
+endProc
 
 enddefine && {fr} CLASS abProject
 * ========================================
@@ -3530,7 +3540,7 @@ return m.success
 * ========================================
 function oProject && {fr} Référence à un projet (ouvert ou créé)
 lparameters ;
-  tcPJX; && {fr} Adresse du projet
+  tuPJX; && {fr} Adresse du projet
 , result; && @ {fr} Résultat (cumulatif)
 , tlOpened; && @ [.F.] {fr} Le projet a été ouvert - .NULL. le projet a été créé
 
@@ -3543,20 +3553,24 @@ local loResult as project;
 
 loResult = .null.
 
-if vartype(m.tcPJX) == 'C'
+do case
+case Type('m.tuPJX.BaseClass') == 'C' and m.tuPJX.BaseClass == 'Project'
+	loResult = m.tuPJX
 
-	tcPJX = iif(empty(justext(m.tcPJX)), forceext(m.tcPJX, 'pjx'), m.tcPJX)
-	if lower(justext(m.tcPJX)) == 'pjx'
+case vartype(m.tuPJX) == 'C'
 
-	 	if file(m.tcPJX)
-		 	tcPJX = fullpath(m.tcPJX)
+	tuPJX = iif(empty(justext(m.tuPJX)), forceext(m.tuPJX, 'pjx'), m.tuPJX)
+	if lower(justext(m.tuPJX)) == 'pjx'
+
+	 	if file(m.tuPJX)
+		 	tuPJX = fullpath(m.tuPJX)
 
 			* {fr} Si le projet n'est pas déjà ouvert
 			llResult = _vfp.projects.count > 0
 			if m.llResult
 				llResult = .f.
 				for each loProject in _vfp.projects foxobject
-					if fullpath(m.loProject.name) == m.tcPJX
+					if fullpath(m.loProject.name) == m.tuPJX
 						llResult = .t.
 						loResult = m.loProject && {fr} after EXIT, FOR EACH resets loProject to .F.
 						exit
@@ -3564,7 +3578,7 @@ if vartype(m.tcPJX) == 'C'
 				endfor
 			endif
 	 	else
-	 		create project (m.tcPJX) nowait noshow noprojecthook save
+	 		create project (m.tuPJX) nowait noshow noprojecthook save
 	 		if Type('_VFP.ActiveProject') == 'O'
 	 			loResult = _VFP.ActiveProject
 		 		llResult = .T.
@@ -3576,7 +3590,7 @@ if vartype(m.tcPJX) == 'C'
 			* {fr} Ouvrir le projet
 			try
 				ignoreAll() && modify command abDev
-				modify project (m.tcPJX) save nowait noshow noprojecthook
+				modify project (m.tuPJX) save nowait noshow noprojecthook
 				keyboard '' clear
 				loResult = _vfp.activeproject
 				tlOpened = iif(isNull(m.tlOpened), m.tlOpened, .t.)
@@ -3590,11 +3604,11 @@ if vartype(m.tcPJX) == 'C'
 			endtry
 		endif
 	else
-		cResultAdd(@m.result, textmerge([Invalid project file extension : <<cLitteral(m.tcPJX)>>]))
+		cResultAdd(@m.result, textmerge([Invalid project file extension : <<cLitteral(m.tuPJX)>>]))
 	endif
-else
-	cResultAdd(@m.result, textmerge([Invalid project specification : <<cLitteral(m.tcPJX)>>]))
-endif
+otherwise
+	cResultAdd(@m.result, textmerge([Invalid project specification : <<cLitteral(m.tuPJX)>>]))
+endcase
 
 return m.loResult
 endproc
@@ -3981,13 +3995,14 @@ lparameters ;
 , tcTypeDest; && {fr} Type de valeur attendu selon codification de la fonction VFP varType()
 
 local cMark, lCentury;
-, cDate, cTime;
+, lDate, cDate, cTime;
 , liDay, liMonth, liYear
 
 cMark = evl(set("Mark"), '/')
+lDate = m.tcTypeDest = 'D'
 
 tuValue = strtran(strtran(strtran(strtran(chrtran(cRepCharDel(alltrim(m.tuValue));
-	, '-', m.cMark); && {fr} iPhone
+	, '-', m.cMark); && iPhone
 	, ' ' + m.cMark, m.cMark);
 	, m.cMark + ' ', m.cMark);
 	, ' :', ':');
@@ -4000,39 +4015,42 @@ case !vartype(m.tuValue) == 'C';
  or empty(chrtran(m.tuValue, m.cMark+':APM', ''))
 	return iif(m.tcTypeDest = 'D', {/}, {/:}) && {en} empty date[-time] {fr} date[-time] vide
 
-case left(m.tuValue, 1) == '{' and right(m.tuValue, 1) == '}' && {fr} litteral
+case leftc(m.tuValue, 1) == '{' and rightc(m.tuValue, 1) == '}' && {fr} litteral
 	return evaluate(m.tuValue)
 
-case ! 2 = Occurs(m.cMark, m.tuValue)
+case 2 # Occurs(m.cMark, m.tuValue)
 	assert .F.
 	return .null.
 
 case !iDayMonthYear(@m.liDay, @m.liMonth, @m.liYear) && modify command abDate
 
-case !varSet(@m.lCentury, 4 = len(getwordnum(m.tuValue, m.liYear, m.cMark)))
+case varSet(@m.lCentury, 4 = len(getwordnum(m.tuValue, m.liYear, m.cMark))) and m.lCentury
 
-case m.lCentury and m.tcTypeDest = 'D'
-	cDate = m.tuValue
-	return date(;
-		  evl(Cast(getwordnum(m.cDate, m.liYear, m.cMark) as I), year(date())); && {fr} year
-		, evl(Cast(getwordnum(m.cDate, m.liMonth, m.cMark) as I), month(date())); && {fr} month
-		, evl(Cast(getwordnum(m.cDate, m.liDay, m.cMark) as I), day(date())); && {fr} day
-		)
-
-case m.lCentury && m.tcTypeDest = 'T'
 	cDate = getwordnum(m.tuValue, 1)
+	liYear = getwordnum(m.cDate, m.liYear, m.cMark)
+	liYear = evl(Cast(Iif(Lenc(m.liYear) > 4, rtrim(m.liYear, '0'), m.liYear) as I), year(date())) && {en} year
+	liMonth = getwordnum(m.cDate, m.liMonth, m.cMark)
+	liMonth = Min(Max(evl(Cast(Iif(Lenc(m.liMonth) > 2, rtrim(m.liMonth, '0'), m.liMonth) as I), month(date())), 1), 12) && {en} month
+	liDay = getwordnum(m.cDate, m.liDay, m.cMark)
+	liDay = Min(Max(evl(Cast(Iif(Lenc(m.liDay) > 2, rtrim(m.liDay, '0'), m.liDay) as I), day(date())), 1), ICase(; && {en} day
+		m.liMonth = 2, 28,;
+		InList(m.liMonth, 1, 3, 5, 7, 8, 10, 12), 31,;
+		30;
+		))
+
 	cTime = getwordnum(m.tuValue, 2)
-	return datetime(;
-		  evl(Cast(getwordnum(m.cDate, m.liYear, m.cMark) as I), year(date())); && {fr} year
-		, evl(Cast(getwordnum(m.cDate, m.liMonth, m.cMark) as I), month(date())); && {fr} month
-		, evl(Cast(getwordnum(m.cDate, m.liDay, m.cMark) as I), day(date())); && {fr} day
-		, Cast(getwordnum(m.cTime, 1, ':') as I); && {fr} hour
-		, Cast(getwordnum(m.cTime, 2, ':') as I); && {fr} minute
-		, Cast(getwordnum(m.cTime, 3, ':') as I); && {fr} seconds
+	
+	return Iif(m.lDate;
+		, date(m.liYear, m.liMonth, m.liDay);
+		, datetime(m.liYear, m.liMonth, m.liDay;
+		  , Cast(getwordnum(m.cTime, 1, ':') as I); && {en} hour
+		  , Cast(getwordnum(m.cTime, 2, ':') as I); && {fr} minute
+		  , Cast(getwordnum(m.cTime, 3, ':') as I); && {en} second
+		  );
 		)
 
 otherwise
-	return Iif(m.tcTypeDest = 'D', Ctod(m.tuValue), Ctot(m.tuValue))
+	return Iif(m.lDate, Ctod(m.tuValue), Ctot(m.tuValue))
 
 endcase
 endfunc
@@ -4061,6 +4079,8 @@ loUnitTest.Test(.t., 2, 'L')
 loUnitTest.Test({}, '23/09/194', 'D') && {fr} date invalide && {fr} ajouté le 15/05/09
 
 loUnitTest.Test({/}, 'boto', 'D') && 2015-06-16 - contributor Gilles Lajot-Sarthou
+
+loUnitTest.Test({^2018-02-01}, '01/020/2018', 'D') && 2018-02-21 thn -- {fr} Méthode ou procédure uValue_td() : erreur n° 11 ("Valeur, type ou nombre d'arguments de fonction, non valide") ? la ligne n° 4,020; Paramètres reçus : Valeur : "01/020/2018"
 
 return loUnitTest.result()
 
@@ -4619,12 +4639,13 @@ return m.llResult
 
 * -----------------------------------
 procedure EnvSet && {fr} Règle l'environnement de la session de données privée avant le(s) test(s)
-lparameters ;
-  tcEnvCommand && {fr} Commande d'environnement
-
-if vartype(m.tcEnvCommand) == 'C'
+lparameters tcEnvCommand && {fr} Commande d'environnement
+if ga_Type_IsChar(m.tcEnvCommand, .T.)
 	&tcEnvCommand
+	return .T.
 endif
+return .F.
+endproc
 
 * -----------------------------------
 procedure ModuleSet && {fr} Définit le nom et l'adresse du module à tester
@@ -5120,8 +5141,9 @@ Résultats de <<m.this.nTest>> test<<Iif(this.nTest = 1, '', 's')>> dont <<m.lnCo
 					* {fr} écrire le n° de test, les résultats attendus et obtenus, les paramètres
 					local lcType
 					lcType = vartype(this.aTest[m.lnTest, 5])
-					text TO m.lcResult ADDITIVE TEXTMERGE NOSHOW FLAGS 1
-- Test n° : <<Transform(m.lnTest)>>
+					text TO m.lcResult ADDITIVE TEXTMERGE NOSHOW FLAGS  1
+
+- Test n° : <<m.lnTest>>
 	Resultats :
 	- attendu:	<<Iif(m.llString, '"' + this.aTest[m.lnTest, 4] + '"', cLitteral(this.aTest[m.lnTest, 4]))>>
 	- obtenu :	<<ICase(m.lcType == 'C' and Lower(Leftc(this.aTest[m.lnTest, 5], Len('Object '))) == Lower('Object '), this.aTest[m.lnTest, 5], m.lcType == 'C', '"' + this.aTest[m.lnTest, 5] + '"', cLitteral(this.aTest[m.lnTest, 5]))>>
@@ -5134,6 +5156,7 @@ Résultats de <<m.this.nTest>> test<<Iif(this.nTest = 1, '', 's')>> dont <<m.lnCo
 
 					* {fr} écrire la variable d'environnement modifiée
 					text TO m.lcResult ADDITIVE TEXTMERGE NOSHOW
+
 - Test n° <<m.lnTest>>
 	L'environnement VFP a changé comme suit :
 		<<this.aTest[m.lnTest, 7]>>
@@ -5831,6 +5854,7 @@ lparameters ;
 , tlPrepend; && [.F.] {fr} Ajouter au début
 , tnStackMinus; && [0] {fr} nombre de niveaux de pile à retrancher - .T.: ne pas ajouter l'en-tête
 , tlDateTime; && [.F.] {en} add date-time header
+, tlFullStack; && [.F.] {en} add full call stack
 
 tcResult = iif(vartype(m.tcResult) == 'C', m.tcResult, '')
 
@@ -5856,13 +5880,15 @@ if .t.;
 		)
 
 	tuItem = iif(leftc(m.tuItem, lenc(m.lcHeader)) == m.lcHeader, '', m.lcHeader) + m.tuItem
+	
+	tlFullStack = Iif(lTrue(m.tlFullStack), cCallingModules(,, .T.), '')
 
 	tcResult = ICase(;
-		Lenc(m.tcResult) + Lenc(m.tuItem) > VFP_VAR_SIZE_MAX,;
+		Lenc(m.tcResult) + Lenc(m.tuItem) + Lenc(m.tlFullStack) > VFP_VAR_SIZE_MAX,;
 			Trim(m.tcResult, '.') + '...',;
 		lTrue(m.tlPrepend),;
-			c2Words(m.tuItem, iif(m.tlLine, CRLF, CRLF2), m.tcResult),;
-			c2Words(m.tcResult, iif(m.tlLine, CRLF, CRLF2), m.tuItem);
+			cWords(iif(m.tlLine, CRLF, CRLF2), m.tuItem, m.tcResult, m.tlFullStack),;
+			cWords(iif(m.tlLine, CRLF, CRLF2), m.tcResult, m.tuItem, m.tlFullStack);
 		  )
 
 endif
@@ -5893,6 +5919,7 @@ return '';
 		+ '!';
 		+ proper(cModuleInfo(m.lcSys16, 'Name'));
 		+ [() - ]
+endfunc
 
 * =============================================
 function lUserAnAdmin as Variant && {en} Current user is a member of the Administrators group (does not mean user has elevated priviledges)
@@ -6000,7 +6027,6 @@ endproc
 * ========================================
 procedure ClassLibRemove && {fr} Ôte un fichier vcx de Set("ClassLib") s'il y est
 lparameters tcVCX && {fr} fichier vcx
-
 return ClassLibAdd(m.tcVCX, .t.)
 endproc
 
@@ -6061,7 +6087,7 @@ endfunc
 
 * ========================================
 procedure varStore(out, in) as Boolean && {fr} assigne une variable - alias de varSet()
-store m.in to out && {fr} http://blogs.msdn.com/b/calvin_hsia/archive/2004/12/14/301282.aspx - Calvin: the STORE command doesn't do as much as the "x=y" command. More in a future blog.
+store m.in to out
 endproc
 
 * =============================================
@@ -6070,9 +6096,15 @@ store m.in to out && {fr} http://blogs.msdn.com/b/calvin_hsia/archive/2004/12/14
 endproc
 
 * =============================================
-procedure varSetc(out, in) as Boolean && {fr} assigne une variable et retourne une chaine vide
-varSet(@m.out, m.in)
+procedure varSetC(out, in) as String && {fr} assigne une variable et retourne une chaine vide
+store m.in to out
 return ''
+endproc
+
+* =============================================
+procedure varSetF(out, in) as Boolean && {fr} assigne une variable et retourne .F.
+store m.in to out
+return .F.
 endproc
 
 * =============================================
@@ -7666,6 +7698,7 @@ text to cSets textmerge noshow flags 1 pretext 3
 	FIXED
 	HOURS
 	LOCK
+	MARK
 	MEMOWIDTH
 	MULTILOCKS
 	NEAR
@@ -7889,10 +7922,29 @@ endfunc
 * ========================================
 function nProjectFiles && {en} number of files in a project matching search criteria
 lparameters ;
-  tuPJX as Project;
+  tuPJX as Project; && @ {en} Project address or object
 , tcFileSkel as String; && @ [all] File skeleton; @ files found
 , tcFileType as String; && [all] see modify file foxpro.h > "File Object Type Property" 
 , tlExclude as Boolean; && [.null.] Excluded from project
+
+local array aa[1]
+return aProjectFiles(; && {en} number of files in a project matching search criteria
+	 @m.aa; && @ {en} 
+	, m.tuPJX; && @ {en} Project address or object
+	,@m.tcFileSkel; && @ [all] {en} File skeleton; @ files found
+	, m.tcFileType; && [all] {en} see modify file foxpro.h > "File Object Type Property" 
+	, m.tlExclude; && [.null.] {en} Excluded from project
+	)
+endfunc
+
+* ========================================
+function aProjectFiles && {en} files in a project matching search criteria
+lparameters ;
+  aProjectFiles; && @ {en} Files in project
+, tuPJX as Project; && @ {en} Project address or object
+, tcFileSkel as String; && @ [all] {en} File skeleton; @ files found
+, tcFileType as String; && [all] {en} see modify file foxpro.h > "File Object Type Property" 
+, tlExclude as Boolean; && [.null.] {en} Excluded from project
 
 local result as Integer;
 , success as Boolean;
@@ -7907,9 +7959,9 @@ tuPJX = oProject(m.tuPJX)
 success = Vartype(m.tuPJX) == 'O'
 assert m.success
 if m.success
-	
+
 	cPJX = m.tuPJX.Name
-	
+
 	tcFileSkel = Iif(ga_Type_IsChar(m.tcFileSkel, .T.), m.tcFileSkel, .null.)
 	tcFileType = Iif(.T.;
 	 and ga_Type_IsChar(m.tcFileType, .T.);
@@ -7934,16 +7986,20 @@ if m.success
 		, .null.;
 		)
 	tlExclude = Iif(Pcount() >= 4 and Vartype(m.tlExclude) == 'L', m.tlExclude, .null.)
-	
+
 	cFilesFound = ''
 	for each oFile as File in m.tuPJX.Files foxobject
-		
+
 		lFile = .T.;
 		 and (IsNull(m.tcFileSkel) or Likec(m.tcFileSkel, JustFname(m.oFile.Name)));
 		 and (IsNull(m.tcFileType) or m.oFile.Type == m.tcFileType);
 		 and (IsNull(m.tlExclude)  or m.oFile.Exclude = m.tlExclude)
-		
+
 		result = m.result + Iif(m.lFile, 1, 0)
+		if m.lFile
+			dimension m.aProjectFiles[m.result]
+			aProjectFiles[m.result] = m.oFile.Name
+		endif
 		cFilesFound = m.cFilesFound + Iif(m.lFile;
 			, ', ' + sys(2014, m.oFile.Name, m.cPJX); && 2016-11-09 thn -- {en} FullPath(m.oFile.Name, m.cPJX) does not work
 			, '';
@@ -7955,3 +8011,12 @@ endif
 
 return m.result
 endfunc
+
+#if .F.
+_cliptext = ''
+for each file in _VFP.ActiveProject.Files foxobject
+	_cliptext = _cliptext + Chr(13) + m.file.name 
+endfor
+_cliptext = Ltrim(_cliptext, Chr(13))
+? _cliptext
+#endif

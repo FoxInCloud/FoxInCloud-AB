@@ -326,6 +326,7 @@ if m.llResult
 endif
 
 return m.lnResult
+endfunc
 
 * -------------------------------------------------------------
 procedure aFilter_Test && {fr} Teste aFilter()

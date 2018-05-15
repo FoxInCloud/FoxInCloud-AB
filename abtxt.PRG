@@ -94,10 +94,9 @@ procedure cTronc_test
 local loTest as abUnitTest of abDev.prg, lcDropped
 loTest = newobject('abUnitTest', 'abDev.prg')
 
-
 * _cliptext = Chr(160)
 
-loTest.Test('891-1490, 791-14Â ...', '891-1490, 791-1491, 1890, 2891 (MilitÃ¤rfzg. Mit geteilert Scheibe)', 20) && {fr} Len('891-1490, 791-14') = 16
+loTest.Test('891-1490, 791-14 ...', '891-1490, 791-1491, 1890, 2891 (MilitÃ¤rfzg. Mit geteilert Scheibe)', 20) && {fr} Len('891-1490, 791-14') = 16
 loTest.Test('891-1490,Â ...', '891-1490, 791-1491, 1890, 2891 (MilitÃ¤rfzg. Mit geteilert Scheibe)', 20, .t., @m.lcDropped)
 loTest.assert('791-1491, 1890, 2891 (MilitÃ¤rfzg. Mit geteilert Scheibe)', m.lcDropped)
 
@@ -139,7 +138,7 @@ lparameters ;
 , tuW1, tuW2, tuW3, tuW4, tuW5, tuW6, tuW7, tuW8, tuW9, tuW10, tuW11, tuW12, tuW13, tuW14, tuW15, tuW16, tuW17, tuW18, tuW19, tuW20, tuW21, tuW22, tuW23, tuW24 && [''] {en} other words {fr} mots suivants
 
 local lcResult;
-, lnWord
+, liWord
 
 lcResult = ''
 
@@ -148,13 +147,13 @@ case !Vartype(m.tuSep) == 'C'
 
 case type('tuW0',1) == 'A' && array
 	external array tuW0
-	for m.lnWord = 1 to Alen(m.tuW0)
-		lcResult = c2Words(m.lcResult, m.tuSep, m.tuW0[m.lnWord])
+	for m.liWord = 1 to Alen(m.tuW0)
+		lcResult = c2Words(m.lcResult, m.tuSep, m.tuW0[m.liWord])
 	endfor
 
 case pcount() > 2
-	for m.lnWord = 0 to pcount()-2
-		lcResult = c2Words(m.lcResult, m.tuSep, evaluate('m.tuW' + ltrim(str(m.lnWord))))
+	for m.liWord = 0 to pcount()-2
+		lcResult = c2Words(m.lcResult, m.tuSep, evaluate('m.tuW' + ltrim(str(m.liWord))))
 	endfor
 endcase
 
@@ -188,7 +187,7 @@ function c2Words && {en} 2 words separated if not empty {fr} Deux mots séparés s
 lparameters ;
   tuW1; && {en} First word {fr} Premier mot, type variable
 , tuSep; && {en} Separator {fr} Séparateur, type variable
-, tuW2 && {en} Second word {fr} Second mot, type variable
+, tuW2; && {en} Second word {fr} Second mot, type variable
 
 local llW1Empty, llW2Empty, lcSep, lnSep, lcW1, lcW2
 
@@ -285,7 +284,7 @@ local loTest as abUnitTest of abDev.prg
 loTest = newobject('abUnitTest', 'abDev.prg')
 
 loTest.Test('TOTO EST ENERVE', 'toto est  énervé')
-loTest.Test([CA C EST SUR LE SAVOIR FAIRE D ABAQUE EST IMMENSE], [Ã‡a c'est  sûr, le savoir-faire d'Abaque est immense])
+loTest.Test([CA C EST SUR LE SAVOIR FAIRE D ABAQUE EST IMMENSE], [ça c'est  sûr, le savoir-faire d'Abaque est immense])
 loTest.Test(space(50), .null., 50)
 
 return loTest.Result()
@@ -436,7 +435,7 @@ return m.lcResult
 procedure cSpaceAroundGroup_test
 
 local loTest as abUnitTest of abDev.prg
-loTest = newobject('abUnitTest', 'abDev.prg') && {fr} NewObject('abUnitTest', 'abDev.prg')
+loTest = NewObject('abUnitTest', 'abDev.prg')
 
 loTest.Test('abc ((efg))', 'abc ( (efg ))')
 loTest.Test('abc [(efg)]', 'abc [ (efg )]')
@@ -522,17 +521,21 @@ return lcResult
 * -----------------------------------------------------------------
 procedure cSepGrpsXFigs_Test && {fr} Teste cSepGrpsXFigs
 
-? sys(16)
-? cSepGrpsXFigs('ABCDE123456', 3) == 'ABCDE123 456'
-? cSepGrpsXFigs('ABCDE123....456', 3, '.') == 'ABCDE123.456'
-? cSepGrpsXFigs('ABCDE123....456.', 3, '.') == 'ABCDE123.456.'
-? cSepGrpsXFigs('AL01021', 10) == 'AL01 021'
-? cSepGrpsXFigs('AL01021') == 'AL01 021'
-? cSepGrpsXFigs('12', 1) == '1 2'
-? cSepGrpsXFigs('AL 01021') == 'AL 01 021'
-? cSepGrpsXFigs('1256001021') == '1 256 001 021'
-? cSepGrpsXFigs('1256001021', , ',') == '1,256,001,021'
-? cSepGrpsXFigs('1256001021', 5, '|') == '12560|01021'
+local loTest as abUnitTest of abDev.prg
+loTest = NewObject('abUnitTest', 'abDev.prg')
+
+loTest.test('ABCDE123 456', 'ABCDE123456', 3)
+loTest.test('ABCDE123.456', 'ABCDE123....456', 3, '.')
+loTest.test('ABCDE123.456.', 'ABCDE123....456.', 3, '.')
+loTest.test('AL01 021', 'AL01021', 10)
+loTest.test('AL01 021', 'AL01021')
+loTest.test('1 2', '12', 1)
+loTest.test('AL 01 021', 'AL 01021')
+loTest.test('1 256 001 021', '1256001021')
+loTest.test('1,256,001,021', '1256001021', , ',')
+loTest.test('12560|01021', '1256001021', 5, '|')
+
+return loTest.Result()
 
 * ===================================================================
 function cListOfArrayC && {fr} Liste délimitée du contenu d'un tableau caractère
@@ -683,30 +686,30 @@ procedure cListofArray_Test
 local loTest as abUnitTest of abDev.prg, laTest[1]
 loTest = newobject('abUnitTest', 'abDev.prg')
 
-dimension laTest [9]
-laTest[1] = 'First' && {fr} C
-laTest[2] = 2.25	 && {fr} N
-laTest[3] = .t.	 && {fr} L
-laTest[4] = date(2003,2,8) && {fr} D
-laTest[5] = datetime(2003,2,8,11,34,15) && {fr} T
-laTest[6] = '' && {fr} C Empty
-laTest[7] = 0	 && {fr} N Empty
-laTest[8] = .f. && {fr} L Empty
-laTest[9] = {} && {fr} D Empty
+	dimension laTest [9]
+	laTest[1] = 'First' && {fr} C
+	laTest[2] = 2.25	 && {fr} N
+	laTest[3] = .t.	 && {fr} L
+	laTest[4] = date(2003,2,8) && {fr} D
+	laTest[5] = datetime(2003,2,8,11,34,15) && {fr} T
+	laTest[6] = '' && {fr} C Empty
+	laTest[7] = 0	 && {fr} N Empty
+	laTest[8] = .f. && {fr} L Empty
+	laTest[9] = {} && {fr} D Empty
 loTest.Test('"First",2.25,.T.,{^2003-02-08},{^2003-02-08 11:34:15},"",0,.F.,{/}', @m.laTest,,,.t.)
 
-dimension laTest[5,2]
-laTest= ''
-laTest[1,2] = 'First'
-laTest[2,2] = 'Second'
-laTest[3,2] = '  '
-laTest[4,2] = 'Fourth'
-laTest[5,2] = 'Fifth'
+	dimension laTest[5,2]
+	laTest= ''
+	laTest[1,2] = 'First'
+	laTest[2,2] = 'Second'
+	laTest[3,2] = '  '
+	laTest[4,2] = 'Fourth'
+	laTest[5,2] = 'Fifth'
 loTest.Test('"First","Second","","Fourth","Fifth"', @m.laTest,,2,.t.)
 loTest.Test('"","First","","Second","","","","Fourth","","Fifth"', @m.laTest,,-1,.t.)
 loTest.Test('First,Second,Fourth,Fifth', @m.laTest,,-1)
-loTest.Test(cWords(CRLF, 'First','Second','Fourth','Fifth') + CRLF, @m.laTest,,-1,,,,,,.t.) && {fr} toutes les colonnes, sans les vides, lignes séparées par CRLF
-loTest.Test(',First,,Second,,,,Fourth,,Fifth', @m.laTest,,-1,,.t.)
+loTest.Test(cWords(CRLF, 'First','Second','Fourth','Fifth'), @m.laTest,,-1,,,,,,.t.) && {fr} toutes les colonnes, sans les vides, lignes séparées par CRLF
+loTest.Test('First,,Second,,,,Fourth,,Fifth', @m.laTest,,-1,,.t.)
 
 return m.loTest.Result()
 
@@ -1112,7 +1115,8 @@ loTest.Test('{^2003-02-08 11:34:15}', datetime(2003,2,8,11,34,15)) && {fr} T
 loTest.Test('.T.', .t.) && {fr} L
 
 	luTest = $1254.25 && {fr} le littéral ne passe pas dans l'appel de méthode
-loTest.Test('$1254.250000', m.luTest) && {fr} Y
+loTest.EnvSet([SET DECIMALS TO 3])
+loTest.Test('$1254.25', m.luTest) && {fr} Y 
 
 	local loFoo as container
 	loFoo = createobject('container')
@@ -1412,7 +1416,7 @@ luData = createobject('Custom')
 m.luData.addproperty('car', 'a')
 m.luData.addproperty('num', 2)
 m.luData.addproperty('date', date(2012,06,20))
-loTest.Test('{"CAR":"a","DATE":"2012-06-20T00:00:00Z","NUM":2}', m.luData)
+loTest.Test('{"car":"a","date":"2012-06-20T00:00:00Z","num":2}', m.luData)
 
 return m.loTest.Result()
 
@@ -1617,8 +1621,8 @@ local loTest as abUnitTest of abDev.prg
 loTest = newobject('abUnitTest', 'abDev.prg')
 release European, EuroAnsi
 loTest.Test('hebete', 'hébété')
-loTest.Test('aaaeeeeioouu', 'àÃ¤Ã¢éèêÃ«ioÃ²ûù')
-loTest.Test('AAAEEEEIOOUU', 'Ã€Ã„Ã‚ÉÃˆÃŠÃ‹IOÃ’Ã™Ã›')
+loTest.Test('aaaeeeeioouu', 'àäâéèêëioòûù')
+loTest.Test('AAAEEEEIOOUU', 'ÀÄÂÉÈÊËIOÒÙÛ')
 loTest.Test('', .t.)
 loTest.Test('', '')
 loTest.Test('', null)
@@ -1840,17 +1844,27 @@ return lnResult
 
 * -----------------------------------------------------------------
 procedure nAtDigits_Test && {fr} Teste nAtDigits
-? sys(16)
-local lcRet
-lcRet = ''
-? nAtDigits('0123456789', 3) = 1
-? nAtDigits('0123456789', 3, .f., @m.lcRet) = 1 and m.lcRet == '012'
-? nAtDigits('01 23456789', 3, .f., @m.lcRet) = 4 and m.lcRet == '234'
-? nAtDigits('01 23456789', 3, .t., @m.lcRet) = 1 and m.lcRet == '012'
-? nAtDigits('012345678 9', 10, .f., @m.lcRet) = 0 and m.lcRet == ''
-? nAtDigits('012345678 9', 10, .t., @m.lcRet) = 1 and m.lcRet == '0123456789'
-? nAtDigits('ABCDEF678 9', 4, .t., @m.lcRet) = 7 and m.lcRet == '6789'
-? nAtDigits('1 2 3ABCDEF678 9', 4, .t., @m.lcRet) = 12 and m.lcRet == '6789'
+
+local loTest as abUnitTest of abDev.prg, result as String
+loTest = newobject('abUnitTest', 'abDev.prg')
+
+loTest.Test(1, '0123456789', 3)
+loTest.Test(1, '0123456789', 3, .f., @m.result)
+loTest.assert(m.result, '012')
+loTest.Test(4, '01 23456789', 3, .f., @m.result)
+loTest.assert(m.result, '234')
+loTest.Test(1, '01 23456789', 3, .t., @m.result)
+loTest.assert(m.result, '012')
+loTest.Test(0, '012345678 9', 10, .f., @m.result)
+loTest.assert(m.result, '')
+loTest.Test(1, '012345678 9', 10, .t., @m.result)
+loTest.assert(m.result, '0123456789')
+loTest.Test(7, 'ABCDEF678 9', 4, .t., @m.result)
+loTest.assert(m.result, '6789')
+loTest.Test(12, '1 2 3ABCDEF678 9', 4, .t., @m.result)
+loTest.assert(m.result, '6789')
+
+return m.loTest.result()
 
 * ===================================================================
 function nAtSep && {fr} Position du premier séparateur en partant de la gauche
@@ -1957,31 +1971,34 @@ return m.lcResult
 * ===================================================================
 function lNumChar && {fr} Chaine de caractères commence par un chiffre, un séparateur ou un opérateur
 lparameters tcChain
-return iif(vartype(m.tcChain)='C';
-	, isdigit(m.tcChain) or left(m.tcChain, 1) $ set('POINT') + '-+';
+return Iif(vartype(m.tcChain)='C'; &&  and varSet(@m.tcChain, Alltrim(m.tcChain))
+	, IsDigit(m.tcChain) or Leftc(m.tcChain, 1) $ set('POINT') + '-+';
 	, .null.;
 	)
 
 * -----------------------------------------------------------------
 procedure lNumChar_Test && {fr} teste lNumChar
-? sys(16)
 
-? isnull(lNumChar (null))
-? isnull(lNumChar (854))
-? not lNumChar ('')
-? not lNumChar (' ')
-? not lNumChar ('toto')
-? not lNumChar (' 915')
-? lNumChar ('915')
+local loTest as abUnitTest of abDev.prg, loPoint as abSet of abDev.prg
+loTest = newobject('abUnitTest', 'abDev.prg')
 
-local lcPoint
-lcPoint = set('POINT')
-set point to ','
-? not lNumChar ('.915')
-? lNumChar (',915')
-set point to '.'
-? lNumChar ('.915')
-set point to (m.lcPoint)
+loTest.Test(.null., .null.)
+loTest.Test(.null., 854)
+loTest.Test(.F., '')
+loTest.Test(.F., ' ')
+loTest.Test(.F., 'toto')
+loTest.Test(.F., ' 915')
+loTest.Test(.T., '915')
+
+loTest.envSet('set point to ","')
+loTest.Test(.F., '.915')
+loTest.Test(.T., ',915')
+
+loTest.envSet('set point to')
+loTest.Test(.T., '.915')
+loPoint = .null.
+
+return m.loTest.result()
 
 * ===================================================================
 function lEmailAddrOK && {fr} Adresse courriel valide
@@ -2051,11 +2068,16 @@ return m.lcResult
 
 * --------------------
 procedure cVFPNameSubStr_Test && {fr} teste cVFPNameSubStr()
-? sys(16)
-? cVFPNameSubStr('lpara tcChain', 7) == 'tcChain'
-? cVFPNameSubStr('lpara tcChain', 6) == 'tcChain'
-? cVFPNameSubStr('lpara 3cChain', 7) == ''
-? cVFPNameSubStr('lpara _cChain', 7) == '_cChain'
+
+local loTest as abUnitTest of abDev.prg, loPoint as abSet of abDev.prg
+loTest = newobject('abUnitTest', 'abDev.prg')
+
+loTest.Test('tcChain', 'lpara tcChain', 7)
+loTest.Test('tcChain', 'lpara tcChain', 6)
+loTest.Test('', 'lpara 3cChain', 7)
+loTest.Test('_cChain', 'lpara _cChain', 7)
+
+return m.loTest.result()
 
 * ===================================================================
 function cParenth && {fr} Met une chaîne entre parenthèses ou autre signes encadrants
@@ -2529,9 +2551,8 @@ return m.lnResult
 * -----------------------------------------------------------------
 procedure anWordIn_Test
 
-local loTest as abUnitTest of abDev.prg
+local loTest as abUnitTest of abDev.prg, laTest[1]
 loTest = newobject('abUnitTest', 'abDev.prg')
-local array laTest[1]
 
 loTest.Test(1, @m.laTest, 'je+suis-décidément le meilleur', 'le')
 loTest.assert(20, laTest[1])
@@ -2751,7 +2772,6 @@ loTest = newobject('abUnitTest', 'abDev.prg')
 loTest.Test('awtoto,awOLEpdfAcro', 'awrlr, awtoto, awOLEpdfAcro', 'aw(\w{3}|olepdfxc|ole(?!pdf)\w+)\b', 'i')
 return loTest.Result()
 
-
 * ===================================================================
 define class abRegExp as GA_LIGHTWEIGHT_CLASS && {fr} Expression régulière ; Implements VBScript.RegExp
 * ===================================================================
@@ -2759,7 +2779,7 @@ define class abRegExp as GA_LIGHTWEIGHT_CLASS && {fr} Expression régulière ; Imp
 && {fr} RÉGLAGES - cf. this.init() / this.setup()
 pattern = '' && {fr} Masque d'expression régulière
 IgnoreCase = .f. && {fr} Ignorer la casse dans les comparaisons
-global = .f. && {fr} Trouver toutes les occurrences ou la première seulement
+Global = .f. && {fr} Trouver toutes les occurrences ou la première seulement
 Multiline = .f. && {fr} Le texte comporte plusieurs lignes && ^ = iif(Multiline, line start, chain start) $ = iif(Multiline, line end, chain end)
 
 && {fr} RÉSULTATS
@@ -2893,41 +2913,33 @@ this.PatternMatched = ''
 procedure setup && {fr} Règle les options de recherche
 lparameters ;
   tcPattern; && [''] {fr} Expression régulière de recherche
-, tuIgnoreCase; && [.F.] {fr} Ignorer la casse dans les comparaisons
-, tlGlobal; && [.F.] {fr} Trouver toutes les occurrences ou la première seulement
-, tlMultiline; && [.F.] {fr} Le texte comporte plusieurs lignes
+, tuIgnoreCase; && [.null.] {fr} Ignorer la casse dans les comparaisons
+, tlGlobal; && [.null.] {fr} Trouver toutes les occurrences ou la première seulement
+, tlMultiline; && [.null.] {fr} Le texte comporte plusieurs lignes
 
 local lnParms
 lnParms = Pcount()
 
-if Empty(m.lnParms)
+if Empty(m.lnParms) or !ga_Type_IsChar(m.tcPattern)
 	return .f.
 else
 	this.pattern = m.tcPattern
-
-	if m.lnParms > 1
-
-		if vartype(m.tuIgnoreCase) == 'C';
-		 and Lenc(alltrim(m.tuIgnoreCase)) <= 3
-			
-			tuIgnoreCase = lower(m.tuIgnoreCase)
-			this.IgnoreCase = 'i' $ m.tuIgnoreCase
-			this.global = 'g' $ m.tuIgnoreCase
-			this.Multiline = 'm' $ m.tuIgnoreCase
-
-		else
-
-			this.IgnoreCase = m.tuIgnoreCase
-
-			if m.lnParms > 2
-				this.global = m.tlGlobal
-
-				if m.lnParms > 3
-					this.Multiline = m.tlMultiline
-				endif
-			endif
-		endif
-	endif
+	do case
+	case m.lnParms = 1
+*		store .F. to this.IgnoreCase, this.global, this.Multiline && 2018-03-14 thn -- {en} keep unchanged
+	case ga_Type_IsChar(m.tuIgnoreCase); && JavaScript style
+	 and varSet(@m.tuIgnoreCase, Alltrim(Lower(m.tuIgnoreCase)));
+	 and Lenc(Chrtran(m.tuIgnoreCase, ' ', '')) <= 3;
+	 and Empty(Chrtran(m.tuIgnoreCase, 'gmi', ''));
+	 and .T.
+		this.IgnoreCase = 'i' $ m.tuIgnoreCase
+		this.global = 'g' $ m.tuIgnoreCase
+		this.Multiline = 'm' $ m.tuIgnoreCase
+	otherwise
+		this.IgnoreCase = m.tuIgnoreCase
+		this.global = m.tlGlobal
+		this.Multiline = m.tlMultiline
+	endcase
 endif
 endproc
 
@@ -2980,6 +2992,7 @@ with m.this as abRegExp of abTxt.prg
 endwith
 
 return m.lnResult
+endproc
 
 * -----------------------------------------------------------------
 protected procedure Execute_Patterns && {fr} Exécute des patterns multiples
@@ -3031,7 +3044,10 @@ tlDebug = Vartype(m.tlDebug) == 'L' and m.tlDebug or m.this.lDebug
 
 if not empty(.pattern)
 
-	local loResults, loResult, loSubMatches as collection, loSubMatch, lcHead
+	local loResults, loResult;
+	, llSubMatches, loSubMatches as collection;
+	, lcSubMatch;
+	, lcHead
 
 	loResults = .oRegExp.Execute(@m.tcIn)
 	if Vartype(m.loResults) == 'O' and m.loResults.count > 0
@@ -3040,10 +3056,13 @@ if not empty(.pattern)
 		for each loResult in m.loResults && {fr} GA ne met pas la clause 'foxobject'
 
 			* {fr} Objectifier les sub-matches en base 1 (VFP)
-			loSubMatches = createobject('collection')
-			for each loSubMatch in loResult.SubMatches
-				loSubMatches.add(m.loSubMatch)
-			endfor
+			llSubMatches = ga_Collection_Object(@m.loSubMatches)
+			assert m.llSubMatches
+			if m.llSubMatches
+				for each lcSubMatch in loResult.SubMatches
+					loSubMatches.add(m.lcSubMatch)
+				endfor
+			endif
 
 			* {fr} Tabuler les résultats
 			.nMatches = .nMatches + 1
@@ -3301,19 +3320,19 @@ endfunc
 function cUnescaped && {fr} Inverse de cEscaped()
 lparameters tcChain
 
-&& {fr} traiter aussi les entités !
-
 return iif(vartype(m.tcChain) == 'C';
-	, strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(cUnescaped_Base(m.tcChain);
-		, '&#34;', ["]);
-		, '&#39;', [']);
-		, '&#8211;', chr(150));
-		, '&#8212;', chr(151));
-		, '&#160;',  chr(160));
-		, '&#8364;', chr(128));
-		, '&#8482;', chr(153));
-		, '&#339;',  chr(156));
-	, m.tcChain)
+	, strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(cUnescaped_Base(m.tcChain);
+	  , '&#34;', ["]);
+	  , '&#39;', [']);
+	  , '&#8211;', chr(150));
+	  , '&#8212;', chr(151));
+	  , '&#160;',  chr(160));
+	  , '&#8364;', chr(128));
+	  , '&#8482;', chr(153));
+	  , '&#339;',  chr(156));
+	  , '&#8209;', '-'); && non-breaking hyphen -- not supported by ASCII
+	, m.tcChain;
+	)
 
 * ===================================================================
 function cUnescaped_XML(tcChain) && {fr} Inverse de cEscaped_XML()
@@ -3323,10 +3342,11 @@ return cUnescaped_Base(tcChain)
 function cUnescaped_Base(tcChain) && {fr} Inverse de cEscaped_Base()
 return iif(vartype(m.tcChain) == 'C';
 	, strtran(strtran(strtran(m.tcChain;
-		, '&#38;', [&]);
-		, '&#60;', [<]);
-		, '&#62;', [>]);
-	, m.tcChain)
+	  , '&#38;', [&]);
+	  , '&#60;', [<]);
+	  , '&#62;', [>]);
+	, m.tcChain;
+	)
 
 * -------------------------------------------------------------
 define class test1 as custom
@@ -3481,8 +3501,8 @@ local liResult, lcFormat, lcResult
 lcResult = ''
 if vartype(m.tc) == 'C' and len(m.tc) > 0
 	lcFormat = iif(lTrue(m.tlHexa);
-		, '@0'; && {fr} hexadécimal
-		, '@L 999'; && 3 chiffres décimaux
+	  , '@0'; && {fr} hexadécimal
+	  , '@L 999'; && 3 chiffres décimaux
 		)
 	for liResult = 1 to lenc(m.tc)
 		lcResult = m.lcResult;
@@ -3529,23 +3549,23 @@ lparameters tcChain, lKeepHeadingSpaces
 
 tcChain = iif(vartype(m.tcChain) == 'C';
 	, cCRLFfix_(cCRLFfix_(cCRLFfix_(cCRLFfix_(cCRLFfix_(cCRLFfix_(m.tcChain;
-		, TABUL + CRLF);
-		, TABUL + CR);
-		, TABUL + LF);
-		, ' ' + CRLF);
-		, ' ' + CR);
-		, ' ' + LF);
+	  , TABUL + CRLF);
+	  , TABUL + CR);
+	  , TABUL + LF);
+	  , ' ' + CRLF);
+	  , ' ' + CR);
+	  , ' ' + LF);
 	, m.tcChain;
 	)
 
 tcChain = iif(vartype(m.tcChain) == 'C' and !m.lKeepHeadingSpaces;
 	, cCRLFfix_(cCRLFfix_(cCRLFfix_(cCRLFfix_(cCRLFfix_(cCRLFfix_(m.tcChain;
-		, CRLF + TABUL);
-		, CR + TABUL);
-		, LF + TABUL);
-		, CRLF + ' ');
-		, CR + ' ');
-		, LF + ' ');
+	  , CRLF + TABUL);
+	  , CR + TABUL);
+	  , LF + TABUL);
+	  , CRLF + ' ');
+	  , CR + ' ');
+	  , LF + ' ');
 	, m.tcChain;
 	)
 
@@ -3558,8 +3578,8 @@ lparameters tcChain, tcNewLine
 
 do while m.tcNewLine $ m.tcChain
 	tcChain = iif(' ' $ m.tcNewLine;
-		, strtran(m.tcChain, m.tcNewLine, alltrim(m.tcNewLine));
-		, strtran(m.tcChain, m.tcNewLine, CRLF);
+	  , strtran(m.tcChain, m.tcNewLine, alltrim(m.tcNewLine));
+	  , strtran(m.tcChain, m.tcNewLine, CRLF);
 		)
 enddo
 
@@ -3581,7 +3601,9 @@ endfunc
 
 *----------------------------------------------------
 function cStringsMasked && {fr} Chaîne oû les litteraux caractères sont masqués par _ga_StringParseBits_Class_.maskStrings()
-lparameters tcChain, result && {en} in: .T. for JavaScript string, @out: .T. if success, else ga_StringParse_Object() instantiation result
+lparameters ;
+  tcChain;
+, result; && @ {en} in: .T. for JavaScript string, @out: .T. if success, else ga_StringParse_Object() instantiation result
 
 local loParser, cResult
 
@@ -3701,7 +3723,7 @@ text to lcTest noshow
 ENDTEXT
 
 text to lcExpected noshow
-&& {fr} L'étape 3 (Publier) de l'Assistant d'Adaptation FoxInCloud (FAA) a créé ce programme
+&& L'étape 3 (Publier) de l'Assistant d'Adaptation FoxInCloud (FAA) a créé ce programme
 
 ENDTEXT
 
@@ -3731,8 +3753,8 @@ this.Parent.Refresh && {en} refresh child lists
 ENDTEXT
 
 text to lcExpected noshow
-IF m.THISFORM.wlHTMLgen && {fr} Adaptation Automatique FoxInCloud
-	RETURN .T. && {fr} Traiter l'événement sur le serveur
+IF m.THISFORM.wlHTMLgen && Adaptation Automatique FoxInCloud
+	RETURN .T. && Traiter l'événement sur le serveur
 ENDIF
 Rand(-1)
 this.Parent.SetAll('Value', '', 'ficTxt') && 
@@ -3965,14 +3987,14 @@ for iLine = ALines(m.aa, m.tcChain, 1) to 1 step -1
 	cLine = ''
 	do while !Empty(m.cQueue) and 0 < nChainFract(;&& {fr} Fractionne une Chaîne de Caractères pour justifier une largeur en mm
 		  m.cQueue; && {fr} Chaîne à fractionner
-		,@m.cTete; && @ {fr} Tête de la chaîne justifiante 
-		,@m.cQueue; && @ {fr} Queue de la chaîne à passer à la ligne suivante
-		, m.tcCarsCoupPref; && [DEF_CAR_COUP] {fr} Caractères de coupure préférés (limités à 10) '_' pour Space(1)
-		, m.tnJustif; && {fr} Largeur de justification de la chaîne (en mm)
-		, m.tcPolice; && {fr} Police
-		, m.tnCorps; && {fr} Corps en points (un point = 1/72 inch)
-		, m.tcStyle; && [N] {fr} Style (ex : BI...)
-		, m.tnChasse; && [100%] {fr} Chasse (déformation) en %
+	  ,@m.cTete; && @ {fr} Tête de la chaîne justifiante 
+	  ,@m.cQueue; && @ {fr} Queue de la chaîne à passer à la ligne suivante
+	  , m.tcCarsCoupPref; && [DEF_CAR_COUP] {fr} Caractères de coupure préférés (limités à 10) '_' pour Space(1)
+	  , m.tnJustif; && {fr} Largeur de justification de la chaîne (en mm)
+	  , m.tcPolice; && {fr} Police
+	  , m.tnCorps; && {fr} Corps en points (un point = 1/72 inch)
+	  , m.tcStyle; && [N] {fr} Style (ex : BI...)
+	  , m.tnChasse; && [100%] {fr} Chasse (déformation) en %
 		)
 		cLine = m.cLine + CRLF + m.cTete
 	enddo
@@ -4263,8 +4285,11 @@ ENDIF
 RETURN m.lnResult
 
 * -----------------------------------------------------------------
-PROCEDURE nWidthMMtext_Test
-? Sys(16)
+PROCEDURE nWidthMMtext_Test_man && manual test
+
+LOCAL loTest AS abUnitTest OF abDev.prg
+loTest = NewObject('abUnitTest', 'abDev.prg')
+
 ? nWidthMMtext ('My taylor is rich', 'helvetica', 9, 'B', .8)
 ? nWidthMMtext ('My taylor is rich', 'helvetica', 9, 'B', 80)
 ? nWidthMMtext ('My taylor is rich', Wfont(1), 9, 'B', 80)
