@@ -2483,7 +2483,6 @@ endproc
 ENDDEFINE && CLASS awSets
 * ============================================
 
-
 * ============================================
 DEFINE CLASS awGrc AS Column && {en} FoxInCloud base column class {fr} Classe de base Column FoxInCloud
 * ============================================
@@ -3673,7 +3672,7 @@ if m.delta # 0 and aoClassCont(@m.aCntl, m.toCont,, .F.) > 0
 					   BitTest(m.nAnchor, 4); && Top RELATIVE - Anchors control to Top border of container and maintains relative distance between the Top border.
 					or BitTest(m.nAnchor, 9),; && Vertical Fixed Size - Anchors center of control relative to top and bottom borders but remains fixed in size.
 						m.Top * m.ratio,;
-					!BitTest(m.nAnchor, 0) and BitTest(m.nAnchor, 2),; && Bottom ABSOLUTE - Anchors control to Bottom border of container and does not change the distance between the Bottom border.
+					!BitTest(m.nAnchor, 0) and BitTest(m.nAnchor, 2),; && Bottom ABSOLUTE - Anchors control to Bottom border of container at a fixed distance.
 						m.Top + m.delta,;
 						m.Top; && Top ABSOLUTE
 					), 0)

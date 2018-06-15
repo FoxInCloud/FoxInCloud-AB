@@ -3011,24 +3011,24 @@ enddefine && CLASS lFields_Test
 * ========================================
 function cFieldsNotIn && {fr} Champs d'une table ne se trouvant pas dans une autre (utile en cas d'APPEND FROM)
 lparameters ;
-  tcTableFrom; && {fr} Table dont les champs doivent se trouver dans l'autre
-, tcTableIn; && {fr} Table cible où chercher les champs
+  tcTableSrc; && {fr} Table source dont les champs doivent se trouver dans l'autre
+, tcTableTgt; && {fr} Table cible où chercher les champs
 , tcFieldsExclude; && ['WARNING'] {fr} Champs à ignorer dans la recherche
 
 local lcResult as string; && {fr} vide = OK
 , llResult;
-, lcAliasFrom;
-, lcAliasIn;
-, llTableFrom;
-, llTableIn;
-, laFieldFrom[1], lnFieldFrom, liFieldFrom, lcFieldFrom;
-, laFieldIn[1], lnFieldIn;
+, lcAliasSrc;
+, lcAliasTgt;
+, llTableSrc;
+, llTableTgt;
+, laFieldSrc[1], lnFieldSrc, liFieldSrc, lcFieldSrc;
+, laFieldTgt[1], lnFieldTgt;
 , laFieldExclude[1];
 
-* {fr} Si les champs de la table From peuvent être Tabulés
-lnFieldFrom = aFieldsShort(@m.lcResult, @m.laFieldFrom, m.tcTableFrom)
-lnFieldIn   = aFieldsShort(@m.lcResult, @m.laFieldIn, m.tcTableIn)
-llResult = m.lnFieldFrom * m.lnFieldIn > 0 && {fr} doit toujours être vrai
+* {fr} Si les champs de la table Src peuvent être Tabulés
+lnFieldSrc = aFieldsShort(@m.lcResult, @m.laFieldSrc, m.tcTableSrc)
+lnFieldTgt = aFieldsShort(@m.lcResult, @m.laFieldTgt, m.tcTableTgt)
+llResult = m.lnFieldSrc * m.lnFieldTgt > 0 && {fr} doit toujours être vrai
 if m.llResult
 
 	lcResult = ''
@@ -3036,16 +3036,14 @@ if m.llResult
 	* {fr} Tabuler les champs à ignorer
 	alines(laFieldExclude, upper(uDefault(m.tcFieldsExclude, 'WARNING')), 1+4, ',')
 
-	* {fr} Pour chaque champ de la table From
-	for liFieldFrom = 1 to m.lnFieldFrom
-		lcFieldFrom = laFieldFrom[m.liFieldFrom, 1]
+	* {fr} Pour chaque champ de la table Src
+	for liFieldSrc = 1 to m.lnFieldSrc
+		lcFieldSrc = laFieldSrc[m.liFieldSrc, 1]
 
 		* {fr} Si le champ source est absent de la table cible et ne peut être ignoré, ajouter à la liste
-		if .T.;
-		 and empty(ascan(m.laFieldIn, m.lcFieldFrom, 1, -1, 1, 7)) ;
-		 and empty(ascan(laFieldExclude, m.lcFieldFrom, 1, -1, 1, 7))
+		if Empty(Ascan(laFieldTgt, m.lcFieldSrc, 1, -1, 1, 7) + Ascan(laFieldExclude, m.lcFieldSrc, 1, -1, 1, 7))
 
-			lcResult = c2Words(m.lcResult, ',', m.lcFieldFrom)
+			lcResult = c2Words(m.lcResult, ',', m.lcFieldSrc)
 		endif
 	endfor
 endif
@@ -3057,67 +3055,81 @@ endfunc
 function aFieldsShort && {fr} noms de champs courts
 lparameters ;
   result; && @ {fr} résultat (cumulatif)
-, taField; && @ {fr} champs
-, tcDBF; && {fr} table
+, taField; && @ {en} result Fields [long field name, 10-chars field name]
+, tcTable; && {fr} table
 
 && 2018-05-09 thn -- {FiC V 2.27.0-beta.1} {en} to do: remplacer par aFieldLong10()
 
 external array taField
 
-local lnResult as integer;
-, llResult;
-, lcResult;
-, lcAlias, llAlias;
-, lcFields, lnFields;
-, lcField, liField;
-, lcFile
+local nField
 
-lnResult = 0
+nField = aFieldLong10(;
+	 @m.result; && @ {fr} résultat (cumulatif)
+	,@m.taField; && @ {en} Fields [long field name, 10-chars field name]
+	,@m.tcTable; && [Alias()] {en} Table : Alias | Work area | Address | [DB!]Table
+	, .T.; && [.F.] {en} Keep fields that are originally short
+	)
 
-lcAlias = cAlias(m.tcDBF, @m.llAlias,, @m.result)
-llResult = used(m.lcAlias)
-if m.llResult
+ = m.nField > 0 and aColDel(@m.taField, 1) > 0
 
-  lnResult = fcount(m.lcAlias)
-  dimension taField[m.lnResult]
-  for liField = 1 to m.lnResult
-    taField[m.liField] = field(m.liField, m.lcAlias)
-  endfor
-  && to do: refermer la table temporairement pour lire son en-tête
-  for liField = 1 to m.lnResult
-  	lcField = taField[m.liField]
-  	if lenc(m.lcField) > 10
-		  do case
-		  case !Empty(m.lcFields)
-		  case .F.;
-		   or IsExclusive(m.lcAlias) and varSet(@m.lcResult, [it's used Exclusive]);
-		   or !varSet(@m.lcFile, ForcePath(m.tcDBF, Sys(2023)));
-		   or !FileCopy(m.tcDBF, m.lcFile, @m.lcResult) and varSet(@m.lcResult, [can't copy to "] + m.lcFile + '"' + ': ' + m.lcResult);
-		   or varSet(@m.lnFields, Fopen(m.lcFile)) and m.lnFields = -1 and varSet(@m.lcResult, [can't open file "] + m.lcFile + '" low level')
-	  		lcResult = textmerge([Can't get the short field name of '<<m.lcField>>' in '<<m.tcDBF>>' because ] + m.lcResult)
-	  		llResult = cResultAdd(@m.result, m.lcResult)
-	  		lnResult = 0
-	  		exit
-		  otherwise
-				Fseek(m.lnFields, 33)
-				lcFields = Fread(m.lnFields, 32 * m.lnResult)
-		  	Fclose(m.lnFields)
-		  	erase (m.lcFile)
-		  endcase
-	    taField[m.liField] = trim(substr(m.lcFields, 32 * m.liField - 31, 10), chr(0))
-  	endif
-  endfor
-  if m.llAlias
-  	use in (m.lcAlias)
-  endif
-else
-	lcResult = [Can't find table ] + cL(m.tcDBF)
-	llResult = cResultAdd(@m.result, m.lcResult)
-endif
+return m.nField
 
-assert m.llResult message cAssertMsg(m.lcResult)
+*!*	2018-05-16 thn -- {FiC V 2.27.0-beta.2} {en} code prone to "not enough memory" errors when fileToStr(big tables)
+*!*	local lnResult as integer;
+*!*	, llResult;
+*!*	, lcResult;
+*!*	, lcAlias, llAlias;
+*!*	, lcFields, lnFields;
+*!*	, lcField, liField;
+*!*	, lcFile
 
-return m.lnResult
+*!*	lnResult = 0
+
+*!*	lcAlias = cAlias(m.tcTable, @m.llAlias,, @m.result)
+*!*	llResult = used(m.lcAlias)
+*!*	if m.llResult
+
+*!*	  lnResult = fcount(m.lcAlias)
+*!*	  dimension taField[m.lnResult]
+*!*	  for liField = 1 to m.lnResult
+*!*	    taField[m.liField] = field(m.liField, m.lcAlias)
+*!*	  endfor
+*!*	  && to do: refermer la table temporairement pour lire son en-tête
+*!*	  for liField = 1 to m.lnResult
+*!*	  	lcField = taField[m.liField]
+*!*	  	if lenc(m.lcField) > 10
+*!*			  do case
+*!*			  case !Empty(m.lcFields)
+*!*			  case .F.;
+*!*			   or IsExclusive(m.lcAlias) and varSet(@m.lcResult, [it's used Exclusive]);
+*!*			   or !varSet(@m.lcFile, ForcePath(m.tcTable, Sys(2023)));
+*!*			   or !FileCopy(m.tcTable, m.lcFile, @m.lcResult) and varSet(@m.lcResult, [can't copy to "] + m.lcFile + '"' + ': ' + m.lcResult);
+*!*			   or varSet(@m.lnFields, Fopen(m.lcFile)) and m.lnFields = -1 and varSet(@m.lcResult, [can't open file "] + m.lcFile + '" low level')
+*!*		  		lcResult = textmerge([Can't get the short field name of '<<m.lcField>>' in '<<m.tcTable>>' because ] + m.lcResult)
+*!*		  		llResult = cResultAdd(@m.result, m.lcResult)
+*!*		  		lnResult = 0
+*!*		  		exit
+*!*			  otherwise
+*!*					Fseek(m.lnFields, 33)
+*!*					lcFields = Fread(m.lnFields, 32 * m.lnResult)
+*!*			  	Fclose(m.lnFields)
+*!*			  	erase (m.lcFile)
+*!*			  endcase
+*!*		    taField[m.liField] = trim(substr(m.lcFields, 32 * m.liField - 31, 10), chr(0))
+*!*	  	endif
+*!*	  endfor
+*!*	  if m.llAlias
+*!*	  	use in (m.lcAlias)
+*!*	  endif
+*!*	else
+*!*		lcResult = [Can't find table ] + cL(m.tcTable)
+*!*		llResult = cResultAdd(@m.result, m.lcResult)
+*!*	endif
+
+*!*	assert m.llResult message cAssertMsg(m.lcResult)
+
+*!*	return m.lnResult
 endfunc
 
 * ========================================
@@ -4211,7 +4223,10 @@ if m.success
 
 	if m.success and m.llTags
 
-		assert not m.llZap message cAssertMsg(textmerge([on va zapper '<<m.lcAlias>>'...] + CRLF + [Presser 'Cancel' pour arrêter le programme] + CRLF + [Presser 'Ignore' pour continuer]))
+		assert not m.llZap message cAssertMsg(textmerge(ICase(;
+						cLangUser() = 'fr', [On va zapper '<<m.lcAlias>>'...] + CRLF + [Presser 'Cancel' pour arrêter le programme] + CRLF + [Presser 'Ignore' pour continuer],; && copy-paste this line to add another language support
+																[Table '<<m.lcAlias>>' will now be zapped...] + CRLF + [Press 'Cancel' to stop the program] + CRLF + [Press 'Ignore' to carry on]; && Default: English
+					)))
 		if m.llZap
 			zap && {fr} SELECT plus haut ou CREATE TABLE a sélectionné la table
 		endif
@@ -4220,9 +4235,10 @@ if m.success
 		for each lcTag in laTag
 			if vartype(m.lcTag) == 'C' && {fr} a pu être supprimé ci-dessus
 				if m.llAlias
-					wWAIT(textmerge(icase(;
+					wWAIT(textmerge(ICase(;
 						cLangUser() = 'fr', [Indexation de la table '<<m.lcAlias>>' en cours (<<cTronc(m.lcTag)>>) NE PAS INTERROMPRE !],; && copy-paste this line to add another language support
-																[Indexing table '<<m.lcAlias>>' (<<cTronc(m.lcTag)>>) DO NOT INTERRUPT!])); && Default: English
+																[Indexing table '<<m.lcAlias>>' (<<cTronc(m.lcTag)>>) DO NOT INTERRUPT!]; && Default: English
+					));
 					, 'WINDOW NOWAIT NOCLEAR')
 				endif
 				&lcTag
@@ -4302,6 +4318,7 @@ lparameters ;
 , taTagInfo; && @ {fr} Spécifications d'index selon aTagInfo() [Tag, Type, Key, Filter, Order, Collation]
 , tcAlias; && {fr} Alias, vide si création de la table
 , tlZap && @ [.F.] {fr} Un index candidat doit être créé
+
 external array taResult, taTagInfo
 tlZap = .f.
 
@@ -4355,7 +4372,7 @@ index on Test tag Test binary
 set collate to "GENERAL"
 index on Test tag Test binary
 ? ataginfo(aa) && {fr} collation = 'machine'
-index on Test tag Test binary collate 'general' && {fr} invalid collation sequence
+index on Test tag Test binary collate 'general' && {en} invalid collation sequence
 #endif
 
 			lcType = iif(m.lcType == 'REGULAR', '', m.lcType)
@@ -4366,7 +4383,7 @@ index on Test tag Test binary collate 'general' && {fr} invalid collation sequen
 			 and not m.tlZap;
 			 and inlist(m.lcType, 'CANDIDATE', 'PRIMARY')
 
-				tlZap = not lTableExpr(m.lcKey, m.tcAlias)
+				tlZap = !lTableExpr(m.lcKey, m.tcAlias) && {fr} Une expression est valide sur une table
 				if not m.tlZap
 
 					* {fr} Vérifier l'absence de doublon
@@ -4374,6 +4391,10 @@ index on Test tag Test binary collate 'general' && {fr} invalid collation sequen
 					tlZap = VFPselectExecute(textmerge([SELECT <<m.lcKey>> AS CAND, Count(*) AS _COUNT FROM <<m.tcAlias>> <<m.lcSelect>> GROUP BY CAND HAVING _COUNT > 1])) > 0
 					use && {fr} Cursor créé par VFPselectExecute()
 				endif
+				assert !m.tlZap message cAssertMsg(textmerge(ICase(;
+					cLangUser() = 'fr', ['<<m.tcAlias>>' va devoir être zappée à cause de l'index],; && copy-paste this line to add another language support
+															['<<m.tcAlias>>' will have to be zapped because of index]; && Default: English
+					)) + ' ' + cL(m.lcKey))
 			endif
 
 			lnResult = m.lnResult + 1
@@ -4812,8 +4833,11 @@ lparameters ;
 , tcField; && {fr} Champ à examiner
 , tcAlias && [Alias courant]
 
-local llResult, lnResult
-lnResult = 0 && {fr} nombre de specs rendues
+local lnResult; && {fr} nombre de specs rendues
+, llResult;
+, laFields[1], lnField
+
+lnResult = 0
 
 llResult = aClear(@m.taFieldSpecs)
 assert m.llResult message cAssertMsg(textmerge(icase(;
@@ -4830,17 +4854,13 @@ if m.llResult
 		) + cLitteral(m.tcAlias))
 	if m.llResult
 
-		llResult = vartype(m.tcField) == 'C' and lField(m.tcField, m.tcAlias)
+		llResult = vartype(m.tcField) == 'C' and varSet(@m.tcField, upper(alltrim(m.tcField))) and lField(m.tcField, m.tcAlias)
 		assert m.llResult message cAssertMsg(textmerge([Le champ <<m.tcField>> est introuvable dans l'alias <<m.tcAlias>>]))
 		if m.llResult
-			tcField = upper(alltrim(m.tcField))
-
-			local laFields[1], lnField
-			afields(laFields, m.tcAlias)
-			lnField = ascan(laFields, m.tcField, 1, -1, 1, 2+4)
+			lnResult = afields(laFields, m.tcAlias)
 			lnResult = Alen(laFields, 2)
 			dimension taFieldSpecs[m.lnResult]
-			acopy(laFields, taFieldSpecs, m.lnField, m.lnResult, 1)
+			lnResult = acopy(laFields, taFieldSpecs, ascan(laFields, m.tcField, 1, -1, 1, 2+4), m.lnResult, 1)
 		endif
 	endif
 endif
@@ -6854,8 +6874,14 @@ enddefine && {fr} CLASS abOrder
 * ========================================
 
 * ========================================
-function abFilter(cAlias, cFilter, result) && {en} abFilter object
+function abFilter && {en} abFilter object
+lparameters ;
+  cAlias; && [Alias()]
+, cFilter; && ['']
+, result; && @
+
 return createobject('abFilter', m.cAlias, m.cFilter, @m.result)
+endfunc
 
 * ========================================
 define class abFilter as GA_LIGHTWEIGHT_CLASS && {fr} Sauve Filter(<Alias>), USE <Alias> si nécessaire, applique un autre filtre, rétablit en sortie
@@ -6863,7 +6889,12 @@ define class abFilter as GA_LIGHTWEIGHT_CLASS && {fr} Sauve Filter(<Alias>), USE
 hidden cAlias, cFilter
 
 * -------------------------------
-protected procedure init(cAlias, cFilter, Result)
+protected procedure init
+lparameters ;
+  cAlias; && [Alias()]
+, cFilter; && ['']
+, result; && @
+
 
 local success as Boolean;
 , lUsed as Boolean
@@ -8426,11 +8457,11 @@ if m.this.lResult
 	if m.this.lResult
 
 		* {fr} si une seule des tables est dans une base de données, tabuler les correspondances entre champs longs et courts (10 caractères)
-		local llFieldLongSrce, llFieldLongDest, lnFieldLong10, laFieldLong10[1]
+		local llFieldLongSrce, llFieldLongDest, lnFieldLong10, laFieldLong10[1], cResult
 		llFieldLongSrce = CursorGetProp("SourceType", m.tcAliasSrce)%100 # 3 or !Empty(CursorGetProp("Database", m.tcAliasSrce))
 		llFieldLongDest = CursorGetProp("SourceType", m.tcAliasDest)%100 # 3 or !Empty(CursorGetProp("Database", m.tcAliasDest))
 		lnFieldLong10 = Iif(m.llFieldLongSrce # m.llFieldLongDest;
-			, aFieldLong10(@m.laFieldLong10, Iif(m.llFieldLongSrce, m.tcAliasSrce, m.tcAliasDest));
+			, aFieldLong10(@m.cResult, @m.laFieldLong10, Iif(m.llFieldLongSrce, m.tcAliasSrce, m.tcAliasDest));
 			, 0;
 			)
 
@@ -8858,46 +8889,55 @@ return Ltrim(m.result, ',', ' ')
 endfunc
 
 * =============================================
-function aFieldLong10 && {en} long field as renamed in a free copy of a table or cursor && {fr} noms de champs de plus de 10 caractères dans une copie libre d'une table ou curseur
+function aFieldLong10 && {en} Long field as renamed in a free copy of a table or cursor && {fr} noms de champs de plus de 10 caractères dans une copie libre d'une table ou curseur
 lparameters ;
-  laField; && @ {en} result [long field name, 10-chars field name]
+  result; && @ {fr} résultat (cumulatif)
+, laField; && @ {en} Fields [long field name, 10-chars field name]
 , lcTable; && [Alias()] {en} Table : Alias | Work area | Address | [DB!]Table
+, llAllFields; && [.F.] {en} Keep fields that are originally short
+
+external array laField
 
 && see in VFP help: "Field Creation" > "Considerations for Choosing Field Names"
 
-local result as Integer; && {en} number of fields with a name longer than 10 characters (as of  column # 1 of result array)
+local nResult as Integer; && {en} number of fields with a name longer than 10 characters (in column # 1 of result array), .null. if error
 , cAlias as String;
 , lAlias as Boolean;
 , aa[1] as String;
 , iField as Integer;
-, cField as String;
 
-external array laField
-
-result = 0
-cAlias = cAlias(m.lcTable, @m.lAlias)
+nResult = .null.
+cAlias = cAlias(m.lcTable, @m.lAlias,, @m.result)
 if Used(m.cAlias)
-	result = AFields(aa, m.cAlias)
-	for iField = 1 to m.result
-		cField = aFieldLong10_cField(@m.laField, m.aa[m.iField, 1])
+
+	nResult = AFields(aa, m.cAlias)
+
+	* set short field name in column 2
+	for iField = 1 to m.nResult
+		aFieldLong10_cField(@m.laField, m.aa[m.iField, 1])
 	endfor
-	for iField = m.result to 1 step -1
-		if Lenc(m.laField[m.iField, 1]) <= 10
-			result = m.result - 1
-			Adel(laField, m.iField)
+
+	* remove fields originally short
+	if !lTrue(m.llAllFields)
+		for iField = m.nResult to 1 step -1
+			if Lenc(m.laField[m.iField, 1]) <= 10
+				nResult = m.nResult - 1
+				Adel(laField, m.iField)
+			endif
+		endfor
+		if m.nResult > 0
+			dimension laField[m.nResult, 2]
+		else
+			aClear(@m.laField)
 		endif
-	endfor
-	if m.result > 0
-		dimension laField[m.result, 2]
-	else
-		aClear(@m.laField)
 	endif
+
 	if m.lAlias
 		use in (m.cAlias)
 	endif
 endif
 
-return m.result
+return m.nResult
 endfunc
 
 * ---------------------------------------------

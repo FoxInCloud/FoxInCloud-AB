@@ -319,7 +319,7 @@ lparameters ;
   tcChain; && {fr} Chaine de caractères à traiter
 , tcChar && [space(1)] {fr} Caractère dont les répétitions sont à éliminer
 
-if vartype(m.tcChain) = 'C'
+if ga_Type_IsChar(m.tcChain, .T.)
 
 	local lcResult, lcChar, lcChars
 
@@ -2036,10 +2036,10 @@ endif
 return m.llResult
 
 * ===================================================================
-function cVFPNameSubStr && {fr} Nom VFP commençant à partir d'une position donnée dans une chaîne
+function cVFPNameSubstr && {fr} Nom VFP commençant à partir d'une position dans une chaîne
 lparameters ;
   tcChain; && {fr} Chaine de caractère
-, tnPos && {fr} Position du nom dans la chaîne; Si @, devient la position immédiatement après le nom trouvé
+, tiPos && {fr} Position du nom dans la chaîne; Si @, devient la position immédiatement après le nom trouvé
 
 local lcResult;
 , lcChar;
@@ -2048,26 +2048,27 @@ local lcResult;
 lcResult = ''
 
 * {en} Move until first non-space character
-do while substr(m.tcChain, m.tnPos, 1) == space(1)
-	tnPos = m.tnPos + 1
+do while substr(m.tcChain, m.tiPos, 1) == space(1)
+	tiPos = m.tiPos + 1
 enddo
 
 * {en} Check first character is alpha or '_'
-lcChar = substr(m.tcChain, m.tnPos, 1)
+lcChar = substr(m.tcChain, m.tiPos, 1)
 llChar = isalpha(m.lcChar) or m.lcChar == '_'
 
 * {en} Check following characters
 do while m.llChar
 	lcResult = m.lcResult + m.lcChar
-	tnPos = m.tnPos + 1
-	lcChar = substr(m.tcChain, m.tnPos, 1)
-	llChar = isalpha(m.lcChar) or m.lcChar == '_' or isdigit(m.lcChar)
+	tiPos = m.tiPos + 1
+	lcChar = substr(m.tcChain, m.tiPos, 1)
+	llChar = IsAlpha(m.lcChar) or m.lcChar == '_' or IsDigit(m.lcChar)
 enddo
 
 return m.lcResult
+endfunc
 
 * --------------------
-procedure cVFPNameSubStr_Test && {fr} teste cVFPNameSubStr()
+procedure cVFPNameSubstr_Test && {fr} teste cVFPNameSubstr()
 
 local loTest as abUnitTest of abDev.prg, loPoint as abSet of abDev.prg
 loTest = newobject('abUnitTest', 'abDev.prg')
@@ -3264,7 +3265,7 @@ function cEscaped && {fr} Chaîne compatible HTTP / XML
 lparameters tcChain
 
 return iif(vartype(m.tcChain) == 'C';
-	, cEscaped_Misc(cEscaped_Punc(cEscaped_Base(m.tcChain)));
+	, cEscaped_Misc(cEscaped_Punc(cEscaped_XML(m.tcChain)));
 	, '';
 	)
 endfunc
@@ -3284,6 +3285,16 @@ return strtran(strtran(strtran(strtran(strtran(strtran(chrtran(m.tcChain; && htt
 	, [&#38;#38;], '&#38;'); && {en} encoded twice
 	, [&#38;#60;], '&#60;'); && {en} encoded twice
 	, [&#38;#62;], '&#62;'); && {en} encoded twice
+
+&& 2018-05-24 thn -- {en} should work but no
+*!*	return strtran(strtran(strtran(strtran(strtran(chrtran(m.tcChain; && http://www.w3.org/TR/2008/REC-xml-20081126/#charsets Char ::=  #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]
+*!*		, NON_XML, ''); && modify file abTxt.h
+*!*		, [&#], '~#~#~#~#');
+*!*		, [&], '&#38;'); && '&amp;'
+*!*		, [<], '&#60;'); && '&lt;'
+*!*		, [>], '&#62;'); && '&gt;'
+*!*		, '~#~#~#~#', [&#]);
+*!*		, [&#38;#], '&#'); && {en} encoded twice
 
 endfunc
 
@@ -4364,4 +4375,35 @@ return Iif(lProperty(m.toControl, 'FontName');
 	, nLineInterPX(m.toControl.FontName, m.toControl.FontSize, coFontStyle(m.toControl));
 	, .null.;
 	)
+endfunc
+
+* -------------------------------------------------------------
+function atcFirst && {fr} Position du premier caractère présent dans une chaîne
+lparameters ;
+  tuChars; && {fr} caractères à chercher
+, tcChain; && {fr} chaîne où chercher
+
+external array tuChars
+
+local liResult as Integer;
+, laChars[1], lcChar, liChar;
+
+do case
+case !ga_Type_IsChar(m.tcChain, .T.)
+	return .null.
+case Type('tuChars', 1) == 'A'
+	dimension laChars[Alen(m.tuChars)]
+	Acopy(tuChars, laChars)
+case ga_Type_IsChar(m.tuChars, .T.)
+otherwise
+	return .null.
+endcase	
+
+liResult = .null.
+for each lcChar in m.laChars
+	liChar = At_c(Transform(m.lcChar), m.tcChain)
+	liResult = ICase(m.liChar = 0, m.liResult, IsNull(m.liResult), m.liChar, Min(m.liChar, m.liResult))
+endfor
+
+return Nvl(m.liResult, 0)
 endfunc

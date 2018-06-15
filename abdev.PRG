@@ -1139,31 +1139,40 @@ function cCallingModules && {en} Calling Modules {fr} Modules appelants
 lparameters ;
   tlCurrent; && [.F.] {en} Include current module's name {fr} Inclure le nom du module courant
 , tcInfo; && [Name] {en} 'Name', 'Address', 'Path', 'Object' or 'Line up'
-, tlLineNo; && [.F.] {en} Add Line number in the object source file
-
-local lcResult;
-, liStack;
-, lnStack;
-, lcStack;
-, aa[1]; && [1- Call Stack Level, 2- Current program filename, 3- Module or Object name, 4- Module or Object Source filename, 5- Line number in the object source file, 6- Source line contents]
+, tlLineNum; && [.F.] {en} Add Line number in the object source file
 
 tcInfo = Upper(Left(Ltrim(Evl(m.tcInfo, 'Name')), 1))
-tlLineNo = lTrue(m.tlLineNo)
+tlLineNum = lTrue(m.tlLineNum)
 
-if m.tlLineNo
-	lnStack = AStackInfo(aa) && The value returned is the number of program levels or rows of the returned array.
-endif
+local lcResult;
+, aa[1]; && [1- Call Stack Level, 2- Current program filename, 3- Module or Object name, 4- Module or Object Source filename, 5- Line number in the object source file, 6- Source line contents]
+, liStack, lnStack;
+, lnDigit;
+, llWeb;
 
 lcResult = ''
-for liStack = 1 to (Iif(m.tlLineNo, m.lnStack, program(-1)) - iif(lTrue(m.tlCurrent), 1, 2))
-	lcStack = Iif(m.tlLineNo;
-		, m.aa[m.liStack, Iif(m.tcInfo == 'N', 3, 2)];
-		, cModuleInfo(Sys(16, m.liStack), m.tcInfo);
-		)
-	lcResult = m.lcResult + ' > ' + textmerge('';
-		+ "<<m.liStack>>_<<m.lcStack>>"; && <<Chr(160)>>
-		+ Iif(m.tlLineNo, " (<<Evl(m.aa[m.liStack, 5], 'N/A')>>)", "");
-		)
+
+lnStack = Iif(m.tlLineNum;
+  , AStackInfo(aa); && The value returned is the number of program levels or rows of the returned array.
+  , program(-1);
+  ) - iif(lTrue(m.tlCurrent), 1, 2)
+lnDigit = ICase(m.lnStack < 10, 1, m.lnStack < 100, 2, 3)
+llWeb = wlWeb()
+
+for liStack = 1 to m.lnStack
+	lcResult = m.lcResult;
+		+ ' > ';
+		+ padl(m.liStack, m.lnDigit, '0');
+		+ Iif(llWeb, '&#160;', Chr(160));
+		+ Iif(m.tlLineNum;
+		  , m.aa[m.liStack, Iif(m.tcInfo == 'N', 3, 2)];
+		  , cModuleInfo(Sys(16, m.liStack), m.tcInfo);
+		  );
+		+ Iif(m.tlLineNum;
+		  , ' (' + Transform(Evl(m.aa[m.liStack, 5], 'N/A')) + ')';
+		  , '';
+		  );
+		+ ''
 endfor
 
 return Lower(Ltrim(m.lcResult, ' ', '>'))
@@ -4374,16 +4383,52 @@ endif
 return m.lcResult
 
 * ===========================
+function oLocalized && {fr} Objet avec chaînes localisées dans propriétés nommées selon la langue
+lparameters ;
+  oLocal; && @ {fr} Au moins un contenu localisé a été trouvé
+, tcString; && {fr} Chaîne à localiser
+
+if !ga_Type_IsChar(m.tcString, .T.)
+	return .F.
+endif
+
+local success;
+, iLang, cLang, cCont
+
+oLocal = Iif(Vartype(m.oLocal) == 'O', m.oLocal, CreateObject('Empty'))
+success = .F.
+for iLang = 1 to GetWordCount(SUPPORTED_LANG, ',') && SUPPORTED_LANG: modify file abDev.h
+	cLang = GetWordNum(SUPPORTED_LANG, m.iLang, ',')
+	cCont = cLocalized(m.tcString, m.cLang, .T.)
+	do case
+	case !Empty(m.cCont)
+		AddProperty(m.oLocal, m.cLang, m.cCont)
+		success = .T.
+	case !lProperty(m.oLocal, m.cLang)
+		AddProperty(m.oLocal, m.cLang, '')
+	endcase
+endfor
+
+return m.success
+endfunc
+
+* ===========================
 function cLocalized && {fr} Chaîne localisée
 lparameters ;
   tcString; && {fr} Chaîne à localiser
 , tcLangUser; && [cLangUser()] {fr} Langue de l'utilisateur
+, tlDefNo; && [.F.] {fr} Ne pas servir de valeur défaut
 
-&& modify command abTxt > abLocalized() pretty similar
+&& see also: modify command abTxt > abLocalized()
+
+if Atc('{', m.tcString) != Atc('}', m.tcString) - 3 && not localized
+	return m.tcString
+endif
 
 local result as string;
 , lcEN as string;
 
+tlDefNo = lTrue(m.tlDefNo)
 lcEN = cLocalized_cLang(m.tcString, 'en')
 
 tcLangUser = iif(ga_Type_IsChar(m.tcLangUser, .t.);
@@ -4397,12 +4442,13 @@ tcLangUser = iif(ga_Type_IsChar(m.tcLangUser, .t.);
 
 result = cLocalized_cLang(m.tcString, m.tcLangUser)
 
-return Evl(c2Words(;
+result = c2Words(;
 	  Evl(Left(m.tcString, at_c('{', m.tcString)-1), ''); && {en} before the first localization tag {??}
 	, ' ';
-	, alltrim(Evl(m.result, m.lcEN), CR, LF, ' ', chr(9));
-	), m.tcString)
+	, alltrim(Iif(lTrue(m.tlDefNo), m.result, Evl(m.result, m.lcEN)), CR, LF, ' ', chr(9));
+	)
 
+return Iif(m.tlDefNo, m.result, Evl(m.result, m.tcString))
 endfunc
 
 * ===========================
@@ -4435,7 +4481,7 @@ do while .T.
 	endcase
 enddo
 
-return Iif(m.iNext > 1, Leftc(m.result, m.iNext-1), m.result)
+return Alltrim(Iif(m.iNext > 1, Leftc(m.result, m.iNext-1), m.result))
 endfunc
 
 * ------------------------------------
@@ -4454,15 +4500,16 @@ endproc
 
 * -----------------------------------
 function cLangUser && {fr} Code langue de l'utilisateur courant
-lparameters tuLocale && @ [.F.] {fr} Code langue avec locale (genre 'fr-fr') ou langue forcée
+lparameters ;
+  tuLocale; && @ [.F.] {fr} Code langue avec locale (genre 'fr-fr') ou langue forcée
 
 local lcResult as String;
 , lcType;
 , llForce;
 , loShell as wScript.shell
 
-lcType = vartype(m.tuLocale)
-llForce = m.lcType == 'C' and not empty(m.tuLocale)
+lcType = Vartype(m.tuLocale)
+llForce = m.lcType == 'C' and !Empty(m.tuLocale)
 
 do case
 case !m.llForce;
@@ -5038,7 +5085,10 @@ return m.llResult
 * -----------------------------------
 hidden function cResult && {fr} Résultat de test(s)
 
-local lcResult
+local lcResult;
+, lnCoverage, lnElapsed, lnElapsedMin, lnElapsedMax, lnElapsedAvg, lnSuccess;
+, lnTest, lnCoverageLess, lcCoverage, lnFailure;
+
 lcResult = ''
 
 * {fr} Si le module est défini
@@ -5050,10 +5100,8 @@ if .t.;
 	if m.this.nTest > 0
 
 		* {fr} Pour chaque test réalisé
-		local lnCoverage, lnElapsed, lnElapsedMin, lnElapsedMax, lnElapsedAvg, lnSuccess
 		lnElapsedMin = 10^10
 		store 0 to m.lnCoverage, m.lnElapsedMax, m.lnElapsedAvg, m.lnSuccess
-		local lnTest
 		for lnTest = 1 to this.nTest
 
 			* {fr} Synthétiser les résultats
@@ -5070,21 +5118,20 @@ if .t.;
 		endfor
 
 		* {fr} Rectifier le temps moyen en cas de coverage sur certains tests
-		local lnCoverageLess
 		lnCoverageLess = this.nTest - m.lnCoverage
 		if m.lnCoverageLess > 0
 			lnElapsedAvg = m.lnElapsedAvg / m.lnCoverageLess
 		endif
+		lcCoverage = Iif(m.lnCoverage > 0, [ dans '] + m.this.cCoverageAddr + ['], '')
 
 		* {fr} Compter les échecs
-		local lnFailure
 		lnFailure = this.nTest - m.lnSuccess
 
 		text TO m.lcResult TEXTMERGE NOSHOW FLAGS 1
 ===========================================
 <<Datetime()>>
 Module : <<DisplayPath(m.this.cAddress, 50)>>!<<this.cModule>>()
-Résultats de <<m.this.nTest>> test<<Iif(this.nTest = 1, '', 's')>> dont <<m.lnCoverage>> avec coverage dans '<<m.this.cCoverageAddr>>'
+Résultats de <<m.this.nTest>> test<<Iif(this.nTest = 1, '', 's')>> dont <<m.lnCoverage>> avec coverage<<m.lcCoverage>>
 <<Iif(m.lnCoverageLess > 0, "Temps d'exécution sans coverage Mini | Moyen | Maxi : " + this.cMS(m.lnElapsedMin) + '|' + this.cMS(m.lnElapsedAvg) + '|' + this.cMS(m.lnElapsedMax), '')>>
 
 		ENDTEXT
@@ -7563,7 +7610,7 @@ RETURN Lower(SUBSTR(TRANSFORM(H0,"@0"),3) + ;
 		)
 
 * ---------------------------------------------
-PROCEDURE SHA1_ProcessBloc && {en} SHA1() private
+PROCEDURE SHA1_ProcessBloc && [Internal] {en} SHA1() private
 LPARAMETERS cBloc
 
 LOCAL I, A, B, C, D, E, nTemp

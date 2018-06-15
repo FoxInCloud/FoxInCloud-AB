@@ -2248,7 +2248,7 @@ return iif(m.llResult or vartype(m.toResult) == 'O';
 endfunc
 
 * ========================================
-procedure objectOfXML_object && {en} [objectOfXML() private] retrieves or create a clean source object {fr}  [privée de objectOfXML()] retrouve ou nettoie l'objet source
+procedure objectOfXML_object && [Internal] {en} [objectOfXML() private] retrieves or create a clean source object {fr}  [privée de objectOfXML()] retrouve ou nettoie l'objet source
 lparameters ;
   tcXML as string; && {en} XML produced by cXMLofObject() {fr} XML produit par cXMLofObject()
 , toResult as object; && [NewObject(class, classlib)] {en} Object to populate {fr} Objet à peupler
@@ -2354,7 +2354,7 @@ endif
 endproc
 
 * ========================================
-function objectOfXML_object_oClass(lcClass, lcClassLib, loClass) && {en} [objectOfXML_object() private] class instance {fr}  [privée de objectOfXML_object()] instance d'une classe
+function objectOfXML_object_oClass(lcClass, lcClassLib, loClass) && [Internal] {en} [objectOfXML_object() private] class instance {fr}  [privée de objectOfXML_object()] instance d'une classe
 && 2018-01-10 thn -- {FiC V 2.26.1-beta.1} {en} created
 try
 	loClass = newobject(m.lcClass, m.lcClassLib, 0)
@@ -2365,7 +2365,7 @@ return m.loClass
 endfunc
 
 * ========================================
-procedure objectOfXML_lChild as Boolean && {en} identifies child object patterns in XML [objectOfXML() private] {fr} repère les objets enfants dans le XML [privée de objectOfXML()] 
+procedure objectOfXML_lChild as Boolean && [Internal] {en} [objectOfXML() private] identifies child object patterns in XML {fr} [privée de objectOfXML()] repère les objets enfants dans le XML 
 lparameters ;
   tcXML as string; && @ {en} XML produced by cXMLofObject() {fr} XML produit par cXMLofObject()
 , tcResult as string; && @ {en} Cumulative result {fr} Résultat (cumulatif)
@@ -2468,7 +2468,7 @@ return m.llResult or cResultAdd(@m.tcResult, m.lcResult)
 endproc
 
 * ========================================
-procedure objectOfXML_propSet && {en} [objectOfXML() private] restores object properties {fr}  [privée de objectOfXML()] restaure les propriétés de l'objet
+procedure objectOfXML_propSet && [Internal] {en} [objectOfXML() private] restores object properties {fr}  [privée de objectOfXML()] restaure les propriétés de l'objet
 lparameters ;
   tcXML as string; && {en} XML produced by cXMLofObject() {fr} XML produit par cXMLofObject()
 , toResult as object; && [NewObject(class, classlib)] {en} Object to populate {fr} Objet à peupler
@@ -2934,12 +2934,12 @@ lparameters ;
 
 external array aMethod
 
-local Result as integer; && {fr} Number of methods found
+local nMethod as integer; && {fr} Number of methods found
 , nMember as integer;
 , iMember as integer;
 , cTypes as string;
 
-Result = 0
+nMethod = 0
 nMember = aMembers(;
 	m.aMethod;
 	, m.oSrce;
@@ -2950,19 +2950,18 @@ if m.nMember > 0
 	cTypes = iif(lTrue(m.lEventsNo), 'm', 'EM')
 	for iMember = m.nMember to 1 step -1
 		if upper(left(m.aMethod[m.iMember, 2], 1)) $ m.cTypes
-			Result = m.Result + 1
+			nMethod = m.nMethod + 1
 		else
 			adel(m.aMethod, m.iMember)
 		endif
 	endfor
-	if m.Result > 0
+	if m.nMethod > 0
 		aColDel(@m.aMethod, 2)
-		dimension m.aMethod[m.result]
+		dimension m.aMethod[m.nMethod]
 	endif
 endif
 
-return m.Result
-
+return m.nMethod
 endfunc
 
 * -----------------------------------------

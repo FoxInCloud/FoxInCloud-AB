@@ -74,7 +74,6 @@
 #define SW_RESTORE 9
 #define SW_SHOWDEFAULT 10
 
-
 && {fr} contribution Gregory Adam : http://www.atoutfox.org/nntp.asp?ID=0000015802
 && declare short GetKeyState in User32 integer vKey
 #define VK_LSHIFT	(0xA0) && {en} Left SHIFT key
@@ -87,3 +86,5 @@
 #define VK_LSHIFT_DOWN	bitTest(GetKeyState(VK_LSHIFT), 31)
 #define VK_RSHIFT_DOWN	bitTest(GetKeyState(VK_RSHIFT), 31)
 #define VK_SHIFT_DOWN	VK_LSHIFT_DOWN or VK_RSHIFT_DOWN
+
+#define SUPPORTED_LANG	"fr,en,de,es,pt,it"

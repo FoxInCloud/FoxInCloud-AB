@@ -28,11 +28,11 @@ external Array taResult && {fr} pour le gestionnaire de projet
 
 local lnResult; && {fr} nombre de lignes du Résultat
 , llResult;
-, lnChar
+, liChar
 
 lnResult = 0
 
-llResult = aClear(@m.taResult) and vartype(m.tcString) == 'C'
+llResult = aClear(@m.taResult) and ga_Type_IsChar(m.tcString, .T.)
 assert m.llResult message cAssertMsg(textmerge(icase(;
 	cLangUser() = 'fr',	[Tableau attendu en premier paramètre : <<cL(m.taResult)>>, chaîne en 2nd <<cL(m.tcString)>> !],; && copy-paste this line to add another language support
 						[Array expected as 1st parameter: <<cL(m.taResult)>>, String as 2nd <<cL(m.tcString)>>!]; && Default: English
@@ -43,13 +43,74 @@ if m.llResult
 	if m.lnResult > 0
 
 		dimension taResult[m.lnResult]
-		for lnChar = 1 to m.lnResult
-			taResult[m.lnChar] = substrc(m.tcString, m.lnChar, 1)
+		for liChar = 1 to m.lnResult
+			taResult[m.liChar] = substrc(m.tcString, m.liChar, 1)
 		endfor
 	endif
 endif
 
 return m.lnResult
+endfunc
+
+* ===================================================================
+function aOfList && {fr} Tabule les membre d'une liste {en} splits items of a list into an Array
+lparameters ;
+  taResult; && @ {fr} Résultat {en} Result
+, tcList; && {fr} Liste {en} List
+, tlStrings; && [.F.] {fr} Les éléments de la liste sont des chaînes, sinon des littéraux de tous types (défaut) {en} List elements are strings, else literals of any type (default)
+
+tlStrings = lTrue(m.tlStrings)
+
+local lnResult; && {fr} nombre de lignes du Résultat
+, llResult;
+, lcList;
+, lnSep, liSep, liSep_;
+, lcElt;
+
+lnResult = .null.
+
+llResult = aClear(@m.taResult);
+ and ga_Type_IsChar(m.tcList, .T.);
+ and varSet(@m.lcList, cStringsMasked(m.tcList));
+ and ',' $ m.lcList;
+ and .T.
+assert m.llResult message cAssertMsg(textmerge(icase(;
+	cLangUser() = 'fr',	[Tableau attendu en premier paramètre : <<cL(m.taResult)>>, liste en 2nd <<cL(m.tcList)>> !],; && copy-paste this line to add another language support
+						[Array expected as 1st parameter: <<cL(m.taResult)>>, List as 2nd <<cL(m.tcList)>>!]; && Default: English
+	)))
+if m.llResult
+	lnResult = Occurs(',', m.lcList) + 1
+	dimension taResult[m.lnResult]
+	for lnSep = 0 to m.lnResult - 1
+		liSep  = Iif(m.lnSep = 0, 0, Atc(',', m.lcList, m.lnSep))
+		liSep_ = Iif(m.lnSep = m.lnResult, 0, Atc(',', m.lcList, m.lnSep + 1))
+		lcElt = Alltrim(Iif(m.liSep_ > 0;
+			, Substrc(m.tcList, m.liSep + 1, m.liSep_ - m.liSep - 1);
+			, Substrc(m.tcList, m.liSep + 1);
+			))
+		taResult[m.lnSep + 1] = Iif(m.tlStrings, m.lcElt, Evaluate(m.lcElt))
+	endfor
+endif
+
+return m.lnResult
+endfunc
+
+* --------------------------------------
+procedure aOfList_Test
+
+local abUnitTest as abUnitTest of abDev.prg, laTest[1]
+abUnitTest = newobject('abUnitTest', 'abDev.prg')
+
+local array aa[1]
+
+abUnitTest.Test(4, @m.aa, [1, "test", 'tset', .T.])
+abUnitTest.assert(1, m.aa[1])
+abUnitTest.assert("test", m.aa[2])
+abUnitTest.assert("tset", m.aa[3])
+abUnitTest.assert(.T., m.aa[4])
+
+return m.abUnitTest.result()
+endproc
 
 * ===================================================================
 function aCopy_ && {en} Copy an Array into another while making sure dimensions match
@@ -208,15 +269,15 @@ taTest1[3,3] = "I"
 * -----------------------------------------------------------------
 procedure aAppend_Test && {fr} Teste aAppend()
 
-local loUnitTest as abUnitTest of abDev.prg
-loUnitTest = newobject('abUnitTest', 'abDev.prg')
+local abUnitTest as abUnitTest of abDev.prg
+abUnitTest = newobject('abUnitTest', 'abDev.prg')
 
 public Array laTest[3, 3], laTest1[3, 3] && {fr} PUBLIC pour l'examiner après test
 
-loUnitTest.Test(6, @m.laTest, @m.laTest1)
-loUnitTest.assert(6, alen(laTest, 1))
+abUnitTest.Test(6, @m.laTest, @m.laTest1)
+abUnitTest.assert(6, alen(laTest, 1))
 
-return m.loUnitTest.Result()
+return m.abUnitTest.Result()
 
 * ===================================================================
 function aSubstract && {fr} Soustrait les éléments d'un Tableau à un autre {en} remove some elements from an Array to another
@@ -256,18 +317,18 @@ return m.lnResult
 * -------------------------------------------------------------
 procedure aSubstract_Test && {fr} Teste aSubstract()
 
-local loUnitTest as abUnitTest of abDev.prg, laDest[1], laSrce[1]
+local abUnitTest as abUnitTest of abDev.prg, laDest[1], laSrce[1]
 
-loUnitTest = newobject('abUnitTest', 'abDev.prg')
+abUnitTest = newobject('abUnitTest', 'abDev.prg')
 alines(laDest, 'toto,tutu,junk,foo,bar', ',')
 alines(laSrce, 'Tutu,fOo', ',')
 
-loUnitTest.Test(3, @m.laDest, @m.laSrce)
-loUnitTest.assert('toto', laDest[1])
-loUnitTest.assert('junk', laDest[2])
-loUnitTest.assert('bar', laDest[3])
+abUnitTest.Test(3, @m.laDest, @m.laSrce)
+abUnitTest.assert('toto', laDest[1])
+abUnitTest.assert('junk', laDest[2])
+abUnitTest.assert('bar', laDest[3])
 
-return loUnitTest.Result()
+return abUnitTest.Result()
 
 * ===================================================================
 function aFilter && {fr} Filtre les éléments d'un Tableau par un autre {en} Filters the elements of an Array by another Array
@@ -331,26 +392,26 @@ endfunc
 * -------------------------------------------------------------
 procedure aFilter_Test && {fr} Teste aFilter()
 
-local loUnitTest as abUnitTest of abDev.prg, laDest[1], laSrce[1]
+local abUnitTest as abUnitTest of abDev.prg, laDest[1], laSrce[1]
 
-loUnitTest = newobject('abUnitTest', 'abDev.prg')
-
-alines(laDest, 'toto,tutu,junk,foo,bar', ',')
-alines(laSrce, 'Tutu,fOo', ',')
-
-loUnitTest.Test(2, @m.laDest, @m.laSrce)
-loUnitTest.assert('tutu', laDest[1])
-loUnitTest.assert('foo', laDest[2])
+abUnitTest = newobject('abUnitTest', 'abDev.prg')
 
 alines(laDest, 'toto,tutu,junk,foo,bar', ',')
 alines(laSrce, 'Tutu,fOo', ',')
 
-loUnitTest.Test(2, @m.laDest, @m.laSrce,,,.t.)
-loUnitTest.assert('toto', laDest[1])
-loUnitTest.assert('junk', laDest[2])
-loUnitTest.assert('bar', laDest[3])
+abUnitTest.Test(2, @m.laDest, @m.laSrce)
+abUnitTest.assert('tutu', laDest[1])
+abUnitTest.assert('foo', laDest[2])
 
-return loUnitTest.Result()
+alines(laDest, 'toto,tutu,junk,foo,bar', ',')
+alines(laSrce, 'Tutu,fOo', ',')
+
+abUnitTest.Test(2, @m.laDest, @m.laSrce,,,.t.)
+abUnitTest.assert('toto', laDest[1])
+abUnitTest.assert('junk', laDest[2])
+abUnitTest.assert('bar', laDest[3])
+
+return abUnitTest.Result()
 
 * ===================================================================
 function laEmpty && {fr} Tableau inexistant ou vide {en} Array don't exists or empty
@@ -364,13 +425,13 @@ external Array ta && {fr} après RETURN pour éviter exécution
 * -------------------------------------------------------------
 procedure laEmpty_test
 
-local loUnitTest as abUnitTest of abDev.prg;
+local abUnitTest as abUnitTest of abDev.prg;
 , laTest[1]
 
-loUnitTest = newobject('abUnitTest', 'abDev.prg')
-loUnitTest.Test(.t., @m.laTest)
+abUnitTest = newobject('abUnitTest', 'abDev.prg')
+abUnitTest.Test(.t., @m.laTest)
 
-return loUnitTest.Result()
+return abUnitTest.Result()
 
 * ===================================================================
 function aRowDel && {fr} Supprime PHYSIQUEMENT une ligne d'un Tableau {en} remove a line from an Array
@@ -456,31 +517,31 @@ return m.llResult
 * -------------------------------------------------------------
 procedure aRowMove_test && {fr} Teste aRowMove()
 
-local loUnitTest as abUnitTest of abDev.prg, laResult[1]
+local abUnitTest as abUnitTest of abDev.prg, laResult[1]
 
-loUnitTest = newobject('abUnitTest', 'abDev.prg')
-
-aRowMove_test_a1(@m.laResult)
-loUnitTest.Test(.t., @m.laResult, 3, 1)
-loUnitTest.assert('3', m.laResult[1])
-loUnitTest.assert('1', m.laResult[2])
+abUnitTest = newobject('abUnitTest', 'abDev.prg')
 
 aRowMove_test_a1(@m.laResult)
-loUnitTest.Test(.t., @m.laResult, 1, 3)
-loUnitTest.assert('2', m.laResult[1])
-loUnitTest.assert('1', m.laResult[3])
+abUnitTest.Test(.t., @m.laResult, 3, 1)
+abUnitTest.assert('3', m.laResult[1])
+abUnitTest.assert('1', m.laResult[2])
+
+aRowMove_test_a1(@m.laResult)
+abUnitTest.Test(.t., @m.laResult, 1, 3)
+abUnitTest.assert('2', m.laResult[1])
+abUnitTest.assert('1', m.laResult[3])
 
 aRowMove_test_a2(@m.laResult)
-loUnitTest.Test(.t., @m.laResult, 3, 1)
-loUnitTest.assert('31', m.laResult[1, 1])
-loUnitTest.assert('11', m.laResult[2, 1])
+abUnitTest.Test(.t., @m.laResult, 3, 1)
+abUnitTest.assert('31', m.laResult[1, 1])
+abUnitTest.assert('11', m.laResult[2, 1])
 
 aRowMove_test_a2(@m.laResult)
-loUnitTest.Test(.t., @m.laResult, 1, 3)
-loUnitTest.assert('21', m.laResult[1, 1])
-loUnitTest.assert('11', m.laResult[3, 1])
+abUnitTest.Test(.t., @m.laResult, 1, 3)
+abUnitTest.assert('21', m.laResult[1, 1])
+abUnitTest.assert('11', m.laResult[3, 1])
 
-return loUnitTest.Result()
+return abUnitTest.Result()
 
 	* -------------------------------------------------------------
 	function aRowMove_test_a1 && {fr} Tableau de test à 1 dimension
@@ -554,39 +615,39 @@ return m.lnResult
 * --------------------------------------
 procedure aColDel_Test
 
-local loUnitTest as abUnitTest of abDev.prg, laTest[1]
-loUnitTest = newobject('abUnitTest', 'abDev.prg')
+local abUnitTest as abUnitTest of abDev.prg, laTest[1]
+abUnitTest = newobject('abUnitTest', 'abDev.prg')
 
 * {fr} Supprimer la Colonne de gauche
 aColDel_Test_a(@m.laTest)
-loUnitTest.Test(1, @m.laTest, 1)
-loUnitTest.assert(alen(laTest, 2), 3)
-loUnitTest.assert(laTest[1,1], 2)
-loUnitTest.assert(laTest[2,1], "B")
-loUnitTest.assert(laTest[1,2], 3)
-loUnitTest.assert(laTest[2,2], "C")
+abUnitTest.Test(1, @m.laTest, 1)
+abUnitTest.assert(alen(laTest, 2), 3)
+abUnitTest.assert(laTest[1,1], 2)
+abUnitTest.assert(laTest[2,1], "B")
+abUnitTest.assert(laTest[1,2], 3)
+abUnitTest.assert(laTest[2,2], "C")
 
 * {fr} Supprimer une Colonne interne
 aColDel_Test_a(@m.laTest)
-loUnitTest.Test(1, @m.laTest, 2)
-loUnitTest.assert(alen(laTest, 2), 3)
-loUnitTest.assert(laTest[1,1], 1)
-loUnitTest.assert(laTest[2,1], "A")
-loUnitTest.assert(laTest[1,2], 3)
-loUnitTest.assert(laTest[2,2], "C")
+abUnitTest.Test(1, @m.laTest, 2)
+abUnitTest.assert(alen(laTest, 2), 3)
+abUnitTest.assert(laTest[1,1], 1)
+abUnitTest.assert(laTest[2,1], "A")
+abUnitTest.assert(laTest[1,2], 3)
+abUnitTest.assert(laTest[2,2], "C")
 
 * {fr} Supprimer la Colonne de droite
 aColDel_Test_a(@m.laTest)
-loUnitTest.Test(1, @m.laTest, 4)
-loUnitTest.assert(alen(laTest, 2), 3)
-loUnitTest.assert(laTest[1,1], 1)
-loUnitTest.assert(laTest[2,1], "A")
-loUnitTest.assert(laTest[1,2], 2)
-loUnitTest.assert(laTest[2,2], "B")
-loUnitTest.assert(laTest[1,3], 3)
-loUnitTest.assert(laTest[2,3], "C")
+abUnitTest.Test(1, @m.laTest, 4)
+abUnitTest.assert(alen(laTest, 2), 3)
+abUnitTest.assert(laTest[1,1], 1)
+abUnitTest.assert(laTest[2,1], "A")
+abUnitTest.assert(laTest[1,2], 2)
+abUnitTest.assert(laTest[2,2], "B")
+abUnitTest.assert(laTest[1,3], 3)
+abUnitTest.assert(laTest[2,3], "C")
 
-return loUnitTest.Result()
+return abUnitTest.Result()
 
 * --------------------------------------
 procedure aColDel_Test_a(laTest)
@@ -671,26 +732,26 @@ procedure aColsDel_Test
 
 local Array laTest[1]
 
-local loUnitTest as abUnitTest of abDev.prg, laTest[1]
-loUnitTest = newobject('abUnitTest', 'abDev.prg')
+local abUnitTest as abUnitTest of abDev.prg, laTest[1]
+abUnitTest = newobject('abUnitTest', 'abDev.prg')
 
 aColDel_Test_a(@m.laTest)
-loUnitTest.Test(1, @m.laTest, 2, 3) && {fr} colonnes 2 et 3 supprimées
-loUnitTest.assert(alen(laTest, 2), 2)
-loUnitTest.assert(laTest[1,1], 1)
-loUnitTest.assert(laTest[2,1], "A")
-loUnitTest.assert(laTest[1,2], 4)
-loUnitTest.assert(laTest[2,2], "D")
+abUnitTest.Test(1, @m.laTest, 2, 3) && {fr} colonnes 2 et 3 supprimées
+abUnitTest.assert(alen(laTest, 2), 2)
+abUnitTest.assert(laTest[1,1], 1)
+abUnitTest.assert(laTest[2,1], "A")
+abUnitTest.assert(laTest[1,2], 4)
+abUnitTest.assert(laTest[2,2], "D")
 
 aColDel_Test_a(@m.laTest)
-loUnitTest.Test(1, @m.laTest, 3) && {fr} colonnes 3 et 4 supprimées
-loUnitTest.assert(alen(laTest, 2), 2)
-loUnitTest.assert(laTest[1,1], 1)
-loUnitTest.assert(laTest[2,1], "A")
-loUnitTest.assert(laTest[1,2], 2)
-loUnitTest.assert(laTest[2,2], "B")
+abUnitTest.Test(1, @m.laTest, 3) && {fr} colonnes 3 et 4 supprimées
+abUnitTest.assert(alen(laTest, 2), 2)
+abUnitTest.assert(laTest[1,1], 1)
+abUnitTest.assert(laTest[2,1], "A")
+abUnitTest.assert(laTest[1,2], 2)
+abUnitTest.assert(laTest[2,2], "B")
 
-return loUnitTest.Result()
+return abUnitTest.Result()
 
 * ===================================================================
 function aVarType && {fr} Vartypes d'après un Tableau ou une liste délimitée ou non {en} Vartypes from an Array or a list delimited or not
@@ -811,47 +872,47 @@ return m.lnResult
 * --------------------------------------
 procedure aColsIns_Test && {fr} Teste aColsIns()
 
-local loUnitTest as abUnitTest of abDev.prg, laTest[1]
-loUnitTest = newobject('abUnitTest', 'abDev.prg')
+local abUnitTest as abUnitTest of abDev.prg, laTest[1]
+abUnitTest = newobject('abUnitTest', 'abDev.prg')
 
 && {fr} Tableau À UNE DIMENSION
 
 aColsIns_Test_a(@m.laTest, 3)
-	loUnitTest.Test(3, @m.laTest, 0, 2) && 2 colonnes au début
-	loUnitTest.assert(.f., laTest[3,1]) && 1ère Colonne insérée
-	loUnitTest.assert(2, laTest[2,3]) && {fr} La Colonne initiale est maintenant # 3
+	abUnitTest.Test(3, @m.laTest, 0, 2) && 2 colonnes au début
+	abUnitTest.assert(.f., laTest[3,1]) && 1ère Colonne insérée
+	abUnitTest.assert(2, laTest[2,3]) && {fr} La Colonne initiale est maintenant # 3
 
 && {fr} Tableau À DEUX DIMENSIONS
 
 && {fr} ajout au début
 aColsIns_Test_a(@m.laTest, 2, 3)
-	loUnitTest.Test(5, @m.laTest, 0, 2) && 2 colonnes au début (1,2)
-	loUnitTest.assert(6, laTest[2,5]) && {fr} donnée initiale
-	loUnitTest.assert(.f., laTest[1,2]) && 2ème Colonne insérée
+	abUnitTest.Test(5, @m.laTest, 0, 2) && 2 colonnes au début (1,2)
+	abUnitTest.assert(6, laTest[2,5]) && {fr} donnée initiale
+	abUnitTest.assert(.f., laTest[1,2]) && 2ème Colonne insérée
 
 && {fr} ajout à l'intérieur
 aColsIns_Test_a(@m.laTest, 2, 3)
-	loUnitTest.Test(5, @m.laTest, 2, 2) && 2 colonnes après la 2 (3,4)
-	loUnitTest.assert(6, laTest[2,5]) && {fr} donnée initiale
-	loUnitTest.assert(.f., laTest[1,4]) && 2ème Colonne insérée
+	abUnitTest.Test(5, @m.laTest, 2, 2) && 2 colonnes après la 2 (3,4)
+	abUnitTest.assert(6, laTest[2,5]) && {fr} donnée initiale
+	abUnitTest.assert(.f., laTest[1,4]) && 2ème Colonne insérée
 
 && {fr} ajout à la fin
 aColsIns_Test_a(@m.laTest, 2, 3)
-	loUnitTest.Test(5, @m.laTest, , 2) && 2 colonnes à la fin (4,5)
-	loUnitTest.assert(6, laTest[2,3]) && {fr} donnée initiale
-	loUnitTest.assert(.f., laTest[2,5]) && 2ème Colonne insérée
+	abUnitTest.Test(5, @m.laTest, , 2) && 2 colonnes à la fin (4,5)
+	abUnitTest.assert(6, laTest[2,3]) && {fr} donnée initiale
+	abUnitTest.assert(.f., laTest[2,5]) && 2ème Colonne insérée
 
 	&& {fr} ajout à la fin avec Valeur imposée
 	aColsIns_Test_a(@m.laTest, 2, 3)
-		loUnitTest.Test(5, @m.laTest, , 2, 'test') && 2 colonnes à la fin (4,5)
-		loUnitTest.assert(6, laTest[2,3]) && {fr} donnée initiale
-		loUnitTest.assert('test', laTest[2,5]) && 2ème Colonne insérée
+		abUnitTest.Test(5, @m.laTest, , 2, 'test') && 2 colonnes à la fin (4,5)
+		abUnitTest.assert(6, laTest[2,3]) && {fr} donnée initiale
+		abUnitTest.assert('test', laTest[2,5]) && 2ème Colonne insérée
 
 	&& {fr} ajout à la fin avec type imposé
 	aColsIns_Test_a(@m.laTest, 2, 3)
-		loUnitTest.Test(5, @m.laTest, , 2, , 'IC') && 2 colonnes à la fin (4,5)
-		loUnitTest.assert(6, laTest[2,3]) && {fr} donnée initiale
-		loUnitTest.assert('', laTest[2,5]) && 2ème Colonne insérée
+		abUnitTest.Test(5, @m.laTest, , 2, , 'IC') && 2 colonnes à la fin (4,5)
+		abUnitTest.assert(6, laTest[2,3]) && {fr} donnée initiale
+		abUnitTest.assert('', laTest[2,5]) && 2ème Colonne insérée
 
 	* --------------------------------------
 	procedure aColsIns_Test_a && {fr} Initialise le Tableau de test avec aElement()
@@ -935,8 +996,8 @@ return m.llResult
 * -------------------------------------------------------------
 procedure laEqual_test
 
-local loUnitTest as abUnitTest of abDev.prg
-loUnitTest = newobject('abUnitTest', 'abDev.prg')
+local abUnitTest as abUnitTest of abDev.prg
+abUnitTest = newobject('abUnitTest', 'abDev.prg')
 
 local Array la1[5], la2[5], laDelta[1]
 la1[1] = 'tete'
@@ -951,12 +1012,12 @@ la2[3] = .f.
 la2[4] = date()
 la2[5] = datetime()
 
-loUnitTest.Test(.t., @m.la1, @m.la2, .t.)
+abUnitTest.Test(.t., @m.la1, @m.la2, .t.)
 
-loUnitTest.Test(.t., @m.la1, @m.la2, .f., @m.laDelta)
-loUnitTest.assert('tete,Tête', cListOfArray(@m.laDelta,, -1))
+abUnitTest.Test(.t., @m.la1, @m.la2, .f., @m.laDelta)
+abUnitTest.assert('tete,Tête', cListOfArray(@m.laDelta,, -1))
 
-return loUnitTest.Result()
+return abUnitTest.Result()
 
 * ===================================================================
 function laOccurs && {fr} Un Tableau à une dimension est une ligne d'un Tableau à 2 dim. {en} an Array at one dimension is a line of an Array at two dimensions
@@ -1080,8 +1141,8 @@ return m.lnResult
 * -----------------------------------------------------------------
 procedure aDistinct_Test && {fr} Teste aDistinct
 
-local loUnitTest as abUnitTest of abDev.prg
-loUnitTest = newobject('abUnitTest', 'abDev.prg')
+local abUnitTest as abUnitTest of abDev.prg
+abUnitTest = newobject('abUnitTest', 'abDev.prg')
 
 public Array laTest[3, 3] && {fr} PUBLIC pour l'examiner après test
 laTest[1, 1] = 'toto'
@@ -1096,9 +1157,9 @@ laTest[3, 1] = 'toto'
 laTest[3, 2] = 3
 laTest[3, 3] = .t.
 
-loUnitTest.Test(2, @m.laTest)
+abUnitTest.Test(2, @m.laTest)
 
-return m.loUnitTest.Result()
+return m.abUnitTest.Result()
 
 * ===================================================================
 function aLookup && {fr} Valeur d'une Colonne d'un Tableau selon une clé cherchée dans une autre Colonne {en} Value found in an Array Column based on a key sought in another Column
@@ -1232,15 +1293,15 @@ return m.lnResult
 * -----------------------------------------------------------------
 procedure aSelect_Test && {fr} Teste aSelect()
 
-local loUnitTest as abUnitTest of abDev.prg
-loUnitTest = newobject('abUnitTest', 'abDev.prg')
+local abUnitTest as abUnitTest of abDev.prg
+abUnitTest = newobject('abUnitTest', 'abDev.prg')
 
 public Array laSrce[1], laDest[1] && {fr} PUBLIC pour examen après test
 avcxclasses(laSrce, 'aw'+'.vcx') && {fr} évite d'embarquer aw.vcx dans le projet
 
-loUnitTest.Test(2, @m.laSrce, @m.laDest, 2, 'commandbutton')
+abUnitTest.Test(2, @m.laSrce, @m.laDest, 2, 'commandbutton')
 
-return m.loUnitTest.Result()
+return m.abUnitTest.Result()
 
 * ===================================================================
 function aClear && {fr} Vide un Tableau {en} Return an empty Array
@@ -1259,13 +1320,13 @@ external Array taResult
 * -----------------------------------------------------------------
 procedure aClear_test
 
-local loUnitTest as abUnitTest of abDev.prg
-loUnitTest = newobject('abUnitTest', 'abDev.prg')
+local abUnitTest as abUnitTest of abDev.prg
+abUnitTest = newobject('abUnitTest', 'abDev.prg')
 
 local Array laTest[3]
-loUnitTest.Test(.t., @m.laTest)
+abUnitTest.Test(.t., @m.laTest)
 
-return loUnitTest.Result()
+return abUnitTest.Result()
 
 * ===================================================================
 function aRowCopyIns && {fr} Copie une ligne d'un Tableau et l'insère dans un autre à une position donnée {en} Copy one line from an Array and insert it in another Array at a specific position
@@ -1438,28 +1499,28 @@ return m.lnResult
 * -------------------------------------------------
 procedure aPush_test
 
-local loUnitTest as abUnitTest of abDev.prg;
+local abUnitTest as abUnitTest of abDev.prg;
 , laResult[1], lnResult;
 , laExpected[1], lnExpected
 
-loUnitTest = newobject('abUnitTest', 'abDev.prg')
+abUnitTest = newobject('abUnitTest', 'abDev.prg')
 
 lnResult = aLitteral(@m.laResult, [1,'toto',1,2,'tata',2])
 lnExpected = aLitteral(@m.laExpected, [1,'toto',1,2,'tata',2, .F.])
-loUnitTest.Test(m.lnResult + 1, @m.laResult, .f.)
-loUnitTest.assert(@m.laExpected, @m.laResult)
+abUnitTest.Test(m.lnResult + 1, @m.laResult, .f.)
+abUnitTest.assert(@m.laExpected, @m.laResult)
 
 lnResult = aLitteral(@m.laResult, [1,'toto',1,2,'tata',2])
 lnExpected = aLitteral(@m.laExpected, [1,'toto',1,2,'tata',2])
-loUnitTest.Test(m.lnResult, @m.laResult, 'toto', .t.)
-loUnitTest.assert(@m.laExpected, @m.laResult)
+abUnitTest.Test(m.lnResult, @m.laResult, 'toto', .t.)
+abUnitTest.assert(@m.laExpected, @m.laResult)
 
 lnResult = aLitteral(@m.laResult, [1,'toto',1,2,'tata',2])
 lnExpected = aLitteral(@m.laExpected, [1,'toto',1,2,'tata',2])
-loUnitTest.Test(m.lnResult, @m.laResult, 1, .t.)
-loUnitTest.assert(@m.laExpected, @m.laResult)
+abUnitTest.Test(m.lnResult, @m.laResult, 1, .t.)
+abUnitTest.assert(@m.laExpected, @m.laResult)
 
-return loUnitTest.Result()
+return abUnitTest.Result()
 
 * ===================================================================
 function aLocate && {fr} Cherche plusieurs valeurs dans un Tableau à 2 dimensions [à la manière de LOCATE FOR] {en} Search many values inside an Array with 2 dimensions like the command LOCATE FOR
@@ -1559,21 +1620,21 @@ endfunc
 * -------------------------------------------------------------
 procedure aLocate_test
 
-local loUnitTest as abUnitTest of abDev.prg, laIn[1], laFor[1]
-loUnitTest = newobject('abUnitTest', 'abDev.prg')
+local abUnitTest as abUnitTest of abDev.prg, laIn[1], laFor[1]
+abUnitTest = newobject('abUnitTest', 'abDev.prg')
 
 aLitteral(@m.laIn, [1,'toto',1,2,'tata',2], 3)
 aLitteral(@m.laFor, [2,'tata',.NULL.])
 
-loUnitTest.Test(2, @m.laIn, @m.laFor)
+abUnitTest.Test(2, @m.laIn, @m.laFor)
 
 aLitteral(@m.laFor, [2,'TATA',.NULL.])
-loUnitTest.Test(2, @m.laIn, @m.laFor, .t.)
+abUnitTest.Test(2, @m.laIn, @m.laFor, .t.)
 
 aLitteral(@m.laFor, [2,'TAT',.NULL.])
-loUnitTest.Test(2, @m.laIn, @m.laFor, .t., .t.)
+abUnitTest.Test(2, @m.laIn, @m.laFor, .t., .t.)
 
-return loUnitTest.Result()
+return abUnitTest.Result()
 
 * ===================================================================
 function aLitteral && {fr} Tableau d'après une liste de litteraux {en} Array from a list of strings
@@ -1744,44 +1805,44 @@ endif
 * -------------------------------------------------------------
 procedure aLinesCols_test && {fr} Teste aLinesCols()
 
-local loUnitTest as abUnitTest of abDev.prg, laLinesCols[1], lcTxt, laType[2]
-loUnitTest = newobject('abUnitTest', 'abDev.prg')
+local abUnitTest as abUnitTest of abDev.prg, laLinesCols[1], lcTxt, laType[2]
+abUnitTest = newobject('abUnitTest', 'abDev.prg')
 text TO lcTxt NOSHOW PRETEXT 1+2
 	11	12
 	21	22	23
 	31	32	33	34	35
 ENDTEXT
 
-loUnitTest.Test(3, @m.laLinesCols, m.lcTxt, TABUL)
-loUnitTest.assert(5, alen(laLinesCols, 2))
+abUnitTest.Test(3, @m.laLinesCols, m.lcTxt, TABUL)
+abUnitTest.assert(5, alen(laLinesCols, 2))
 
-loUnitTest.Test(3, @m.laLinesCols, m.lcTxt, , 'N')
-loUnitTest.assert(21, laLinesCols[2,1])
-loUnitTest.assert('22', laLinesCols[2,2])
+abUnitTest.Test(3, @m.laLinesCols, m.lcTxt, , 'N')
+abUnitTest.assert(21, laLinesCols[2,1])
+abUnitTest.assert('22', laLinesCols[2,2])
 
-loUnitTest.Test(3, @m.laLinesCols, m.lcTxt, , 'N,N')
-loUnitTest.assert(21, laLinesCols[2,1])
-loUnitTest.assert(22, laLinesCols[2,2])
+abUnitTest.Test(3, @m.laLinesCols, m.lcTxt, , 'N,N')
+abUnitTest.assert(21, laLinesCols[2,1])
+abUnitTest.assert(22, laLinesCols[2,2])
 
-loUnitTest.Test(3, @m.laLinesCols, m.lcTxt, , 'N|N')
-loUnitTest.assert(21, laLinesCols[2,1])
-loUnitTest.assert(22, laLinesCols[2,2])
+abUnitTest.Test(3, @m.laLinesCols, m.lcTxt, , 'N|N')
+abUnitTest.assert(21, laLinesCols[2,1])
+abUnitTest.assert(22, laLinesCols[2,2])
 
-loUnitTest.Test(3, @m.laLinesCols, m.lcTxt, , 'II')
-loUnitTest.assert(21, laLinesCols[2,1])
-loUnitTest.assert(22, laLinesCols[2,2])
+abUnitTest.Test(3, @m.laLinesCols, m.lcTxt, , 'II')
+abUnitTest.assert(21, laLinesCols[2,1])
+abUnitTest.assert(22, laLinesCols[2,2])
 
 laType = 'I'
-loUnitTest.Test(3, @m.laLinesCols, m.lcTxt, , @m.laType)
-loUnitTest.assert(21, laLinesCols[2,1])
-loUnitTest.assert(22, laLinesCols[2,2])
+abUnitTest.Test(3, @m.laLinesCols, m.lcTxt, , @m.laType)
+abUnitTest.assert(21, laLinesCols[2,1])
+abUnitTest.assert(22, laLinesCols[2,2])
 
-loUnitTest.Test(3, @m.laLinesCols, m.lcTxt, , replicate('I', 6))
-loUnitTest.assert(21, laLinesCols[2,1])
-loUnitTest.assert(22, laLinesCols[2,2])
-loUnitTest.assert(0, laLinesCols[1,6]) && {fr} nombre de colonnes selon typage
+abUnitTest.Test(3, @m.laLinesCols, m.lcTxt, , replicate('I', 6))
+abUnitTest.assert(21, laLinesCols[2,1])
+abUnitTest.assert(22, laLinesCols[2,2])
+abUnitTest.assert(0, laLinesCols[1,6]) && {fr} nombre de colonnes selon typage
 
-return loUnitTest.Result()
+return abUnitTest.Result()
 
 * ===================================================================
 function aReverse && {fr} Tableau inversé {en} Inverse Array
@@ -1911,8 +1972,8 @@ endfunc
 * ===================================================================
 function aOfBase64 as Boolean && {en} array of a base 64 linearization
 lparameters ;
-  Result as string; && @ {fr} out
-, aa; && @ {fr} out
+  Result as string; && @ out result
+, aa; && @ out array
 , base64 as string
 
 external Array aa

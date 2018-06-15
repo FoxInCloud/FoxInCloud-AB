@@ -1085,9 +1085,9 @@ lcResult = icase(;
 lcMark = set('Mark', 1)
 
 return '';
-	+ iif(empty(m.lcMark);
+	+ iif(Empty(m.lcMark);
 		, m.lcResult;
-		, chrtran(m.lcResult, './-', replicate(m.lcMark, len('./-')));
+		, Chrtran(m.lcResult, './-', replicate(m.lcMark, len('./-')));
 		);
 	+	iif(lTrue(m.tlT);
 		, space(1) + iif(.f.;
