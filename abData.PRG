@@ -1114,13 +1114,14 @@ llResult = used(m.this.cAlias)
 this.cTable = iif(m.llResult, fullpath(dbf(m.this.cAlias)), '')
 
 return m.llResult and not m.llExclusive
+endproc
 
 * --------------------------
 procedure destroy
 
 use in select(m.this.cAlias)
 
-if m.this.lUsed
+if m.this.lUsed and File(m.this.cTable)
 
 	local lcFilter
 	lcFilter = this.cFilter
@@ -1130,6 +1131,7 @@ if m.this.lUsed
 	set filter to &lcFilter in (m.this.cAlias)
 	RecnoSet(m.this.iRecno, m.this.cAlias)
 endif
+endproc
 
 enddefine && {fr} CLASS abExclusive
 * ========================================
@@ -1983,7 +1985,7 @@ llResult = vartype(m.tcTag) == 'C' and not empty(m.tcTag)
  	local lcAlias, llAlias
  	lcAlias = cAlias(m.tuTable, @m.llAlias)
  	llResult = used(m.lcAlias)
- 	assert m.llResult message cAssertMsg(textmerge("Table can't be found: <<cL(m.tuTable)>>"))
+ 	assert m.llResult message cAssertMsg(textmerge("Table <<cL(m.tuTable)>> can't be found"))
  	if m.llResult
 
 	 	local lnSelect
@@ -2074,7 +2076,7 @@ lcResult = ''
 * {fr} Si la table peut être localisée
 lcAlias = cAlias(m.tuTable, @m.llAlias)
 llResult = used(m.lcAlias)
-assert m.llResult message cAssertMsg(textmerge("Table can't be found: <<cL(m.tuTable)>>"))
+assert m.llResult message cAssertMsg(textmerge("Table <<cL(m.tuTable)>> can't be found"))
 if m.llResult
 
 	* {fr} Si un tag a été spécifié
@@ -2113,7 +2115,7 @@ lcResult = ''
 	* {fr} Si la table peut être localisée
  	lcAlias = cAlias(m.tuTable, @m.llAlias)
  	llResult = used(m.lcAlias)
- 	assert m.llResult message cAssertMsg(textmerge("Table can't be found: <<cL(m.tuTable)>>"))
+ 	assert m.llResult message cAssertMsg(textmerge("Table <<cL(m.tuTable)>> can't be found"))
  	if m.llResult
 
 	* {fr} Si un tag a été spécifié
@@ -2182,7 +2184,7 @@ llResult = vartype(m.tcTag) == 'C' and not empty(m.tcTag)
 	* {fr} Si la table peut être localisée
  	lcAlias = cAlias(m.tuTable, @m.llAlias)
  	llResult = used(m.lcAlias)
- 	assert m.llResult message cAssertMsg(textmerge("Table can't be found: <<cL(m.tuTable)>>"))
+ 	assert m.llResult message cAssertMsg(textmerge("Table <<cL(m.tuTable)>> can't be found"))
  	if m.llResult
  		tuTable = dbf(m.lcAlias)
 
@@ -2205,6 +2207,38 @@ llResult = vartype(m.tcTag) == 'C' and not empty(m.tcTag)
 endif
 
 return m.lcResult
+
+* ========================================
+function lTagPC && {fr} Un tag d'index d'une table est candidat ou primaire
+lparameters ;
+  tcTag; && Index Tag
+, tuTable; && [Alias()] {fr} Alias ou adresse de la table où l'existence du tag est à vérifier
+
+local success as Boolean;
+, lcAlias, llAlias;
+, lnTag, liTag, lcTag;
+
+lcAlias = cAlias(m.tuTable, @m.llAlias)
+success = used(m.lcAlias) and lVFPName(m.tcTag)
+assert m.success message cAssertMsg(textmerge("Table <<cL(m.tuTable)>> can't be found or tag <<cL(m.tcTag)>> is invalid"))
+if m.success
+
+	success = .F.
+	tcTag = Upper(Alltrim(m.tcTag))
+	for liTag = 1 to tagcount(cdx(1, m.lcAlias), m.lcAlias) && {fr} le CDX a le même nom que l'alias
+		if tag(m.liTag, m.lcAlias) == m.tcTag
+			success = primary(m.liTag, m.lcAlias) or candidate(m.liTag, m.lcAlias)
+			exit
+		endif
+	endfor
+endif
+
+if m.llAlias
+	use in (m.lcAlias)
+endif
+
+return m.success
+endfunc
 
 * ========================================
 function cTagPC && {fr} Premier tag d'index candidat, ou d'index primaire d'une table
@@ -2231,7 +2265,7 @@ tlTagCand = .f. && {fr} retour
 
 lcAlias = cAlias(m.tuTable, @m.llAlias)
 llResult = used(m.lcAlias)
-assert m.llResult message cAssertMsg(textmerge("Table can't be found: <<cL(m.tuTable)>>"))
+assert m.llResult message cAssertMsg(textmerge("Table <<cL(m.tuTable)>> can't be found"))
 if m.llResult
 
 	llResult = .f.
@@ -2315,7 +2349,7 @@ llResult = type('taTagsPC', 1) == 'A'
  		aClear(@m.taTagsPC)
 
 	lcAlias = cAlias(m.tuTable, @m.llAlias)
- 	assert m.llResult message cAssertMsg(textmerge("Table can't be found: <<cL(m.tuTable)>>"))
+ 	assert m.llResult message cAssertMsg(textmerge("Table <<cL(m.tuTable)>> can't be found"))
  	if m.llResult
 
 		* {fr} Pour chaque tag d'index candidat [ou primaire]
@@ -4130,14 +4164,13 @@ lparameters ;
 tcResult = ''
 
 local success as Boolean;
-, laFields[1],	laTagInfo[1];
+, laFields[1], lcFields, llFields;
+, laTagInfo[1];
 , lcAlias, llAlias;
 , llCursor, lcTable;
-, loSelect as abSelect;
-, loSafety as abSet;
+, loSelect as abSelect, loSafety as abSet;
 , llExclusive;
-, lcFields, llFields;
-, laTag[1], lnTags, llTags, liTag, lcTag;
+, laTag[1], lnTag, llTag, liTag, lcTag;
 , llZap;
 
 * {fr} Tabuler les spécifications de champs et d'indexes
@@ -4156,16 +4189,18 @@ if m.success
 	loSelect = abSelect(Iif(m.llAlias, m.lcAlias, 0))
 	loSafety = abSet('SAFETY', 'OFF')
 
-	* {fr} Lire les consignes de champs et d'indexes
+	* {fr} Lire les consignes de champs
 	lcFields = TableFreeCreateOrAdjust_cFields(@m.laFields, m.lcAlias)
 	llFields = not empty(m.lcFields)
-	lnTags = TableFreeCreateOrAdjust_aTags(@m.laTag, @m.laTagInfo, m.lcAlias, @m.llZap)
-	llTags = m.lnTags > 0
+
+	* {fr} Lire les consignes d'indexes
+	lnTag = TableFreeCreateOrAdjust_aTags(@m.laTag, @m.laTagInfo, m.lcAlias, @m.llZap)
+	llTag = m.lnTag > 0
 
 	* {fr} Si la table existe déjà
 	if m.llAlias
 
-		if m.llFields or m.llTags
+		if m.llFields or m.llTag
 			lcAlias = ExclusiveForce(m.lcAlias, @m.llExclusive)
 			success = used(m.lcAlias)
 			assert m.success message cAssertMsg(textmerge([Impossible d'accéder à la table '<<m.tcTable>>' en mode exclusif]))
@@ -4176,14 +4211,14 @@ if m.success
 			* {fr} Si la structure doit changer && /!\ supporter ALTER COLUMN ... NULL
 			if m.llFields
 				* {fr} Supprimer les tags avant de supprimer les champs qui pourraient y être impliqués
-				if m.llTags
-					for liTag = 1 to m.lnTags && {fr} EACH lcTag IN laTag
+				if m.llTag
+					for liTag = m.lnTag to 1 step -1 && {fr} EACH lcTag IN laTag
 						lcTag = laTag[m.liTag]
-						if upper(left(m.lcTag, len('DELE'))) == 'DELE' && {fr} DELETE TAG ...
+						if upper(left(Evl(m.lcTag, ''), len('DELE'))) == 'DELE' && {fr} DELETE TAG ...
 							&lcTag
 							adel(laTag, m.liTag)
 						endif
-					next
+					endfor
 				endif
 
 				wWAIT(;
@@ -4221,7 +4256,7 @@ if m.success
 		tlCreated = .t.
 	endif
 
-	if m.success and m.llTags
+	if m.success and m.llTag
 
 		assert not m.llZap message cAssertMsg(textmerge(ICase(;
 						cLangUser() = 'fr', [On va zapper '<<m.lcAlias>>'...] + CRLF + [Presser 'Cancel' pour arrêter le programme] + CRLF + [Presser 'Ignore' pour continuer],; && copy-paste this line to add another language support
@@ -4233,7 +4268,7 @@ if m.success
 
 		* {fr} Créer ou ajuster les indexes
 		for each lcTag in laTag
-			if vartype(m.lcTag) == 'C' && {fr} a pu être supprimé ci-dessus
+			if ga_Type_IsChar(m.lcTag, .T.) && {fr} a pu être supprimé ci-dessus
 				if m.llAlias
 					wWAIT(textmerge(ICase(;
 						cLangUser() = 'fr', [Indexation de la table '<<m.lcAlias>>' en cours (<<cTronc(m.lcTag)>>) NE PAS INTERROMPRE !],; && copy-paste this line to add another language support
@@ -4322,12 +4357,12 @@ lparameters ;
 external array taResult, taTagInfo
 tlZap = .f.
 
-local lcSetCollate;
+local lnResult;
+, lcSetCollate;
 , tlAlias, tlTagInfo, tnTag;
 , llTagInfo, laTagInfo[1], lnTag;
 , llTag, lcTag, lcType, lcKey, lcFilter, lcOrder, lcCollate;
 , lcSelect;
-, lnResult
 
 lnResult = 0
 lcSetCollate = set("Collate")
@@ -4381,20 +4416,18 @@ index on Test tag Test binary collate 'general' && {en} invalid collation sequen
 			* {fr} Si un index candidat doit être créé
 			if m.tlAlias;
 			 and not m.tlZap;
-			 and inlist(m.lcType, 'CANDIDATE', 'PRIMARY')
+			 and inlist(m.lcType, 'CANDIDATE', 'PRIMARY');
+			 and lTableExpr(m.lcKey, m.tcAlias) && {fr} Une expression est valide sur une table
 
-				tlZap = !lTableExpr(m.lcKey, m.tcAlias) && {fr} Une expression est valide sur une table
-				if not m.tlZap
-
-					* {fr} Vérifier l'absence de doublon
-					lcSelect = iif(empty(m.lcFilter), '', ' WHERE ' + m.lcFilter)
-					tlZap = VFPselectExecute(textmerge([SELECT <<m.lcKey>> AS CAND, Count(*) AS _COUNT FROM <<m.tcAlias>> <<m.lcSelect>> GROUP BY CAND HAVING _COUNT > 1])) > 0
-					use && {fr} Cursor créé par VFPselectExecute()
-				endif
+				* {fr} Vérifier l'absence de doublon
+				lcSelect = iif(empty(m.lcFilter), '', ' WHERE ' + m.lcFilter)
+				lcSelect = textmerge([SELECT <<m.lcKey>> AS CAND, Count(*) AS _COUNT FROM <<m.tcAlias>> <<m.lcSelect>> GROUP BY CAND HAVING _COUNT > 1]) && {en} separate for debug
+				tlZap = 0 < VFPselectExecute(m.lcSelect)
 				assert !m.tlZap message cAssertMsg(textmerge(ICase(;
 					cLangUser() = 'fr', ['<<m.tcAlias>>' va devoir être zappée à cause de l'index],; && copy-paste this line to add another language support
 															['<<m.tcAlias>>' will have to be zapped because of index]; && Default: English
 					)) + ' ' + cL(m.lcKey))
+				use && {fr} Cursor créé par VFPselectExecute()
 			endif
 
 			lnResult = m.lnResult + 1
@@ -4420,6 +4453,7 @@ if m.llTagInfo
 endif
 
 return m.lnResult
+endproc
 
 * ========================================
 procedure TableFreeCreateOrAdjust_cFields && {fr} Expression de champs
@@ -4634,10 +4668,11 @@ endif
 return m.lnResult
 
 * ========================================
-procedure aTagInfo_ && {fr} aTagInfo() d'après un tableau ou une liste
+function aTagInfo_ && {fr} aTagInfo() d'après un tableau ou une liste
 lparameters ;
   taResult; && @ {fr} Spécifications d'indexes au format aTagInfo() [Tag, Type, Key, Filter, Order, Collation]
 , tuTagInfo && @ {fr} Spécification d'indexes au format aTagInfo(), tabulées ou délimitées  par ';|\t'
+
 external array taResult, tuTagInfo
 
 #if .f.
@@ -4700,8 +4735,8 @@ else
 	assert .f. message cAssertMsg(textmerge([Tableau attendu en premier paramètre <<cLitteral(m.taResult)>>]))
 endif
 
-
 return m.lnResult
+endfunc
 
 * ========================================
 function aFieldsDef && {fr} Définitions de champs selon le format de aFields()
@@ -4994,12 +5029,11 @@ return m.lcResult
 endfunc
 
 * ========================================
-function lRelationTrgt && {fr} Un alias est cible d'une relation
+function lRelationTrgt && {fr} Un alias est cible d'une relation {fr} An alias is the target of a relation
 lparameters tcAlias && [Alias()]
-
 local array laRelation[1]
-
 return aRelationTrgt(@m.laRelation, m.tcAlias) > 0
+endfunc
 
 * ========================================
 function aRelationTrgt && {fr} Relation dont un alias est la cible
@@ -5070,9 +5104,9 @@ return  0 < iif(pcount() = 1;
 * ========================================
 function aRelationSrce && {fr} Relations dont un alias est la source
 lparameters ;
-  taRelation; && {en} Relations [1- Relational Expression, 2- Target Alias]
+  taRelation; && {en} Relations [1- Relational Expression, 2- Target Alias[, 3- Target Index Expression, 4- Source Alias, 5- Target Index Expression is unique]]
 , tcAlias; && [Alias()] {fr} Alias à examiner
-, tlExtended; && [.F., .T. if m.tlCascade] {fr} Relations [1- Relational Expression, 2- Target Alias, 3- Target Index Expression, 4- Source Alias]
+, tlExtended; && [.F., .T. if m.tlCascade] {fr} Relations [1- Relational Expression, 2- Target Alias, 3- Target Index Expression, 4- Source Alias, 5- Target Index Expression is unique]
 , tlCascade && [.F.] {en} Explore target alias as source alias
 
 external array taRelation
@@ -5084,7 +5118,8 @@ local lnResult as integer; && {fr} Nombre de relations trouvées
 , llResult;
 , lcTarget;
 , lcRelation;
-, liRelation
+, liRelation;
+, lcOrder;
 
 lnResult = iif(!m.tlCascade or laEmpty(@m.taRelation), 0, Alen(m.taRelation, 1))
 
@@ -5114,12 +5149,14 @@ if not empty(m.tcAlias)
 					lcTarget = target(m.liRelation, m.tcAlias)
 
 					lnResult = m.lnResult + 1
-					dimension taRelation[m.lnResult, Iif(m.tlExtended, 4, 2)]
+					dimension taRelation[m.lnResult, Iif(m.tlExtended, 5, 2)]
 					taRelation[m.lnResult, 1] = m.lcRelation
 					taRelation[m.lnResult, 2] = m.lcTarget
 					if m.tlExtended
-						taRelation[m.lnResult, 3] = cTagExpr(order(m.lcTarget), m.lcTarget)
+						lcOrder = order(m.lcTarget)
+						taRelation[m.lnResult, 3] = cTagExpr(m.lcOrder, m.lcTarget)
 						taRelation[m.lnResult, 4] = m.tcAlias
+						taRelation[m.lnResult, 5] = lTagPC(m.lcOrder, m.lcTarget)
 					endif
 					if m.tlCascade
 						lnResult = aRelationSrce(@m.taRelation, m.lcTarget, m.tlExtended, m.tlCascade)
@@ -5203,15 +5240,19 @@ define class aRelationSrce_Test as abUnitTest of abDev.prg
 
 * ========================================
 function cRelationSrceJoins && {fr} SQL-select joins construits d'après les relations dont un alias est la source
-lparameters tcAlias && [Alias()] {fr} Alias à examiner
+lparameters ;
+  tcAlias; && [Alias()] {fr} Alias à examiner
+, tlOneOne; && [.F.] {en} child index expressions are unique
 
 local result as string;
 , aa[1] as string;
 , I as integer;
 
 result = ''
+tlOneOne = .null.
 
-for I = 1 to aRelationSrce(@m.aa, Evl(m.tcAlias, Alias()), .t., .t.) && [1- Relational Expression, 2- Target Alias, 3- Target Index Expression, 4- Source Alias]
+for I = 1 to aRelationSrce(@m.aa, Evl(m.tcAlias, Alias()), .t., .t.) && [1- Relational Expression, 2- Target Alias, 3- Target Index Expression, 4- Source Alias, 5- Target Index Expression is unique]
+	tlOneOne = Nvl(m.tlOneOne, .T.) and m.aa[m.i, 5]
 	result = m.result + textmerge(" left join <<Lower(m.aa[m.i, 2])>> on <<Lower(m.aa[m.i, 4])>>.<<Lower(m.aa[m.i, 1])>> = <<Lower(m.aa[m.i, 2])>>.<<Lower(m.aa[m.i, 3])>>")
 endfor
 
@@ -5261,7 +5302,7 @@ tcAlias = evl(m.tcAlias, alias())
 local laRelation[1], lnSelect, llResult
 
 llResult = used(m.tcAlias) and 0 < aRelationSrce(;
-	 @m.laRelation; && {en} Relations [1- Relational Expression, 2- Target Alias]
+	 @m.laRelation; && {en} Relations [1- Relational Expression, 2- Target Alias, 3- Target Index Expression, 4- Source Alias, 5- Target Index Expression is unique]
 	, m.tcAlias;
 	)
 if m.llResult
@@ -6097,6 +6138,7 @@ lparameters ;
   taJoins; && @ {fr} Jointures: [1-Table enfant | 2-Table parent | 3-Tag enfant | 4-Tag parent | 5-RI]
 , tcDBC; && {fr} Base de données
 , tcTableParent && {fr} Table de départ
+
 external array taJoins
 local llResult, lnResult && {fr} Nombre de relations
 lnResult = 0
@@ -6183,6 +6225,7 @@ lparameters ;
 , tcDBC; && {fr} Base de données
 , tcTableChild; && {fr} Table enfant
 , tcTablesIgnore && [''] {fr} Ignorer ces tables parent
+
 external array taJoins
 local llResult, lnResult && {fr} Nombre de relations
 lnResult = 0
@@ -6277,8 +6320,11 @@ lparameters ;
   tc__Expr; && {fr} Expression à vérifier
 , tu__Table && [Alias()] {fr} table ou alias où vérifier l'expression
 
-local lo__Select, lc__Alias, ll__Opened;
-, lo__Except as exception, ll__Result && {fr} Evite que les noms des variables locales puissent figurer dans l'expression
+local ll__Result; && {fr} Evite que les noms des variables locales puissent figurer dans l'expression
+, lo__Select;
+, lc__Alias;
+, ll__Opened;
+, lo__Except as exception;
 
 ll__Result = vartype(m.tc__Expr) == 'C'
 assert m.ll__Result message cAssertMsg(textmerge("Invalid expression parameter: <<cLitteral(m.tc__Expr)>>"))
@@ -6823,7 +6869,7 @@ lparameters ;
 , cOrder; && set order to...
 , lDesc; && [.F.] set order to... descending
 
-local success, lUsed, oSelect
+local success, lUsed, abSelect
 
 cAlias = evl(m.cAlias, alias())
 success = used(m.cAlias)
@@ -6835,7 +6881,7 @@ endif
 
 if m.success
 
-	oSelect = abSelect(m.cAlias)
+	abSelect = abSelect(m.cAlias)
 	this.cAlias = m.cAlias
 	this.cOrder = iif(!m.lUsed, order(), .null.)
 	this.lDesc  = iif(!m.lUsed and !IsNull(evl(this.cOrder, .null.)), descending(), .null.)
@@ -6951,14 +6997,14 @@ lparameters ;
 , tcError; && @ && {en} (cumulative) error if any
 
 local success as Boolean;
-, oSelect as abSelect of abData.prg;
+, abSelect as abSelect of abData.prg;
 , cFldState as string;
 , iField as integer;
 
 if .t.;
- and varSet(@m.oSelect, abSelect(evl(m.tcAlias, alias())));
- and (used() or cResultAdd(textmerge([Table or Alias <<cL(m.tcAlias)>> can't be found])));
- and (inlist(CursorGetProp("Buffering"), 2, 3) or cResultAdd(textmerge([Alias '<<Alias()>>' should be row buffered])));
+ and varSet(@m.abSelect, abSelect(evl(m.tcAlias, alias())));
+ and (used() or cResultAdd(@m.tcError, textmerge([Table or Alias <<cL(m.tcAlias)>> can't be found])));
+ and (inlist(CursorGetProp("Buffering"), 2, 3) or cResultAdd(@m.tcError, textmerge([Alias '<<Alias()>>' should be row buffered])));
  and varSet(@m.cFldState, getfldstate(-1));
  and !empty(chrtran(m.cFldState, '1', ''))
 
@@ -7012,11 +7058,11 @@ endif
 hidden procedure destroy
 
 local success as Boolean;
-, oSelect as abSelect or abData.prg;
+, abSelect as abSelect or abData.prg;
 
 if used(m.this.cAlias)
 
-	oSelect = abSelect(m.this.cAlias)
+	abSelect = abSelect(m.this.cAlias)
 	tablerevert(.t.)
 	cursorsetprop("Buffering", 3)
 	this.reset

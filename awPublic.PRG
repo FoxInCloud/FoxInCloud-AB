@@ -222,14 +222,14 @@ return Iif(Vartype(m.toControl) == 'O';
 endfunc
 
 * =============================================================
-function wcIconFA && [see http://fontawesome.io/] {en} HTML for a 'font awesome' icon {fr} HTML d'une icône 'Font Awesome'
+function wcIconFA && [see https://fontawesome.com/] {en} HTML for a 'font awesome' icon {fr} HTML d'une icône 'Font Awesome'
 lparameters ;
-  cIcon as String; && @ {en} pick name from http://getbootstrap.com/components/#glyphicons-glyphs @: full CSS class
+  cIcon as String; && @ {en} pick name from https://fontawesome.com/icons @: full CSS class
 , cClass as String; && @ [''] {en} in: 'muted', 'primary', 'info', 'success', 'danger', 'warning'; @: CSS class && http://getbootstrap.com/css/#buttons-options, http://getbootstrap.com/css/#helper-classes-colors
-, uSize as Variant; && [0|''] 1-'lg'|2-'2x'| … 9-'9x'
+, uSize as Variant; && [0|''] 1-'lg'|2-'2x'| … 9-'9x' see https://fontawesome.com/how-to-use/on-the-web/styling/
 , fixedWidth as Boolean; && [.F.] {en} Fixed width for vertical alignment
-, cOthers as String; && [''] eg. fa-rotate-90, see http://fontawesome.io/examples/
-, cStyle as String; && [''] inline style directive
+, cOthers as String; && [''] {en} eg. fa-rotate-90, see https://fontawesome.com/how-to-use/on-the-web/styling/
+, cStyle as String; && [''] {en} inline style directive
 
 #if .F.
 && {en} example: insert in any text
@@ -309,7 +309,7 @@ endfunc
 
 * =============================================================
 function cScriptJSfocus && {fr} Javascript pour mettre le focus sur un contrôle
-lparameters toControl as awCbo of aw.vcx
+lparameters toControl as awCbo of aw.vcx, toForm as awFrm of aw.vcx
 
 if Vartype(m.toControl) == 'O'
 	
@@ -317,7 +317,7 @@ if Vartype(m.toControl) == 'O'
 
 	lcID = cawID(m.toControl, Iif(.F.;
 		or m.toControl.BaseClass == 'Combobox' and Empty(m.toControl.Style);
-		or m.toControl.BaseClass == 'Spinner';
+		or m.toControl.BaseClass == 'Spinner'  and !m.toForm.wBSlHTMLgen;
 		, 'txt';
 		, '';
 	))
@@ -337,7 +337,6 @@ else
 	return  ''
 endif
 
-&& {fr} erreur si exécuté dans un eval()
 endfunc	
 
 * =============================================================
@@ -2499,8 +2498,8 @@ woHTMLgen = .null. && as awHTMLgen of awHTML.prg - {en} awHTMLgen instance {fr} 
 wCSSclassAdd = '' && {en} Additional CSS class(es) {fr} Classe(s) CSS additionnelles
 wcHTML = .null. && [cf. this.wcHTMLGen()]{en} Object custom HTML {fr} HTML spécifique de l'objet
 wcHTMLevents = .null. && {en} HTML events to implement (coma delimited) - .null.: all (default), '': none {fr} Evénements HTML à générer (séparés par ',') - .null.: tous (défaut), '': aucun
-
 wlContentDynamic = .F. && {en} This object's members and/or properties are dynamic - .T. if members or property change at run-time {fr} Le contenu et/ou les propriétés de cet objet sont dynamiques - .T. si les membres ou les propriétés changent à l'exécution
+wcSortDir = '' && {en} Grid sorted on this column ? _N_o, _A_sc or _D_esc {fr} Grille triée sur cette colonne ? _N_on, _A_sc ou _D_esc
 
 DynamicToolTipText = '' && {en} [Web only, not supported by VFP] Character expression setting .ToolTipText for each grid row {fr} [Web seul] Expression caractère définissant .ToolTipText pour chaque ligne de la grille
 _MemberData = '<VFPData><memberdata name="dynamictooltiptext" display="DynamicToolTipText" type="property"/></VFPData>'
@@ -3414,13 +3413,11 @@ function cawUserAction && {en} FoxInCloud user action linearized from Request da
 lparameters reqData, lError
 
 && 2016-06-16 thn -- {FiC V 2.21.1-beta.6} {en} created
-local result;
-, piece;
-, iSep
 
+local result, piece, iSep
 result = ''
 
-if .T. && !m.lError
+if ga_Type_IsChar(m.reqData, .T.) and .T. && !m.lError
 
 	piece = cawUserAction_strExtract(m.reqData, '&ObjAddr=', '&', 1, 3)
 	iSep = Atc('-', m.piece)
@@ -3432,7 +3429,6 @@ if .T. && !m.lError
 		, cawUserAction_strExtract(m.reqData, '&Prop=', '&', 1, 3));
 		, cawUserAction_strExtract(m.reqData, '&MethAddr=', '&', 1, 3));
 		, '')
-
 	piece = ICase(;
 		Lower(m.piece) == Lower('InitControlsInet'),;
 			'Init',;
@@ -3444,23 +3440,19 @@ if .T. && !m.lError
 			'InteractiveChange',;
 			m.piece;
 		)
-
 	result = m.result + nEvl(m.piece, '.' + m.piece)
 
-	piece = Strtran(URLDecode(cawUserAction_strExtract(m.reqData, '&ValueType=', '&', 1, 3)), 'undefined')
+	piece = Strtran(URLdecode(cawUserAction_strExtract(m.reqData, '&ValueType=', '&', 1, 3), .T.), '') && 'undefined'
 	piece = Trim(Leftc(m.piece, Evl(Atcc(CR, m.piece), Lenc(m.piece))), CR, LF)
-	piece = Iif(Empty(m.piece);
-		, '';
-		, cL(uValueJS(;
-			  URLDecode(cawUserAction_strExtract(m.reqData, '&Value=', '&', 1, 3));
-			, m.piece;
-			));
-		)
+	piece = Iif(Empty(m.piece), '', cL(uValueJS(;
+		  URLdecode(cawUserAction_strExtract(m.reqData, '&Value=', '&', 1, 3), .T.);
+		, m.piece;
+		)))
 	result = c2Words(m.result, '(', nEvl(m.piece, m.piece + ')'))
-
 endif
 
-return Padr(m.result, 100)
+return m.result
+endfunc
 
 * -----------------------------------------------------
 function cawUserAction_strExtract
@@ -3476,9 +3468,12 @@ lparameters ;
 
 nError = .null.
 
-local result, oRegExp as abRegExp, iMatch, oSubMatch, aa[1]
-result = ''
-if m.error
+local result, oRegExp as abRegExp, iMatch, aa[1]
+
+if lTrue(m.error) and ga_Type_IsChar(m.queryStr, .T.)
+
+	result = '' && optimization
+
 	oRegExp = abRegExp('err[^\d]{4,10}(\d{1,4})', 'gi')
 	for iMatch = 1 to oRegExp.execute(m.queryStr)
 		nError = Cast(m.oRegExp.Matches[m.iMatch, 3].Item(1) as Integer)
@@ -3497,9 +3492,10 @@ if m.error
 		endfor
 	endif
 	if Empty(m.result)
-		#if .F.
+
+		#if .F. && non-AJAX Error
 		 Error:          7
-		 Message: Le fichier existe d?j?.
+		 Message: Le fichier existe déjà.
 		 Code: 
 		 Program: propsreplace
 		 Line No:      13235
@@ -3516,7 +3512,8 @@ if m.error
 	endif
 	result = Evl(m.result, m.queryStr)
 endif
-return Padr(Trim(m.result, CR, LF, ' '), 100)
+
+return Padr(Trim(Evl(m.result, ''), CR, LF, ' '), 100)
 endfunc
 
 * -----------------------------------------------------

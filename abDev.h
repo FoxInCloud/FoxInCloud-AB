@@ -88,3 +88,6 @@
 #define VK_SHIFT_DOWN	VK_LSHIFT_DOWN or VK_RSHIFT_DOWN
 
 #define SUPPORTED_LANG	"fr,en,de,es,pt,it"
+
+#define CSS_RELATIVE_DIM_POS	(.F. and lDevModeAB())
+&& https://drafts.csswg.org/css-box-3/#width-and-height && awHTMLgen: relative dimensions and positions based on .Anchor

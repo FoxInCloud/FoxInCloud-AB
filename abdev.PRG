@@ -2095,41 +2095,50 @@ return m.lcResult
 function cInLineCommentStripped && {fr} Instructions sans commentaire de ligne
 lparameters ;
   tcInsts as string; && {fr} Instructions
-, tcComment as string && @ {fr} Commentaires trouvés
+, tcComment as string; && @ {fr} Commentaires trouvés
+, tlJS as boolean; && [.F.] {fr} Instructions JavaScript
 
 tcComment = ''
 
 local lcResult;
-, llResult;
-, liComment;
-, liCR
+, llResult, liResult;
+, lcComSep, liComSep;
+, liCR;
 
-lcResult = ''
+lcResult = m.tcInsts
 
 * {fr} Si code valide
-llResult = vartype(m.tcInsts) == 'C'
+llResult = ga_Type_IsChar(m.tcInsts)
 assert m.llResult message cAssertMsg(textmerge([Invalid Code: <<cL(m.tcInsts)>>]))
-if m.llResult
+if m.llResult and !Empty(m.tcInsts)
 
-	lcResult = m.tcInsts
+	lcResult = cCRLFfix(m.tcInsts)
+	tlJS = lTrue(m.tlJS)
+	tcInsts = Iif(m.tlJS, cStringsMasked(m.lcResult, .T.), m.lcResult)
+	lcComSep = Replicate(Iif(m.tlJS, '/', '&'), 2)
 
+* assert !m.tlJS
+	liResult = 1
 	do while .t.
 
-		liComment = at_c(replicate('&', 2), m.lcResult)
-		if m.liComment > 0
+		liComSep = ratc(m.lcComSep, m.tcInsts, m.liResult)&& 2018-08-30 thn -- {en} end to start of text
+		&& 2018-08-30 thn -- {en} removed the variations on preceding character -- did not work with ratc(,, nOccurence)
+		if m.liComSep > 0
+			if !(m.tlJS and Substrc(m.tcInsts, m.liComSep-1, 1) == ':') && eg. http://
 
-			liCR = at_c(CR, substrc(m.lcResult, m.liComment))
+				liCR = at_c(CR, Substrc(m.lcResult, m.liComSep))
 
-			tcComment = m.tcComment;
-				+ iif(empty(m.tcComment), '', CRLF);
-				+ iif(m.liCR > 0;
-					, substrc(m.tcInsts, m.liComment, m.liCR - m.liComment);
-					, substrc(m.tcInsts, m.liComment);
-					);
+				tcComment = m.tcComment + iif(empty(m.tcComment), '', CRLF) + Alltrim(iif(m.liCR > 0;
+						, substrc(m.lcResult, m.liComSep, m.liCR - 1);
+						, substrc(m.lcResult, m.liComSep);
+						));
 
-			lcResult = '';
-				+ rtrim(substrc(m.lcResult, 1, m.liComment - 1), space(1), TABUL);
-				+ iif(m.liCR > 0, substrc(m.lcResult, m.liComment + m.liCR-1), '')
+				lcResult = '';
+					+ Rtrim(leftc(m.lcResult, m.liComSep - 1), ' ', TABUL); && {en} before comment
+					+ iif(m.liCR > 0, substrc(m.lcResult, m.liComSep + m.liCR-1), '') && {en} after  comment
+
+			endif
+			liResult = m.liResult + 1
 		else
 			exit
 		endif
@@ -2137,6 +2146,7 @@ if m.llResult
 endif
 
 return m.lcResult
+endfunc
 
 * ----------------------------
 procedure cInLineCommentStripped_Test && {fr} Teste cInLineCommentStripped()
@@ -3195,8 +3205,7 @@ local lcResult;
 
 lcResult = ''
 
-if type('m.toException.BaseClass') == 'C';
-	and m.toException.BaseClass == 'Exception'
+if type('m.toException.BaseClass') == 'C' and m.toException.BaseClass == 'Exception'
 
 	with m.toException as exception
 
@@ -3215,9 +3224,10 @@ if type('m.toException.BaseClass') == 'C';
 				CRLF + Ltrim(.userValue, CR, LF, ' '),;
 				Cast(.userValue as M);
 			)
-		lcMessage = Trim(.Message, ',', ' ', '.') && "Erreur levée par l'utilisateur, ."
 
+		lcMessage = Trim(.Message, ',', ' ', '.') && "Erreur levée par l'utilisateur, ."
 		lcMessage = m.lcMessage + Iif(Empty(m.lcMessage) or Empty(m.lcUserValue), '', ' - ') + m.lcUserValue && c2Words() may not be available
+
 		lcLine = Iif(Vartype(.LineNo) == 'N', Ltrim(Transform(.LineNo, '999,999')), .LineNo)
 
 		lcResult = c2Words(;
@@ -4207,9 +4217,7 @@ function cSetPath(tlSort) && {fr} Set("Path") bien présenté
 local laResult[1]
 
 alines(laResult, set("Path"), 1, ',', ';')
-if m.tlSort
-	asort(laResult)
-endif
+= lTrue(m.tlSort) and asort(laResult) > 0
 
 return cListOfArray(@m.laResult, CRLF)
 endfunc
@@ -6170,13 +6178,13 @@ endproc
 * =============================================
 function abCoverage && {fr} Lance un historique d'exécution && {fr} Alias de oCoverage()
 lparameters ;
-  condition as Boolean; && [.T.] {fr} condition pour lancer le coverage
+  condition as Boolean; && @ [.T.] {fr} in: condition pour lancer le coverage ; out: file address
 , lAdditive as Boolean; && [.F.] {en} Add to the same file
 , lProduction as Boolean; && [.F.] {fr} Forcer le Coverage en mode production
 
 return iif(empty(pcount());
 	, oCoverage();
-	, oCoverage(m.condition, m.lAdditive, m.lProduction);
+	, oCoverage(@m.condition, m.lAdditive, m.lProduction);
 	)
 
 endfunc
@@ -6184,18 +6192,18 @@ endfunc
 * =============================================
 function oCoverage && {fr} Lance un historique d'exécution
 lparameters ;
-  condition as Boolean; && [.T.] {fr} condition pour lancer le coverage
+  condition as Boolean; && @ [.T.] {fr} in: condition pour lancer le coverage ; out: file address
 , lAdditive as Boolean; && [.F.] {en} Add to the same file
 , lProduction as Boolean; && [.F.] {fr} Forcer le Coverage en mode production
 
-* {fr} loCoverage = oCoverage([condition]) && {en} Starts log {fr} Commence l'historique
-* 	--<{en} code you want to trace {fr} Code que vous voulez tracer >--
+* loCoverage = oCoverage([condition[, lAdditive[, lProduction]]]) && {en} Starts log {fr} Commence l'historique
+* 	... && {en} code you want to trace {fr} Code que vous voulez tracer
 
-* {fr} loCoverage = .null. && {en} Stops log {fr} Arrête l'historique
+* loCoverage = .null. && {en} Stops log {fr} Arrête l'historique
 
 if .t.;
- and (empty(pcount()) or lTrue(m.condition));
- and (lDevMode() or lTrue(m.lProduction))
+ and (empty(pcount()) or !lFalse(m.condition));
+ and (lTrue(m.lProduction) or lDevMode())
 
 	lAdditive = lTrue(m.lAdditive)
 
@@ -6214,6 +6222,8 @@ if .t.;
 		strtofile(CRLF + ttoc(datetime()) + ' ' + replicate('-', 50), m.lcFile, .t.)
 	endif
 
+	condition = m.lcFile
+	
 	return abSet('COVERAGE';
 			, '"' + m.lcFile + '"';
 				+ iif(m.lAdditive, ' ADDITIVE', '');
@@ -7339,6 +7349,7 @@ function caError && {fr} version textuelle plus compréhensible de aError()
 lparameters errNum && @ {en} [0] error number out
 
 local result as String;
+, oNULL as abSet of abDev.prg;
 , nError as Integer;
 , iError as Integer;
 , aa[1];
@@ -7346,6 +7357,7 @@ local result as String;
 result = ''
 nError = AError(aa)
 errNum = m.aa[1]
+oNULL = abSet('NullDisplay', '-')
 
 do case
 case Empty(m.nError)
@@ -7381,7 +7393,7 @@ otherwise
 			Message(): <<m.aa[2]>>
 			Error parameters if any: <<m.aa[3]>>
 			Work area: <<m.aa[4]>>
-			Trigger failed: <<ICase(m.aa[5] = 1, 'Insert', m.aa[5] = 2, 'Update', m.aa[5] = 3, 'Delete', 'N/A')>>
+			Trigger failed: <<ICase(m.aa[5] = 1, 'Insert', m.aa[5] = 2, 'Update', m.aa[5] = 3, 'Delete', .NULL.)>>
 		endtext
 	
 endcase

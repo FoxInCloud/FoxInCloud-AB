@@ -1,17 +1,17 @@
-* {fr} abTxt.prg
+* abTxt.prg
 * =====================================================
 * (c) Abaque SARL, 66 rue Michel Ange - 75016 Paris - France
 * contact@FoxInCloud.com - http://foxincloud.com/ - +33 9 53 41 90 90
-* {fr} -----------------------------------------------------
-* {fr} Ce logiciel est distribué sous GNU General Public License, tel quel, sans aucune garantie
-* {fr} Il peut être utilisé et/ou redistribué sans restriction
-* {fr} Toute modification doit être reversée à la communauté
-* {fr} La présente mention doit être intégralement reproduite dans toute copie même partielle
 * {en} -----------------------------------------------------
 * {en} This software is distributed under the terms of GNU General Public License, AS IS, without any warranty
 * {en} It can be used and/or distributed without restriction
 * {en} Any modification or improvement must be given for free to the community
 * {en} This permission notice shall be entirely included in all copies or substantial portions of the Software
+* {fr} -----------------------------------------------------
+* {fr} Ce logiciel est distribué sous GNU General Public License, tel quel, sans aucune garantie
+* {fr} Il peut être utilisé et/ou redistribué sans restriction
+* {fr} Toute modification doit être reversée à la communauté
+* {fr} La présente mention doit être intégralement reproduite dans toute copie même partielle
 * =====================================================
 
 #INCLUDE AB.H
@@ -19,23 +19,23 @@ AB()
 return abUnitTests()
 
 * ===================================================================
-function cTronc && {fr} Chaîne tronquée à une longueur donnée en la terminant par "..."
+function cTronc && {fr} Chaîne tronquée à une longueur donnée et terminée par "..." {en} Truncated string
 lparameters ;
-  tcChain; && {fr} Chaine à tronquer
-, tnTronc; && [50] {fr} Nombre de caractères oû la chaine totale doit tenir
-, tlWord; && [.F.] {fr} couper à la fin d'un mot
-, tcDropped; && @ [''] {fr} Partie éventuellement coupée
-, tlEllipsNot; && [.F.] {fr} Ne pas ajouter de points de suspension
-, tcSep && [any] {fr} preferred separator
+  tcChain; && {fr} Chaine à tronquer {en} String to be truncated
+, tnTronc; && [50] {fr} Nombre de caractères où la chaine doit tenir {en} Number of characters of the truncated string
+, tlWord; && [.F.] {fr} Couper à la fin d'un mot {en} Split at the end of a word
+, tcTail; && @ [''] {fr} Partie éventuellement coupée {en} Truncated tail
+, tlEllipsNot; && [.F.] {fr} Ne pas ajouter de points de suspension {en} do not add ellipsis at the end
+, tcSep && [any] {en} Preferred word separator {fr} séparateur de mots préféré
 
 local lcResult;
 , llResult;
 , lcEllips;
 
-store '' to tcDropped, lcResult
+store '' to tcTail, lcResult
 
 llResult = vartype(m.tcChain) == 'C'
-assert m.llResult message "Required parameter tcChain is invalid"
+assert m.llResult message "Required parameter 'tcChain' is invalid"
 if m.llResult
 
 	tnTronc = Iif(ga_Type_IsPositiveInteger(m.tnTronc), m.tnTronc, 50)
@@ -81,7 +81,7 @@ if m.llResult
 		endif
 
 		lcResult = m.lcResult + m.lcEllips
-		tcDropped = alltrim(substr(m.tcChain, m.tnTronc))
+		tcTail = alltrim(substr(m.tcChain, m.tnTronc))
 	endif
 endif
 
@@ -240,42 +240,37 @@ loTest.Test("Je suis né le 05/08/1955", "Je suis né", ' le ', date(1955,8,5))
 return loTest.Result()
 
 * ===================================================================
-function cC && {fr} Alias de cComparable()
+function cC && {fr} Alias de cComparable() {en} Alias of cComparable()
 lparameters ;
-  tc; && Texte source
-, tnLength && [trim] {fr} Si > 0, le résultat est paddé à cette longueur (pour index)
+  tc; && {fr} Texte source {en} Source text
+, tnLength && [trim] {fr} Si > 0, le résultat est complété à cette longueur (pour index) {en} if > 0, pad result to this length
 
 return cComparable(m.tc, m.tnLength)
 
 * ===================================================================
-function cComparable && {fr} Texte débarrassé de ses variantes typographiques pour comparaison
+function cComparable && {fr} Texte débarrassé de ses variantes typographiques pour comparaison {en} Text without typographic discrepancies
 lparameters ;
-  tc; && {fr} Texte source
-, tnLength && [trim] {fr} Si > 0, le résultat est paddé à cette longueur (pour index)
+  tc; && {fr} Texte source {en} Source text
+, tnLength && [trim] {fr} Si > 0, le résultat est complété à cette longueur (pour index) {en} if > 0, pad result to this length
 
 local lcChars, lcResult && Texte comparable
 
-do case
-case isnull(m.tc) or empty(m.tc)
-	lcResult = ''
+lcResult = ''
 
-case vartype(m.tc) == 'C'
-	lcResult = upper(alltrim(m.tc))
-	lcResult = cEuroANSI(m.lcResult) && {fr} désaccentue
-	lcChars  = chrtran(m.EuroAnsi, '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz ', '')
-	lcResult = chrtran(m.lcResult, m.lcChars, space(len(m.lcChars))) && {fr} ne garde que les caractères alphanumériques et les espaces
-	lcResult = cRepCharDel(m.lcResult) && {fr} supprime les double espaces
-	lcResult = cSpaceAroundGroup(m.lcResult) && {fr} normalise le nombre d'espaces autour des caractères de groupement
-
-otherwise
-	lcResult = ''
-endcase
-
-if vartype(m.tnLength) == 'N' and m.tnLength > 0
-	lcResult = padr(m.lcResult, m.tnLength)
+if ga_Type_IsChar(m.tc, .T.)
+	lcResult = cEuroANSI(Upper(Alltrim(m.tc)))
+	lcChars  = Chrtran(m.EuroAnsi, '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz ', '')
+	lcResult = cSpaceAroundGroup(; && {fr} normalise le nombre d'espaces autour des caractères de groupement
+							cRepCharDel(; && {fr} supprime les double espaces
+							 Chrtran(m.lcResult, m.lcChars, space(len(m.lcChars))); && {fr} ne garde que les caractères alphanumériques et les espaces
+						))
 endif
 
-return m.lcResult
+return Iif(vartype(m.tnLength) == 'N' and m.tnLength > 0;
+	, padr(m.lcResult, m.tnLength);
+	, m.lcResult;
+	)
+endfunc
 
 * -----------------------------------------------------------------
 procedure cComparable_test
@@ -349,7 +344,7 @@ loTest.Test('appuie-tête', 'appuie----------------tête', '-')
 return loTest.Result()
 
 * ===================================================================
-function cSpaceAround && {fr} Chaîne oû les nombres d'Space(1) avant et après une sous-chaîne donnée sont normalisés
+function cSpaceAround && {fr} Chaîne oû les nombres d'espaces avant et après une sous-chaîne donnée sont normalisés
 lparameters ;
   tcChain ; && {fr} Chaine à traiter
 , tcSubChain ; && {fr} Sous-chaine dont les espaces avant - après sont à normaliser
@@ -548,19 +543,19 @@ external array taWords
 && /!\ en chantier
 
 * ===================================================================
-function cListOfArray && {fr} Liste délimitée du contenu d'un tableau
+function cListOfArray && {fr} Liste délimitée du contenu d'un tableau {en} Delimited list of array elements
 lparameters ;
-  taWords; && @ {fr} Mots de types divers (CNDTLY sont supportés)
-, tcDelim; && [','] {fr} Délimiteur
-, tnCol; && [1] {fr} N° de colonne, -1 pour toutes les colonnes (tableau taWords à 2 dimensions)
-, tlLitterals; && [.F.] {fr} écrire les mots sous la forme de litteraux VFP (ex. foo > "foo",  02/07/03 > {^2003-02-07})
-, tlKeepEmpty; && [tlLitterals] {fr} Include empty words
-, tlKeepNull; && [tlLitterals] {fr} Include .NULL. words
-, tlKeepWeird; && [.F.] {fr} Include words of type G/U
-, tlDistinct; && [.F.] {fr} Élimine les doublons
-, tlLines; && [.F.] {fr} Séparer les lignes (tableau taWords à 2 dimensions et m.tnCol = -1)
-, tnColFilter; && [aucune] {fr} n° de colonne contenant un filtre des lignes à lister
-, tlRtrimNot; && [.F.] {fr} Ne pas supprimer les espaces en queue des éléments de type caractère
+  taWords; && @ {fr} Mots de types divers (CNDTLY sont supportés) {en} source array
+, tcDelim; && [','] {fr} Délimiteur {en} delimiter
+, tnCol; && [1] {fr} N° de colonne, -1 pour toutes les colonnes (Alen(taWords, 2) > 0) {en} column number, -1 for all columns with Alen(taWords, 2) > 0
+, tlLitterals; && [.F.] (ex. foo > "foo",  02/07/03 > {^2003-02-07}) {fr} écrire les mots sous la forme de litteraux VFP {en} write elements as VFP literals
+, tlKeepEmpty; && [tlLitterals] {en} Include empty words
+, tlKeepNull; && [tlLitterals] {en} Include .NULL. words
+, tlKeepWeird; && [.F.] {en} Include words of type G/U
+, tlDistinct; && [.F.] {fr} Élimine les doublons {en} Remove duplicates
+, tlLines; && [.F.] (m.tnCol = -1) {fr} Séparer les lignes {en} Separate lines
+, tnColFilter; && [aucune] {fr} n° de colonne avec une valeur filtre des lignes à lister {en} Column number with filter for lines
+, tlRtrimNot; && [.F.] {fr} Ne pas supprimer les espaces en queue des éléments de type caractère {en} Do not trim String values
 
 external array taWords
 
@@ -715,21 +710,18 @@ return m.loTest.Result()
 
 * ===================================================================
 function cPrintable && {fr} Chaine ne contenant que des caractères imprimables
-lparameters ;
-  tcChain && {fr} Chaine à normaliser
+lparameters tcChain && {fr} Chaine à normaliser
 
-if vartype(m.tcChain) == 'C' ;
- and not empty(m.tcChain)
-
-	return cRepCharDel(chrtranc(m.tcChain, NON_PRINTABLE, space(len(NON_PRINTABLE))))
-else
-	return ''
-endif
+return Iif(ga_Type_IsChar(m.tcChain, .T.);
+	, cRepCharDel(Chrtranc(m.tcChain, NON_PRINTABLE, space(len(NON_PRINTABLE))));
+	, '';
+	)
+endfunc
 
 * ===================================================================
 function cOfLitteral && {fr} Chaîne depuis un littéral
 lparameters ;
-  tcLitteral;
+  tcLitteral; && Literal String
 , tlLitteral && [.F.] {en} return an empty string if tcLitteral is not a String literal
 
 local Result, length
@@ -768,14 +760,14 @@ return m.loTest.Result()
 * ===================================================================
 function cL && {fr} Littéral VFP && {fr} Alias de cLitteral()
 lparameters ;
-  tuData ; && {fr} Valeur à convertir en littéral (type supportés : tous soit CDGLNOQTUXY)
-, tlRTrim; && [.F.] {fr} si type C, ôter les espaces à droite
-, tnTronc; && [aucun] {fr} si type C, nombre de caractères de troncature
-, tlXML; && [.F.] {fr} Encoder pour XML
-, tlObjRecurseNot; && [.F.] {fr} Ne pas récurser dans les membres et propriétés de type objet
+  tuValue; && @ {fr} Valeur à convertir en littéral (tous type supportés : CDGLNOQTUXY) {en} Value to be turned into a literal (all types supported : CDGLNOQTUXY)
+, tlRTrim; && [.F.] {fr} si type C, ôter les espaces à droite {en} if type C, trim right spaces
+, tnTronc; && [aucun] {fr} si type C, nombre de caractères de troncature {en} if type C, number of characters to truncate to
+, tlXML; && [.F.] {fr} Encoder pour XML {en} Encode for XML
+, tlObjRecurseNot; && [.F.] {fr} Ne pas récurser dans les membres et propriétés de type objet {en} Do not recurse into member and object properties
 
 return cLitteral(;
-	 @m.tuData;
+	 @m.tuValue;
 	, m.tlRTrim;
 	, m.tnTronc;
 	, m.tlXML;
@@ -783,13 +775,13 @@ return cLitteral(;
 	)
 
 * ===================================================================
-function cLitteral && {fr} Littéral VFP
+function cLitteral && {fr} Littéral VFP {en} VFP literal
 lparameters ;
-  tuData; && @ {fr} Valeur à convertir en littéral (type supportés : tous soit CDGLNOQTUXY)
-, tlRTrim; && [.F.] {fr} si type C, ôter les espaces à droite
-, tnTronc; && [aucun] {fr} si type C, nombre de caractères de troncature
-, tlXML; && [.F.] {fr} Encoder pour XML
-, tlObjRecurseNot; && [.F.] {fr} Ne pas récurser dans les membres et propriétés de type objet
+  tuValue; && @ {fr} Valeur à convertir en littéral (tous type supportés : CDGLNOQTUXY) {en} Value to be turned into a literal (all types supported : CDGLNOQTUXY)
+, tlRTrim; && [.F.] {fr} si type C, ôter les espaces à droite {en} if type C, trim right spaces
+, tnTronc; && [aucun] {fr} si type C, nombre de caractères de troncature {en} if type C, number of characters to truncate to
+, tlXML; && [.F.] {fr} Encoder pour XML {en} Encode for XML
+, tlObjRecurseNot; && [.F.] {fr} Ne pas récurser dans les membres et propriétés de type objet {en} Do not recurse into member and object properties
 
 #if .f. && {fr} Vartype VFP9
 	C && {fr} Character, Memo, Varchar, Varchar (Binary)
@@ -810,23 +802,23 @@ tlXML = lTrue(m.tlXML)
 tlObjRecurseNot = lTrue(m.tlObjRecurseNot)
 
 local lcVarType
-lcVarType = vartype(m.tuData)
+lcVarType = vartype(m.tuValue)
 
 return ICase(;
-	type('tuData', 1) == 'A',;
-		'[' + cListOfArray(@m.tuData, ', ',-1,.t.,.t.,.t.,.t.) + ']',;
+	type('tuValue', 1) == 'A',;
+		'[' + cListOfArray(@m.tuValue, ', ',-1,.t.,.t.,.t.,.t.) + ']',;
 	M.lcVarType == 'C',;
-		cLitteral_C(m.tuData, m.tlRTrim, m.tnTronc, m.tlXML),;
+		cLitteral_C(m.tuValue, m.tlRTrim, m.tnTronc, m.tlXML),;
 	M.lcVarType == 'L',;
-		iif(m.tuData, '.T.', '.F.'),;
+		iif(m.tuValue, '.T.', '.F.'),;
 	M.lcVarType $ 'DT',;
-		cLitteralDTStrict(m.tuData),;
+		cLitteralDTStrict(m.tuValue),;
 	M.lcVarType $ 'YN',;
-		cLitteral_N(m.tuData, m.lcVarType),;
+		cLitteral_N(m.tuValue, m.lcVarType),;
 	M.lcVarType == 'X',;
 		'.NULL.',;
 	M.lcVarType == 'O',;
-		cLitteral_O(m.tuData, m.tlRTrim, m.tnTronc, m.tlXML, m.tlObjRecurseNot),;
+		cLitteral_O(m.tuValue, m.tlRTrim, m.tnTronc, m.tlXML, m.tlObjRecurseNot),;
 	M.lcVarType == 'G',;
 		'General',;
 	M.lcVarType == 'Q',;
@@ -835,7 +827,7 @@ return ICase(;
 )
 
 * -----------------------------------------------------------------
-function cLitteral_C && {fr} Littéral VFP de type caractère
+function cLitteral_C && [Private to cLitteral()] {fr} Littéral VFP de type caractère
 lparameters ;
   tcData ; && {fr} Valeur à convertir en littéral (type supportés : tous soit CDGLNOQTUXY)
 , tlRTrim; && [.F.] {fr} si type C, ôter les espaces à droite
@@ -898,7 +890,7 @@ return m.lcResult
 endfunc
 
 * -----------------------------------------------------------------
-function cLitteral_C_(tcData) && {fr} privée de cLitteral_C() - chaîne avec délimiteurs
+function cLitteral_C_(tcData) && [Private to cLitteral()] {fr} chaîne avec délimiteurs
 
 return icase(;
 	not ["] $ m.tcData,;
@@ -911,7 +903,7 @@ return icase(;
 	)
 
 * -----------------------------------------------------------------
-function cLitteral_C__(tcData) && {fr} littéral d'un chaîne contenant ",[]
+function cLitteral_C__(tcData) && [Private to cLitteral()] {fr} littéral d'un chaîne contenant ",[]
 
 local lnAt;
 , lnAtSimple, lnAtDouble, lnAtBracket;
@@ -955,17 +947,17 @@ enddo
 return m.Result
 
 * -----------------------------------------------------------------
-function cLitteral_N && {fr} Littéral VFP de type numérique
+function cLitteral_N && [Private to cLitteral()] {fr} Littéral VFP de type numérique
 lparameters ;
-  tuData; && {fr} Nombre  à convertir en littéral
+  tuValue; && {fr} Nombre  à convertir en littéral
 , lcVarType
 
 local result as String
 
 result = chrtran(;
 	  iif(m.lcVarType = 'Y';
-		, '$' + alltrim(str(m.tuData, 200, 6));
-		, transform(m.tuData);
+		, '$' + alltrim(str(m.tuValue, 200, 6));
+		, transform(m.tuValue);
 		);
 	, set("Point"), '.'; && {fr} Gregory Adam http://www.atoutfox.org/nntp.asp?ID=0000008895
 	)
@@ -974,7 +966,7 @@ return Iif('.' $ m.result, Trim(m.result, '0'), m.result)
 endfunc
 
 * -----------------------------------------------------------------
-function cLitteral_O && {fr} Littéral VFP de type objet
+function cLitteral_O && [Private to cLitteral()] {fr} Littéral VFP de type objet
 lparameters ;
   toObject; && {fr} Objet à convertir en littéral
 , tlRTrim; && [.F.] {fr} si type C, ôter les espaces à droite
@@ -989,45 +981,28 @@ local lcResult;
 , cProps as string;
 , cProp as string;
 
-lcResult = ''
-
-do case
-
-case type('m.toObject.class') == 'C' and type('m.toObject.classLibrary') == 'C' && Visual FoxPro Object
-	&& All Visual FoxPro base classes except the Empty class have the following minimum set of properties: 
-	&& - Class Property 
-	&& - BaseClass Property 
-	&& - ClassLibrary Property 
-	&& - ParentClass Property 
-	
-	lcResult = cWords(', ';
+lcResult = ICase(;
+	type('m.toObject.class') == 'C' and type('m.toObject.classLibrary') == 'C',; && {en} VFP Object && {en} All VFP base classes except the Empty class have the following minimum set of properties: Class, BaseClass, ClassLibrary, ParentClass
+		cWords(', ';
 		, 'BaseClass: ' + Iif(PemStatus(m.toObject, 'BaseClass', 2), 'N/A', cLitteral(m.toObject.BaseClass));
 		, nEvl(m.toObject.ParentClass, 'ParentClass: ' + cLitteral(m.toObject.ParentClass));
 		, 'Class: ' + cLitteral(m.toObject.class);
 		, nEvl(m.toObject.ClassLibrary, 'ClassLibrary:' + cLitteral(m.toObject.ClassLibrary));
 		, Iif(type('m.toObject.Parent') == 'O' and type('m.toObject.Parent.Name') == 'C', 'parent: ' + m.toObject.Parent.Name, '');
 		, cLitteral_O_cProps(m.toObject, m.tlRTrim, m.tnTronc, m.tlXML, m.tlObjRecurseNot);
-		)
-
-case type('m.toObject.Application') == 'O' and type('m.toObject.Application.Name') == 'C' && {fr} and ! 'foxpro' $ Lower(m.toObject.Application.Name) && {fr} COM object? eg 'Microsoft Excel'
-	lcResult = 'COM class: ' + m.toObject.application.name
-
-case type('m.toObject.class') == 'C' && {fr} weird Object
-	lcResult = "class: " + m.toObject.class
-
-otherwise && {fr} Empty Object
-
-	lcResult = cWords(', ';
-		, 'class: "Empty"';
-		, cLitteral_O_cProps(m.toObject, m.tlRTrim, m.tnTronc, m.tlXML, m.tlObjRecurseNot);
-		)
-endcase
+		),;
+	type('m.toObject.Application') == 'O' and type('m.toObject.Application.Name') == 'C',; && and ! 'foxpro' $ Lower(m.toObject.Application.Name) && COM object? eg 'Microsoft Excel'
+		'COM class: ' + m.toObject.application.name,;
+	type('m.toObject.class') == 'C',; && {en} weird Object
+		"class: " + m.toObject.class,;
+		cLitteral_O_cProps(m.toObject, m.tlRTrim, m.tnTronc, m.tlXML, m.tlObjRecurseNot); && {en} Empty Object && 2018-09-12 thn -- {en} 'class: "Empty"' removed
+	)
 
 return nEvl(m.lcResult, 'Object {' + m.lcResult + '}')
 endfunc
 
 * -----------------------------------------------------------------
-function cLitteral_O_cProps && {fr} Propriétés d'un objet modifiées par rapport à sa classe
+function cLitteral_O_cProps && [Private to cLitteral()] {fr} Propriétés d'un objet modifiées par rapport à sa classe
 lparameters ;
   toObject; && {fr} Objet à convertir en littéral
 , tlRTrim; && [.F.] {fr} si type C, ôter les espaces à droite
@@ -1090,7 +1065,7 @@ return ltrim(substr(m.lcResult, 2))
 endfunc
 
 * -----------------------------------------------------------------
-procedure cLitteral_Test && {fr} cLitteral() unit test
+procedure cLitteral_Test && {en} cLitteral() unit test
 
 local loTest as abUnitTest of abDev.prg;
 , luTest;
@@ -1166,7 +1141,7 @@ for liParm = 1 to pcount()
 		, cLitteral(m.luParm);
 		) + ','
 endfor
-return left(m.lcResult, len(m.lcResult)-1) && {fr} supprime la dernière ','
+return Trim(m.lcResult, ',')
 endfunc
 
 * -----------------------------------------------------------------
@@ -1193,10 +1168,10 @@ return loTest.Result()
 * =============================================================
 function cLitteralJS_HTML && {fr} Littéral Javascript d'après une valeur VFP pour ajout à un attribut HTML
 lparameters ;
-  tuData; && @ {fr} Valeur à convertir en littéral ; types supportés : cf. cLitteralJS_lSupport()
+  tuValue; && @ {fr} Valeur à convertir en littéral ; types supportés : cf. cLitteralJS_lSupport()
 , tlTrim; && [.F.] {fr} si type C, ôter les espaces à droite
 
-return strtran(cLitteralJS(m.tuData, m.tlTrim), '"', '&#34;') && {fr} échappe les guillements '"' par '&#34;' pour le HTML
+return strtran(cLitteralJS(m.tuValue, m.tlTrim), '"', '&#34;') && {fr} échappe les guillements '"' par '&#34;' pour le HTML
 endfunc
 
 * -----------------------------------------------
@@ -1219,12 +1194,12 @@ endproc
 * =============================================================
 function cLitteralJS && {fr} Littéral Javascript d'après une valeur VFP
 lparameters ;
-  tuData; && @ {fr} Valeur à convertir en littéral ; types supportés : cf. cLitteralJS_lSupport()
+  tuValue; && @ {fr} Valeur à convertir en littéral ; types supportés : cf. cLitteralJS_lSupport()
 , tlTrim; && [.F.] {fr} si type C, ôter les espaces à droite
 , tlJSON; && [.F.] {fr} produire un littéral compatible JSON
 , tlQuotesNo; && [.F.] {fr} si type C, ne pas entourer de guillemets (XML)
 
-external array tuData
+external array tuValue
 
 tlJSON = lTrue(m.tlJSON)
 
@@ -1232,8 +1207,8 @@ local lcVarType, llResult, lcResult
 
 lcResult = ''
 
-lcVarType = type('tuData', 1)
-lcVarType = iif(m.lcVarType == 'A', m.lcVarType, vartype(m.tuData))
+lcVarType = type('tuValue', 1)
+lcVarType = iif(m.lcVarType == 'A', m.lcVarType, vartype(m.tuValue))
 do case
 
 case m.lcVarType == 'C'
@@ -1242,11 +1217,11 @@ case m.lcVarType == 'C'
 && /!\ 2/8/07	conserver les sauts de ligne		lcResult = cPrintable(m.lcResult)
 
 	* {fr} Encadrer la chaîne de délimiteur, échapper si nécessaire
-	* {fr} return ["] + Strtran(Strtran(Iif(lTrue(m.tlTrim), Trim(m.tuData), m.tuData), '\', '\\'), ["], [\"]) + ["]
+	* {fr} return ["] + Strtran(Strtran(Iif(lTrue(m.tlTrim), Trim(m.tuValue), m.tuValue), '\', '\\'), ["], [\"]) + ["]
 	return icase(;
 		lTrue(m.tlQuotesNo),;
 		[];
-			+ strtran(strtran(strtran(strtran(iif(lTrue(m.tlTrim), trim(m.tuData), m.tuData);
+			+ strtran(strtran(strtran(strtran(iif(lTrue(m.tlTrim), trim(m.tuValue), m.tuValue);
 				, '\', '\\');
 				, CRLF, '\n');
 				, CR, '\n');
@@ -1255,7 +1230,7 @@ case m.lcVarType == 'C'
 		M.tlJSON,;
 		[];
 			+ ["];
-			+ strtran(strtran(strtran(strtran(strtran(iif(lTrue(m.tlTrim), trim(m.tuData), m.tuData);
+			+ strtran(strtran(strtran(strtran(strtran(iif(lTrue(m.tlTrim), trim(m.tuValue), m.tuValue);
 				, '\', '\\');
 				, ["], [\"]);
 				, CRLF, '\n');
@@ -1264,7 +1239,7 @@ case m.lcVarType == 'C'
 			+ ["],;
 		[];
 			+ ['];
-			+ strtran(strtran(strtran(strtran(strtran(iif(lTrue(m.tlTrim), trim(m.tuData), m.tuData);
+			+ strtran(strtran(strtran(strtran(strtran(iif(lTrue(m.tlTrim), trim(m.tuValue), m.tuValue);
 				, '\', '\\');
 				, ['], [\']); && {fr} see GA_STRINGPARSE_CLASS.MaskStrings(), parameter JSstring
 				, CRLF, '\n');
@@ -1275,35 +1250,35 @@ case m.lcVarType == 'C'
 
 case m.lcVarType $ 'DT'
 	return iif(m.tlJSON;
-		, textmerge(["<<Year(m.tuData)>>-<<Padl(Month(m.tuData), 2, '0')>>-<<Padl(Day(m.tuData), 2, '0')>>T<<Padl(Hour(m.tuData), 2, '0')>>:<<Padl(Minute(m.tuData), 2, '0')>>:<<Padl(Sec(m.tuData), 2, '0')>>Z"]);
-		, 'new Date(' + cYMDHMS(m.tuData, .t.) + ')';
+		, textmerge(["<<Year(m.tuValue)>>-<<Padl(Month(m.tuValue), 2, '0')>>-<<Padl(Day(m.tuValue), 2, '0')>>T<<Padl(Hour(m.tuValue), 2, '0')>>:<<Padl(Minute(m.tuValue), 2, '0')>>:<<Padl(Sec(m.tuValue), 2, '0')>>Z"]);
+		, 'new Date(' + cYMDHMS(m.tuValue, .t.) + ')';
 		)
 
 case m.lcVarType == 'X'
 	return 'null'
 
 case m.lcVarType == 'L'
-	return iif(m.tuData, 'true', 'false')
+	return iif(m.tuValue, 'true', 'false')
 
 case m.lcVarType == 'N'
-	return strtran(transform(m.tuData), set("Point"), '.')
+	return strtran(transform(m.tuValue), set("Point"), '.')
 
 case m.lcVarType == 'Y'
-	return strtran(transform(mton(m.tuData)), set("Point"), '.')
+	return strtran(transform(mton(m.tuValue)), set("Point"), '.')
 
 case m.lcVarType == 'O' && {fr} Objet
 && {V 1.25}
-	llResult = cLitteralJS_lSupport(m.tuData, @m.lcResult)
+	llResult = cLitteralJS_lSupport(m.tuValue, @m.lcResult)
 	assert m.llResult message cAssertMsg(m.lcResult)
 	if m.llResult
 && {V 1.25}
 
 		local laProp[1], lcProp
-		if amembers(laProp, m.tuData, 0, 'U') > 0 && 'U' : user-defined
+		if amembers(laProp, m.tuValue, 0, 'U') > 0 && 'U' : user-defined
 			asort(laProp)
 			for each lcProp in laProp
-				if not pemstatus(m.tuData, m.lcProp, 2) && {fr} protected
-					lcResult = m.lcResult + ',"' + lower(m.lcProp) + '":' + cLitteralJS(getpem(m.tuData, m.lcProp),, .t.) && {fr} JSON compatible
+				if not pemstatus(m.tuValue, m.lcProp, 2) && {fr} protected
+					lcResult = m.lcResult + ',"' + lower(m.lcProp) + '":' + cLitteralJS(getpem(m.tuValue, m.lcProp),, .t.) && {fr} JSON compatible
 				endif
 			next
 		endif
@@ -1313,19 +1288,19 @@ case m.lcVarType == 'O' && {fr} Objet
 	endif
 
 case m.lcVarType == 'A' && {fr} Array
-	if !laEmpty(@m.tuData)
+	if !laEmpty(@m.tuValue)
 		local luElt, liRow, lcRow, liCol
-		if Alen(m.tuData, 2) > 0
-			for liRow = 1 to Alen(m.tuData, 1)
+		if Alen(m.tuValue, 2) > 0
+			for liRow = 1 to Alen(m.tuValue, 1)
 				lcResult = m.lcResult + ', ['
 				lcRow = ''
-				for liCol = 1 to Alen(m.tuData, 2)
-					lcRow = m.lcRow + ', ' + cLitteralJS(m.tuData[m.liRow, m.liCol], m.tlTrim, m.tlJSON)
+				for liCol = 1 to Alen(m.tuValue, 2)
+					lcRow = m.lcRow + ', ' + cLitteralJS(m.tuValue[m.liRow, m.liCol], m.tlTrim, m.tlJSON)
 				endfor
 				lcResult = m.lcResult + Ltrim(m.lcRow, ',', ' ') + ']'
 			endfor
 		else
-			for each luElt in tuData
+			for each luElt in tuValue
 				lcResult = m.lcResult + ', ' + cLitteralJS(m.luElt, m.tlTrim, m.tlJSON)
 			next
 		endif
@@ -1333,7 +1308,7 @@ case m.lcVarType == 'A' && {fr} Array
 	lcResult = '[' + Ltrim(m.lcResult, ',', ' ') + ']'
 
 otherwise
-	assert .f. message cAssertMsg(textmerge([could not build a JavaScript constant from <<m.tuData>> of type <<m.lcVarType>>]))
+	assert .f. message cAssertMsg(textmerge([could not build a JavaScript constant from <<m.tuValue>> of type <<m.lcVarType>>]))
 endcase
 
 return m.lcResult
@@ -1342,23 +1317,23 @@ endfunc
 * -----------------------------------------------
 function cLJS && {fr} Littéral Javascript d'après une valeur VFP && {fr} Alias (simplifié) de cLitteralJS()
 lparameters ;
-  tuData; && @ {fr} Valeur à convertir en littéral ; types supportés : cf. cLitteralJS_lSupport()
+  tuValue; && @ {fr} Valeur à convertir en littéral ; types supportés : cf. cLitteralJS_lSupport()
 , tlTrim; && [.F.] {fr} si type C, ôter les espaces à droite
 , tlJSON && [.F.] {fr} produire un littéral compatible JSON
 
-return cLitteralJS(@m.tuData, m.tlTrim, m.tlJSON)
+return cLitteralJS(@m.tuValue, m.tlTrim, m.tlJSON)
 endfunc
 
 * -----------------------------------------------
-function cLitteralJS_lSupport && {fr} Une données est supportée pour conversion en littéral Javascript
+function cLitteralJS_lSupport && [Private to cLitteralJS()] {fr} Une données est supportée pour conversion en littéral Javascript
 lparameters ;
-  tuData; && {fr} Donnée à analyser
+  tuValue; && {fr} Donnée à analyser
 , tcResult && @ {fr} Résultat localisé si pas supporté
 
 local lcVarType, llResult
 
-lcVarType = type('tuData', 1)
-lcVarType = iif(m.lcVarType == 'A', m.lcVarType, vartype(m.tuData))
+lcVarType = type('tuValue', 1)
+lcVarType = iif(m.lcVarType == 'A', m.lcVarType, vartype(m.tuValue))
 
 do case
 
@@ -1368,19 +1343,19 @@ case m.lcVarType $ 'ACDTXLYN'
 case m.lcVarType == 'O'
 	do case
 
-	case type('m.tuData.Application.Name') == 'C' and not 'foxpro' $ lower(m.tuData.application.name)
+	case type('m.tuValue.Application.Name') == 'C' and not 'foxpro' $ lower(m.tuValue.application.name)
 		tcResult = textmerge(icase(;
-			cLangUser() = 'fr',	[les objets non foxPro (<<m.tuData.Application.Name>>) ne sont pas supportés],;
-													[non-FoxPro objects (<<m.tuData.Application.Name>>) are not supported]; && Default: English
+			cLangUser() = 'fr',	[les objets non foxPro (<<m.tuValue.Application.Name>>) ne sont pas supportés],;
+													[non-FoxPro objects (<<m.tuValue.Application.Name>>) are not supported]; && Default: English
 		))
 
-	case type('m.tuData.Class') == 'U' && {fr} Empty class
+	case type('m.tuValue.Class') == 'U' && {fr} Empty class
 		llResult = .t.
 
-	case type('m.tuData.BaseClass') == 'C' and inlist(m.tuData.baseclass, 'Collection', 'Control', 'Olecontrol') && {fr} unsupported foxpro class
+	case type('m.tuValue.BaseClass') == 'C' and inlist(m.tuValue.baseclass, 'Collection', 'Control', 'Olecontrol') && {fr} unsupported foxpro class
 		tcResult = textmerge(icase(;
-			cLangUser() = 'fr',	[la classe de base '<<m.tuData.BaseClass>>' n'est pas supportée],;
-													[base class '<<m.tuData.BaseClass>>' is not supported]; && Default: English
+			cLangUser() = 'fr',	[la classe de base '<<m.tuValue.BaseClass>>' n'est pas supportée],;
+													[base class '<<m.tuValue.BaseClass>>' is not supported]; && Default: English
 		))
 	otherwise
 		llResult = .t.
@@ -1613,6 +1588,7 @@ case m.lcVarType == 'L' and m.tuEuropean
 endcase
 
 return m.lcResult
+endfunc
 
 * -----------------------------------------------------------------
 procedure cEuroANSI_Test
@@ -3332,11 +3308,13 @@ function cUnescaped && {fr} Inverse de cEscaped()
 lparameters tcChain
 
 return iif(vartype(m.tcChain) == 'C';
-	, strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(cUnescaped_Base(m.tcChain);
+	, strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(cUnescaped_Base(m.tcChain);
 	  , '&#34;', ["]);
 	  , '&#39;', [']);
+	  , '&thinsp;', ' ');
 	  , '&#8211;', chr(150));
-	  , '&#8212;', chr(151));
+	  , '&mdash;', chr(151));
+	  , '&#8212;', chr(151)); && &mdash; &&
 	  , '&#160;',  chr(160));
 	  , '&#8364;', chr(128));
 	  , '&#8482;', chr(153));
@@ -3616,7 +3594,7 @@ lparameters ;
   tcChain;
 , result; && @ {en} in: .T. for JavaScript string, @out: .T. if success, else ga_StringParse_Object() instantiation result
 
-local loParser, cResult
+local loParser, lJS, cResult
 
 return iif(.t.;
 		and ga_Type_IsChar(m.tcChain, .t.);
@@ -3624,7 +3602,8 @@ return iif(.t.;
 			or ga_StringParse_Object(@m.loParser); && modify command abGA
 			or cResultAdd(@m.result, GA_STRINGPARSE_CLASS + [ class instantiation failed!]);
 			);
-		and (!lTrue(m.result) or varSet(@m.tcChain, strtran(strtran(m.tcChain, '\"'), "\'")));
+		and varSet(@m.lJS, lTrue(m.result));
+		and (!m.lJS or varSet(@m.tcChain, strtran(strtran(m.tcChain, '\"', '~~'), "\'", '~~'))); && 2018-07-31 thn -- {en} substitute chain that is not likely to occur in the source string
 		and varSet(@m.result, m.loParser.maskStrings(@m.cResult, m.tcChain)); && modify command abGA
 		and m.result;
 	, m.cResult;
@@ -3641,6 +3620,7 @@ loTest = newobject('abUnitTest', 'abDev.prg')
 loTest.Test([Evl(m.test, ~~~~~~~~~~~~~~~~)], [Evl(m.test, "this is a test")]) && _cliptext = Replicate('~', Len('"this is a test"'))
 
 return loTest.result()
+endproc
 
 * =================================
 function chunked && {en} chunked strings separated with CR LF
@@ -3812,16 +3792,13 @@ local laTags[1], lcTag, loRE, lcResult
 lcResult = m.tcHTML
 
 if vartype(m.tcTags) == 'C'
-
 	alines(laTags, m.tcTags, 1, ',', ';')
 	for each lcTag in laTags
-
 		lcResult = cTagStripped(m.lcResult, m.lcTag)
 	endfor
 else
-
 	loRE = create('VBscript.regexp')
-	loRE.pattern = '<[^>]+>'
+	loRE.pattern = '<[^>]+?>'
 	loRE.global = .t.
 	lcResult = loRE.replace(m.tcHTML, '')
 endif
@@ -3829,30 +3806,28 @@ endif
 return m.lcResult
 
 * -------------------------------
-function cTagStripped && {fr} Texte HTML sans une balise
+function cTagStripped && {fr} Texte sans une balise HTML
 lparameters ;
   tcHTML; && Texte HTML
 , tcTag; && [toutes] {fr} Balise(s) à supprimer
-, tlExcept; && [.F.] {fr} Sauf balises ci-dessus
+, tlExcept; && [.F.] {fr} Sauf balises ci-dessus (non supporté)
 
 tcTag = iif(vartype(m.tcTag) == 'C', upper(alltrim(m.tcTag)), '')
 tlExcept = lTrue(m.tlExcept)
 
 local lcResult;
 , liTagBeg;
-, liTagEnd;
-, llTagEnd;
+, liTagEnd, llTagEnd;
 , lcTag;
 , lcHTML;
 , lnOccBeg;
 , lnOccEnd;
 
-lcResult = iif(vartype(m.tcHTML) == 'C', m.tcHTML, '')
+lcResult = Iif(Vartype(m.tcHTML) == 'C', m.tcHTML, '')
 if !empty(m.lcResult)
 
-	lnOccBeg = 0
-	do while .t.
-		lnOccBeg = m.lnOccBeg + 1
+	lnOccBeg = Occurs('<' + m.tcTag, Upper(m.lcResult))
+	do while m.lnOccBeg > 0
 
 		* {fr} Si balise cherchée ouvrante,
 		liTagBeg = atcc('<' + m.tcTag, m.lcResult, m.lnOccBeg)
@@ -3861,7 +3836,7 @@ if !empty(m.lcResult)
 			* {fr} Trouver la position de la balise fermante correspondante
 			lcHTML = substrc(m.lcResult, m.liTagBeg)
 			lnOccEnd = 1
-			do while .t. && /!\ bug boucle infinie
+			do while .t.
 
 				liTagEnd = atcc('>', m.lcHTML, m.lnOccEnd)
 				llTagEnd = m.liTagend > 0
@@ -3871,7 +3846,6 @@ if !empty(m.lcResult)
 					lnOccEnd = m.lnOccEnd + 1
 				endif
 			enddo
-
 			if m.llTagEnd
 
 				lcTag = Substrc(m.lcHTML, 2, Evl(Atcc(' ', m.lcHTML), m.liTagEnd) - 2)
@@ -3886,6 +3860,8 @@ if !empty(m.lcResult)
 					lcResult = strtran(m.lcResult, m.lcHTML, '', 1, 1, 1)
 				endif
 			endif
+
+			lnOccBeg = m.lnOccBeg - 1
 
 		* {fr} Sinon, terminé
 		else

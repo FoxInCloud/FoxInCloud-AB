@@ -1379,11 +1379,11 @@ endif
 return m.lnResult
 
 * ===================================================================
-function aAdd && {fr} Ajoute un élément à un Tableau à UNE dimension {en} Add one element to an Array with one dimension
+function aAdd && {fr} Ajoute un élément à un Tableau à UNE dimension {en} Add one element to a one-dimensional array
 lparameters ;
-  taResult; && @ {fr} Résultat {en} Result
+  taResult; && @ {fr} Tableau Résultat {en} Result array
 , tuElt; && {fr} élément à ajouter {en} element to append
-, tlUnique; && [.F.] {fr} ne pas ajouter l'élément s'il existe déjà {en} don't append it if it exists already
+, tlUnique; && [.F.] {fr} ajouter l'élément seulement s'il n'existe pas {en} append element only if not extent
 , tlPush; && [.F.] {fr} Ajouter au début {en} Append at the beginning
 
 external Array taResult && {fr} pour le gestionnaire de projet {en} for the project manager

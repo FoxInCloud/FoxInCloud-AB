@@ -1,17 +1,17 @@
-* {fr} abOOP.prg
+* abOOP.prg
 * =====================================================
 * (c) Abaque SARL, 66 rue Michel Ange - 75016 Paris - France
 * contact@FoxInCloud.com - http://foxincloud.com/ - +33 9 53 41 90 90
-* {fr} -----------------------------------------------------
-* {fr} Ce logiciel est distribué sous GNU General Public License, tel quel, sans aucune garantie
-* {fr} Il peut être utilisé et/ou redistribué sans restriction
-* {fr} Toute modification doit être reversée à la communauté
-* {fr} La présente mention doit être intégralement reproduite dans toute copie même partielle
 * {en} -----------------------------------------------------
 * {en} This software is distributed under the terms of GNU General Public License, AS IS, without any warranty
 * {en} It can be used and/or distributed without restriction
 * {en} Any modification or improvement must be given for free to the community
 * {en} This permission notice shall be entirely included in all copies or substantial portions of the Software
+* {fr} -----------------------------------------------------
+* {fr} Ce logiciel est distribué sous GNU General Public License, tel quel, sans aucune garantie
+* {fr} Il peut être utilisé et/ou redistribué sans restriction
+* {fr} Toute modification doit être reversée à la communauté
+* {fr} La présente mention doit être intégralement reproduite dans toute copie même partielle
 * =====================================================
 
 #INCLUDE AB.H
@@ -101,14 +101,14 @@ return m.loTest.Result()
 * ========================================
 function oFormIn && {fr} Forme où se trouve un objet
 lparameters toObject && {fr} Objet VFP
-
 return oContIn(m.toObject, 'Form')
+endfunc
 
 * ========================================
-function lFormIn && {fr} Un objet est placé dans une forme
+function lFormIn && {fr} Un objet est placé dans un formulaire
 lparameters toObject && {fr} Objet VFP
-
 return not isnull(oFormIn(m.toObject))
+endfunc
 
 * ========================================
 function cListItems as String && {fr} Listbox|Combobox.List[] > liste délimitée
@@ -553,7 +553,9 @@ lparameters ;
   taSiblings; && @ {fr} Frères d'un objet dans un conteneur
 , toObject; && {fr} Objet
 , tcClass; && [toutes] {fr} Classe
-, tlTabIndex && [.F.] {fr} tabuler seulement les objets ayant la propriété TabIndex, classer par TabIndex croissant
+, tlTabIndex; && [.F.] {fr} tabuler seulement les objets ayant la propriété TabIndex, classer par TabIndex croissant
+, tlControl; && [.F.] {fr} tabuler seulement les contrôles
+
 external array taSiblings
 
 local lnResult as Integer; && {fr} Nombre de frères trouvés
@@ -575,6 +577,7 @@ if m.llResult
 	if m.llResult
 
 		tlTabIndex = lTrue(m.tlTabIndex)
+		tlControl  = lTrue(m.tlControl)
 
 		* {fr} Pour chaque objet frère
 		for liSibling = 1 to nObjectsCont(m.loParent)
@@ -582,7 +585,9 @@ if m.llResult
 
 			if not m.loSibling == m.toObject;
 			 and (empty(m.tcClass) or loClass(m.loSibling, m.tcClass));
-			 and (not m.tlTabIndex or lProperty(m.loSibling, 'TabIndex'))
+			 and (not m.tlTabIndex or lProperty(m.loSibling, 'TabIndex') and lProperty(m.loSibling, 'TabStop'));
+			 and (not m.tlControl or InList(m.loSibling.BaseClass, 'Checkbox', 'Combobox', 'Commandbutton', 'Editbox', 'Grid', 'Listbox', 'Optionbutton', 'Spinner', 'Textbox'));
+			 and .T.
 
 				* {fr} Ajouter au résultat
 				lnResult = m.lnResult + 1
@@ -628,38 +633,41 @@ return iif(aoSiblings(@m.laSibling, m.toObject, m.tcClass) = 1;
 function oSiblingTabIndex && {fr} Frère d'un object dans un conteneur selon un différentiel de tabindex
 lparameters ;
   toObject; && {fr} Objet
-, tnTabIndex && {fr} Différentiel de TabIndex
+, tnTabIndex; && {fr} Différentiel de TabIndex
+, tlControl; && [.F.] {fr} tabuler seulement les contrôles
 
-if empty(m.tnTabIndex)
+&& 2018-09-11 thn -- {FiC V 2.28.0-beta.2} {en} improved; tlControl added
+&& 2018-09-18 thn -- {FiC V 2.28.0-beta.4} {en} works for controls in the same container
+
+local loResult;
+, laSibling[1], lnSibling, liSibling, loSibling, llUp
+
+do case
+case empty(m.tnTabIndex) or !lProperty(m.toObject, 'tabIndex')
 	return m.toObject
-else
+case varSet(@m.lnSibling, aoSiblings(@m.laSibling, m.toObject,, .t., @m.tlControl)) and Empty(m.lnSibling)
+	return .null.
+otherwise
+* setStepOn(Lower(m.toObject.Name) == Lower('txtnom35'))
+	llUp = m.tnTabIndex > 0
+	tnTabIndex = m.toObject.tabIndex + m.tnTabIndex
+	loResult = m.laSibling[1]
+	for liSibling = 1 to m.lnSibling
+		if .T.;
+		 and Iif(m.llUp, laSibling[m.liSibling, 2] >= m.tnTabIndex, laSibling[m.liSibling, 2] <= m.tnTabIndex);
+		 and varSet(@m.loSibling, m.laSibling[m.liSibling, 1]);
+		 and m.loSibling.tabStop;
+		 and m.loSibling.enabled;
+		 and (!m.tlControl or m.loSibling.visible);
+		 and .T.
+			loResult = m.loSibling
+			EXIT
+		endif
+	endfor
 
-	local laSibling[1], lnSibling, liSibling, loSibling, loResult
-	lnSibling = aoSiblings(@m.laSibling, m.toObject,, .t.)
-	if m.lnSibling > 0
-
-		tnTabIndex = m.toObject.tabindex + m.tnTabIndex
-		loResult = .null.
-		for liSibling = 1 to m.lnSibling
-
-			loSibling = laSibling[m.liSibling, 1]
-			if laSibling[m.liSibling, 2] = m.tnTabIndex
-
-				if m.loSibling.enabled
-					loResult = m.loSibling
-					exit
-				else
-					tnTabIndex = m.tnTabIndex + 1
-				endif
-			endif
-		endfor
-
-		return m.loResult
-
-	else
-		return .null.
-	endif
-endif
+	return m.loResult
+endcase
+endfunc
 
 * ========================================
 function lClass && {fr} Une définition de classe existe
@@ -875,74 +883,6 @@ return iif(aoClassCont(@m.laObject, m.toCont, m.tcClasses, m.tlRecurse, m.tnCont
 	)
 
 * ====================
-function HTMLtabIndex && {en} Collects .TabIndex for HTML
-lparameters ;
-  oTabIndex as GA_DICTIONARY_CLASS of abGA.prg; && @ {fr} key: Sys(1272, m.oCont) - value : Tabindex
-, toForm as Form
-
-local success as Boolean;
-, iTabIndex as integer;
-
-success = ga_Dictionary_object(@m.oTabIndex)
-if m.success
-
-	iTabIndex = 0
-	success = HTMLtabIndex_(m.toForm, @m.oTabIndex, @m.iTabIndex)
-endif
-
-return m.success
-
-*----------------------------------------------------
-function HTMLtabIndex_ && {en} Collects .TabIndex for HTML - recursive
-lparameters ;
-  toCont as Container;
-, oTabIndex as GA_DICTIONARY_CLASS of abGA.prg;
-, iTabIndex as integer
-
-local success as Boolean;
-, aoCont[1];
-, oCont as Textbox;
-, iTabIndex_ as integer
-
-success = .t.
-
-if aoClassCont(@m.aoCont, m.toCont, .f.,,, .t.) > 0 and aColsDel(@m.aoCont, 2) > 0
-	for each oCont in m.aoCont foxobject
-
-		iTabIndex = m.iTabIndex + 1
-		success = m.oTabIndex.add(sys(1272, m.oCont), m.iTabIndex)
-		if m.success and loCont(m.oCont)
-
-			iTabIndex_ = iif(m.oCont.baseclass == 'Page';
-				, m.oTabIndex.item(sys(1272, m.oCont.parent));
-				, m.iTabIndex;
-				)
-			success = HTMLtabIndex_(m.oCont, @m.oTabIndex, @m.iTabIndex_)
-		endif
-		if !m.success
-			exit
-		endif
-	endfor
-endif
-
-assert m.success
-return m.success
-
-*----------------------------------------------------
-procedure HTMLtabIndex_Test
-
-local oTest as abUnitTest of abDev.prg;
-, oForm as awFrm of aw.vcx;
-, oTabIndex as GA_DICTIONARY_CLASS of abGA.prg;
-
-oTest = newobject('abUnitTest', 'abDev.prg')
-
-do form (addbs(DOS_AWSAMPLES) + 'fic\ficdemo\progs\forms\ecran_2') name oForm noshow
-m.oTest.Test(.t., @m.oTabIndex, m.oForm)
-*suspend
-return m.oTest.Result()
-
-* ====================
 function aoClassCont && {fr} Objets VFP [d'une classe] dans un conteneur /!\ récursion descendante
 lparameters ;
   taObjects; && @ {fr} Objets trouvés
@@ -991,7 +931,7 @@ endif
 			loObject = oObjectCont(m.toCont, m.liObject) && modify command abOOP
 
 			* {fr} Si l'objet est de la classe cherchée, ajouter au résultat
-			lnResult = iif(!m.llClass or loClass(m.loObject, m.tcClasses);
+			lnResult = iif(Vartype(m.loObject) == 'O' and (!m.llClass or loClass(m.loObject, m.tcClasses));
 				, aoAppend(@m.taObjects, m.loObject, m.tlTabIndex, m.tlEnabled);
 				, m.lnResult;
 				)
@@ -1077,19 +1017,15 @@ if m.llResult
 			iParent = 0
 			iTabIndex = 0
 			do while vartype(m.oParent) == 'O'
-				iTabIndex = m.oParent.tabindex * 20^m.iParent + m.iTabIndex
-				oParent = iif(.t.;
-				 and type('m.oParent.Parent') == 'O';
-				 and lProperty(m.oParent.parent, 'TabIndex');
-				 and (!lProperty(m.oParent.parent, 'TabStop') or m.oParent.parent.tabstop);
-				 , m.oParent.parent;
-				 , .null.;
-				 )
+				if lProperty(m.oParent, 'TabIndex') and (!lProperty(m.oParent, 'TabStop') or m.oParent.tabstop)
+					iTabIndex = m.oParent.tabindex * 20^m.iParent + m.iTabIndex
+				endif
+				oParent = iif(type('m.oParent.Parent') == 'O', m.oParent.parent, .null.)
 				iParent = m.iParent + 1
 			enddo
 			dimension taObjects[m.lnResult, 2]
 			taObjects[m.lnResult, 1] = m.toObject
-			taObjects[m.lnResult, 2] = m.iTabIndex && {fr} Iif(m.lPage, 0, m.toObject.Tabindex)
+			taObjects[m.lnResult, 2] = m.iTabIndex && Iif(m.lPage, 0, m.toObject.Tabindex)
 		else
 			dimension taObjects[m.lnResult]
 			taObjects[m.lnResult] = m.toObject
@@ -3186,4 +3122,26 @@ do while !IsNull(m.node)
 enddo
 
 return m.result
+endfunc
+
+* ------------------------------------
+function lAliasGrcCS as Boolean && {en} An alias is referenced in the .controlSource of at least one grid's column
+lparameters oGrd as Grid, cAlias as String
+
+ && 2018-07-03 thn -- {FiC V 2.27.0-beta.6} {en} created
+
+local success, oGrc, cCS
+
+if m.oGrd.ColumnCount > 0 and ga_Type_IsChar(m.cAlias, .T.)
+	cAlias = Upper(Alltrim(m.cAlias))
+	for each oGrc as Column in m.oGrd.Columns foxobject
+		cCS = Upper(Chrtran(Strtran(m.oGrc.ControlSource, '->', '.'), ' ', ''))
+		if Occurs('.', m.cCS) = 1 and JustStem(m.cCS) == m.cAlias or lTableExpr(m.cCS, m.cAlias)
+			success = .T.
+			exit
+		endif
+	endfor
+endif
+
+return m.success
 endfunc

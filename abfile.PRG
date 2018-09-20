@@ -1176,11 +1176,11 @@ ENDIF
 ldDate = m.laFile[3]
 RETURN EVALUATE('';
 	+ "{^";
-	+ TRANSFORM(YEAR(m.ldDate));
+	+ Cast(YEAR(m.ldDate) as M);
 	+ "-";
-	+ TRANSFORM(MONTH(m.ldDate));
+	+ Cast(MONTH(m.ldDate) as M);
 	+ "-";
-	+ TRANSFORM(DAY(m.ldDate));
+	+ Cast(DAY(m.ldDate) as M);
 	+ " " ;
 	+ m.laFile[4]; && {fr} time
 	+ "}";
@@ -2716,8 +2716,8 @@ if ga_Type_IsChar(m.cFile, .T.) and file(m.cFile) and !Used(cAliasUsed(m.cFile))
 	nMS = min(max(Iif(ga_Type_isPositiveInteger(m.nMS), m.nMS, 0), 50), 5000)
 	nAttempt = Iif(ga_Type_isPositiveInteger(m.nAttempt), m.nAttempt, 10)
 	nSleepMS = Max(Int(m.nMS / m.nAttempt), 10) && minimum 10 ms between attempts
-
 	cFile = FullPath(m.cFile)
+
 	cFileFPT = FileMemo(m.cFile)
 	lFileFPT = File(m.cFileFPT)
 

@@ -72,7 +72,8 @@ procedure XLWStableBeautify && {fr} Améliore l'aspect d'une feuille Excel conten
 lparameters ;
   tuXLWS; && {fr} Référence à une feuille ou @ adresse d'un classeur Excel
 , tcXLWSName; && [nom du classeur] {fr} Nom de la feuille si on veut la renommer
-, tcTypes && [ignoré] {fr} Types des colonnes
+, tcTypes; && [ignoré] {fr} Types des colonnes
+
 external array tcTypes
 
 local llResult as Boolean; && {fr} La feuille a été traitée
