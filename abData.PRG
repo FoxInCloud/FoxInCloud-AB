@@ -19,8 +19,8 @@ AB()
 return abUnitTests()
 
 * ========================================
-function cTableAddress && {fr} Adresse complète d'une table d'après son alias
-lparameters tcAlias && [alias()] {fr} Alias d'ouverture de la table
+function cTableAddress && {fr} Adresse d'une table d'après son alias {en} Address of a table from an Alias
+lparameters tcAlias && [alias()] {fr} Alias d'ouverture de la table {en} Alias
 
 local llFullPathOff, lcResult
 
@@ -45,44 +45,10 @@ return m.lcResult
 endfunc
 
 * ========================================
-function JustField && {fr} Champ et alias d'une chaîne de type "[alias.]field" && {fr} note: JustExt("field") retourne ""
+function JustField && {fr} Champ et alias d'une chaîne de type "[alias.]field" {en} Field and Alias from a string like "[alias.]field"
 lparameters ;
-  tcChain; && {fr} Chaîne présumée de type 'alias.field' ou 'field'
-, tcAlias && @ {fr} Alias en retour
-
-local llResult, lcResult && {fr} Field
-store '' to tcAlias, lcResult
-
-llResult = vartype(m.tcChain) == 'C'
-assert m.llResult message cAssertMsg(textmerge([Spécification de chaîne invalide : <<cLitteral(m.tcChain)>>]))
-if m.llResult
-
-	tcChain = upper(strtran(chrtran(alltrim(m.tcChain), ' ', ''), '->', '.'))
-
-	if occurs([.], m.tcChain) <= 1 and lenc(m.tcChain) < 257 && 2*128 + 1
-
-		if [.] $ m.tcChain
-			tcAlias = juststem(m.tcChain)
-			lcResult = justext(m.tcChain)
-*!*					2015-05-25 bouffe du temps inutilement
-*!*					IF NOT (lVFPName(m.tcAlias) AND lVFPName(m.lcResult))
-*!*						STORE '' TO m.tcAlias, m.lcResult
-*!*					ENDIF
-		else
-*!*					lcResult = Iif(lVFPName(m.tcChain), m.tcChain, '')
-			lcResult = m.tcChain
-		endif
-	endif
-endif
-
-return m.lcResult
-endfunc
-
-* ========================================
-function JustField && {fr} Champ et alias d'une chaîne de type "[alias.]field"
-lparameters ;
-  tcChain; && {fr} Chaîne présumée de type 'alias.field' ou 'field'
-, tcAlias && @ [''] {fr} Alias en retour
+  tcChain; && {fr} Chaîne présumée de type 'alias.field' ou 'field' {en} Presumed string like "[alias.]field"
+, tcAlias && @ {fr} Alias en retour {en} out: Alias
 
 tcAlias = '' && {fr} important
 
@@ -132,10 +98,10 @@ loTest.Test('', m.lcChain, @m.lcAlias)
 return loTest.Result()
 
 * ========================================
-function JustTable && {fr} Table dans une chaîne de type "Base de données!table"
+function JustTable && {fr} Table dans une chaîne de type "Base de données!table" {en} Table from a string like "database!table"
 lparameters ;
-  tcChain; && {fr} Chaîne présumée de type "Base de données!table"
-, tcDBC && @ {fr} Base de données en retour
+  tcChain; && {fr} Chaîne présumée de type "Base de données!table" {en} Presumed string like "database!table"
+, tcDBC && @ {fr} Base de données en retour {en} out: database
 
 local lnExclam, llResult, lcResult && {fr} Table ou toute la chaîne source si elle ne comporte aucun '!'
 store '' to lcResult, tcDBC
@@ -170,17 +136,17 @@ return loTest.Result()
 endproc
 
 * =================================================
-function abSelect && {fr} Change la zone de travail Select() et rétablit à destruction
+function abSelect as abSelect of abData.prg && {fr} Change la zone de travail Select() et rétablit à destruction {en} Changes Select() and restores when destroyed
 lparameters ;
-  tuSelect; && [0] {fr} Zone de travail / alias à sélectionner, ou table à ouvrir et sélectionner
-, tlKeepOpened; && [.F.] {fr} Si la table est ouverte, laisser ouverte en sortie
-, tcError; && @ [''] {fr} Erreur éventuelle
+  tuSelect; && [0] {fr} Zone de travail ou alias à sélectionner, ou table à ouvrir et sélectionner {en} Work Area or Alias to select(), or table to USE and Select()
+, tlKeepOpened; && [.F.] {fr} Si la table est ouverte, laisser ouverte en sortie {en} If table was USEd, keep USEd upon exit
+, tcError; && @ [''] {fr} Erreur éventuelle {en} out: error if any
 
 return createobject('abSelect', m.tuSelect, m.tlKeepOpened, @m.tcError)
 endfunc
 
 * =================================================
-define class abSelect as GA_LIGHTWEIGHT_CLASS && {fr} Change la zone de travail Select() et rétablit à destruction
+define class abSelect as GA_LIGHTWEIGHT_CLASS && && {fr} Change la zone de travail Select() et rétablit à destruction {en} Changes Select() and restores when destroyed
 * =================================================
 
 protected nSelect; && {fr} Zone de travail initiale
@@ -196,11 +162,11 @@ lOpened = .f.
 lKeepOpened = .f.
 
 * ---------------------------------------------------
-procedure init && {fr} Change la zone de travail
+protected procedure init && {fr} Change la zone de travail
 lparameters ;
-  tuSelect; && [0] {fr} Zone de travail / alias à sélectionner, ou table à ouvrir et sélectionner; @ alias
-, tlKeepOpened; && [.F.] {fr} Si la table est ouverte, laisser ouverte en sortie
-, tcError; && @ [''] {fr} Erreur éventuelle
+  tuSelect; && [0] {fr} Zone de travail ou alias à sélectionner, ou table à ouvrir et sélectionner {en} Work Area or Alias to select(), or table to USE and Select()
+, tlKeepOpened; && [.F.] {fr} Si la table est ouverte, laisser ouverte en sortie {en} If table was USEd, keep USEd upon exit
+, tcError; && @ [''] {fr} Erreur éventuelle {en} out: error if any
 
 tuSelect = evl(m.tuSelect, 0)
 
@@ -251,7 +217,7 @@ return m.llResult
 endproc
 
 * ---------------------------------------------------
-procedure destroy && {fr} Rétablit la zone de travail initiale et referme la table si this.Init() l'a ouverte
+protected procedure destroy && {fr} Rétablit la zone de travail initiale et referme la table si this.Init() l'a ouverte
 
 select (m.this.nSelect)
 
@@ -261,11 +227,11 @@ endif
 endproc
 
 * =================================================
-enddefine && {fr} CLASS abSelect
+enddefine && class abSelect
 * =================================================
 
 * ========================================
-function cDBCtableAddr && {fr} Adresse d'une table dans un DBC
+function cDBCtableAddr && {fr} Adresse d'une table dans un DBC {en} Address of a table included in a database (DBC)
 lparameters tcDBCTable && 'DBC!Table'
 
 local lcTable, lcDBC, loDBC as abSet, llDBC, llResult, lcResult
@@ -304,14 +270,14 @@ endif
 return m.lcResult
 
 * ========================================
-function cAlias && {fr} Alias d'une table
+function cAlias && {fr} Alias d'une table {en} Alias of a Table
 lparameters ;
-  tuTable; && [Alias()] {en} Table : Alias | Work area | Address | [DB!]Table
-, tlOpened; && @ {fr} La table a été ouverte, penser à la refermer
-, tlExclusive; && [.F.] {fr} Ouvrir la table en exclusif
-, tcError; && @ [''] {fr} Erreur éventuelle
-, tcAlias; && [default] {fr} Alias sous lequel ouvrir la table
-, nMS; && @ [50 ms] {en} wait delay to gain write access to table -- Between(m.nMS, 50 ms, 5000 ms); @: nMS elapsed
+  tuTable; && [Alias()] Table : Alias | Work area | Address | [DB!]Table
+, tlOpened; && @ {fr} La table a été ouverte, penser à la refermer {en} out: table was USEd
+, tlExclusive; && [.F.] {fr} Ouvrir la table en exclusif {en} use table exclusive
+, tcError; && @ [''] {fr} Erreur éventuelle {en} out: error if any
+, tcAlias; && [default] {fr} Alias sous lequel ouvrir la table {en} Alias under which table shoudl be uses
+, nMS; && @ [50 ms] {fr} délai d'attente pour obtenir l'accès à la table {en} wait delay to gain write access to table -- Between(m.nMS, 50 ms, 5000 ms); @: nMS elapsed
 
 tlOpened = .f.
 tcAlias = Upper(iif(ga_Type_IsChar(m.tcAlias, .t.) and lVFPName(m.tcAlias), m.tcAlias, ''))
@@ -406,7 +372,7 @@ return m.lcResult
 function nBufferDirty && {fr} nombre d'enregistrements modifiés dans le tampon d'un alias {en} number of modified records in an alias buffer
 lparameters ;
   tcAlias; && [Alias()]
-, tlAll; && [.F.] {en} all modified even if filtered
+, tlAll; && [.F.] {fr} tous les enregistrement même filtrés {en} all modified even if filtered
 
 local nBufferDirty as integer;
 , loRecno as abRecno of abData.prg;
@@ -439,8 +405,9 @@ return m.nBufferDirty
 endfunc
 
 * ========================================
-function lBufferDirty as Boolean && {fr} Le tampon d'un alias est modifié
+function lBufferDirty as Boolean && {fr} Le tampon d'un alias est modifié {en} an alias' buffer is modified
 lparameters tcAlias && [Alias()]
+
 tcAlias = evl(m.tcAlias, alias())
 
 local lBufferDirty as Boolean;
@@ -489,7 +456,7 @@ return m.lBufferDirty
 endfunc
 
 * -----------------------------------------------------------------
-procedure lBufferDirty_Test && {fr} lBufferDirty() {en} unit test
+procedure lBufferDirty_Test && lBufferDirty() unit test
 
 local loTest as lBufferDirty_Test of abData.prg, liRecno as integer
 loTest = newobject('lBufferDirty_Test', 'abData.prg')
@@ -567,8 +534,9 @@ define class lBufferDirty_Test as abUnitTest of abDev.prg
 	enddefine
 
 * ========================================
-function lBufferInsert && {fr} Un alias tamponné a (au moins) un enregistrement ajouté
-lparameters tcAlias && [courant] {fr} Alias à examiner
+function lBufferInsert && {fr} Un alias tamponné a (au moins) un enregistrement ajouté {en} a buffered alias has at least one record inserted
+lparameters tcAlias && [Alias()]
+
 tcAlias = evl(m.tcAlias, alias())
 
 local success as Boolean;
@@ -606,12 +574,13 @@ endcase
 endfunc
 
 * ========================================
-function abAlias && {fr} Caractéristiques d'un alias
+function abAlias as abAlias of abData.prg && {en} Alias settings {fr} Caractéristiques d'un alias
 lparameters ;
-  tcAlias; && [Alias()] {fr} Alias à analyser
-, tcResult && @ {fr} Résultat
+  tcAlias; && [Alias()]
+, tcResult && @ {fr} Résultat {en} Result
 
 return createobject('abAlias', m.tcAlias, @m.tcResult)
+endfunc
 
 * ========================================
 define class abAlias as relation && {en} Alias settings {fr} Caractéristiques d'un alias
@@ -633,10 +602,10 @@ iRecno = .null.
 dimension aRelationSrce[1], aRelationTrgt[1]
 
 * ---------------------------------------------------
-procedure init && {fr} Mémorise les attributs d'un Alias
+protected procedure init && {en} Records Alias settings {fr} Mémorise les caractéristiques d'un alias
 lparameters ;
-  tcAlias; && [Alias()] {fr} Alias à analyser
-, tcResult; && @ {fr} Résultat
+  tcAlias; && [Alias()]
+, tcResult; && @ {fr} Résultat {en} Result
 
 tcAlias = evl(m.tcAlias, alias())
 
@@ -685,8 +654,8 @@ return this.reset()
 endproc
 
 * ---------------------------------------------------
-procedure reset && {fr} Rétablit les attributs de l'alias
-lparameters tcResult && @ {fr} Résultat
+procedure reset && {en} Restores Alias settings {fr} Rétablit les caractéristiques d'un alias
+lparameters tcResult && @ {fr} Résultat {en} Result
 
 local success as Boolean;
 , result as String;
@@ -784,85 +753,27 @@ return m.success or cResultAdd(@m.tcResult, m.result)
 endproc
 
 * ========================================
-enddefine && {fr} CLASS abAlias
+enddefine && class abAlias
 * ========================================
 
 * ========================================
-function abTableUseIn && {fr} Referme les alias d'une table temporairement
-lparameters tcTable
-return CreateObject('abTableUseIn', m.tcTable)
-endfunc
-
-* =================================================
-define class abTableUseIn as GA_LIGHTWEIGHT_CLASS && {fr} Referme les alias d'une table temporairement
-* =================================================
-protected aAlias[1]
-* ---------------------------------------------------
-procedure init
-lparameters tcTable
-
-local success as Boolean;
-, aa[1];
-, nAlias;
-, iAlias;
-, cAlias;
-
-tcTable = Evl(m.tcTable, '')
-if File(m.tcTable)
-	tcTable = FullPath(m.tcTable)
-	nAlias = 0
-	for iAlias = 1 to AUsed(m.aa)
-		cAlias = m.aa[m.iAlias, 1]
-		if dbf(m.cAlias) == m.tcTable
-			nAlias = m.nAlias + 1
-			dimension this.aAlias[m.nAlias]
-			this.aAlias[m.nAlias] = oAlias(m.cAlias)
-			success = Vartype(this.aAlias[m.nAlias]) == 'O'
-			if m.success
-				use in (m.cAlias)
-			else
-				exit
-			endif
-		endif
-	endfor
-endif
-return m.success
-endproc
-
-* ---------------------------------------------------
-procedure destroy
-local oAlias as oAlias of abdata.prg
-for each oAlias in this.aAlias foxobject
-	m.oAlias.swap
-endfor
-endproc
-
-* =================================================
-enddefine && class abTableUseIn
-* =================================================
-
-* ========================================
-function oAlias && {fr} Caractéristiques d'un alias
+function oAlias as oAlias of abData.prg && {en} Alias settings {fr} Caractéristiques d'un alias
 lparameters ;
-  tcAlias; && [Alias()] {fr} Alias à analyser
-, tcResult && @ {fr} Résultat
+  tcAlias; && [Alias()]
+, tcResult && @ {fr} Résultat {en} Result
 
 return createobject('oAlias', m.tcAlias, @m.tcResult)
+endfunc
 
 * ========================================
-define class oAlias as abAlias of abData.prg
+define class oAlias as abAlias of abData.prg && {en} Alias settings {fr} Caractéristiques d'un alias
 * ========================================
 
 * ---------------------------------------------------
-procedure destroy
-return && don't execute abAlias.destroy()
-endproc
-
-* ---------------------------------------------------
-procedure Swap && {fr} Ouvre une table sous l'alias initial et lui applique les mêmes attributs
+procedure swap as Boolean && {fr} Ouvre une autre table sous le même alias et lui applique les mêmes attributs {en} USE another table under the same Alias with the same attributes
 lparameters ;
-  tcDBF; && {fr} table
-, tcResult; && @ {fr} Résultat
+  tcDBF; && Table
+, tcResult; && @ {fr} Résultat {en} Result
 
 local success as Boolean;
 , result as String;
@@ -918,13 +829,72 @@ assert m.success message cAssertMsg(m.result)
 return m.success or cResultAdd(@m.tcResult, m.result)
 endproc
 
+* ---------------------------------------------------
+protected procedure destroy
+return && don't execute abAlias.destroy()
+endproc
+
 * ========================================
-enddefine && {fr} CLASS oAlias
+enddefine && class oAlias
 * ========================================
 
 * ========================================
-function cAliasesUsed && {fr} Alias ouverts dans la session de données courante
-lparameters nAlias
+function abTableUseIn as abTableUseIn of abData.prg && {fr} Referme les alias d'une table temporairement {en} temporarily USE IN aliases of a table
+lparameters tcTable
+return CreateObject('abTableUseIn', m.tcTable)
+endfunc
+
+* =================================================
+define class abTableUseIn as GA_LIGHTWEIGHT_CLASS && {fr} Referme les alias d'une table temporairement {en} temporarily USE IN aliases of a table
+* =================================================
+protected aAlias[1]
+* ---------------------------------------------------
+protected procedure init
+lparameters tcTable
+
+local success as Boolean;
+, aa[1];
+, nAlias;
+, iAlias;
+, cAlias;
+
+tcTable = Evl(m.tcTable, '')
+if File(m.tcTable)
+	tcTable = FullPath(m.tcTable)
+	nAlias = 0
+	for iAlias = 1 to AUsed(m.aa)
+		cAlias = m.aa[m.iAlias, 1]
+		if dbf(m.cAlias) == m.tcTable
+			nAlias = m.nAlias + 1
+			dimension this.aAlias[m.nAlias]
+			this.aAlias[m.nAlias] = oAlias(m.cAlias)
+			success = Vartype(this.aAlias[m.nAlias]) == 'O'
+			if m.success
+				use in (m.cAlias)
+			else
+				exit
+			endif
+		endif
+	endfor
+endif
+return m.success
+endproc
+
+* ---------------------------------------------------
+protected procedure destroy
+local oAlias as oAlias of abdata.prg
+for each oAlias in this.aAlias foxobject
+	m.oAlias.swap
+endfor
+endproc
+
+* =================================================
+enddefine && class abTableUseIn
+* =================================================
+
+* ========================================
+function cAliasesUsed && {fr} Alias ouverts dans la session de données courante {en} Alias(es) USEd in current dataSession
+lparameters nAlias && @ out: alias count
 local array aa[1]
 return Iif(varSet(@m.nAlias, AUsed(m.aa)) and m.nAlias > 0 and Asort(m.aa) > 0;
 	, Lower(cListOfArray(@m.aa,', ',1));
@@ -933,10 +903,11 @@ return Iif(varSet(@m.nAlias, AUsed(m.aa)) and m.nAlias > 0 and Asort(m.aa) > 0;
 endfunc
 
 * ========================================
-function cAliasUsed && {fr} Alias sous lequel une table est ouverte (le premier si plusieurs)
+function cAliasUsed && {fr} Alias sous lequel une table est ouverte (le premier si plusieurs) {en} Alias a table is used under (first found if several)
 lparameters ;
-  tcTable; && {fr} Adresse de la table
-, tlExclusive && @ [.F.] {fr} La table est ouverte en exclusif
+  tcTable; && {fr} Adresse de la table {en} Table address
+, tlExclusive && @ [.F.] {fr} La table est ouverte en exclusif {en} out: table is USEd exclusive
+
 tlExclusive = .f.
 
 local lcResult; && {fr} Alias
@@ -952,10 +923,14 @@ if file(m.tcTable) and AUsed(laUsed, .null., m.tcTable) > 0
 endif
 
 return m.lcResult
+endfunc
 
 * ========================================
-function aUsedDBF && {fr} Table *.DBF couramment used() dans cette session de VFP && /!\ d'autres sessions peuvent les utiliser en réseau ...
-lparameters taUsed && @ {fr} Fichiers *.DBF couramment used()
+function aUsedDBF && {fr} Table(s) used() dans cette session de VFP {en} Table(s) used() in this VFP session
+lparameters taUsed && @ out: used() *.DBF
+
+&& /!\ {fr} d'autres sessions de VFP peuvent utiliser les mêmes tables en réseau ...
+
 external array taUsed
 
 local lnDS_, liDS, laDS[1], lnDS, laResult[1], liResult, lcResult, lnResult
@@ -1001,15 +976,16 @@ if aClear(@m.taUsed)
 endif
 
 return m.lnResult
+endfunc
 
 * ========================================
-procedure AliasReuse && {fr} Rouvre un alias dans un autre mode
+procedure AliasReuse && {fr} Rouvre une table dans un autre mode {en} re-USE a table with different settings
 lparameters ;
-  tcAlias; && {fr} Alias
+  tcAlias; && Alias
 , tcMode; && [''] 'Exclusive' | 'Shared' | 'Noupdate' | ''
-, tlAgain; && [.F.] {fr} AGAIN
-, tcAliasNew; && [m.tcAlias] {fr} Nouvel Alias
-, tiWorkArea; && [0] {fr} Work area && 2016-09-01 thn -- {FiC V 2.22.0-beta.5} {en} added
+, tlAgain; && [.F.] USE ... AGAIN
+, tcAliasNew; && [m.tcAlias] {fr} Nouvel Alias {en} New Alias
+, tiWorkArea; && [0] Work area
 
 local llResult;
 , lcTable, lcOrder, lcFilter;
@@ -1085,18 +1061,19 @@ return m.llResult
 endproc
 
 * ========================================
-function abExclusive && {fr} Tente d'ouvrir ou réouvrir une table en exclusif et la remet dans l'état initial au Destroy()
-lparameters tuTable && [Alias()] {fr} Alias, zone ou adresse d'une table
+function abExclusive as abExclusive of abData.prg && {fr} Tente d'ouvrir ou réouvrir une table en exclusif et la remet dans l'état initial au Destroy() {en} Attempts to [re]USE a table Exclusive and resets upon .destroy()
+lparameters tuTable && [Alias()] {fr} Alias, zone ou adresse de la table {en} Table's alias, work area or address
 return createobject('abExclusive', m.tuTable)
+endfunc
 
 * ========================================
 define class abExclusive as GA_LIGHTWEIGHT_CLASS && {fr} Tente d'ouvrir ou réouvrir une table en exclusif et la remet dans l'état initial au Destroy()
 
-hidden lUsed, cAlias, cTable, cOrder, cFilter, iRecno, lReadonly, cFields
+protected lUsed, cAlias, cTable, cOrder, cFilter, iRecno, lReadonly, cFields
 
 * --------------------------
-procedure init
-lparameters tuTable && [Alias()] {fr} Alias, zone ou adresse d'une table
+protected procedure init
+lparameters tuTable && [Alias()] {fr} Alias, zone ou adresse de la table {en} Table's alias, work area or address
 
 tuTable = evl(m.tuTable, alias())
 this.lUsed = vartype(m.tuTable) == 'C' and used(m.tuTable)
@@ -1117,7 +1094,7 @@ return m.llResult and not m.llExclusive
 endproc
 
 * --------------------------
-procedure destroy
+protected procedure destroy
 
 use in select(m.this.cAlias)
 
@@ -1133,16 +1110,16 @@ if m.this.lUsed and File(m.this.cTable)
 endif
 endproc
 
-enddefine && {fr} CLASS abExclusive
+enddefine && class abExclusive
 * ========================================
 
 * ========================================
-function lExclusiveForce && {fr} Tente d'ouvrir ou réouvrir une table en exclusif
+function lExclusiveForce && {fr} Tente d'ouvrir ou réouvrir une table en exclusif {en} Attempts to [re]USE a table Exclusive
 lparameters ;
-  tcAlias as String; && @ {fr} Alias sous lequel la table est ouverte en exclusif
-, tuTable; && [Alias()] {fr} Alias, zone ou adresse d'une table
-, tlExcl as Boolean; && @ {fr} L'alias était déjà ouvert en exclusif
-, tnMS as Integer; && [0] {fr} Délai d'attente en ms (0-5000)
+  tcAlias as String; && @ {fr} Alias sous lequel la table est ouverte en exclusif {en} Alias that the table is open exclusive under
+, tuTable; && [Alias()] {fr} Alias, zone ou adresse de la table {en} Table's alias, work area or address
+, tlExcl as Boolean; && @ {fr} L'alias était déjà ouvert en exclusif {en} Table was alreadu USEd exclusive
+, tnMS as Integer; && [0] {fr} Délai d'attente en ms (0-5000) {en} Wait delay in ms (0-5000)
 
 tcAlias = ExclusiveForce(Evl(m.tuTable, m.tcAlias), @m.tlExcl, m.tnMS)
 return Used(m.tcAlias)
@@ -1151,9 +1128,9 @@ endfunc
 * ========================================
 procedure ExclusiveForce && {fr} Tente d'ouvrir ou réouvrir une table en exclusif
 lparameters ;
-  tuTable; && [Alias()] {fr} Alias, zone ou adresse d'une table
-, tlExcl as Boolean; && @ {fr} L'alias était déjà ouvert en exclusif
-, tnMS as Integer; && [0] {fr} Délai d'attente en ms (1-5000)
+  tuTable; && [Alias()] {fr} Alias, zone ou adresse de la table {en} Table's alias, work area or address
+, tlExcl as Boolean; && @ {fr} L'alias était déjà ouvert en exclusif {en} Table was alreadu USEd exclusive
+, tnMS as Integer; && [0] {fr} Délai d'attente en ms (0-5000) {en} Wait delay in ms (0-5000)
 
 tlExcl = .f.
 
@@ -1191,14 +1168,18 @@ return m.lcResult
 endproc
 
 * ========================================
-procedure HeaderFieldsCarry && {fr} Copie le contenu des champs d'entête dans l'enr. suivant
+procedure HeaderFieldsCarry && {fr} Copie le contenu des champs d'entête dans l'enr. suivant {en} copies contents of header fields into next record
 lparameters ;
-  tuTable; && [Alias()] {fr} Alias, zone ou adresse d'une table
-, tcFields && [''] {fr} Champs d'en-tête
-local llResult
+  tuTable; && [Alias()] {fr} Alias, zone ou adresse de la table {en} Table's alias, work area or address
+, tcFields && [''] {fr} Champs d'en-tête {en} header fields
+
+local llResult;
+, lcAlias, llAlias;
+, laFields[1], lnFields, lnField, lcField;
+, lnSelect;
+, laValues[1], luValue;
 
 * {fr} Si l'alias de la table existe
-local lcAlias, llAlias
 lcAlias = cAlias(m.tuTable, @m.llAlias)
 llResult = used(m.lcAlias)
 assert m.llResult message cAssertMsg(textmerge([Impossible d'ouvrir la table <<cL(m.tuTable)>>]))
@@ -1210,17 +1191,15 @@ if m.llResult
 	if m.llResult
 
 		* {fr} Tabuler les champs
-		local laFields[1], lnFields, lnField, lcField
 		lnFields = alines(laFields, m.tcFields, 1+4, ',')
 
 		* {fr} Sélectionner la table sur le 1er enr.
-		local lnSelect
 		lnSelect = select(0)
 		select (m.lcAlias)
 		locate
 
 		* {fr} Initialiser les valeurs des champs d'en-tête
-		local laValues[m.lnFields], luValue
+		dimension laValues[m.lnFields]
 		for m.lnField = 1 to m.lnFields
 			laValues[m.lnField] = evaluate(laFields[m.lnField])
 		endfor
@@ -1254,14 +1233,17 @@ if m.llAlias
 endif
 
 return m.llResult
+endproc
 
 * ========================================
-procedure TableMove && {fr} Déplace une table et ses fichiers dépendants dans un autre dossier
+procedure TableMove as Boolean && {fr} Déplace une table et ses fichiers dépendants dans un autre dossier {en} moves a VFP table and its companion files into another folder
 lparameters ;
-  tcSrceAddr; && {fr} Adresse actuelle de la table
-, tcDestAddr && {fr} Adresse cible
+  tcSrceAddr; && {fr} Adresse actuelle de la table {en} Table's current address
+, tcDestAddr && {fr} Adresse cible de la table {en} Table's target address
 
-local llResult
+local llResult as Boolean;
+, lcAlias, llOpened;
+, abSelect as abSelect of abData.prg;
 
 * {fr} Si le fichier source existe
 llResult = lFile(m.tcSrceAddr)
@@ -1280,14 +1262,12 @@ if m.llResult
 		if m.llResult
 
 			* {fr} Si le fichier source est une table et peut être ouverte en exclusif
-			local lcAlias, llOpened
 			lcAlias = ExclusiveForce(cAlias(m.tcSrceAddr, @m.llOpened))
 			llResult = used(m.lcAlias)
 			assert m.llResult message cAssertMsg(textmerge([le fichier source <<m.tcSrceAddr>> n'est pas une table ou ne peut pas être ouverte en exclusif]))
 			if m.llResult
 
 				* {fr} Copier à l'adresse destination
-				local abSelect as abSelect
 				tcDestAddr = forcepath(justfname(m.tcSrceAddr), m.tcDestAddr)
 				abSelect = abSelect(m.lcAlias)
 				copy to (m.tcDestAddr) with cdx
@@ -1314,18 +1294,23 @@ if m.llResult
 endif
 
 return m.llResult
+endproc
 
 * ========================================
-procedure TablesMerge && {fr} Fusionne 2 tables en ajustant la structure de la réceptacle
+procedure TablesMerge as Boolean && {fr} Fusionne 2 tables en ajustant la structure de la réceptacle {en} Merges 2 tables while adjusting the structure of the final table
 lparameters ;
-  tuDestTable; && {fr} Alias ou zone ou adresse de la table destination (crée si elle n'existe pas)
-, tuSrceTable && [Alias()] {fr} Alias ou zone ou adresse de la table source
-local llResult && {fr} La fusion a été réalisée
+  tuDestTable; && {fr} Alias ou zone ou adresse de la table destination (crée si elle n'existe pas) {en} Alias or work area or address of destination table (created if non extent)
+, tuSrceTable; && [Alias()] {fr} Alias ou zone ou adresse de la table source {en} Alias or work area or address of source table
+
+local llResult; && {fr} La fusion a été réalisée
+, llParms;
+, lcDestAlias, llDestOpened, llDestCreate;
+, lcSrceAlias, llSrceOpened, lcSrceAddr;
+, lnSelect;
+, lnSrce, laSrce[1], lnDest, laDest[1];
+, lnField, lcField, lnLength1, lnLength2, lnIdx, llAdjust, lnDest1;
 
 * {fr} Si une table destination a été précisée
-local llParms ;
-, lcDestAlias, llDestOpened, llDestCreate, ;
-	lcSrceAlias, llSrceOpened, lcSrceAddr
 llParms = not empty(m.tuDestTable)
 if m.llParms
 
@@ -1337,8 +1322,7 @@ if m.llParms
 		* {fr} Vérifier qu'elle pourra être créé
 		if vartype(m.tuDestTable) == 'C'
 			tuDestTable = forceext(m.tuDestTable, [dbf])
-			llDestCreate = directory(justpath(m.tuDestTable)) ;
-				and lFileAddress(m.tuDestTable)
+			llDestCreate = directory(justpath(m.tuDestTable)) and lFileAddress(m.tuDestTable)
 			llParms = m.llDestCreate
 		endif
 	endif
@@ -1353,10 +1337,9 @@ if m.llParms
 	endif
 endif
 
-assert m.llParms message "Table source et/ou destination invalide"
+assert m.llParms message cAssertMsg("Table source et/ou destination invalide")
 if m.llParms
 
-	local lnSelect
 	lnSelect = select(0)
 
 	* {fr} Si la la table destination n'existe pas,
@@ -1371,13 +1354,10 @@ if m.llParms
 	else
 
 		* {fr} Lire la structure des deux tables
-		local lnSrce, lnDest
-		local array laSrce[1], laDest[1]
 		lnSrce = afields(laSrce, m.lcSrceAlias)
 		lnDest = afields(laDest, m.lcDestAlias)
 
 		* {fr} Pour chaque champ source
-		local lnField, lcField, lnLength1, lnLength2, lnIdx, llAdjust, lnDest1
 		lnDest1 = m.lnDest
 		for m.lnField = 1 to m.lnSrce
 			lcField = laSrce[m.lnField, 1]
@@ -1423,7 +1403,7 @@ if m.llParms
 		if m.llAdjust
 			lcDestAlias = ExclusiveForce(m.lcDestAlias)
 			llAdjust = used(m.lcDestAlias)
-			assert m.llAdjust message "Impossible d'ouvrir la table destination en exclusif"
+			assert m.llAdjust message cAssertMsg("Impossible d'ouvrir la table destination en exclusif")
 			if m.llAdjust
 				local lcAlter
 				lcAlter = 'ALTER TABLE ' + m.lcDestAlias
@@ -1460,12 +1440,14 @@ if m.llSrceOpened
 endif
 
 return m.llResult
+endproc
 
 * ========================================
 function lFPT && {fr} Une table a un fichier FPT associé (présence d'un champ mémo, Varchar, Varbinary, Blob, etc.)
-lparameters tuTable && {fr} Alias ou zone ou adresse d'une table
+lparameters tuTable && [Alias()] {fr} Alias ou zone ou adresse d'une table {en} Alias or work area or address of a table
 
-local lcAlias, llAlias, llResult
+local llResult;
+, lcAlias, llAlias
 
 lcAlias = cAlias(m.tuTable, @m.llAlias)
 
@@ -1478,26 +1460,30 @@ if m.llAlias
 endif
 
 return m.llResult
+endfunc
 
 * ========================================
-function lTablesIdem && {fr} Deux tables sont identiques : mêmes structure et contenu
+function lTablesIdem && {fr} Deux tables sont identiques : mêmes structure et contenu {en} Two tables are identical: same structure and contents
 lparameters ;
-  tuTable1; && {fr} Alias ou zone ou adresse de la première table
-, tuTable2; && {fr} Alias ou zone ou adresse de la seconde table
-, tlFieldsOrder && [.F.] {fr} Les champs doivent être dans le même ordre
-local llResult && {fr} Les tables sont identiques
+  tuTable1; && {fr} Alias ou zone ou adresse de la première table {en} Alias or work area or address of first table
+, tuTable2; && {fr} Alias ou zone ou adresse de la seconde  table {en} Alias or work area or address of second table
+, tlFieldsOrder && [.F.] {fr} Les champs doivent être dans le même ordre {en} Fields must be in the same order
+
+local llResult; && {fr} Les tables sont identiques
+, lcAlias1, lcAlias2, llAlias1, llAlias2;
+, llFieldsOrder;
+, lnRecs, lnFields, lnField, lcField, lcJoin;
+, lnSelect, loAnsi;
 
 * {fr} Si les spécifications de tables sont valides
-local lcAlias1, lcAlias2, llAlias1, llAlias2
 lcAlias1 = cAlias(m.tuTable1, @m.llAlias1)
 lcAlias2 = cAlias(m.tuTable2, @m.llAlias2)
 llResult = used(m.lcAlias1) and used(m.lcAlias2)
-assert m.llResult message cAssertMsg("Spécifications de tables invalides" + CRLF;
-	+ cLitteral(m.tuTable1) + CRLF;
-	+ cLitteral(m.tuTable2);
+assert m.llResult message cAssertMsg("Spécifications de tables invalides:";
+	+ CRLF + cLitteral(m.tuTable1);
+	+ CRLF + cLitteral(m.tuTable2);
 	)
 if m.llResult
-	local llFieldsOrder
 	llFieldsOrder = uDefault(m.tlFieldsOrder, .f.)
 
 	* {fr} Si les tables ont des structures identiques
@@ -1505,7 +1491,6 @@ if m.llResult
 	if m.llResult
 
 		* {fr} Construire l'expression de jointure
-		local lnRecs, lnFields, lnField, lcField, lcJoin
 		lnRecs = RecCount_(m.lcAlias1)
 		lnFields = fcount(m.lcAlias1)
 		lcJoin = ''
@@ -1516,16 +1501,13 @@ if m.llResult
 		endfor
 
 		* {fr} Extraire les enregistrements concordants
-		local lnSelect, loAnsi
 		lnSelect = select(0)
 		loAnsi = abSet('ANSI', 'ON')
 		select * from (m.lcAlias1) full join (m.lcAlias2) on &lcJoin into cursor (sys(2015))
 		llResult = _tally = m.lnRecs
-
 		use
 		release loAnsi
 		select (m.lnSelect)
-
 	endif
 endif
 
@@ -1537,26 +1519,28 @@ if m.llAlias2
 endif
 
 return m.llResult
+endfunc
 
 * ========================================
-function lFieldsIdem && {fr} Deux tables ont la même structure
+function lFieldsIdem && {fr} Deux tables ont la même structure {en} Two tables have the same structure
 lparameters ;
-  tuTable1; && {fr} Alias ou zone ou adresse de la première table
-, tuTable2; && {fr} Alias ou zone ou adresse de la seconde table
-, tlFieldsOrder && [.F.] {fr} Les champs doivent être dans le même ordre
-local llResult && {fr} Les tables ont la même structure
+  tuTable1; && {fr} Alias ou zone ou adresse de la première table {en} Alias or work area or address of first table
+, tuTable2; && {fr} Alias ou zone ou adresse de la seconde  table {en} Alias or work area or address of second table
+, tlFieldsOrder && [.F.] {fr} Les champs doivent être dans le même ordre {en} Fields must be in the same order
+
+local llResult; && {fr} Les tables ont la même structure
+, lcAlias1, lcAlias2, llAlias1, llAlias2;
+, laFields1[1], lnFields1, laFields2[1], lnFields2;
+, lnField1, lcField1, lnField2;
 
 * {fr} Si les spécifications de tables sont valides
-local lcAlias1, lcAlias2, llAlias1, llAlias2
 lcAlias1 = cAlias(m.tuTable1, @m.llAlias1)
 lcAlias2 = cAlias(m.tuTable2, @m.llAlias2)
 llResult = used(m.lcAlias1) and used(m.lcAlias2)
-assert m.llResult message cAssertMsg(textmerge([<<cCallingModules(.T.)>> - Spécifications de tables invalides : <<cLitteral(m.tuTable1)>> | <<cLitteral(m.tuTable2)>>]))
+assert m.llResult message cAssertMsg(textmerge([Spécifications de tables invalides : <<cLitteral(m.tuTable1)>> | <<cLitteral(m.tuTable2)>>]))
 if m.llResult
 
 	* {fr} Lire les structures des deux tables
-	local array laFields1[1], laFields2[1]
-	local lnFields1, lnFields2
 	lnFields1 = afields(laFields1, m.lcAlias1)
 	lnFields2 = afields(laFields2, m.lcAlias2)
 
@@ -1568,12 +1552,8 @@ if m.llResult
 		aColsDel(@m.laFields1, 5)
 		aColsDel(@m.laFields2, 5)
 
-		* {fr} Donner sa valeur par défaut au paramètre optionnel
-		local llFieldsOrder
-		llFieldsOrder = uDefault(m.tlFieldsOrder, .f.)
-
 		* {fr} Si les champs doivent être dans le même ordre
-		if m.llFieldsOrder
+		if lTrue(m.tlFieldsOrder)
 
 			llResult = laEqual(@m.laFields1, @m.laFields2)
 
@@ -1581,7 +1561,6 @@ if m.llResult
 		else
 
 			* {fr} Pour chaque champ de la première table
-			local lnField1, lcField1, lnField2
 			for m.lnField1 = 1 to m.lnFields1
 				lcField1 = laFields1[m.lnField1, 1]
 
@@ -1614,27 +1593,33 @@ if m.llAlias2
 endif
 
 return m.llResult
+endfunc
 
 * ========================================
-function l2FieldsIdem && {fr} deux champs sont de même structure : type[, longueur [décimales]]
+function l2FieldsIdem as Boolean && {fr} deux champs sont de même structure : type[, longueur [décimales]] {en} Two fields have the same structure: type[, length [decimals]]
 lparameters ;
-  tcTableField1; && 'table.field' du premier champ
-, tcTableField2; && 'table.field' du second champ
-, tlNullIgnore; && [.F.] {fr} Ignorer si "Null values allowed"
-, tlContains && [.F.] {fr} le champ 2 doit pouvoir contenir le champ 1
-local llResult && {fr} Les deux champs ont la même structure
+  tcTableField1; && 'table.field' {fr} du premier champ {en} of first field
+, tcTableField2; && 'table.field' {fr} du second champ {en} of second field
+, tlNullIgnore; && [.F.] "Null values allowed" {fr} Ignorer {en} Ignore
+, tlContains && [.F.] {fr} le champ 2 doit pouvoir contenir le champ 1 {en} field 2 should be able of containing contents of field 2
 
-local lcAlias1, lcAlias2, llAlias1, llAlias2, lcField1, lcField2, laFields1[1], laFields2[1], lnField1, lnField2
+local llResult as Boolean; && {fr} Les deux champs sont de même structure : type[, longueur [décimales]] {en} Two fields have the same structure: type[, length [decimals]]
+, lcAlias1, lcAlias2;
+, llAlias1, llAlias2;
+, lcField1, lcField2;
+, laFields1[1], laFields2[1];
+, lnField1, lnField2;
+
 lcAlias1 = cAlias(juststem(m.tcTableField1), @m.llAlias1)
 lcAlias2 = cAlias(juststem(m.tcTableField2), @m.llAlias2)
 llResult = used(m.lcAlias1) and used(m.lcAlias2)
-assert m.llResult message cAssertMsg(textmerge([<<cCallingModules(.T.)>> - Paramètres invalides: <<m.tcTableField1>> | <<m.tcTableField2>>]))
+assert m.llResult message cAssertMsg(textmerge([Paramètres invalides: <<m.tcTableField1>> | <<m.tcTableField2>>]))
 if m.llResult
 
 	lcField1 = upper(justext(m.tcTableField1))
 	lcField2 = upper(justext(m.tcTableField2))
 	llResult = lField(m.lcField1, m.lcAlias1) and lField(m.lcField2, m.lcAlias2)
-	assert m.llResult message cAssertMsg(textmerge([<<cCallingModules(.T.)>> - Les champs <<m.lcField1>> et <<m.lcField2>> doivent appartenir aux tables <<m.lcAlias1>> et <<m.lcAlias2>>]))
+	assert m.llResult message cAssertMsg(textmerge([Les champs <<m.lcField1>> et <<m.lcField2>> doivent appartenir aux tables <<m.lcAlias1>> et <<m.lcAlias2>>]))
 	if m.llResult
 
 		afields(laFields1, m.lcAlias1)
@@ -1642,7 +1627,7 @@ if m.llResult
 		lnField1 = ascan(laFields1, m.lcField1, 1, -1, 1, 2+4+8)
 		lnField2 = ascan(laFields2, m.lcField2, 1, -1, 1, 2+4+8)
 
-		tlContains = iif(vartype(m.tlContains) == 'L', m.tlContains, .f.)
+		tlContains = lTrue(m.tlContains)
 		llResult = laFields1[m.lnField1, AFIELDS_TYPE] == laFields2[m.lnField2, AFIELDS_TYPE];
 			and (not m.tlContains and laFields1[m.lnField1, AFIELDS_WIDTH] == laFields2[m.lnField2, AFIELDS_WIDTH] or laFields1[m.lnField1, AFIELDS_WIDTH] <= laFields2[m.lnField2, AFIELDS_WIDTH]);
 			and (not m.tlContains and laFields1[m.lnField1, AFIELDS_PRECISION] == laFields2[m.lnField2, AFIELDS_PRECISION] or laFields1[m.lnField1, AFIELDS_PRECISION] <= laFields2[m.lnField2, AFIELDS_PRECISION]);
@@ -1658,6 +1643,7 @@ if m.llAlias2
 endif
 
 return m.llResult
+endfunc
 
 * -----------------------------------------------------------------
 procedure l2FieldsIdem_Test
@@ -1672,14 +1658,16 @@ loTest.Test(.f., 'TMP1.BBB', 'TMP2.BBB')
 return loTest.Result()
 
 * ========================================
-procedure TableOfArray && {fr} Construit une table ou un curseur à partir d'un tableau
+procedure TableOfArray as String && {fr} Crée une table ou un curseur à partir d'un tableau
 lparameters ;
   taArray; && @ {fr} Tableau source
 , tuTable; && [Cursor] {fr} Adresse de la table à créer ou, si invalide, ordre de créer un curseur
 , tl2D && [.F.] {fr} Créer autant de champs que de colonnes dans le tableau
+
+external array taArray
+
 local lcResult && {fr} Adresse de la table ou Alias du curseur
 lcResult = ''
-external array taArray
 
 * {fr} Si un tableau a bien été passé
 local llResult
@@ -1883,7 +1871,7 @@ return m.lnResult
 * ========================================
 procedure cFieldsLTrim && {fr} Tronque à gauche les champs de type caractère, pour tous les enr.
 lparameters ;
-  tcTable; && [Alias()] {fr} Alias, zone ou adresse d'une table
+  tcTable; && [Alias()] {fr} Alias, zone ou adresse de la table {en} Table's alias, work area or address
 , tcFieldsIgnore && [''] {fr} Squelette des champs à ignorer
 local llResult
 
@@ -2418,7 +2406,7 @@ function keyset && {fr} Rétablit Set("Key") dans un Alias
 lparameters ;
   tcAlias; && [Alias()]
 , tcKey; && {fr} Set("Key")
-, tcResult && @ {fr} Résultat (cumulatif)
+, tcResult && @ {fr} Résultat {en} Result (cumulatif)
 tcAlias = evl(m.tcAlias, alias())
 
 local lnSelect, lnKey, lcKey1, lcKey2, llChar, lcKey, llResult
@@ -2526,12 +2514,12 @@ return loTest.Result()
 * ========================================
 function lViewCAD && {fr} Un alias est une vue liée à un CursorAdapter
 lparameters ;
-  tcAlias; && [alias courant] {fr} alias à analyser
+  tcAlias; && [Alias()]
 , tlUpdateable; && [.NULL.] {fr} updateable view ; .NULL.: don't care and feedback
 , tiDS && [session de données courante] {fr} identifiant de la session de données
 
 return lView(;
-		tcAlias; && [alias courant] {fr} alias à analyser
+		tcAlias; && [Alias()]
 	, iif(pcount() < 2, .null., m.tlUpdateable); && [.NULL.] {fr} updateable view ; .NULL.: don't care and feedback
 	, tiDS; && [session de données courante] {fr} identifiant de la session de données
 	, .t.; && [all] {fr} View should be linked to a CursorAdapter
@@ -2542,7 +2530,7 @@ endfunc
 * ========================================
 function lViewLocal && {fr} Un alias est une vue locale
 lparameters ;
-  tcAlias; && [alias courant] {fr} alias à analyser
+  tcAlias; && [Alias()]
 , tlUpdateable; && @ [.NULL.] {en} updateable view ; .NULL.: don't care and feedback
 , tiDS; && [session de données courante] {fr} identifiant de la session de données
 , tlCAD; && @ [.NULL.] {en} View should be linked to a CursorAdapter ; .NULL.: don't care and feedback
@@ -2551,7 +2539,7 @@ tlUpdateable = iif(pcount() < 2 or IsNull(m.tlUpdateable), .null., lTrue(m.tlUpd
 tlCAD = iif(pcount() < 4 or IsNull(m.tlCAD), .null., lTrue(m.tlCAD))
 
 return lView(;
-	  m.tcAlias; && [alias courant] {fr} alias à analyser
+	  m.tcAlias; && [Alias()]
 	, @m.tlUpdateable; && [.NULL.] {fr} updateable view ; .NULL.: don't care and feedback
 	, m.tiDS; && [session de données courante] {fr} identifiant de la session de données
 	, @m.tlCAD; && [all] {fr} View should be linked to a CursorAdapter
@@ -2563,7 +2551,7 @@ endfunc
 * ========================================
 function lViewRemote && {fr} Un alias est une vue distante
 lparameters ;
-  tcAlias; && [alias courant] {fr} alias à analyser
+  tcAlias; && [Alias()]
 , tlUpdateable; && @ [.NULL.] {en} updateable view ; .NULL.: don't care and feedback
 , tiDS; && [session de données courante] {fr} identifiant de la session de données
 , tlCAD; && @ [.NULL.] {en} View should be linked to a CursorAdapter ; .NULL.: don't care and feedback
@@ -2572,7 +2560,7 @@ tlUpdateable = iif(pcount() < 2 or IsNull(m.tlUpdateable), .null., lTrue(m.tlUpd
 tlCAD = iif(pcount() < 4 or IsNull(m.tlCAD), .null., lTrue(m.tlCAD))
 
 return lView(;
-	  m.tcAlias; && [alias courant] {fr} alias à analyser
+	  m.tcAlias; && [Alias()]
 	, @m.tlUpdateable; && [.NULL.] {fr} updateable view ; .NULL.: don't care and feedback
 	, m.tiDS; && [session de données courante] {fr} identifiant de la session de données
 	, m.tlCAD; && [all] {fr} View should be linked to a CursorAdapter
@@ -2584,7 +2572,7 @@ endfunc
 * ========================================
 function lView && {fr} Un alias est une vue
 lparameters ;
-  tcAlias; && [alias courant] {fr} alias à analyser
+  tcAlias; && [Alias()]
 , tlUpdateable; && @ [.NULL.] {en} updateable view ; .NULL.: don't care and feedback
 , tiDS; && [session de données courante] {fr} identifiant de la session de données
 , tlCAD; && @ [.NULL.] {en} View should be linked to a CursorAdapter ; .NULL.: don't care and feedback
@@ -2660,7 +2648,7 @@ endfunc
 * ========================================
 function lViewU && {fr} Un alias est une vue updateable
 lparameters ;
-  tcAlias; && [alias courant] {fr} alias à analyser
+  tcAlias; && [Alias()]
 , tiDS && [session de données courante] {fr} identifiant de la session de données
 
 return lView(m.tcAlias, .t., m.tiDS)
@@ -2726,7 +2714,7 @@ return aViews(@m.taView, .t., m.tiDS)
 * ========================================
 function lCursor && {fr} Un alias est un curseur
 lparameters ;
-  tcAlias; && [alias courant] {fr} alias à analyser
+  tcAlias; && [Alias()]
 , tlReadWrite; && [.NULL.] {en} updateable cursor (READWRITE); .NULL.: don't care and feedback
 , tiDS && [session de données courante] {fr} identifiant de la session de données
 
@@ -3647,7 +3635,7 @@ return m.llResult
 * ========================================
 function cFieldsCarIndexExp && {fr} Expression d'index composite en caractère sur une liste de champs de types quelconques
 lparameters ;
-  tcTable; && [Alias()] {fr} Alias, zone ou adresse de la table
+  tcTable; && [Alias()] {fr} Alias, zone ou adresse de la table {en} Table's alias, work area or address
 , tcIdxFields; && {fr} Liste de champs
 , tnLength && @ {fr} Longueur de la clé d'index composite en caractères
 
@@ -3835,7 +3823,7 @@ return m.lcResult
 * ========================================
 procedure FreeTableSlim && {fr} Table libre : supprime les lignes vides et réduit la largeur des champs caractère au minimum
 lparameters ;
-  tuTable; && {fr} Alias, zone ou adresse d'une table
+  tuTable; && {fr} Alias, zone ou adresse de la table {en} Table's alias, work area or address
 , tnLenPercent && [0] {fr} Pourcentage de la longueur des champs caractères à ajouter en réserve
 
 local lcAlias, llAlias, llExclusive, llResult
@@ -4049,7 +4037,7 @@ return llResult
 
 * ========================================
 function cTableCheckSum && {fr} Checksum du contenu d'une table
-lparameters tuTable && [Alias()] {fr} Alias ou Zone ou adresse d'une table
+lparameters tuTable && [Alias()] {fr} Alias ou zone ou adresse d'une table {en} Alias or work area or address of a table
 
 local lcTableAddr, lcData, loSelect, lnRecno, lnResult, llResult, lcResult
 lcResult = ''
@@ -4866,7 +4854,7 @@ function aFieldSpecs && {fr} Spécifications d'un champ issues de aFields()
 lparameters ;
   taFieldSpecs; && @ {fr} Spécifications d'un champ issues de aFields()
 , tcField; && {fr} Champ à examiner
-, tcAlias && [Alias courant]
+, tcAlias && [Alias()]
 
 local lnResult; && {fr} nombre de specs rendues
 , llResult;
@@ -5338,7 +5326,7 @@ if used(m.this.cAlias)
 endif
 
 * ========================================
-enddefine && {fr} CLASS abRelationOff
+enddefine && class abRelationOff
 * ========================================
 
 * ========================================
@@ -5682,7 +5670,7 @@ endif
 
 
 * =================================================
-enddefine && {fr} class abSQLthermo
+enddefine && class abSQLthermo
 * =================================================
 
 * ========================================
@@ -6916,7 +6904,7 @@ else
 	endif
 endif
 
-enddefine && {fr} CLASS abOrder
+enddefine && class abOrder
 * ========================================
 
 * ========================================
@@ -6973,7 +6961,7 @@ else
 	set filter to &lcFilter in (m.this.cAlias)
 endif
 
-enddefine && {fr} CLASS abFilter
+enddefine && class abFilter
 * ========================================
 
 * ========================================
@@ -7069,7 +7057,7 @@ if used(m.this.cAlias)
 endif
 endproc
 
-enddefine && {fr} CLASS abRowBufferSave
+enddefine && class abRowBufferSave
 * ========================================
 
 #if .f.
@@ -7208,7 +7196,7 @@ success = CursorSetProp("MaxRecords", m.this.nMaxRecords, m.this.cAlias)
 assert m.success
 endproc
 
-enddefine && {fr} class abMaxRecords
+enddefine && class abMaxRecords
 * ========================================
 
 * ========================================
@@ -7248,7 +7236,7 @@ else
 	return RecnoSet(m.this.iRecno, m.this.cAlias)
 endif
 
-enddefine && {fr} CLASS abRecno
+enddefine && class abRecno
 * ========================================
 
 * ========================================
@@ -7268,7 +7256,7 @@ procedure RecnoSet as Boolean && {fr} Place un alias sur un enregistrement déter
 lparameters ;
   tiRecno; && {fr} n° d'enregistrement
 , tcAlias; && [Alias()]
-, tcResult && @ {fr} Résultat (cumulatif)
+, tcResult && @ {fr} Résultat {en} Result (cumulatif)
 
 tcAlias = evl(m.tcAlias, alias())
 
@@ -7735,7 +7723,7 @@ procedure lTableStruIdem && {fr} Deux tables ont une structure et des indexes id
 lparameters ;
   tcTable1;
 , tcTable2;
-, tcResult && @ {fr} résultat
+, tcResult && @ {fr} Résultat {en} Result
 
 local lcAlias1, lcAlias2, llAlias1, llAlias2;
 , laField1[1], laField2[1];
@@ -7804,6 +7792,16 @@ return m.llResult
 * ========================================
 define class abDataSyncVFP as custom && {fr} Synchronise deux tables ou deux bases de données VFP && {fr} as custom pour .addObject()
 * ========================================
+
+&& {en} Each table must have:
+&& - a primary or candidate key (unique)
+&& - a field "last modification date-time" T
+&& - a field "last modified by synchronization" L
+&& {fr} Chaque table doit avoir:
+&& - une clé primaire ou candidate (unique)
+&& - un champ "date et heure de dernière modification"
+&& - un champ "dernière modification par synchronisation"
+
 
 * {fr} RÉGLAGES
 && {fr} Champ {date et heure de dernière modification} dans les tables du DBC - requis pour la synchronisation de base de données (avec la classe acDataSyncVFP) ; pris en compte dans le réglage de plSync
@@ -8782,7 +8780,7 @@ lparameters ;
 && {fr} Implémenter en sous-classe
 
 * ========================================
-enddefine && {fr} CLASS abDataSyncVFP
+enddefine && class abDataSyncVFP
 * ========================================
 
 * -------------------------------

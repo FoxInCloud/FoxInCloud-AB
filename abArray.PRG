@@ -468,7 +468,7 @@ endif
 return m.lnResult
 
 * ===================================================================
-function aRowMove && {fr} Déplace une ligne dans un Tableau {fr} move one line inside an Array
+function aRowMove && {fr} Déplace une ligne dans un Tableau {fr} Moves one line inside an Array
 lparameters ;
   taResult; && @ {fr} Résultat {en} result
 , tnFrom; && {fr} n° de ligne à déplacer {en} number for the line to move

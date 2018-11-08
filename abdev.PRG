@@ -2119,29 +2119,27 @@ if m.llResult and !Empty(m.tcInsts)
 
 * assert !m.tlJS
 	liResult = 1
-	do while .t.
+	do while .T.
 
 		liComSep = ratc(m.lcComSep, m.tcInsts, m.liResult)&& 2018-08-30 thn -- {en} end to start of text
-		&& 2018-08-30 thn -- {en} removed the variations on preceding character -- did not work with ratc(,, nOccurence)
-		if m.liComSep > 0
-			if !(m.tlJS and Substrc(m.tcInsts, m.liComSep-1, 1) == ':') && eg. http://
-
-				liCR = at_c(CR, Substrc(m.lcResult, m.liComSep))
-
-				tcComment = m.tcComment + iif(empty(m.tcComment), '', CRLF) + Alltrim(iif(m.liCR > 0;
-						, substrc(m.lcResult, m.liComSep, m.liCR - 1);
-						, substrc(m.lcResult, m.liComSep);
-						));
-
-				lcResult = '';
-					+ Rtrim(leftc(m.lcResult, m.liComSep - 1), ' ', TABUL); && {en} before comment
-					+ iif(m.liCR > 0, substrc(m.lcResult, m.liComSep + m.liCR-1), '') && {en} after  comment
-
-			endif
-			liResult = m.liResult + 1
-		else
+		do case
+		case Empty(m.liComSep)
 			exit
-		endif
+		case !(m.tlJS and Substrc(m.tcInsts, m.liComSep-1, 1) == ':') && eg. http://
+
+			liCR = at_c(CR, Substrc(m.lcResult, m.liComSep))
+
+			tcComment = m.tcComment + iif(empty(m.tcComment), '', CRLF) + Alltrim(iif(m.liCR > 0;
+					, substrc(m.lcResult, m.liComSep, m.liCR - 1);
+					, substrc(m.lcResult, m.liComSep);
+					));
+
+			lcResult = '';
+				+ Rtrim(leftc(m.lcResult, m.liComSep - 1), ' ', TABUL); && {en} before comment
+				+ iif(m.liCR > 0, substrc(m.lcResult, m.liComSep + m.liCR-1), '') && {en} after  comment
+
+		endcase
+		liResult = m.liResult + 1
 	enddo
 endif
 
@@ -3555,6 +3553,7 @@ if _vfp.projects.count > 0
 endif
 
 return m.success
+endfunc
 
 * ========================================
 function oProject && {fr} Référence à un projet (ouvert ou créé)
@@ -5723,7 +5722,8 @@ endfunc
 * ===================================================================
 function cAssertMsg && {fr} MESSAGE pour ASSERT limité à 120 caractères sous les IDE non-US
 lparameters tcMsg && @ {fr} message - si @, retour enrichi
-tcMsg = ltrim(evl(nvl(m.tcMsg, ''), 'empty message?'))
+
+tcMsg = Strtran(ltrim(evl(nvl(m.tcMsg, ''), 'empty message?')), '&#160;', chr(160))
 
 local lcProgram
 
@@ -6139,6 +6139,11 @@ endfunc
 function cSys2015Unique && {fr} Sys(2015) unique même sur une machine rapide - alias de Sys2015()
 return Sys2015()
 endfunc
+
+* =============================================
+procedure propSet(obj, prop, value) as Boolean && {fr} assigne une propriété
+store m.value to ('m.obj.' + m.prop)
+endproc
 
 * ========================================
 procedure varStore(out, in) as Boolean && {fr} assigne une variable - alias de varSet()
@@ -6568,8 +6573,8 @@ do case
 case !this.Init_RegExp(@m.result)
 	return m.success
 case this.lSemVer(m.version)
- loose   = m.version.loose
- version = m.version.version
+	loose   = m.version.loose
+	version = m.version.version
 case !ga_Type_IsChar(m.version, .t.)
 	return cResultAdd(@m.result, [Invalid version: ] + cL(m.version))
 endcase

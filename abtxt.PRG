@@ -2805,6 +2805,7 @@ catch to loException
 endtry
 
 return m.llResult && .F. > {fr} objet non créé
+endproc
 
 * -----------------------------------------------------------------
 protected procedure destroy
@@ -2914,8 +2915,8 @@ else
 		this.Multiline = 'm' $ m.tuIgnoreCase
 	otherwise
 		this.IgnoreCase = m.tuIgnoreCase
-		this.global = m.tlGlobal
-		this.Multiline = m.tlMultiline
+		this.Global = Iif(m.lnParms > 2, m.tlGlobal, this.Global)
+		this.Multiline = Iif(m.lnParms > 3, m.tlMultiline, this.Multiline)
 	endcase
 endif
 endproc
@@ -2951,7 +2952,9 @@ return m.llResult
 procedure Execute && {fr} Tabule les occurrences dans this.matches[]
 lparameters ;
   tcIn; && {fr} Chaîne oû chercher
-, tlDebug && [.F.] {fr} Débuguer
+, tlDebug; && [.F.] {fr} Débuguer
+, tlInstContKeep; && [.F.] {fr} Garder les matches qui sont des suites d'instructions {en} Keep matches that are on multi-line instruction
+
 tlDebug = lTrue(m.tlDebug)
 
 local lnResult
@@ -2962,8 +2965,8 @@ with m.this as abRegExp of abTxt.prg
 	.clear
 
 	lnResult = iif(.lPatterns; && /!\ ne marche pas avec HIDDEN .lPatterns !
-		, .Execute_Patterns(@m.tcIn, m.tlDebug); && {fr} plusieurs patterns (exécution récursive)
-		, .Execute_Pattern(@m.tcIn, m.tlDebug); && {fr} un seul pattern (cas général)
+		, .Execute_Patterns(@m.tcIn, m.tlDebug, m.tlInstContKeep); && {fr} plusieurs patterns (exécution récursive)
+		, .Execute_Pattern(@m.tcIn, m.tlDebug, m.tlInstContKeep); && {fr} un seul pattern (cas général)
 		)
 
 endwith
@@ -2975,7 +2978,8 @@ endproc
 protected procedure Execute_Patterns && {fr} Exécute des patterns multiples
 lparameters ;
   tcIn; && {fr} Chaîne oû chercher
-, tlDebug && [.F.] {fr} Débuguer
+, tlDebug; && [.F.] {fr} Débuguer
+, tlInstContKeep; && [.F.] {fr} Garder les matches qui sont des suites d'instructions {en} Keep matches that are on multi-line instruction
 
 local lnPattern, laMatches[1], laResult[1], lnResult
 
@@ -2985,7 +2989,7 @@ for .nPattern = 1 to alen(.aPattern) && {fr} FOR EACH .Pattern IN .aPattern prod
 	.pattern = .aPattern[.nPattern] && {fr} see this.Pattern_assign()
 
 	* {fr} Si des occurrences sont trouvées
-	if .Execute_Pattern(@m.tcIn, m.tlDebug) > 0
+	if .Execute_Pattern(@m.tcIn, m.tlDebug, m.tlInstContKeep) > 0
 
 		lnResult = m.lnResult + .nMatches
 
@@ -3012,9 +3016,10 @@ endproc
 protected procedure Execute_Pattern && {fr} Exécute un pattern unique
 lparameters ;
   tcIn; && {fr} Chaîne oû chercher
-, tlDebug as Boolean && [.F.] {fr} Débuguer
+, tlDebug as Boolean; && [.F.] {fr} Débuguer
+, tlInstContKeep; && [.F.] {fr} Garder les matches qui sont des suites d'instructions {en} Keep matches that are on multi-line instruction
 
-tlDebug = Vartype(m.tlDebug) == 'L' and m.tlDebug or m.this.lDebug
+tlDebug = lTrue(m.tlDebug) or m.this.lDebug
 
 .nSeconds = seconds()
 .nMatches = 0 && {fr} Nombre de Résultats
@@ -3603,8 +3608,9 @@ return iif(.t.;
 			or cResultAdd(@m.result, GA_STRINGPARSE_CLASS + [ class instantiation failed!]);
 			);
 		and varSet(@m.lJS, lTrue(m.result));
-		and (!m.lJS or varSet(@m.tcChain, strtran(strtran(m.tcChain, '\"', '~~'), "\'", '~~'))); && 2018-07-31 thn -- {en} substitute chain that is not likely to occur in the source string
-		and varSet(@m.result, m.loParser.maskStrings(@m.cResult, m.tcChain)); && modify command abGA
+		and varSet(@m.cResult, m.tcChain);
+		and (!m.lJS or varSet(@m.cResult, strtran(strtran(m.cResult, '\"', '~~'), "\'", '~~'))); && 2018-07-31 thn -- {en} substitute chain that is not likely to occur in the source string
+		and varSet(@m.result, m.loParser.maskStrings(@m.cResult, m.cResult)); && modify command abGA
 		and m.result;
 	, m.cResult;
 	, m.tcChain;
@@ -3617,7 +3623,8 @@ procedure cStringsMasked_Test && {fr} cStringsMasked() unit test && 1.5 ms dev
 local loTest as abUnitTest of abDev.prg
 loTest = newobject('abUnitTest', 'abDev.prg')
 
-loTest.Test([Evl(m.test, ~~~~~~~~~~~~~~~~)], [Evl(m.test, "this is a test")]) && _cliptext = Replicate('~', Len('"this is a test"'))
+* loTest.Test([Evl(m.test, ~~~~~~~~~~~~~~~~) &] + [& l'impossible], [Evl(m.test, "this is a test") &] + [& l'impossible]) && _cliptext = Replicate('~', Len('"this is a test"'))
+loTest.Test([Evl(m.test, ~~~~~~~~~~~~~~~~)], cInLineCommentStripped([Evl(m.test, "this is a test") &] + [& l'impossible])) && _cliptext = Replicate('~', Len('"this is a test"'))
 
 return loTest.result()
 endproc

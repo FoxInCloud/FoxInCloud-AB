@@ -201,6 +201,7 @@ function wcID && {fr} Identifiant d'un objet HTML selon convention FoxInCloud (a
 lparameters;
   toControl; && {fr} Contrôle
 , tcSuffix && [''] {fr} suffixe éventuel
+
 return cawID(m.toControl, m.tcSuffix)
 endfunc
 
@@ -311,11 +312,13 @@ endfunc
 function cScriptJSfocus && {fr} Javascript pour mettre le focus sur un contrôle
 lparameters toControl as awCbo of aw.vcx, toForm as awFrm of aw.vcx
 
+&& 2018-09-27 thn -- {FiC V 2.28.0-beta.8} {en} deprecated: code moved to awAJAX.cScriptJSfocusAdd() which is the only callee
+
 if Vartype(m.toControl) == 'O'
 	
 	local lcID, lcFonction
 
-	lcID = cawID(m.toControl, Iif(.F.;
+	lcID = wcID(m.toControl, Iif(.F.;
 		or m.toControl.BaseClass == 'Combobox' and Empty(m.toControl.Style);
 		or m.toControl.BaseClass == 'Spinner'  and !m.toForm.wBSlHTMLgen;
 		, 'txt';
@@ -324,15 +327,13 @@ if Vartype(m.toControl) == 'O'
 
 	lcFonction = Chrtran(m.lcID, '-', '_') + '_focus'
 
-&& {fr} http://ablogaboutcode.com/2011/06/14/how-javascript-loading-works-domcontentloaded-and-onload/
-
-	return Textmerge([function <<m.lcFonction>>(){];
+	return Textmerge([function <<m.lcFonction>>(){]; && http://ablogaboutcode.com/2011/06/14/how-javascript-loading-works-domcontentloaded-and-onload/
 			+ [true &];
 			+ [& !FoxInCloud.aReqsPend.length &];
 			+ [& !FoxInCloud.focusEvent &];
 			+ [& jQuery('#<<m.lcID>>').focus();];
 		+ [};];
-		+ [window.setTimeout(<<m.lcFonction>>, 10);]) && {fr} Prototype#defer(): Schedules the function to run as soon as the interpreter is idle uses 10 ms
+		+ [window.setTimeout(<<m.lcFonction>>, ] + cLitteralJS(Iif(m.toForm.wBSlHTMLgen, 500, 10)) + [);])
 else
 	return  ''
 endif
@@ -833,109 +834,106 @@ IF m.llResult
 ENDIF
 
 return m.llResult
+endproc
 
 * =============================================================
 procedure wcPropSaveNotEdit as Boolean && (Web) {fr} Édite la liste de propriétés d'un objet à NE PAS sauvegarder (.wcPropSaveNot)
 lparameters ;
   toObj; && {fr} Objet dont la propriété .wcPropSaveNot est à éditer
-, tcProps; && {fr} Propriété(s) à ajouter | ôter de la liste
-, tlRemove; && [.F.] {fr} .F. : ajouter à la liste, .T. : ôter de  la liste
+, tuProps; && {fr} Propriété(s) à ajouter ou ôter de la liste
+, tlRemove; && [.F.] {fr} .F. : ajouter à la liste, .T. : ôter de  la liste {en} .F.: add to list, .T.: remove from list
+, tlCheck; && [.F.] {fr} Vérifier que l'objet détient bien les propriétés à sauvegarder
 
 return wcPropSaveEdit_(;
 	  m.toObj;
-	,@m.tcProps;
+	,@m.tuProps;
 	, m.tlRemove;
+	, m.tlCheck;
 	, 'wcPropSaveNot';
 	)
-
 endproc
 
 * =============================================================
 procedure wcPropSaveEdit as Boolean && (Web) {fr} Édite la liste de propriétés d'un objet à sauvegarder (.wcPropSave)
 lparameters ;
   toObj; && {fr} Objet dont la propriété .wcPropSave est à éditer
-, tcProps; && {fr} Propriété(s) à ajouter | ôter de la liste
-, tlRemove; && [.F.] {fr} .F. : ajouter à la liste, .T. : ôter de  la liste
+, tuProps; && {fr} Propriété(s) à ajouter ou ôter de la liste
+, tlRemove; && [.F.] {fr} .F. : ajouter à la liste, .T. : ôter de  la liste {en} .F.: add to list, .T.: remove from list
+, tlCheck; && [.F.] {fr} Vérifier que l'objet détient bien chaque propriété {en} Check object holds each property
 
 return wcPropSaveEdit_(;
 	  m.toObj;
-	,@m.tcProps;
+	,@m.tuProps;
 	, m.tlRemove;
+	, m.tlCheck;
 	, 'wcPropSave';
 	)
-
 endproc
 
 * =============================================================
 procedure wcPropSaveEdit_ as Boolean && (Web) {fr} Édite une des 2 listes de propriétés d'un objet à sauvegarder (.wcPropSave ou .wcPropSaveNot)
 lparameters ;
   toObj; && {fr} Objet dont la propriété .wcPropSave est à éditer
-, tcProps; && {fr} Propriété(s) à ajouter | ôter de la liste
-, tlRemove; && [.F.] {fr} .F. : ajouter à la liste, .T. : ôter de  la liste
+, tuProps; && {fr} Propriété(s) à ajouter ou ôter de la liste
+, tlRemove; && [.F.] {fr} .F. : ajouter à la liste, .T. : ôter de  la liste {en} .F.: add to list, .T.: remove from list
+, tlCheck; && [.F.] {fr} Vérifier que l'objet détient bien les propriétés à sauvegarder
 , tcPropSave; && {fr} Propriété de l'objet à modifier ('wcPropSave' ou 'wcPropSaveNot')
 
 tlRemove = lTrue(m.tlRemove)
+tlCheck  = lTrue(m.tlCheck)
+external array tuProps
 
 LOCAL success as Boolean; && {fr} mission accomplie
-, laProp[1], lcProp, liProp; && {fr} propriétés indiquées
+, llArray, laProp[1], lcProp, liProp; && {fr} propriétés indiquées
 , laPropSave[1], lnPropSave, lcPropSave; && {fr} propriétés existantes
 
 success = .T.;
  and Vartype(m.toObj) == 'O';
- and Vartype(m.tcProps) == 'C';
- and NOT Empty(m.tcProps);
+ and Vartype(m.tuProps) == 'C';
  and Vartype(m.tcPropSave) == 'C';
  and InList(Lower(m.tcPropSave), Lower('wcPropSave'), Lower('wcPropSaveNot'));
  and .T.
 ASSERT m.success MESSAGE cAssertMsg(Textmerge([Invalid parameters(s)]))
-IF m.success
+llArray = Type('tuProps', 1) == 'A'
+IF m.success and (m.llArray or ALines(laProp, m.tuProps, 5, ',', ';') > 0) && trim
 
-	* {fr} Si les propriétés indiquées sont valides
-	success = ALines(laProp, m.tcProps, 1+4, ',', ';') > 0 && trim
-	ASSERT m.success MESSAGE cAssertMsg(Textmerge([Invalid Properties list '<<m.tcProps>>']))
-	IF m.success
-	
-		* {fr} Tabuler la liste existante
-		IF .T.;
-		 and lProperty(m.toObj, m.tcPropSave);
-		 and VarStore(@m.lcPropSave, GetPem(m.toObj, m.tcPropSave));
-		 and ga_Type_IsChar(m.lcPropSave, .T.)
-			lnPropSave = ALines(laPropSave, m.lcPropSave, 1+4, ',', ';') && {fr} trim
-		ELSE
-			addProperty(m.toObj, m.tcPropSave, '')
-			lnPropSave = 0
-		ENDIF
-	
-		* {fr} Pour chaque propriété indiquée
-		FOR EACH lcProp IN laProp
-			
-				liProp = Ascan(laPropSave, m.lcProp, 1, -1, 1, 7) && 1+2+4
-				
-				do case
-				case m.tlRemove and m.liProp > 0 && {fr} suppression
-						lnPropSave = m.lnPropSave - Adel(laPropSave, m.liProp)
-				case !m.tlRemove and Empty(m.liProp) && {fr} ajout
-						lnPropSave = m.lnPropSave + 1
-						DIMENSION laPropSave[m.lnPropSave]
-						laPropSave[m.lnPropSave] = m.lcProp
-				endcase
-		ENDFOR
-		
-		* {fr} Remplacer les propriétés à sauvegarder
-		WITH m.toObj as awTxt of aw.vcx
-			
-			lcPropSave = ''
-			IF m.lnPropSave > 0
-				DIMENSION laPropSave[m.lnPropSave]
-				FOR EACH lcProp IN m.laPropSave
-					lcPropSave = m.lcPropSave + ', ' + m.lcProp
-				ENDFOR
-			ENDIF
-			store Ltrim(Substr(m.lcPropSave, 2)) to ('.' + m.tcPropSave)
-		ENDWITH
+	* {fr} Tabuler la liste existante
+	IF .T.;
+	 and lProperty(m.toObj, m.tcPropSave);
+	 and varSet(@m.lcPropSave, GetPem(m.toObj, m.tcPropSave));
+	 and ga_Type_IsChar(m.lcPropSave, .T.)
+		lnPropSave = ALines(laPropSave, m.lcPropSave, 5, ',', ';') && {fr} trim
+	ELSE
+		addProperty(m.toObj, m.tcPropSave, '')
+		lnPropSave = 0
 	ENDIF
-ENDIF
 
+	* {fr} Traiter chaque propriété indiquée
+	if m.llArray
+		dimension laProp[Alen(m.tuProps)]
+		Acopy(tuProps, laProp)
+	endif
+	FOR EACH lcProp IN m.laProp
+		lcProp = Trim(m.lcProp) && m.llArray
+		liProp = Ascan(laPropSave, m.lcProp, 1, -1, 1, 7) && case insensitive, exact on
+		do case
+		case !m.tlRemove and Empty(m.liProp) && {fr} ajout
+			lnPropSave = m.lnPropSave + 1
+			DIMENSION laPropSave[m.lnPropSave]
+			laPropSave[m.lnPropSave] = m.lcProp
+		case m.tlRemove and m.liProp > 0 && {fr} suppression
+			lnPropSave = m.lnPropSave - Adel(laPropSave, m.liProp)
+		endcase
+	ENDFOR
+	
+	* {fr} Remplacer les propriétés à sauvegarder
+	lcPropSave = ''
+	FOR liProp = 1 to m.lnPropSave
+		lcPropSave = m.lcPropSave + Iif(!m.tlCheck or lProperty(m.toObj, laPropSave[m.liProp]), ', ' + laPropSave[m.liProp], '')
+	ENDFOR
+	store Ltrim(Substr(m.lcPropSave, 2)) to ('m.toObj.' + m.tcPropSave)
+
+ENDIF
 return m.success
 endproc
 
@@ -1528,35 +1526,36 @@ assert m.llResult message cAssertMsg(Textmerge(ICase(;
 	cLangUser() = 'fr',	[Le formulaire <<cL(m.tcForm)>> est invalide ou introuvable],; && copy-paste this line to add another language support
 											[Form <<cL(m.tcForm)>> is either invalid or can't be found]; && Default: English
 	)))
-if m.llResult
 
-	IF wlLAN() && {fr} desktop mode
+do case
+case !m.llResult
 
-			lcParms = wcParms(Pcount() - 1, .T.)
-			DO FORM (m.tcForm) name luForm &lcParms
+case wlLAN() && {en} desktop mode
+
+	lcParms = wcParms(Pcount() - 1, .T.)
+	DO FORM (m.tcForm) name luForm &lcParms
 		
-	ELSE && {fr} web mode
+otherwise && {en} web mode
 
-		luForm = wlProcess(@m.loProcess) and wlAJAX(@m.loAJAX)
-		ASSERT m.luForm MESSAGE cAssertMsg(Textmerge(ICase(;
-			cLangUser() = 'fr',	[En mode Web, cette fonction ne peut être utilisée que pendant une requête],; && copy-paste this line to add another language support
-													[In web mode, this function can only be called within a request]; && Default: English
+	luForm = wlProcess(@m.loProcess) and wlAJAX(@m.loAJAX)
+	ASSERT m.luForm MESSAGE cAssertMsg(Textmerge(ICase(;
+		cLangUser() = 'fr',	[En mode Web, cette fonction ne peut être utilisée que pendant une requête],; && copy-paste this line to add another language support
+												[In web mode, this function can only be called within a request]; && Default: English
+		)))
+	IF m.luForm
+	
+		lcParms = wcParms(Pcount() - 1)
+
+		luForm = .F.;
+			or m.loAJAX.Navigate(m.tcForm &lcParms);
+			or m.loAJAX.Navigate(Textmerge([wFormStandardPage.<<m.loProcess.cScriptMap>>?awForm=<<m.tcForm>>]) &lcParms)
+
+		= !m.luForm and ParmsLit(@m.lcParms &lcParms) and m.loProcess.Warning(Textmerge(ICase(;
+			cLangUser() = 'fr',	[Le formulaire '<<m.tcForm>>' ne peut être affiché avec les paramètres <<m.lcParms>>],; && copy-paste this line to add another language support
+													[Form '<<m.tcForm>>' can't be displayed with parameters <<m.lcParms>>]; && Default: English
 			)))
-		IF m.luForm
-		
-			lcParms = wcParms(Pcount() - 1)
-
-			luForm = .F.;
-				or m.loAJAX.Navigate(m.tcForm &lcParms);
-				or m.loAJAX.Navigate(Textmerge([wFormStandardPage.<<m.loProcess.cScriptMap>>?awForm=<<m.tcForm>>]) &lcParms)
-
-			= !m.luForm and ParmsLit(@m.lcParms &lcParms) and m.loProcess.Warning(Textmerge(ICase(;
-				cLangUser() = 'fr',	[Le formulaire '<<m.tcForm>>' ne peut être affiché avec les paramètres <<m.lcParms>>],; && copy-paste this line to add another language support
-														[Form '<<m.tcForm>>' can't be displayed with parameters <<m.lcParms>>]; && Default: English
-				)))
-		endif
 	endif
-endif
+endcase
 
 return m.luForm
 endfunc
@@ -2499,10 +2498,14 @@ wCSSclassAdd = '' && {en} Additional CSS class(es) {fr} Classe(s) CSS additionne
 wcHTML = .null. && [cf. this.wcHTMLGen()]{en} Object custom HTML {fr} HTML spécifique de l'objet
 wcHTMLevents = .null. && {en} HTML events to implement (coma delimited) - .null.: all (default), '': none {fr} Evénements HTML à générer (séparés par ',') - .null.: tous (défaut), '': aucun
 wlContentDynamic = .F. && {en} This object's members and/or properties are dynamic - .T. if members or property change at run-time {fr} Le contenu et/ou les propriétés de cet objet sont dynamiques - .T. si les membres ou les propriétés changent à l'exécution
-wcSortDir = '' && {en} Grid sorted on this column ? _N_o, _A_sc or _D_esc {fr} Grille triée sur cette colonne ? _N_on, _A_sc ou _D_esc
+wcSortDir = '' && [Internal] {en} Grid sorted on this column ? _N_o, _A_sc or _D_esc {fr} Grille triée sur cette colonne ? _N_on, _A_sc ou _D_esc
 
 DynamicToolTipText = '' && {en} [Web only, not supported by VFP] Character expression setting .ToolTipText for each grid row {fr} [Web seul] Expression caractère définissant .ToolTipText pour chaque ligne de la grille
-_MemberData = '<VFPData><memberdata name="dynamictooltiptext" display="DynamicToolTipText" type="property"/></VFPData>'
+_MemberData = '';
+ + '<VFPData>';
+ +  '<memberdata type="property" name="dynamictooltiptext" display="DynamicToolTipText" description="[Web only, not supported by VFP] Character expression setting .ToolTipText for each grid row "/>';
+ +  '<memberdata type="property" name="wcsortdir" display="wcSortDir"/>';
+ + '</VFPData>'
 
 *!*		*--------------------------------------------
 *!*		protected procedure init
@@ -2565,7 +2568,6 @@ IF (Type('m.thisForm.wlHTMLgen') == 'L' AND m.thisForm.wlHTMLgen)
 ENDIF
 
 && {fr} subclass: your code here
-
 endproc
 
 *--------------------------------------------
@@ -2576,7 +2578,6 @@ IF (Type('m.thisForm.wlHTMLgen') == 'L' AND m.thisForm.wlHTMLgen)
 ENDIF
 
 && {fr} subclass: your code here
-
 endproc
 
 *--------------------------------------------
@@ -2587,7 +2588,6 @@ IF (Type('m.thisForm.wlHTMLgen') == 'L' AND m.thisForm.wlHTMLgen)
 ENDIF
 
 && {fr} subclass: your code here
-
 endproc
 
 *--------------------------------------------
@@ -2598,7 +2598,6 @@ IF (Type('m.thisForm.wlHTMLgen') == 'L' AND m.thisForm.wlHTMLgen)
 ENDIF
 
 && {fr} subclass: your code here
-
 endproc
 
 *--------------------------------------------
@@ -2612,14 +2611,12 @@ endproc
 
 *--------------------------------------------
 procedure Resize
-
 IF (Type('m.thisForm.wlHTMLgen') == 'L' AND m.thisForm.wlHTMLgen)
 	return .F. && {en} default: ignore event in Web mode && {fr} subclass: return <JavaScript> to process on client
 	&& 2018-02-05 thn -- {FiC V 2.26.1-beta.9} {en} always returns .T. whatever value is returned
 ENDIF
 
 && {fr} subclass: your code here
-
 endproc
 
 *--------------------------------------------
@@ -2666,8 +2663,8 @@ procedure Refresh_
 lparameters void_parameter_reminder_implement_your_Refresh_code_in_this_method
 endproc
 
-*-- {en} [Internal, do not overload] PROTECTED or HIDDEN property getter {fr} [Interne, ne pas surcharger] Valeur d'une propriété PROTECTED ou HIDDEN
-PROCEDURE wpropget
+*--------------------------------------------
+PROCEDURE wPropGet && {en} [Internal, do not overload] PROTECTED or HIDDEN property getter {fr} [Interne, ne pas surcharger] Valeur d'une propriété PROTECTED ou HIDDEN
 	LPARAMETERS tcProp, taArray && @ {fr} tcProp is an Array
 	EXTERNAL ARRAY taArray
 	tcProp = 'm.this.' + m.tcProp
@@ -2683,9 +2680,8 @@ PROCEDURE wpropget
 	&& {en} sub-class: execute RETURN DoDefault(m.tcProp[, @m.taArray])
 ENDPROC
 
-
-*-- {en} [Internal, do not overload] PROTECTED or HIDDEN property setter {fr} [Interne, ne pas surcharger] Règle la valeur d'une propriété PROTECTED ou HIDDEN
-PROCEDURE wPropSet
+*--------------------------------------------
+PROCEDURE wPropSet && {en} [Internal, do not overload] PROTECTED or HIDDEN property setter {fr} [Interne, ne pas surcharger] Règle la valeur d'une propriété PROTECTED ou HIDDEN
 	LPARAMETERS tcProp, tuValue
 	WITH m.this
 

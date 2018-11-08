@@ -922,7 +922,7 @@ return Ltrim(ICase(;
 				'9.99',;
 				'9.999';
 			));
-		+ Chr(160) + icase(;
+		+ Chr(160) + ICase(;
 			m.tlShort,;
 				's',;
 			m.cLangUser = 'de',	'sek',; && copy-paste this line to add another language support
@@ -982,7 +982,7 @@ return int(nSeconds(@m.tnSeconds) * 1000)
 function cMS && {fr} Millisecondes écoulées tenant compte du passage par minuit
 lparameters tnSeconds && {fr} Seconds() au début, si @, Seconds() en retour
 
-return transform(nMS(@m.tnSeconds)) + ' ms.'
+return transform(nMS(@m.tnSeconds)) + Chr(160) + 'ms.'
 
 * ================================================
 function cDateTimeSep && {fr} Date et heure avec séparateurs compatibles pour nom de fichier

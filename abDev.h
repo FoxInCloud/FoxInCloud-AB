@@ -31,6 +31,7 @@
 	#define DOS_AWSAMPLES_TASTRADE_ORIGINAL	DOS_AWSAMPLES_TASTRADE + '_Original\'
 	#define DOS_AWSAMPLES_TASTRADE_ADAPTED	DOS_AWSAMPLES_TASTRADE + 'Adapted\'
 	#define DOS_AWSAMPLES_TASTRADE_ADAPTED_PROG	DOS_AWSAMPLES_TASTRADE_ADAPTED + 'progs\'
+	#define DOS_AWSAMPLES_TASTRADE_SANDBOX	DOS_AWSAMPLES_TASTRADE + 'Sandbox\'
 	#define DOS_AWSAMPLES_FIC_TUTO	DOS_AWSAMPLES + 'FIC\FICtuto\'
 	#define DOS_AWSAMPLES_FIC_TUTO_PROG 	DOS_AWSAMPLES_FIC_TUTO + 'progs\'
 	#define DOS_AWSAMPLES_FIC_TUTO_FORM 	DOS_AWSAMPLES_FIC_TUTO + 'progs\forms\'
@@ -46,7 +47,7 @@
 #define DOS_USER_APPDATA_AW			DOS_USER_APPDATA_AB + 'AW\'
 
 * {fr} Dossiers à exclure des traitements batch
-#define FOLDERS_EXCLUDE	'save,_save,old,_old,bak,back,_back,tmp,_tmp,temp,_temp,ancien,_ancien,anciens,_anciens,sauve,_sauve';
+#define FOLDERS_EXCLUDE	'save,_save,old,_old,bak,backup,back,_back,tmp,_tmp,temp,_temp,ancien,_ancien,anciens,_anciens,sauve,_sauve';
 	 + ',src,source,_source,script,scripts,image,images,screenshots,doc,docs,test,_gsData_,.git,test,tests'
 
 *!*	declare integer ShellExecute IN Shell32.dll; && {fr} If the function succeeds, it returns a value greater than 32

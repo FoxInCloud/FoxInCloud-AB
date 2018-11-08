@@ -15,7 +15,7 @@
 * =====================================================
 
 * =====================================================
-* {fr} Pour disposer des modules inclus dans ab*.prg, exécuter ce programme
+* {fr} Pour charger les modules inclus dans ab*.prg, exécuter ce programme
 * {en} To use modules in ab*.prg from your app, just execute this program
 * =====================================================
 
@@ -26,7 +26,7 @@
 LPARAMETERS ;
   tlClear; && [.F.] {fr} Supprimer les références de Set("Procedure") et Set("Classlib")
 , tlAppExe; && [.F.] {fr} Le programme principal est un app ou un exe
-, tlGAno && [.F.] RELEASE PROCEDURE abga
+, tlGAno && [.F.] RELEASE PROCEDURE abGA
 
 local lcFXPs
 lcFXPs = cABprgs(.T.)
@@ -192,7 +192,7 @@ return 'ab.h';
 	+	', abOffice.h';
 	+	', abTxt.h';
 	+	', awPublic.h';
-	+	', ga_.h'; && {fr} pour ga*.prg
+	+	', ga_.h'; && {fr} pour *GA.prg
 
 * =================================
 function aABsrce(aABsrce) && {fr} fichiers source de la classe ab
@@ -203,8 +203,8 @@ endfunc
 * =================================
 FUNCTION cABothers && {fr} autres fichiers de la classe ab
 
-return ' aw.vcx';
-		+	', aw.vct';
+return ' aw.vct'; && {fr} .vct en premier car s'il est verrouillé, il ne faut pas copier le .vcx
+		+	', aw.vcx';
 		+	', awGenMenu.prg';
 		+	', european.mem'; && {fr} nécessaire
 		+	', Graphics\aw.ico';
@@ -246,49 +246,50 @@ RETURN Iif(aClear(@m.aABfile);
 #IF .F. && {fr} copier coller dans modify command awOOP.prg > awAdapter.Adapt_abSrceCopy()
 
 EXTERNAL FILE; && {fr} pour avoir le code source même si l'app est encrypté
-			ab.h;
-		, abdev.h;
-		, abdata.h;
-		, abfile.h;
-		, abOffice.h;
-		, abtxt.h;
-		, awPublic.h;
-		, ga_.h; && {fr} pour ga*.prg
-		;
-		, ab.prg;
-		, abArray.prg;
-		, abData.prg;
-		, abDate.prg;
-		, abDev.prg;
-		, abFile.prg;
-		, abGA.prg;
-		, abOffice.prg;
-		, abOOP.prg;
-		, abTxt.prg;
-		, awPublic.prg;
-		;
-		, awCopy.vcx; && {fr} pour éviter conflit de nom avec class designer
-		, awCopy.vct; && {fr} pour éviter conflit de nom avec class designer
-		, european.mem; && {fr} nécessaire
-		, Graphics\aw.ico;
-		, Graphics\exclamation64.png;
-		, Graphics\indicator_remembermilk_orange.gif;
-		, Graphics\info64.png;
-		, Graphics\question64.png;
-		, Graphics\standby64.png;
-		, Graphics\folder.png;
-		, Graphics\folder_image.png;
-		, Graphics\folder_table.png;
-		, Graphics\arrows-gray-gray.png;
-		, Graphics\arrows-black-gray.png;
-		, Graphics\arrows-gray-black.png;
-		, Graphics\arrowdoubleleft.png;
-		, Graphics\arrowdoubleright.png;
-		, Graphics\refreshblue32.png;
-		, Graphics\prefirst.png;
-		, Graphics\prelast.png;
-		, Graphics\preprev.png;
-		, Graphics\prenext.png;
+	ab.h;
+, abDev.h;
+, abData.h;
+, abFile.h;
+, abOffice.h;
+, abTxt.h;
+, awPublic.h;
+, ga_.h; && {fr} pour *GA.prg
+;
+, ab.prg;
+, abArray.prg;
+, abData.prg;
+, abDate.prg;
+, abDev.prg;
+, abFile.prg;
+, abGA.prg;
+, abOffice.prg;
+, abOOP.prg;
+, abTxt.prg;
+, awPublic.prg;
+;
+, awCopy.vcx; && {fr} pour éviter conflit de nom avec class designer
+, awCopy.vct; && {fr} pour éviter conflit de nom avec class designer
+, european.mem; && {fr} nécessaire
+;
+, Graphics\aw.ico;
+, Graphics\exclamation64.png;
+, Graphics\indicator_remembermilk_orange.gif;
+, Graphics\info64.png;
+, Graphics\question64.png;
+, Graphics\standby64.png;
+, Graphics\folder.png;
+, Graphics\folder_image.png;
+, Graphics\folder_table.png;
+, Graphics\arrows-gray-gray.png;
+, Graphics\arrows-black-gray.png;
+, Graphics\arrows-gray-black.png;
+, Graphics\arrowdoubleleft.png;
+, Graphics\arrowdoubleright.png;
+, Graphics\refreshblue32.png;
+, Graphics\prefirst.png;
+, Graphics\prelast.png;
+, Graphics\preprev.png;
+, Graphics\prenext.png;
 
 #ENDIF
 * ========================================
@@ -298,6 +299,7 @@ LPARAMETERS ;
 , tlRelative && [.F.] {fr} Supprimer en relatif au dossier par défaut
 
 RETURN PathesAdd(@m.taFolder, .T., m.tlRelative)
+endproc
 
 * ========================================
 PROCEDURE PathRemove && {fr} Retire un dossier du Set('Path') - 9 ms
@@ -306,6 +308,7 @@ LPARAMETERS ;
 , tlRelative && [.F.] {fr} Supprimer en relatif au dossier par défaut
 
 RETURN PathAdd(m.tcFolder, .T., m.tlRelative)
+endproc
 
 * ========================================
 PROCEDURE PathesAdd && {fr} Ajoute des dossier à Set('Path')
@@ -335,6 +338,7 @@ IF Type('taFolder', 1) == 'A'
 ENDIF
 
 RETURN m.lnResult
+endproc
 
 * ========================================
 PROCEDURE PathAdd && {fr} Set('Path') : ajoute / supprime un dossier - 1-3 ms
@@ -385,6 +389,7 @@ IF Vartype(m.tcFolder) == 'C'
 ENDIF
 
 RETURN m.llResult
+endproc
 
 * --------------------------------------------------
 PROCEDURE PathAdd_test && {fr} teste PathAdd()
@@ -396,6 +401,7 @@ loTest.Test(.F., cModuleInfo(Sys(16), 'Path'))
 loTest.Test(.F., 'toto')
 
 RETURN loTest.Result()
+endproc
 
 * ========================================
 PROCEDURE PathAddSubFolders && {fr} Ajoute un dossier et ses sous-dossiers au Set('Path')
@@ -436,6 +442,7 @@ LPARAMETERS ;
 , tcResult && @ [''] {fr} Erreur éventuelle
 
 RETURN CreateObject('abPathesAdd', @m.tvFolders, m.tlRelative, m.tlPrepend, @m.tcResult)
+endproc
 
 * =================================
 DEFINE CLASS abPathesAdd AS Relation && {fr} Ajoute des dossiers à Set('Path') et rétablit Set('Path') au .Destroy()
@@ -444,7 +451,7 @@ HIDDEN cPath
 cPath = Set("Path")	
 
 * ---------------------------------
-PROCEDURE Init
+protected procedure Init
 LPARAMETERS ;
   tvFolders; && {fr} Dossier(s) - @ tableau (array) ou liste délimitée
 , tlRelative; && [.F.] {fr} Ajouter en relatif au dossier par défaut
@@ -483,9 +490,10 @@ tcResult = Textmerge(ICase(;
 	))
 
 RETURN .F.
+endproc
 
 * ---------------------------------
-PROCEDURE Destroy
+protected procedure Destroy
 
 SET PATH TO (m.this.cPath)
 
