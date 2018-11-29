@@ -7750,8 +7750,11 @@ text to cSets textmerge noshow flags 1 pretext 3
 	BLOCKSIZE
 	CARRY
 	CENTURY
+	CENTURY, 1
 	COLLATE
+	CONFIRM
 	CURRENCY
+	CURRENCY, 1
 	DATABASE
 	DATE
 	DECIMALS
@@ -7759,6 +7762,7 @@ text to cSets textmerge noshow flags 1 pretext 3
 	EXACT
 	EXCLUSIVE
 	FIELDS
+	FIELDS, 2
 	FIXED
 	HOURS
 	LOCK
@@ -7769,17 +7773,14 @@ text to cSets textmerge noshow flags 1 pretext 3
 	NULL
 	POINT
 	REFRESH
+	REFRESH, 1
 	REPROCESS
 	SAFETY
 	SECONDS
+	SEPARATOR
 	SYSFORMATS
 	TALK
 	UNIQUE
-
-	CENTURY, 1
-	CURRENCY, 1
-	FIELDS, 2
-	REFRESH, 1
 endtext
 if m.tlUnSupported
 text to cSets textmerge noshow flags 1 pretext 3
@@ -7800,27 +7801,42 @@ if lFalse(Nvl(m.tlSetsType, .F.)) && not scoped to the datasession -- aka global
 text to cSets textmerge noshow flags 1 pretext 3
 	<<m.cSets>>
 	ALTERNATE
+	ALTERNATE, 1
 	ASSERTS
 	BELL
+	BELL, 1
 	BROWSEIME
 	CLOCK
 	COMPATIBLE
 	CONSOLE
 	COVERAGE
+	COVERAGE, 1
+	CPCOMPILE
 	CPDIALOG
 	DATASESSION
+	DEBUGOUT
 	DEFAULT
 	DELIMITERS
+	DELIMITERS, 1
+	DEVELOPMENT
+	DEVICE
+	DIRECTORY
 	ENGINEBEHAVIOR
 	ESCAPE
 	FDOW
 	FULLPATH
 	FWEEK
 	HELP
+	HELP, 1
 	LIBRARY
+	MARGIN
 	MESSAGE
+	MESSAGE, 1
 	MOUSE
+	MOUSE, 1
+	NOCPTRANS
 	NOTIFY
+	NOTIFY, 1
 	NULLDISPLAY
 	ODOMETER
 	OPTIMIZE
@@ -7828,7 +7844,7 @@ text to cSets textmerge noshow flags 1 pretext 3
 	PRINTER
 	REPORTBEHAVIOR
 	RESOURCE
-	SEPARATOR
+	RESOURCE, 1
 	SPACE
 	SQLBUFFERING
 	STATUS
@@ -7842,15 +7858,7 @@ text to cSets textmerge noshow flags 1 pretext 3
 	TEXTMERGE, 2
 	TEXTMERGE, 3
 	UDFPARMS
-
-	ALTERNATE, 1
-	BELL, 1
-	COVERAGE, 1
-	MOUSE, 1
-	RESOURCE, 1
-	DELIMITERS, 1
-	MESSAGE, 1
-	HELP, 1
+	VARCHARMAPPING
 endtext
 if m.tlUnSupported
 text to cSets textmerge noshow flags 1 pretext 3

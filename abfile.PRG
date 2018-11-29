@@ -1169,22 +1169,22 @@ lparameters tcFile && {fr} Fichier
 
 LOCAL laFile[1], ldDate
 
-IF ADir(laFile, m.tcFile) # 1
-   RETURN {/:}
+IF ADir(laFile, FullPath(m.tcFile)) # 1
+	RETURN {/:}
+ELSE
+	ldDate = m.laFile[3]
+	RETURN EVALUATE('';
+		+ "{^";
+		+ Cast(YEAR(m.ldDate) as M);
+		+ "-";
+		+ Cast(MONTH(m.ldDate) as M);
+		+ "-";
+		+ Cast(DAY(m.ldDate) as M);
+		+ " " ;
+		+ m.laFile[4]; && time
+		+ "}";
+		)
 ENDIF   
-
-ldDate = m.laFile[3]
-RETURN EVALUATE('';
-	+ "{^";
-	+ Cast(YEAR(m.ldDate) as M);
-	+ "-";
-	+ Cast(MONTH(m.ldDate) as M);
-	+ "-";
-	+ Cast(DAY(m.ldDate) as M);
-	+ " " ;
-	+ m.laFile[4]; && {fr} time
-	+ "}";
-	)
 endfunc
 
 * ==============================================

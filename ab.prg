@@ -988,6 +988,7 @@ RETURN Iif(Vartype(m.tnPix)=='N' AND m.tnPix > 0;
 	, m.tnPix / 96 * 25.4; && 96 pixels/pouce (standard Windows) et 25.4 mm/pouce
 	, 0;
 	)
+endfunc
 
 * -------------------------------------------------------------
 FUNCTION nPXofMM && {fr} Pixels écran de mm papier
@@ -996,6 +997,7 @@ RETURN Int(Iif(Vartype(m.tnMM)== 'N' AND m.tnMM > 0;
 	, m.tnMM / 25.4 * 96; && 96 pixels/pouce (standard Windows) et 25.4 mm/pouce
 	, 0;
 	))
+endfunc
 
 * -------------------------------------------------------------
 FUNCTION nPXofPt && {fr} Pixels écran de point CSS
@@ -1004,3 +1006,4 @@ RETURN Int(Iif(Vartype(m.tnPt)== 'N' AND m.tnPt > 0;
 	, Round(m.tnPt / 72 * 90, 1); && 72 pt /pouce, 96 pixels/pouce (standard Windows) ramené à 90 pour ajuster
 	, 0;
 	))
+endfunc
