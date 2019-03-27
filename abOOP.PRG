@@ -238,10 +238,10 @@ local lnResult as integer; && {fr} nombre d'éléments
 , loForm as form;
 , llDS as Boolean, liDS as integer;
 , llValue, luValue;
-, lcAlias as string, lcField as string, llFldState as Boolean, lnFldState as integer;
+, lcAlias as String, lcField as String, llFldState as Boolean, lnFldState as integer;
 , lnCol as integer, liCol as integer;
 , liRow as integer;
-, lcElt as string;
+, lcElt as String;
 
 lnResult = .null.
 
@@ -519,7 +519,7 @@ if vartype(m.toControl) == 'O'
 
 	* {fr} Tabuler les parents de l'objet jusqu'au formulaire
 	local array laParents[1]
-	local lnParents, loParent as object
+	local lnParents, loParent as Object
 	lnParents = 0
 	loParent = m.toControl
 	do while .t.
@@ -1369,8 +1369,8 @@ endfunc
 function lMethod && {fr} Un objet est doté d'une Méthode ou un Événement
 lparameters ;
   toObject as form; && {fr} Objet VFP
-, tcMethod as string; && {fr} méthode
-, tcEventMethod as string && [any] 'M'ethod or 'E'vent
+, tcMethod as String; && {fr} méthode
+, tcEventMethod as String && [any] 'M'ethod or 'E'vent
 
 return .t.;
 	and vartype(m.toObject) == 'O';
@@ -1444,8 +1444,8 @@ return loTest.Result()
 * ========================================
 function lMethodImplemented && {fr} Une Méthode ou un Événement est implémenté(e) dans un objet /!\ SUPPORTE SEULEMENT LES CLASSES VISUELLES
 lparameters ;
-  toObject as object; && {fr} Objet VFP
-, tcMethod as string && {fr} méthode
+  toObject as Object; && {fr} Objet VFP
+, tcMethod as String && {fr} méthode
 
 local llResult
 
@@ -1554,9 +1554,9 @@ endfunc
 
 * ========================================
 function oClone && (recursive) {en} Clones an object {fr} Clone un objet
-lparameters toObj as collection && {en} as any VFP class
+lparameters toObj as Collection && {en} as any VFP class
 
-local loResult as collection; && {en} as any VFP class
+local loResult as Collection; && {en} as any VFP class
 , llResult as Boolean;
 , llClass as Boolean;
 , llClassLib as Boolean;
@@ -1604,7 +1604,7 @@ if vartype(m.toObj) == 'O'
 				lnRow = alen(m.toObj.&lcProp, 1)
 				lnCol = alen(m.toObj.&lcProp, 2)
 				llResult = .t.;
-				 and addproperty(;
+				 and addProperty(;
 					  m.loResult;
 					, m.lcProp + textmerge(iif(m.lnCol > 0, '[<<m.lnRow>>, <<m.lnCol>>]', '[<<m.lnRow>>]'));
 					);
@@ -1612,7 +1612,7 @@ if vartype(m.toObj) == 'O'
 
 			case m.llUserDef or vartype(m.luProp) == 'O'
 
-				llResult = addproperty(;
+				llResult = addProperty(;
 					  m.loResult;
 					, m.lcProp;
 					, iif(vartype(m.luProp) == 'O';
@@ -1684,18 +1684,18 @@ return loTest.Result()
 * -----------------------------------------
 	function oClone_Test_populate(loObj)
 
-	addproperty(m.loObj, 'string', 'test')
-	addproperty(m.loObj, 'boolean', .t.)
-	addproperty(m.loObj, 'numeric', 1)
-	addproperty(m.loObj, 'date', date())
-	addproperty(m.loObj, 'NULL', .null.)
-	addproperty(m.loObj, 'array[2,2]')
+	addProperty(m.loObj, 'string', 'test')
+	addProperty(m.loObj, 'boolean', .t.)
+	addProperty(m.loObj, 'numeric', 1)
+	addProperty(m.loObj, 'date', date())
+	addProperty(m.loObj, 'NULL', .null.)
+	addProperty(m.loObj, 'array[2,2]')
 		m.loObj.array[1] = .t.
 		m.loObj.array[2] = 1
 		m.loObj.array[3] = 'test'
 		m.loObj.array[4] = createobject('Custom')
-	addproperty(m.loObj, 'object', createobject('empty'))
-	addproperty(m.loObj.object, 'string', 'test')
+	addProperty(m.loObj, 'object', createobject('empty'))
+	addProperty(m.loObj.object, 'string', 'test')
 
 	return m.loObj
 
@@ -1708,46 +1708,94 @@ lparameters ;
 
 external array taClass
 
-local laObj[1], loObj, laClass[1], lnResult
-lnResult = 0
+local lnResult;
+, laObj[1], loObj;
+, laClass[1]
 
+lnResult = 0
 if aClear(@m.taClass)
 
-	lnResult = aclass(m.taClass, m.toCont)
+	lnResult = AClass(m.taClass, m.toCont)
 	if loCont(m.toCont) and aoClassCont(@m.laObj, m.toCont,, m.tlRecurse) > 0
 
 		for each loObj in m.laObj foxobject
-			aclass(laClass, m.loObj)
+			AClass(laClass, m.loObj)
 			lnResult = aAppend(@m.taClass, @m.laClass, .t.)
 		endfor
 	endif
 endif
 
 return m.lnResult
+endfunc
 
 * ========================================
 function aClassesClear && {fr} CLEAR CLASS sur un tableau de classes
 lparameters taClass && @ {fr} classes
 external array taClass
 
-local lcClass, llResult
+local llResult;
+, lnClass, liClass, lcClass;
+, lcParent;
+, obj as ga_TopologicalSort of abGA.prg;
 
-llResult = type('taClass', 1) == 'A' and not laEmpty(@m.taClass)
+llResult = type('taClass', 1) == 'A' and ga_Type_IsChar(m.taClass, .T.) and ga_TopologicalSort_Object(@m.obj)
+assert m.llResult
 if m.llResult
-	for each lcClass in taClass
-		if not lBaseClass(m.lcClass)
-			clear class (m.lcClass)
+
+	* 1- {en} remove base and 'fake' classes from list
+	lnClass = Alen(m.taClass)
+	for liClass = m.lnClass to 1 step -1
+		lcParent = ''
+		try
+			lcParent = GetPem(m.taClass[m.liClass], 'parentClass')
+		catch
+		endtry
+		if Empty(m.lcParent)
+			Adel(taClass, m.liClass)
+			lnClass = m.lnClass - 1
 		endif
 	endfor
+	if m.lnClass > 0
+		dimension taClass[m.lnClass]
+
+		* 2- {en} sort classes in parenthood order && 2019-03-06 thn -- {FiC V 2.28.1-beta.3} {en} added to fix c00005 error when child classes are CLEARed before parents
+		for each lcClass in taClass
+			if !m.obj.AddArc(m.lcClass)
+				llResult = .F.
+				assert m.llResult
+				exit
+			endif
+		endfor
+		if m.llResult
+			for each lcClass in taClass
+				if !m.obj.AddArc(Upper(GetPem(m.lcClass, 'parentClass')), m.lcClass)
+					llResult = .F.
+					assert m.llResult
+					exit
+				endif
+			endfor
+			if m.llResult
+				m.obj.sort(@m.taClass)
+
+				* 3- {en} clear classes top down
+				for each lcClass in taClass
+					if !lBaseClass(m.lcClass)
+						clear class (m.lcClass)
+					endif
+				endfor
+			endif
+		endif
+	endif
 endif
 
 return m.llResult
+endfunc
 
 * ========================================
-function cXMLofObject as string && {en} Object linearized as XML {fr} Objet linéarisé en XML
+function cXMLofObject as String && {en} Object linearized as XML {fr} Objet linéarisé en XML
 lparameters ;
-  toObj as object; && {en} Source Object {fr} Objet source
-, tcResult as string && @ {en} Cumulative result {fr} Résultat (cumulatif)
+  toObj as Object; && {en} Source Object {fr} Objet source
+, tcResult as String; && @ {en} Cumulative result {fr} Résultat (cumulatif)
 
 && {en} Supports:
 && {en} - nested objects
@@ -1765,8 +1813,8 @@ lparameters ;
 && {fr} - les propriétés cachées et protégées des objets dérivés des 'classes de base' FoxInCloud (aw.vcx!aw*)
 && {fr} Seul abOOP.prg!objectOfXML() peut reconstituer l'objet à partir du XML produit
 
-local lcResult as string; && {fr} XML, .null. if error
-, cNullDisplay as string; && 2014-06-17 abSet can't be used because cXMLofObject() can be in a replace command - in a replace , .destroy() raises an error 'record is not locked'
+local lcResult as String; && {fr} XML, .null. if error
+, cNullDisplay as String; && 2014-06-17 abSet can't be used because cXMLofObject() can be in a replace command - in a replace , .destroy() raises an error 'record is not locked'
 
 cNullDisplay = set("Nulldisplay")
 set nulldisplay to && .NULL.
@@ -1778,15 +1826,16 @@ if !empty(m.cNullDisplay)
 endif
 
 return m.lcResult
+endfunc
 
 * ========================================
-function cXMLofObject_ as string && {fr} Objet linéarisé en XML - Privée de cXMLofObject()
+function cXMLofObject_ as String && {fr} Objet linéarisé en XML - Privée de cXMLofObject()
 && /!\ récursion à partir de cXMLofObject_uValue()
 lparameters ;
-  toObj as collection; && {fr} par exemple
+  toObj as Collection; && {fr} par exemple
 , tcResult; && @ {fr} Résultat (cumulatif)
 
-local lcResult as string; && {fr} XML, .null. if error
+local lcResult as String; && {fr} XML, .null. if error
 , llResult as Boolean;
 , llEmpty;
 , llFIC; && {fr} FoxInCloud object
@@ -1822,13 +1871,13 @@ if m.llResult
 	if m.llResult
 
 		llFIC = lMethod(m.toObj, 'wPropGet') and lProperty(m.toObj, 'wcPropSave') && {fr} FoxInCloud object
+		= m.llFIC and wcPropSaveInit(@m.tcResult, m.toObj) && 2019-01-30 thn -- {FiC V 2.28.1-beta.1} {en} added && modify command awPublic.prg
 		lcResult = textmerge("<#o#><#c#><<Iif(m.llEmpty, '', m.toObj.Class)>></#c#><#cl#><<Iif(m.llEmpty, '', m.toObj.ClassLibrary)>></#cl#>")
 		lnProp = aMembers(laProp, m.toObj, 0, 'GPH') && {fr} public, protected and hidden && {fr} without ", 0, 'GPH')", aMembers() omits protected and hidden properties
 		if m.lnProp > 0
-			aMembers(laPropPH, m.toObj, 0, 'PH') && {fr} protected and hidden only
 
-			for liProp = 1 to m.lnProp
-* {fr} FOR EACH lcProp IN laProp && {fr} exactement le même temps de réponse
+			aMembers(laPropPH, m.toObj, 0, 'PH') && {fr} protected and hidden only
+			for liProp = 1 to m.lnProp && FOR EACH lcProp IN laProp && {fr} exactement le même temps de réponse
 
 				if .t.;
 				 and varSet(@m.lcProp, lower(m.laProp[m.liProp])); && {fr} Lower(m.lcProp)
@@ -1936,7 +1985,7 @@ endfunc
 * -----------------------------------------
 function cXMLofObject_colItems && {fr} XML des items d'une collection
 lparameters ;
-  toObj as collection;
+  toObj as Collection;
 , tcResult; && @ {fr} Résultat (cumulatif)
 
 local lcResult as String;
@@ -1968,13 +2017,17 @@ return iif(m.tcType == 'O';
 endfunc
 
 * -----------------------------------------
-function cXMLofObject_lPropSave(toObj, tcProp, llFIC) && [privée de cXMLofObject()] {fr} Propriété modifiable à sauvegarder
-local lcProp as string
+function cXMLofObject_lPropSave(toObj, tcProp, llFIC) && [cXMLofObject() private] {fr} Propriété modifiable à sauvegarder {en} Updateable property to be saved
+local lcProp as String
 lcProp = ',' + lower(m.tcProp) + ','
 return .t.;
- and !PEMstatus(m.toObj, m.tcProp, 1); && {fr} Read-only
- and !m.lcProp $ ',' + chrtran(lower('wcPropSave,_MemberData,Name'), ' ', '') + ','; && ,dataSession,dataSessionID
- and (!m.llFIC or m.lcProp $ ',' + Lower(chrtran(nvl(m.toObj.wcPropSave, ''), ' ', '')) + ',');
+ and !PEMstatus(m.toObj, m.tcProp, 1); && {en} Read-only
+ and !m.lcProp $ ',' + chrtran(lower('wcPropSave,wcPropSaveNot,_MemberData,Name'), ' ', '') + ','; && ,dataSession,dataSessionID
+ and (!m.llFIC or .T.;
+  and  m.lcProp $ ',' + Lower(chrtran(nvl(m.toObj.wcPropSave,    ''), ' ', '')) + ',';
+  and !m.lcProp $ ',' + Lower(chrtran(nvl(m.toObj.wcPropSaveNot, ''), ' ', '')) + ',';
+  );
+ and .t.
 
 endfunc
 
@@ -1982,27 +2035,27 @@ endfunc
 procedure cXMLofObject_Test && {fr} test unitaire de cXMLofObject()
 
 local loTest as abUnitTest of abDev.prg;
-, loObj as collection, lcResult
+, loObj as Collection, lcResult
 
 loTest = newobject('abUnitTest', 'abDev.prg')
 
 loObj = createobject('Collection')
 
-addproperty(m.loObj, 'string', 'testValue')
+addProperty(m.loObj, 'string', 'testValue')
 m.loObj.add('testItem1', 'testItem1')
 m.loObj.add('testItem2', 'testItem2')
 
-addproperty(m.loObj, 'object', createobject('Collection'))
-addproperty(m.loObj.object, 'string', 'testValue')
+addProperty(m.loObj, 'object', createobject('Collection'))
+addProperty(m.loObj.object, 'string', 'testValue')
 m.loObj.object.add('testItem1', 'testItem1')
 m.loObj.object.add('testItem2', 'testItem2')
 
-addproperty(m.loObj.object, 'object', createobject('Custom'))
-addproperty(m.loObj.object.object, 'string', 'testValue')
+addProperty(m.loObj.object, 'object', createobject('Custom'))
+addProperty(m.loObj.object.object, 'string', 'testValue')
 
-addproperty(m.loObj.object.object, 'object', createobject('Grid'))
-addproperty(m.loObj.object.object.object, 'string', 'testValue')
-addproperty(m.loObj.object.object.object, 'array[2]')
+addProperty(m.loObj.object.object, 'object', createobject('Grid'))
+addProperty(m.loObj.object.object.object, 'string', 'testValue')
+addProperty(m.loObj.object.object.object, 'array[2]')
 m.loObj.object.object.object.array[1] = 'el1'
 m.loObj.object.object.object.array[2] = newobject('awcst', 'aw' + '.vcx') && {fr} évite d'embarquer aw.vcx dans un projet ab
 
@@ -2010,7 +2063,7 @@ lcResult = ''
 loTest.Test(.null., m.loObj, @m.lcResult) && .NULL.
 ? m.lcResult
 
-addproperty(m.loObj.object.object.object, 'array[66000]')
+addProperty(m.loObj.object.object.object, 'array[66000]')
 lcResult = ''
 loTest.Test(.null., m.loObj, @m.lcResult) && .NULL.
 ? m.lcResult
@@ -2055,7 +2108,7 @@ local liResult, loResult
 
 loResult = createobject('Empty')
 for liResult = 1 to evl(m.tnProp, 56) && 1800 propriétés (champs) pour le fomulaire vFacturas, mais 56 utiles
-	addproperty(;
+	addProperty(;
 		  m.loResult;
 		, 'test' + transform(m.liResult);
 		, icase(;
@@ -2103,20 +2156,20 @@ return m.llResult
 endfunc
 
 * ========================================
-function objectOfXML as object && {en} Object from its linearized XML produced by cXMLofObject() {fr} Objet à partir de sa représentation linéarisée en XML par cXMLofObject()
+function objectOfXML as Object && {en} Object from its linearized XML produced by cXMLofObject() {fr} Objet à partir de sa représentation linéarisée en XML par cXMLofObject()
 && /!\ récursive
 lparameters ;
-  tcXML as string; && {en} XML produced by cXMLofObject() {fr} XML produit par cXMLofObject()
-, toResult as object; && [NewObject(class, classlib)] {en} Result object to populate {fr} Objet résultat à peupler
-, tcResult as string; && @ {en} Cumulative result {fr} Résultat (cumulatif)
+  tcXML as String; && {en} XML produced by cXMLofObject() {fr} XML produit par cXMLofObject()
+, toResult as Object; && [NewObject(class, classlib)] {en} Result object to populate {fr} Objet résultat à peupler
+, tcResult as String; && @ {en} Cumulative result {fr} Résultat (cumulatif)
 
-local toResult as object; && {fr} see above
+local toResult as Object; && {fr} see above
 , llResult as Boolean;
-, lcResult as string;
+, lcResult as String;
 , llChild as Boolean;
 , lnChild as Integer;
 , liChild as Integer;
-, loChild as collection; && {fr} objets enfants éventuels
+, loChild as Collection; && {fr} objets enfants éventuels
 , llObject as Boolean; && @ {en} an object was passed in toResult {fr} Un objet a été passé dans toResult
 , llFIC as Boolean; && @ {en} object derives from a FoxinCloud class {fr} L'objet a d'une classe FoxinCloud
 
@@ -2154,14 +2207,14 @@ llResult = .T.;
 		);
 	;
 	and objectOfXML_propSet(; && {en} [objectOfXML() private] restores object properties {fr}  [privée de objectOfXML()] restaure les propriétés de l'objet
-		  m.tcXML; && {en} XML produced by cXMLofObject() {fr} XML produit par cXMLofObject()
+		  m.tcXML   ; && {en} XML produced by cXMLofObject() {fr} XML produit par cXMLofObject()
 		, m.toResult; && [NewObject(class, classlib)] {en} Object to populate {fr} Objet à peupler
 		,@m.lcResult; && @ {en} Cumulative result {fr} Résultat (cumulatif)
 		, m.llObject; && {en} an object was passed {fr} Un objet a été passé
-		, m.llFIC; && {en} object derives from a FoxinCloud class {fr} L'objet a d'une classe FoxinCloud
-		, m.llChild; && {en} object has direct child(ren) {fr} L'objet a des objets enfants
-		,@m.liChild; && @ {en} Index of current child object {fr} Index de l'objet enfant courant
-		, m.loChild; && {en} Child objects XML {fr} XML des objets enfants
+		, m.llFIC   ; && {en} object derives from a FoxinCloud class {fr} L'objet a d'une classe FoxinCloud
+		, m.llChild ; && {en} object has direct child(ren) {fr} L'objet a des objets enfants
+		,@m.liChild ; && @ {en} Index of current child object {fr} Index de l'objet enfant courant
+		, m.loChild ; && {en} Child objects XML {fr} XML des objets enfants
 		);
 	 ;
 	and objectOfXML_colItems(; && {fr} Si Collection, restaure ses membres
@@ -2186,22 +2239,21 @@ endfunc
 * ========================================
 procedure objectOfXML_object && [Internal] {en} [objectOfXML() private] retrieves or create a clean source object {fr}  [privée de objectOfXML()] retrouve ou nettoie l'objet source
 lparameters ;
-  tcXML as string; && {en} XML produced by cXMLofObject() {fr} XML produit par cXMLofObject()
-, toResult as object; && [NewObject(class, classlib)] {en} Object to populate {fr} Objet à peupler
-, tcResult as string; && @ {en} Cumulative result {fr} Résultat (cumulatif)
+  tcXML as String; && {en} XML produced by cXMLofObject() {fr} XML produit par cXMLofObject()
+, toResult as Object; && [NewObject(class, classlib)] {en} Object to populate {fr} Objet à peupler
+, tcResult as String; && @ {en} Cumulative result {fr} Résultat (cumulatif)
 , llObject as Boolean; && @ {en} an object was passed {fr} Un objet a été passé
 , llFIC as Boolean; && @ {en} object derives from a FoxinCloud class {fr} L'objet a d'une classe FoxinCloud
 
 local llResult as Boolean;
-, lcResult as string;
-;
+, lcResult as String;
 , loClass, lcClass, lcClassLib;
 , llEmpty;
 , laProp[1], lcProp, llProp, luProp, luProp_;
 
 #if .f.
 o = createobject('empty')
-addproperty(o, 'test')
+addProperty(o, 'test')
 ? PEMstatus(o, 'test', 0) && .T. && {fr} Toutes les propriétés d'un objet Empty étant marquées modifiées, cXMLofObject() les a toutes listées
 #endif
 
@@ -2248,7 +2300,7 @@ llFIC = lMethod(m.toResult, 'wPropReset') and lProperty(m.toResult, 'wcPropSave'
 toResult = createobject('relation')
 lcProp = 'test'
 ? aMembers(aa, m.toResult, 0, 'GPH')
-addproperty(m.toResult, m.lcProp, 'test')
+addProperty(m.toResult, m.lcProp, 'test')
 ? aMembers(aa, m.toResult, 0, 'GPH')
 ? PEMstatus(m.toResult, m.lcProp, 4) && .T.
 ? PEMstatus(m.toResult, 'Class', 4) && .F.
@@ -2263,24 +2315,24 @@ if m.llObject;
 	for each lcProp in laProp
 		= .f.;
 		 	or .t.;
-		 		and !PEMstatus(m.toResult, m.lcProp, 4); && {en} not user defined
-		 		and ',' + m.lcProp + ',' $ ',BASECLASS,CLASS,CLASSLIBRARY,CONTROLCOUNT,CONTROLS,NAME,OBJECTS,OBJECT,PARENT,PARENTCLASS,';
+		 	 and !PEMstatus(m.toResult, m.lcProp, 4); && {en} not user defined
+		 	 and ',' + m.lcProp + ',' $ ',BASECLASS,CLASS,CLASSLIBRARY,CONTROLCOUNT,CONTROLS,NAME,OBJECTS,OBJECT,PARENT,PARENTCLASS,';
 		 	or .t.;
-		 		and  PEMstatus(m.toResult, m.lcProp, 4); && {en} custom property ...
-		 		and !PEMstatus(m.toResult, m.lcProp, 6); && ... added to the object (not inherited from the class)
-		 		and removeproperty(m.toResult, m.lcProp);
+		 	 and  PEMstatus(m.toResult, m.lcProp, 4); && {en} custom property ...
+		 	 and !PEMstatus(m.toResult, m.lcProp, 6); && ... added to the object (not inherited from the class)
+		 	 and removeProperty(m.toResult, m.lcProp);
 		 	or PEMstatus(m.toResult, m.lcProp, 1); && {en} Read-only
 		 	or .t.; && and setStepOn(Lower(m.lcProp) == 'keysort')
 			 and PEMstatus(m.toResult, m.lcProp, 0); && {en} modified
-			 and varSet(@m.luProp,  getPEM(m.toResult, m.lcProp));
-			 and varSet(@m.luProp_, getPEM(m.toResult.Class, m.lcProp)); &&  && 2018-01-10 thn -- {FiC V 2.26.1-beta.1} {en} replaced getPEM(m.loClass, m.lcProp) by getPEM(m.toResult.Class, m.lcProp)
-			 and !luEqual(m.luProp, m.luProp_); && {fr} Propriété changée par rapport à la classe
+			 and varSet(@m.luProp , getPEM(m.toResult, m.lcProp));
+			 and varSet(@m.luProp_, getPEM(m.toResult.Class, m.lcProp)); && 2018-01-10 thn -- {FiC V 2.26.1-beta.1} {en} replaced getPEM(m.loClass, m.lcProp) by getPEM(m.toResult.Class, m.lcProp)
+			 and !luEqual(@m.luProp, @m.luProp_); && {fr} Propriété changée par rapport à la classe
 			 and iif(PEMstatus(m.toResult, m.lcProp, 2); && {en} protected property
 				, iif(m.llFIC;
 					, m.toResult.wPropReset(m.lcProp);
 					, .f.;
 					);
-				, addproperty(m.toResult, m.lcProp, iif(vartype(m.luProp_) == 'O'; && {en} sets property to value in class
+				, addProperty(m.toResult, m.lcProp, iif(vartype(m.luProp_) == 'O'; && {en} sets property to value in class
 					, oClone(m.luProp_);
 					, m.luProp_;
 					)));
@@ -2292,10 +2344,11 @@ endproc
 * ========================================
 function objectOfXML_object_oClass(lcClass, lcClassLib, loClass) && [Internal] {en} [objectOfXML_object() private] class instance {fr}  [privée de objectOfXML_object()] instance d'une classe
 && 2018-01-10 thn -- {FiC V 2.26.1-beta.1} {en} created
+&& 2019-02-20 thn -- {FiC V 2.28.1-beta.3} {en} https://support.west-wind.com/ReplyMessage.wwt?id=5F317HTX0#5F317HTX0
 try
-	loClass = newobject(m.lcClass, m.lcClassLib, 0)
-catch
 	loClass = newobject(m.lcClass, m.lcClassLib)
+catch
+	loClass = newobject(m.lcClass, m.lcClassLib, 0)
 endtry
 return m.loClass
 endfunc
@@ -2303,14 +2356,14 @@ endfunc
 * ========================================
 procedure objectOfXML_lChild as Boolean && [Internal] {en} [objectOfXML() private] identifies child object patterns in XML {fr} [privée de objectOfXML()] repère les objets enfants dans le XML 
 lparameters ;
-  tcXML as string; && @ {en} XML produced by cXMLofObject() {fr} XML produit par cXMLofObject()
-, tcResult as string; && @ {en} Cumulative result {fr} Résultat (cumulatif)
+  tcXML as String; && @ {en} XML produced by cXMLofObject() {fr} XML produit par cXMLofObject()
+, tcResult as String; && @ {en} Cumulative result {fr} Résultat (cumulatif)
 , llChild as Boolean; && @ [.F.] {en} object has direct child(ren) {fr} L'objet a des objets enfants
 , lnChild as Integer; && @ {en} [0] Number of direct child objects {fr} Nombre d'objets enfants
-, loChild as collection; && @ {en} [.F.] Child objects XML {fr} XML des objets enfants
+, loChild as Collection; && @ {en} [.F.] Child objects XML {fr} XML des objets enfants
 
 local llResult as Boolean;
-, lcResult as string;
+, lcResult as String;
 , loRegExpOpen as abRegExp of abTxt.prg;
 , loRegExpClose as abRegExp of abTxt.prg;
 ;
@@ -2406,17 +2459,17 @@ endproc
 * ========================================
 procedure objectOfXML_propSet && [Internal] {en} [objectOfXML() private] restores object properties {fr}  [privée de objectOfXML()] restaure les propriétés de l'objet
 lparameters ;
-  tcXML as string; && {en} XML produced by cXMLofObject() {fr} XML produit par cXMLofObject()
-, toResult as object; && [NewObject(class, classlib)] {en} Object to populate {fr} Objet à peupler
-, tcResult as string; && @ {en} Cumulative result {fr} Résultat (cumulatif)
+  tcXML    as String; && {en} XML produced by cXMLofObject() {fr} XML produit par cXMLofObject()
+, toResult as Object; && [NewObject(class, classlib)] {en} Object to populate {fr} Objet à peupler
+, tcResult as String; && @ {en} Cumulative result {fr} Résultat (cumulatif)
 , llObject as Boolean; && {en} an object was passed {fr} Un objet a été passé
-, llFIC as Boolean; && {en} object derives from a FoxinCloud class {fr} L'objet a d'une classe FoxinCloud
-, llChild as Boolean; && {en} object has direct child(ren) {fr} L'objet a des objets enfants
-, liChild as Integer; && @ {en} Index of current child object {fr} Index de l'objet enfant courant
-, loChild as collection; && {en} Child objects XML {fr} XML des objets enfants
+, llFIC    as Boolean; && {en} object derives from a FoxinCloud class {fr} L'objet a d'une classe FoxinCloud
+, llChild  as Boolean; && {en} object has direct child(ren) {fr} L'objet a des objets enfants
+, liChild  as Integer; && @ {en} Index of current child object {fr} Index de l'objet enfant courant
+, loChild  as Collection; && {en} Child objects XML {fr} XML des objets enfants
 
 local llResult as Boolean;
-, lcResult as string;
+, lcResult as String;
 , laProp[1], lcProp, llProp;
 , lcType, luValue, laValue[1];
 , lcFile;
@@ -2453,7 +2506,7 @@ for each lcProp in laProp
 	case m.lcType == 'C'
 
 		&& {fr} la valeur est déjà dans le bon type
-		addproperty(;
+		addProperty(;
 			  m.toResult;
 			, m.lcProp;
 			, m.luValue;
@@ -2473,14 +2526,14 @@ for each lcProp in laProp
  		aClear(@m.laValue)
  		restore from (m.lcFile) additive
  		delete file (m.lcFile)
- 		addproperty(m.toResult, m.lcProp + textmerge(iif(alen(m.laValue, 2) > 0;
+ 		addProperty(m.toResult, m.lcProp + textmerge(iif(alen(m.laValue, 2) > 0;
  				, '[<<Alen(m.laValue, 1)>>, <<Alen(m.laValue, 2)>>]';
  				, '[<<Alen(m.laValue)>>]';
  				)))
  		acopy(m.laValue, m.toResult.&lcProp)
 
 	case m.lcType != 'O'
-		addproperty(;
+		addProperty(;
 			  m.toResult;
 			, m.lcProp;
 			, uValue(m.luValue, m.lcType);
@@ -2508,7 +2561,7 @@ for each lcProp in laProp
 			exit
 		endif
 		llResult = (.F.;
-			or addproperty(;
+			or addProperty(;
 				  m.toResult;
 				, m.lcProp;
 				, m.luValue;
@@ -2524,12 +2577,12 @@ endproc
 * ========================================
 procedure objectOfXML_colItems as Boolean && {en} restores collection items from XML built by cXMLofObject() {fr} restaure les éléments d'une collection d'après le XML de cXMLofObject()
 lparameters ;
-  tcXML as string; && {en} XML produced by cXMLofObject() {fr} XML produit par cXMLofObject()
-, toResult as object; && {en} Collection Object to populate {fr} Objet Collection à peupler
-, tcResult as string; && @ {en} Cumulative result {fr} Résultat (cumulatif)
+  tcXML as String; && {en} XML produced by cXMLofObject() {fr} XML produit par cXMLofObject()
+, toResult as Object; && {en} Collection Object to populate {fr} Objet Collection à peupler
+, tcResult as String; && @ {en} Cumulative result {fr} Résultat (cumulatif)
 , llChild as Boolean; && [compute] {en} object has direct child(ren) {fr} L'objet a des objets enfants
 , liChild as Integer; && @ [compute] {en} Index of current child object {fr} Index de l'objet enfant courant
-, loChild as collection; && [compute] {en} Child objects XML {fr} XML des objets enfants
+, loChild as Collection; && [compute] {en} Child objects XML {fr} XML des objets enfants
 
 local llChild_ as boolean, lnChild as Integer
 
@@ -2629,28 +2682,28 @@ procedure objectOfXML_Test && {en} objectOfXML() unit test {fr} test unitaire de
 * {fr} CLEAR ALL
 
 local loTest as abUnitTest of abDev.prg;
-, loObj as collection;
-, lcResult as string;
+, loObj as Collection;
+, lcResult as String;
 
 loTest = newobject('abUnitTest', 'abDev.prg')
 
 loObj = createobject('Collection')
 
-addproperty(m.loObj, 'string', 'testValue')
+addProperty(m.loObj, 'string', 'testValue')
 m.loObj.add('testItem1', 'testItem1')
 m.loObj.add('testItem2', 'testItem2')
 
-addproperty(m.loObj, 'object', createobject('Collection'))
-addproperty(m.loObj.object, 'string', 'testValue')
+addProperty(m.loObj, 'object', createobject('Collection'))
+addProperty(m.loObj.object, 'string', 'testValue')
 m.loObj.object.add('testItem1', 'testItem1')
 m.loObj.object.add(CreateObject('custom'), 'testItem2') && {fr} m.loObj.object.add('testItem2', 'testItem2')
 
-addproperty(m.loObj.object, 'object', createobject('Custom'))
-addproperty(m.loObj.object.object, 'string', 'testValue')
+addProperty(m.loObj.object, 'object', createobject('Custom'))
+addProperty(m.loObj.object.object, 'string', 'testValue')
 
-addproperty(m.loObj.object.object, 'object', createobject('Empty'))
-addproperty(m.loObj.object.object.object, 'string', 'testValue')
-addproperty(m.loObj.object.object.object, 'array[2]')
+addProperty(m.loObj.object.object, 'object', createobject('Empty'))
+addProperty(m.loObj.object.object.object, 'string', 'testValue')
+addProperty(m.loObj.object.object.object, 'array[2]')
 m.loObj.object.object.object.array[1] = 'el1'
 m.loObj.object.object.object.array[2] = 2.5
 
@@ -2687,11 +2740,11 @@ define class objectOfXML_Test_towBus as custom && 2015-03-19 http://support.west
 function oObjPropsPublic && {fr} objet avec les propriétés publiques d'un autre objet
 lparameters oObj
 
-local Result as object;
+local Result as Object;
 , success as Boolean;
 , aProp[1];
 , aPropRO[1];
-, cProp as string;
+, cProp as String;
 
 Result = .null.
 if vartype(m.oObj) == 'O' and aMembers(aProp, m.oObj, 0, 'G') > 0
@@ -2701,7 +2754,7 @@ if vartype(m.oObj) == 'O' and aMembers(aProp, m.oObj, 0, 'G') > 0
 		 or PEMstatus(m.oObj, m.cProp, 1); && {fr} Read-only
 		 or m.cProp == 'NAME';
 		 )
-			success = addproperty(m.Result, m.cProp, evaluate('m.oObj.' + m.cProp))
+			success = addProperty(m.Result, m.cProp, evaluate('m.oObj.' + m.cProp))
 			assert m.success
 		endif
 	endfor
@@ -2718,9 +2771,9 @@ return chrtran(strtran(m.tcObjAddr, '->', '.'), ' ', '')
 function oPropsDefault && {fr} règle les propriétés d'un objet aux valeur par défaut définies par un autre objet
 lparameters oTrgt, oDefault
 
-local Result as object;
-, aProp[1] as string;
-, cProp as string;
+local Result as Object;
+, aProp[1] as String;
+, cProp as String;
 , uProp as Variant;
 
 Result = m.oTrgt
@@ -2728,7 +2781,7 @@ if vartype(m.Result) == 'O' and vartype(m.oDefault) == 'O' and aMembers(aProp, m
 	for each cProp in m.aProp
 		uProp = evaluate('m.oDefault.' + m.cProp)
 		if !lProperty(m.oTrgt, m.cProp) or vartype(evaluate('m.oTrgt.' + m.cProp), .t.) # vartype(m.uProp, .t.)
-			addproperty(m.oTrgt, m.cProp, m.uProp)
+			addProperty(m.oTrgt, m.cProp, m.uProp)
 		endif
 	endfor
 endif
@@ -2739,9 +2792,9 @@ return m.Result
 procedure oPropsDefault_Test && {fr} test unitaire de oPropsDefault()
 
 local loTest as abUnitTest of abDev.prg;
-, oTrgt as object;
-, oDefault as object;
-, oResult as object;
+, oTrgt as Object;
+, oDefault as Object;
+, oResult as Object;
 
 loTest = newobject('abUnitTest', 'abDev.prg')
 
@@ -2755,7 +2808,7 @@ return m.loTest.Result()
 endproc
 
 * -----------------------------------------
-function ab_Empty_Object_PropertyList as object && {fr} ga_Empty_Object_PropertyList() et retourne l'objet créé
+function ab_Empty_Object_PropertyList as Object && {fr} ga_Empty_Object_PropertyList() et retourne l'objet créé
 lparameters	;
   properties; && {fr} up to 16 coma-separated properties
 , t01,t02,t03,t04,t05,t06,t07,t08,t09,t10,t11,t12,t13,t14,t15,t15,t16
@@ -2774,12 +2827,12 @@ endfunc
 procedure ab_Empty_Object_PropertyList_Test && {fr} test unitaire de ab_Empty_Object_PropertyList()
 
 local loTest as abUnitTest of abDev.prg;
-, oResult as object;
+, oResult as Object;
 
 loTest = newobject('abUnitTest', 'abDev.prg')
 
 oResult = createobject('Empty')
-addproperty(m.oResult, 'test', 1)
+addProperty(m.oResult, 'test', 1)
 
 loTest.Test(m.oResult, 'test', 1) && 0,1 ms
 
@@ -2787,7 +2840,7 @@ return m.loTest.Result()
 endproc
 
 * -----------------------------------------
-function ab_Collection_ZeroBased_Object as object && {fr} ga_Collection_ZeroBased_Object() et retourne l'objet créé
+function ab_Collection_ZeroBased_Object as Object && {fr} ga_Collection_ZeroBased_Object() et retourne l'objet créé
 
 local obj
 
@@ -2861,19 +2914,19 @@ return aevents(aa, m.oSrce) > 0;
 endfunc
 
 * -----------------------------------------
-function aMethod as string && {fr} Méthodes d'un objet
+function aMethod as String && {fr} Méthodes d'un objet
 lparameters ;
-  aMethod as string; && @ {en} Result Array
-, oSrce as object; && {en} Object to be analyzed
+  aMethod as String; && @ {en} Result Array
+, oSrce as Object; && {en} Object to be analyzed
 , lEventsNo as Boolean; && [.F.]
-, cFlags as string; && ['']
+, cFlags as String; && ['']
 
 external array aMethod
 
 local nMethod as integer; && {fr} Number of methods found
 , nMember as integer;
 , iMember as integer;
-, cTypes as string;
+, cTypes as String;
 
 nMethod = 0
 nMember = aMembers(;
@@ -2901,17 +2954,17 @@ return m.nMethod
 endfunc
 
 * -----------------------------------------
-function cPEMcased as string && {fr} Nom de Propriété, Evénement ou Méthode avec la casse définie dans _MemberData
+function cPEMcased as String && {fr} Nom de Propriété, Evénement ou Méthode avec la casse définie dans _MemberData
 lparameters ;
   oSrce as awFrm of aw.vcx;
-, cPEM as string;
+, cPEM as String;
 , oXMLDOM as MSXML.DOMdocument && [CreateObject('MSXML.DOMdocument')]
 
-local cPEMcased as string;
-, cPEM_ as string;
-, cXML as string;
-, laClass[1] as string;
-, cClass as string;
+local cPEMcased as String;
+, cPEM_ as String;
+, cXML as String;
+, laClass[1] as String;
+, cClass as String;
 , lClass as Boolean;
 , lPEMcased as Boolean;
 , oPEMcased as MSXML.IXMLDOMNode;
@@ -2984,7 +3037,7 @@ procedure cPEMcased_Test && {fr} test unitaire de cPEMcased()
 local loTest as abUnitTest of abDev.prg;
 , oXMLDOM as MSXML.DOMdocument; && [CreateObject('MSXML.DOMdocument')]
 , oSrce as awFrm of aw.vcx;
-, cX as string;
+, cX as String;
 , oDefault as abSet of abDev.prg;
 
 loTest = newobject('abUnitTest', 'abDev.prg')
@@ -3048,11 +3101,11 @@ oForm = oFormIn(m.oControl)
 
 if Vartype(m.oForm) == 'O'
 	oPxOf1Fx = CreateObject('Empty')
-	AddProperty(m.oPxOf1Fx, 'x', Iif(Empty(m.oForm.ScaleMode); && {en} Applies To: Form | _SCREEN | ToolBar && 2016-10-31 thn -- {FiC V 2.23.0-beta.1} {en} added for Foxels support
+	addProperty(m.oPxOf1Fx, 'x', Iif(Empty(m.oForm.ScaleMode); && {en} Applies To: Form | _SCREEN | ToolBar && 2016-10-31 thn -- {FiC V 2.23.0-beta.1} {en} added for Foxels support
 			, nPixOfFox(1, .F., m.oForm.FontName, m.oForm.FontSize, coFontStyle(m.oForm)); && foxels
 			, 1; && pixels
 			))
-	AddProperty(m.oPxOf1Fx, 'y', Iif(Empty(m.oForm.ScaleMode); && {en} Applies To: Form | _SCREEN | ToolBar && 2016-10-31 thn -- {FiC V 2.23.0-beta.1} {en} added for Foxels support
+	addProperty(m.oPxOf1Fx, 'y', Iif(Empty(m.oForm.ScaleMode); && {en} Applies To: Form | _SCREEN | ToolBar && 2016-10-31 thn -- {FiC V 2.23.0-beta.1} {en} added for Foxels support
 			, nPixOfFox(1, .T., m.oForm.FontName, m.oForm.FontSize, coFontStyle(m.oForm)); && foxels
 			, 1; && pixels
 			))

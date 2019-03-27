@@ -3178,8 +3178,7 @@ lcResult = ''
 llResult = vartype(m.tcField) == 'C'
 assert m.llResult message cAssertMsg(textmerge([Nom de champ invalide : <<cLitteral(m.tcField)>>]))
 if m.llResult
-*	tcField = cVFPName(m.tcField, 10)
-	tcField = Upper(Alltrim(m.tcField)) && 2016-01-22 thn -- {en} long field names - eg see cCursorSchema()
+	tcField = Upper(Alltrim(m.tcField)) && 2016-01-22 thn -- {en} long field names - eg see cCursorSchema() && cVFPName(m.tcField, 10)
 
 	llResult = vartype(m.tcType) == 'C'
 	if m.llResult
@@ -3189,7 +3188,7 @@ if m.llResult
 	assert m.llResult message cAssertMsg(textmerge([Type de champ non supporté par VFP : <<cLitteral(m.tcType)>>]))
 	if m.llResult
 
-		lcResult = c2Words(m.tcField, space(1), m.tcType)
+		lcResult = Trim(m.tcField + ' ' + m.tcType)
 
 		if !m.tcType $ VFP9_FIELD_TYPES_FIXED_LEN and vartype(m.tuLen) $ 'CN'
 
@@ -3206,7 +3205,7 @@ if m.llResult
 				lcDec = iif(val(m.lcDec) = 0 and !m.tcType == 'B', '', m.lcDec)
 			endif
 
-			lcResult = textmerge([<<m.lcResult>>(<<c2Words(m.lcLen, ',', m.lcDec)>>)])
+			lcResult = m.lcResult + m.lcLen + Iif(Empty(m.lcLen) or Empty(m.lcDec), '', ',') + m.lcDec
 		endif
 
 		lcResult = lcResult + textmerge([];
@@ -8559,7 +8558,7 @@ if m.this.lResult
 		* {fr} Si remplacement sans clé unique dans la table destination
 		if m.tlReplace;
 		 and !this.oResult.lPCtag;
-		 and m.tnRecs = 0
+		 and Empty(m.tnRecs)
 
 			* ==============
 			* {fr} Ajouter tout simplement
@@ -8609,10 +8608,9 @@ if m.this.lResult
 				try
 
 					* {fr} Si clé primaire non automatique, chercher l'enregistrement correspondant dans la table destination
-					llReplace = this.oResult.lPCtag;
-						and iif(this.oResult.lcTag;
+					llReplace = this.oResult.lPCtag and iif(this.oResult.lcTag;
 							, seek(evaluate(m.lcPCexpMem), m.tcAliasDest, m.lcPCtag);
-							, seek(evaluate(m.lcPexpMem), m.tcAliasDest, m.lcPtag);
+							, seek(evaluate(m.lcPexpMem ), m.tcAliasDest, m.lcPtag);
 							)
 					llInsert = not m.llReplace
 

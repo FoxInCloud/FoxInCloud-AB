@@ -350,216 +350,6 @@ return ICase(;
 	wlAJAX(@m.loAJAX), m.loAJAX.nLastKey,;
 	0;
 	)
-
-* =============================================================
-function wGetColor && {fr} GetColor() _SANS RETOUR MODAL_ en mode LAN ou Web
-&& _MODAL_ GetColor():
-&& {en} - form method: use thisForm.wGetColor()
-&& {en} - standalone procedure or function: NOT SUPPORTED
-lparameters nDefaultColorNumber
-
-LOCAL lnParm
-lnParm = Pcount()
-
-IF wlLAN()
-	return ICase(;
-		m.lnParm = 0, 	GetColor(),;
-										GetColor(m.nDefaultColorNumber);
-	)
-ELSE
-	
-	return 0 && {fr} NOT SUPPORTED
-ENDIF
-
-* =============================================================
-function wGetPict && {fr} GetPict() _SANS RETOUR MODAL_ en mode LAN ou Web
-&& _MODAL_ GetPict():
-&& {en} - form method: use thisForm.wGetPict()
-&& {en} - standalone procedure or function: NOT SUPPORTED
-lparameters cFileExtensions, cFileNameCaption, cOpenButtonCaption
-
-LOCAL lnParm
-lnParm = Pcount()
-
-IF wlLAN()
-	return ICase(;
-		m.lnParm = 0, 	GetPict(),;
-		m.lnParm = 1, 	GetPict(m.cFileExtensions),;
-		m.lnParm = 2, 	GetPict(m.cFileExtensions, m.cFileNameCaption),;
-										GetPict(m.cFileExtensions, m.cFileNameCaption, m.cOpenButtonCaption);
-	)
-ELSE
-
-	return 0 && {fr} NOT SUPPORTED
-ENDIF
-
-* =============================================================
-function wGetFile && {fr} GetFile() _SANS RETOUR MODAL_ en mode LAN ou Web
-&& _MODAL_ GetFile():
-&& {en} - form method: use thisForm.wGetFile()
-&& {en} - standalone procedure or function: NOT SUPPORTED
-lparameters cFileExtensions, cText, cOpenButtonCaption, nButtonType, cTitleBarCaption
-
-LOCAL lnParm
-lnParm = Pcount()
-
-IF wlLAN()
-	return ICase(;
-		m.lnParm = 0, 	GetFile(),;
-		m.lnParm = 1, 	GetFile(m.cFileExtensions),;
-		m.lnParm = 2, 	GetFile(m.cFileExtensions, m.cText),;
-		m.lnParm = 3, 	GetFile(m.cFileExtensions, m.cText, m.cOpenButtonCaption),;
-		m.lnParm = 4, 	GetFile(m.cFileExtensions, m.cText, m.cOpenButtonCaption, m.nButtonType),;
-										GetFile(m.cFileExtensions, m.cText, m.cOpenButtonCaption, m.nButtonType, m.cTitleBarCaption);
-	)
-ELSE
-
-	return 0 && {fr} NOT SUPPORTED
-ENDIF
-
-* =============================================================
-function wLocFile && {fr} LocFile() _SANS RETOUR MODAL_ en mode LAN ou Web
-&& _MODAL_ LocFile():
-&& {en} - form method: use thisForm.wLocFile()
-&& {en} - standalone procedure or function: NOT SUPPORTED
-lparameters cFileName, cFileExtensions, cFileNameCaption
-
-LOCAL lnParm
-lnParm = Pcount()
-
-IF wlLAN()
-	return ICase(;
-		m.lnParm = 1, 	LocFile(m.cFileName),;
-		m.lnParm = 2, 	LocFile(m.cFileName, m.cFileExtensions),;
-										LocFile(m.cFileName, m.cFileExtensions, m.cFileNameCaption);
-	)
-ELSE
-
-	return '' && {fr} NOT SUPPORTED
-ENDIF
-
-* =============================================================
-function wPutFile && {fr} PutFile() _SANS RETOUR MODAL_ en mode LAN ou Web
-&& _MODAL_ PutFile():
-&& {en} - form method: use thisForm.wPutFile()
-&& {en} - standalone procedure or function: NOT SUPPORTED
-lparameters cCustomText, cFileName, cFileExtensions
-
-LOCAL lnParm
-lnParm = Pcount()
-
-IF wlLAN()
-	return ICase(;
-		m.lnParm = 0, PutFile(),;
-		m.lnParm = 1, PutFile(m.cCustomText),;
-		m.lnParm = 2, PutFile(m.cCustomText, m.cFileName),;
-									PutFile(m.cCustomText, m.cFileName, m.cFileExtensions);
-	)
-ELSE
-
-	return 0 && {fr} NOT SUPPORTED
-ENDIF
-
-* =============================================================
-function wInputBox && {fr} InputBox() _SANS RETOUR MODAL_ en mode LAN ou Web
-&& _MODAL_ InputBox():
-&& {en} - form method: use thisForm.wInputBox()
-&& {en} - standalone procedure or function: NOT SUPPORTED
-lparameters cInputPrompt, cDialogCaption, cDefaultValue, nTimeout, cTimeoutValue, cCancelValue
-
-LOCAL lnParm
-lnParm = Pcount()
-
-IF wlLAN()
-	return ICase(;
-		m.lnParm = 1, InputBox(m.cInputPrompt),;
-		m.lnParm = 2, InputBox(m.cInputPrompt, m.cDialogCaption),;
-		m.lnParm = 3, InputBox(m.cInputPrompt, m.cDialogCaption, m.cDefaultValue),;
-		m.lnParm = 4, InputBox(m.cInputPrompt, m.cDialogCaption, m.cDefaultValue, m.nTimeout),;
-		m.lnParm = 5, InputBox(m.cInputPrompt, m.cDialogCaption, m.cDefaultValue, m.nTimeout, m.cTimeoutValue),;
-									InputBox(m.cInputPrompt, m.cDialogCaption, m.cDefaultValue, m.nTimeout, m.cTimeoutValue, m.cCancelValue);
-	)
-ELSE
-	return 0 && {fr} NOT SUPPORTED
-ENDIF
-
-* =============================================================
-function wMessageBox && {en} MessageBox() _W/O MODAL return_ in LAN or Web mode {fr} MessageBox() _SANS RETOUR MODAL_ en mode LAN ou Web
-&& _MODAL_ MessageBox():
-&& {en} - form method: use thisForm.wMessageBox()
-&& {en} - standalone procedure or function: NOT SUPPORTED
-lparameters ;
-  eMessageText; && {en} see VFP MessageBox()
-, nDialogBoxType; && {en} see VFP MessageBox()
-, cTitleBarText; && {en} see VFP MessageBox()
-, nTimeout; && {en} see VFP MessageBox()
-, uParm5 && {en} in case of abnormal # of parameters wMessageBox('', eMessageText[, nDialogBoxType[, cTitleBarText[, nTimeout]]])
-
-eMessageText = Evl(m.eMessageText, '')
-
-LOCAL lnParm as Integer;
-, success as Boolean;
-, luTemp as Variant;
-, loForm as awFrmMB OF aw.vcx;
-, loAJAX as awAJAX of awServer.prg;
-, loAppHost as awAppHost of awAppHost.fxp;
-
-lnParm = Max(1, Pcount())
-
-IF Empty(m.eMessageText) && {en} abnormal call wMessageBox('', eMessageText[, nDialogBoxType[, cTitleBarText[, nTimeout]]])
-	lnParm = Max(1, m.lnParm - 1)
-	eMessageText = m.nDialogBoxType
-	nDialogBoxType = m.cTitleBarText
-	cTitleBarText = m.nTimeout
-	nTimeout = m.uParm5
-ENDIF
-
-IF m.lnParm >= 3 AND Vartype(m.nDialogBoxType) == 'C' && {fr} dans les anciennes versions de VFP, nDialogBoxType et cTitleBarText peuvent être inversés
-	luTemp = m.nDialogBoxType
-	nDialogBoxType = m.cTitleBarText
-	cTitleBarText = m.luTemp
-ENDIF
-
-if Vartype(m.cTitleBarText) == 'N' && {fr} wMessageBox(“Mon beau message avec TimeOut”, 64, 10000)
-	nTimeout = m.cTitleBarText
-	cTitleBarText = ''
-	lnParm = 4
-endif
-
-do case
-case wlLAN()
-
-	return ICase(;
-		m.lnParm = 1,	MessageBox(m.eMessageText),;
-		m.lnParm = 2,	MessageBox(m.eMessageText, m.nDialogBoxType),;
-		m.lnParm = 3,	MessageBox(m.eMessageText, m.nDialogBoxType, m.cTitleBarText),;
-									MessageBox(m.eMessageText, m.nDialogBoxType, m.cTitleBarText, m.nTimeout);
-		)
-
-case wlAJAX(@m.loAJAX) and wlAppHost(@m.loAppHost) && {fr} requête en cours
-
-	loForm = ICase(; && {en} see #DEFINE wMESSAGEBOX_CLASS in awPublic.h / awPublic_Override.h && 2017-02-02 thn -- {FiC V 2.24.0-beta.5} {en} deprecated by xxxServer.cFrmMBclass
-		m.lnParm = 1,	m.loAppHost.oForm(m.loAppHost.cFrmMBclass, .T., .T., m.eMessageText),;
-		m.lnParm = 2,	m.loAppHost.oForm(m.loAppHost.cFrmMBclass, .T., .T., m.eMessageText, m.nDialogBoxType),;
-		m.lnParm = 3,	m.loAppHost.oForm(m.loAppHost.cFrmMBclass, .T., .T., m.eMessageText, m.nDialogBoxType, m.cTitleBarText),;
-									m.loAppHost.oForm(m.loAppHost.cFrmMBclass, .T., .T., m.eMessageText, m.nDialogBoxType, m.cTitleBarText, m.nTimeout);
-		)
-	success = loClass(m.loForm, 'awFrmMB')
-	assert m.success or !Vartype(m.loForm) == 'O' message cAssertMsg(Textmerge(ICase(;
-		cLangUser() = 'fr',	[Votre classe d'écran de "MessageBox" '<<m.loForm.Class>>' devrait dériver de 'aw.vcx!awFrmMB'],; && copy-paste this line to add another language support
-												[Your "MessageBox" form class '<<m.loForm.Class>>' should derive from 'aw.vcx!awFrmMB']; && Default: English
-		)))
-
-	success = m.success and m.loAJAX.DialogAdd(m.loForm)
-
-otherwise
-	assert m.success message cAssertMsg(Textmerge(ICase(;
-		cLangUser() = 'fr',	[Aucune requête en cours, MessageBox('<<m.eMessageText>>') est ignoré],; && copy-paste this line to add another language support
-												[No pending user request, MessageBox('<<m.eMessageText>>') is ignored]; && Default: English
-		)))
-endcase
-
-return 0 && {fr} rester en numérique
 endfunc
 
 * =============================================================
@@ -837,6 +627,131 @@ return m.llResult
 endproc
 
 * =============================================================
+function wcPropSaveClean(wcPropSave) && {en} clean list of properties to save {fr} propriétés à sauvegarder nettoyées
+&& 2018-10-18 thn -- {FiC V 2.28.0-beta.9} {en} grid.members.wcPropSave* support: created
+&& 2019-01-30 thn -- {FiC V 2.28.1-beta.1} {en} created from a awAJAX method
+return Iif(Vartype(m.wcPropSave) == 'C';
+	, Alltrim(Chrtran(m.wcPropSave, "'"+'"[]', ''), ' ', ',', ';'); && {fr} au cas où l'utilisateur a tapé un ou des littéral(ux) - (eg GG)
+	, '';
+	)
+endfunc
+
+* ------------------------------------------------------------
+procedure wcPropSaveInit && {fr} liste les propriétés à sauvegarder dans .wcPropSave
+&& 2014-06-19 thn {fr} protected pour pouvoir être étendue en sous-classe
+&& 2018-10-18 thn -- {FiC V 2.28.0-beta.9} {en} grid.members.wcPropSave* support: created
+&& 2019-01-30 thn -- {FiC V 2.28.1-beta.1} {en} code moved from awAJAX.PropsSave_Init_Memb_Init_wcPropSave()
+LPARAMETERS ;
+  result as String; && @ {fr} résultat (cumulatif)
+, toMember as awTxt of aw.vcx; && {fr} Membre dont il faut sauvegarder les propriétés
+, toForm as awFrm of aw.vcx; && [.null.] {fr} Écran dont il faut sauvegarder les propriétés
+, tcBaseClass as String; && [m.toMember.baseClass] {fr} classe de base du membre
+, tlControl as Boolean; && [.F.] {fr} le membre est un contrôle
+
+#if .F. && 2018-10-18 thn -- {FiC V 2.28.0-beta.9} {en} grid.members.wcPropSave* support: to be refined
+properties in .wcPropSave:
+- native: save if listed here or in parent class
+- custom: save implicitely
+properties in .wcPropSaveNot:
+- native: don't save even if in some parent Class .wcPropSave
+- custom: don't save if defined in the
+#endif
+
+LOCAL llResult as Boolean;
+, oawClassBase as abRegExp;
+, laProp[1];
+, llPropSaveNot as Boolean, lcPropSaveNot as String;
+, lcClass as String, lcClass_ as String, lcClassLib as String, lcBaseClass as String;
+, llClassAW as Boolean, laPropAW[1];
+
+oawClassBase = abRegExp('';
+	+ 'aw('; && aw.vcx : {en} RegExp pattern for root FoxInCloud base classes
+	+ '\w{3}';
+	+ '|olepdfxc';
+	+ '|ole(?!pdf)\w+';
+	+ ')';
+	, 'i';
+	)
+
+toMember.wcPropSave = wcPropSaveClean(m.toMember.wcPropSave) && modify command awPublic.prg
+
+* {en} save user-defined properties defined in parent classes, except those defined in aw (managed individually below)
+lcClass = Lower(m.toMember.class)
+lcBaseClass = Lower(m.toMember.baseClass)
+if lProperty(m.toMember, 'wcPropSaveNot')
+	llPropSaveNot = .T.
+	toMember.wcPropSaveNot = wcPropSaveClean(m.toMember.wcPropSaveNot) && modify command awPublic.prg
+endif
+
+* assert !m.toMember.Baseclass == 'Container'
+&& 2018-10-18 thn -- {FiC V 2.28.0-beta.9} {en} grid.members.wcPropSave* support: remove properties in .wcPropSaveNot from .wcPropSave
+do while .T.
+	= m.llPropSaveNot;
+	 and varSet(@m.lcPropSaveNot, wcPropSaveClean(GetPem(m.lcClass, 'wcPropSaveNot'))); && modify command awPublic.prg
+	 and !Empty(m.lcPropSaveNot);
+	 and wcPropSaveNotEdit(m.toMember, m.lcPropSaveNot) && modify command awPublic.prg
+	lcClassLib = Lower(JustStem(GetPem(m.lcClass, 'classLibrary')))
+	llClassAW = (m.lcClassLib == Lower('aw') or m.lcClassLib == Lower('awPublic')) and m.oawClassBase.test(m.lcClass)
+	if m.llClassAW
+		AMembers(laPropAW, m.lcClass, 0, 'U')
+		exit
+	endif
+	lcClass_ = m.lcClass
+	lcClass = Lower(GetPem(m.lcClass, 'ParentClass'))
+	if m.lcClass == m.lcClass_ && parent class with same name -- not supported
+		assert .F. message cAssertMsg(Textmerge(ICase(;
+		cLangUser() = 'fr',	[La classe <<m.lcClass>> et sa classe parent ont le même nom -- cas non supporté],; && copy-paste this line to add another language support
+												[Class <<m.lcClass>> has parent class of the same same -- not supported]; && Default: English
+		)))
+		exit
+	endif
+	if m.lcClass == m.lcBaseClass && native class
+		exit
+	endif
+enddo
+
+llResult = .T.;
+ and (.F.; && {fr} Propriétés définies dans cet objet ou classe
+	or Empty(AMembers(laProp, m.toMember, 0, 'G+U')); && +B are parts of U && 'U': User-Defined (Extrinsic), 'B': Base properties using the AddProperty method, 'G': Public && 2018-03-23 thn -- {FiC V 2.26.2-beta.4} {en} we take Public only because the wPropGet|Set() mechanism does not work for protected properties of a sub-class
+	or m.llClassAW and Empty(aFilter(@m.laProp, @m.laPropAW,,, .T.));
+	or wcPropSaveEdit(m.toMember, @m.laProp); && modify command awPublic.prg
+ );
+ and (.F.;
+	or Empty(AMembers(laProp, m.toMember, 0, 'R')); && 'R': Read-only properties
+	or wcPropSaveEdit(m.toMember, @m.laProp, .T.); && .T. : remove && modify command awPublic.prg
+ );
+ and wcPropSaveEdit(; && modify command awPublic.prg
+	  m.toMember; && {en} never save these properties
+	,  'woForm'; && {en} FoxInCloud internal
+	+ ',waImgs';
+	+ ',wcPropSave';
+	+ ',wcPropSaveNot';
+	+ ',wcID';
+	+ ',wcHTML';
+	+ ',wlFormNoShow';
+	+ ',wlControlsEnable';
+	+ ',wlHTML5placeHolder';
+	+ ',wnScrollBars';
+	+ ',woHTMLgen';
+	;
+	+ ',SelStart'; && {en} native properties (probably found by FAA) that are not supported and not worth restoring
+	+ ',SelLength'; 
+	+ ',Name'; 
+	+ ',_memberdata'; 
+	+ ',__VFPSETUP'; 
+	+ Iif(Vartype(m.toForm) == 'O' and m.toForm.wBSlHTMLgen;
+	  , ', Left, Top, Width, Height' + Iif(m.tlControl or Evl(m.tcBaseClass, m.toMember.BaseClass) == 'Container', ', BorderColor, BackColor', '');
+	  , '';
+	  );
+	, .T.; && {fr} Remove
+	);
+ and .T.
+
+assert m.llResult
+return m.llResult
+endproc
+
+* =============================================================
 procedure wcPropSaveNotEdit as Boolean && (Web) {fr} Édite la liste de propriétés d'un objet à NE PAS sauvegarder (.wcPropSaveNot)
 lparameters ;
   toObj; && {fr} Objet dont la propriété .wcPropSaveNot est à éditer
@@ -929,7 +844,7 @@ IF m.success and (m.llArray or ALines(laProp, m.tuProps, 5, ',', ';') > 0) && tr
 	* {fr} Remplacer les propriétés à sauvegarder
 	lcPropSave = ''
 	FOR liProp = 1 to m.lnPropSave
-		lcPropSave = m.lcPropSave + Iif(!m.tlCheck or lProperty(m.toObj, laPropSave[m.liProp]), ', ' + laPropSave[m.liProp], '')
+		lcPropSave = m.lcPropSave + Iif(!m.tlCheck or lProperty(m.toObj, laPropSave[m.liProp]), ',' + laPropSave[m.liProp], '') && 2019-01-30 thn -- {FiC V 2.28.1-beta.1} {en} no space after coma for lightness AND modify command abOOP.prg > cXMLofObject()
 	ENDFOR
 	store Ltrim(Substr(m.lcPropSave, 2)) to ('m.toObj.' + m.tcPropSave)
 
@@ -1299,7 +1214,7 @@ lparameters ;
 && - .F.: modeless
 && - String:
 &&   {en} (added  on 2016-12-13, SUPPORTED IN WEB MODE ONLY) "call-back method name or address" relative to control where current user action has occurred
-&&   {fr} (ajouté le 2016-12-13, SUPPORTÉ SEULEMENT EN MODE WEB) "nom|adresse de la méthod call-back" relativement au contrôle où la dernière action utilisateur a eu lieu
+&&   {fr} (ajouté le 2016-12-13, SUPPORTÉ SEULEMENT EN MODE WEB) "nom|adresse de la méthod call-back" adresse relative au contrôle où la dernière action utilisateur a eu lieu
 
 LOCAL result as Variant; && {en} failure: .null., modeless: reference to form object, modal: .T.
 , loForm as awFrm of aw.vcx;
@@ -1356,7 +1271,6 @@ case wlLAN() && {fr} desktop mode
 	if m.llSCX && .scx
 		lcParms = wcParms(m.lnParms, .T.)
 		do form (m.tcForm) name loForm &lcParms noshow
-*		store m.loForm to (chrtran(JustStem(m.tcForm), ' -', '__')) && 2016-07-07 thn -- {FiC V 2.22.0-beta.1} {en} added for vh
 	else
 		lcParms = wcParms(m.lnParms)
 		loForm = CreateObject(m.tcForm &lcParms)
@@ -1515,13 +1429,17 @@ lparameters ;
 
 LOCAL luForm as awFrm of aw.vcx; && {en} LAN: reference to form, Web: success
 , llResult as Boolean;
+, llExt as Boolean;
 , lcParms as String;
 , loProcess as awProcess of awServer.prg; && {en} FoxInCloud request processing object
 , loAJAX as awAJAX of awServer.prg; && {en} FoxInCloud AJAX request processing Object
 
 luForm = .null.
 
-llResult = Vartype(m.tcForm) == 'C' and File(m.tcForm) and Lower(JustExt(m.tcForm)) == 'scx'
+llResult = .T.;
+ and ga_Type_IsChar(m.tcForm, .T.);
+ and varSet(@m.llExt, '.' $ m.tcForm); && 2019-01-31 thn -- {FiC V 2.28.1-beta.1} {en} wFormMaster() supports form classes
+ and (!m.llExt or File(m.tcForm) and Lower(JustExt(m.tcForm)) == 'scx')
 assert m.llResult message cAssertMsg(Textmerge(ICase(;
 	cLangUser() = 'fr',	[Le formulaire <<cL(m.tcForm)>> est invalide ou introuvable],; && copy-paste this line to add another language support
 											[Form <<cL(m.tcForm)>> is either invalid or can't be found]; && Default: English
@@ -1532,9 +1450,17 @@ case !m.llResult
 
 case wlLAN() && {en} desktop mode
 
-	lcParms = wcParms(Pcount() - 1, .T.)
-	DO FORM (m.tcForm) name luForm &lcParms
-		
+	if m.llExt
+		lcParms = wcParms(Pcount() - 1, .T.)
+		DO FORM (m.tcForm) name luForm &lcParms noshow
+	else && 2019-01-31 thn -- {FiC V 2.28.1-beta.1} {en} wFormMaster() supports form classes
+		lcParms = wcParms(Pcount() - 1)
+		luForm = CreateObject(m.tcForm &lcParms)
+	endif
+	if Vartype(m.luForm) == 'O'
+		luForm.Show(1) && 2019-01-31 thn -- {FiC V 2.28.1-beta.1} {en} as it's a master form, it's supposed to stay around
+	endif
+
 otherwise && {en} web mode
 
 	luForm = wlProcess(@m.loProcess) and wlAJAX(@m.loAJAX)
@@ -1545,10 +1471,9 @@ otherwise && {en} web mode
 	IF m.luForm
 	
 		lcParms = wcParms(Pcount() - 1)
-
 		luForm = .F.;
-			or m.loAJAX.Navigate(m.tcForm &lcParms);
-			or m.loAJAX.Navigate(Textmerge([wFormStandardPage.<<m.loProcess.cScriptMap>>?awForm=<<m.tcForm>>]) &lcParms)
+		 or m.loAJAX.Navigate(m.tcForm &lcParms);
+		 or m.loAJAX.Navigate(Textmerge([wFormStandardPage.<<m.loProcess.cScriptMap>>?awForm=<<m.tcForm>>]) &lcParms)
 
 		= !m.luForm and ParmsLit(@m.lcParms &lcParms) and m.loProcess.Warning(Textmerge(ICase(;
 			cLangUser() = 'fr',	[Le formulaire '<<m.tcForm>>' ne peut être affiché avec les paramètres <<m.lcParms>>],; && copy-paste this line to add another language support
@@ -1558,6 +1483,218 @@ otherwise && {en} web mode
 endcase
 
 return m.luForm
+endfunc
+
+* =============================================================
+function wMessageBox && {en} MessageBox() _W/O MODAL return_ in LAN or Web mode {fr} MessageBox() _SANS RETOUR MODAL_ en mode LAN ou Web
+&& _MODAL_ MessageBox():
+&& {en} - form method: use thisForm.wMessageBox()
+&& {en} - standalone procedure or function: NOT SUPPORTED
+lparameters ;
+  eMessageText; && {en} see VFP MessageBox()
+, nDialogBoxType; && {en} see VFP MessageBox()
+, cTitleBarText; && {en} see VFP MessageBox()
+, nTimeout; && {en} see VFP MessageBox()
+, uParm5 && {en} in case of abnormal # of parameters wMessageBox('', eMessageText[, nDialogBoxType[, cTitleBarText[, nTimeout]]])
+
+eMessageText = Evl(m.eMessageText, '')
+
+LOCAL lnParm as Integer;
+, success as Boolean;
+, luTemp as Variant;
+, loForm as awFrmMB OF aw.vcx;
+, loAJAX as awAJAX of awServer.prg;
+, loAppHost as awAppHost of awAppHost.fxp;
+
+lnParm = Max(1, Pcount())
+
+IF Empty(m.eMessageText) && {en} abnormal call wMessageBox('', eMessageText[, nDialogBoxType[, cTitleBarText[, nTimeout]]])
+	lnParm = Max(1, m.lnParm - 1)
+	eMessageText = m.nDialogBoxType
+	nDialogBoxType = m.cTitleBarText
+	cTitleBarText = m.nTimeout
+	nTimeout = m.uParm5
+ENDIF
+
+IF m.lnParm >= 3 AND Vartype(m.nDialogBoxType) == 'C' && {fr} dans les anciennes versions de VFP, nDialogBoxType et cTitleBarText peuvent être inversés
+	luTemp = m.nDialogBoxType
+	nDialogBoxType = m.cTitleBarText
+	cTitleBarText = m.luTemp
+ENDIF
+
+if Vartype(m.cTitleBarText) == 'N' && {fr} wMessageBox(“Mon beau message avec TimeOut”, 64, 10000)
+	nTimeout = m.cTitleBarText
+	cTitleBarText = ''
+	lnParm = 4
+endif
+
+do case
+case wlLAN()
+
+	return ICase(;
+		m.lnParm = 1,	MessageBox(m.eMessageText),;
+		m.lnParm = 2,	MessageBox(m.eMessageText, m.nDialogBoxType),;
+		m.lnParm = 3,	MessageBox(m.eMessageText, m.nDialogBoxType, m.cTitleBarText),;
+									MessageBox(m.eMessageText, m.nDialogBoxType, m.cTitleBarText, m.nTimeout);
+		)
+
+case wlAJAX(@m.loAJAX) and wlAppHost(@m.loAppHost) && {fr} requête en cours
+
+	loForm = ICase(;
+		m.lnParm = 1,	m.loAppHost.oForm(m.loAppHost.cFrmMBclass, .T., .T., m.eMessageText),;
+		m.lnParm = 2,	m.loAppHost.oForm(m.loAppHost.cFrmMBclass, .T., .T., m.eMessageText, m.nDialogBoxType),;
+		m.lnParm = 3,	m.loAppHost.oForm(m.loAppHost.cFrmMBclass, .T., .T., m.eMessageText, m.nDialogBoxType, m.cTitleBarText),;
+									m.loAppHost.oForm(m.loAppHost.cFrmMBclass, .T., .T., m.eMessageText, m.nDialogBoxType, m.cTitleBarText, m.nTimeout);
+		)
+	success = loClass(m.loForm, 'awFrmMB')
+	assert m.success or !Vartype(m.loForm) == 'O' message cAssertMsg(Textmerge(ICase(;
+		cLangUser() = 'fr',	[Votre classe d'écran de "MessageBox" '<<m.loForm.Class>>' devrait dériver de 'aw.vcx!awFrmMB'],; && copy-paste this line to add another language support
+												[Your "MessageBox" form class '<<m.loForm.Class>>' should derive from 'aw.vcx!awFrmMB']; && Default: English
+		)))
+
+	success = m.success and m.loAJAX.DialogAdd(m.loForm)
+
+otherwise
+	assert m.success message cAssertMsg(Textmerge(ICase(;
+		cLangUser() = 'fr',	[Aucune requête en cours, MessageBox('<<m.eMessageText>>') est ignoré],; && copy-paste this line to add another language support
+												[No pending user request, MessageBox('<<m.eMessageText>>') is ignored]; && Default: English
+		)))
+endcase
+
+return 0 && {fr} rester en numérique
+endfunc
+
+* =============================================================
+function wInputBox && {fr} InputBox() _SANS RETOUR MODAL_ en mode LAN ou Web
+&& _MODAL_ InputBox():
+&& {en} - form method: use thisForm.wInputBox()
+&& {en} - standalone procedure or function: NOT SUPPORTED
+lparameters cInputPrompt, cDialogCaption, cDefaultValue, nTimeout, cTimeoutValue, cCancelValue
+
+LOCAL lnParm
+lnParm = Pcount()
+
+IF wlLAN()
+	return ICase(;
+		m.lnParm = 1, InputBox(m.cInputPrompt),;
+		m.lnParm = 2, InputBox(m.cInputPrompt, m.cDialogCaption),;
+		m.lnParm = 3, InputBox(m.cInputPrompt, m.cDialogCaption, m.cDefaultValue),;
+		m.lnParm = 4, InputBox(m.cInputPrompt, m.cDialogCaption, m.cDefaultValue, m.nTimeout),;
+		m.lnParm = 5, InputBox(m.cInputPrompt, m.cDialogCaption, m.cDefaultValue, m.nTimeout, m.cTimeoutValue),;
+									InputBox(m.cInputPrompt, m.cDialogCaption, m.cDefaultValue, m.nTimeout, m.cTimeoutValue, m.cCancelValue);
+	)
+else
+	return .null. && {en} NOT SUPPORTED
+endif
+endfunc
+
+* =============================================================
+function wGetFile && {fr} GetFile() _SANS RETOUR MODAL_ en mode LAN ou Web
+&& _MODAL_ GetFile():
+&& {en} - form method: use thisForm.wGetFile()
+&& {en} - standalone procedure or function: NOT SUPPORTED
+lparameters cFileExtensions, cText, cOpenButtonCaption, nButtonType, cTitleBarCaption
+
+LOCAL lnParm
+lnParm = Pcount()
+
+IF wlLAN()
+	return ICase(;
+		m.lnParm = 0, 	GetFile(),;
+		m.lnParm = 1, 	GetFile(m.cFileExtensions),;
+		m.lnParm = 2, 	GetFile(m.cFileExtensions, m.cText),;
+		m.lnParm = 3, 	GetFile(m.cFileExtensions, m.cText, m.cOpenButtonCaption),;
+		m.lnParm = 4, 	GetFile(m.cFileExtensions, m.cText, m.cOpenButtonCaption, m.nButtonType),;
+										GetFile(m.cFileExtensions, m.cText, m.cOpenButtonCaption, m.nButtonType, m.cTitleBarCaption);
+	)
+ELSE
+	return .null. && {en} NOT SUPPORTED
+ENDIF
+endfunc
+
+* =============================================================
+function wGetPict && {fr} GetPict() _SANS RETOUR MODAL_ en mode LAN ou Web
+&& _MODAL_ GetPict():
+&& {en} - form method: use thisForm.wGetPict()
+&& {en} - standalone procedure or function: NOT SUPPORTED
+lparameters cFileExtensions, cFileNameCaption, cOpenButtonCaption
+
+LOCAL lnParm
+lnParm = Pcount()
+
+IF wlLAN()
+	return ICase(;
+		m.lnParm = 0, 	GetPict(),;
+		m.lnParm = 1, 	GetPict(m.cFileExtensions),;
+		m.lnParm = 2, 	GetPict(m.cFileExtensions, m.cFileNameCaption),;
+										GetPict(m.cFileExtensions, m.cFileNameCaption, m.cOpenButtonCaption);
+	)
+ELSE
+	return .null. && {en} NOT SUPPORTED
+ENDIF
+endfunc
+
+* =============================================================
+function wLocFile && {fr} LocFile() _SANS RETOUR MODAL_ en mode LAN ou Web
+&& _MODAL_ LocFile():
+&& {en} - form method: use thisForm.wLocFile()
+&& {en} - standalone procedure or function: NOT SUPPORTED
+lparameters cFileName, cFileExtensions, cFileNameCaption
+
+LOCAL lnParm
+lnParm = Pcount()
+
+IF wlLAN()
+	return ICase(;
+		m.lnParm = 1, 	LocFile(m.cFileName),;
+		m.lnParm = 2, 	LocFile(m.cFileName, m.cFileExtensions),;
+										LocFile(m.cFileName, m.cFileExtensions, m.cFileNameCaption);
+	)
+ELSE
+	return .null. && {en} NOT SUPPORTED
+ENDIF
+endfunc
+
+* =============================================================
+function wPutFile && {fr} PutFile() _SANS RETOUR MODAL_ en mode LAN ou Web
+&& _MODAL_ PutFile():
+&& {en} - form method: use thisForm.wPutFile()
+&& {en} - standalone procedure or function: NOT SUPPORTED
+lparameters cCustomText, cFileName, cFileExtensions
+
+LOCAL lnParm
+lnParm = Pcount()
+
+IF wlLAN()
+	return ICase(;
+		m.lnParm = 0, PutFile(),;
+		m.lnParm = 1, PutFile(m.cCustomText),;
+		m.lnParm = 2, PutFile(m.cCustomText, m.cFileName),;
+									PutFile(m.cCustomText, m.cFileName, m.cFileExtensions);
+	)
+ELSE
+	return .null. && {en} NOT SUPPORTED
+ENDIF
+endfunc
+
+* =============================================================
+function wGetColor && {fr} GetColor() _SANS RETOUR MODAL_ en mode LAN ou Web
+&& _MODAL_ GetColor():
+&& {en} - form method: use thisForm.wGetColor()
+&& {en} - standalone procedure or function: NOT SUPPORTED
+lparameters nDefaultColorNumber
+
+LOCAL lnParm
+lnParm = Pcount()
+
+IF wlLAN()
+	return ICase(;
+		m.lnParm = 0, 	GetColor(),;
+										GetColor(m.nDefaultColorNumber);
+	)
+ELSE
+	return .null. && {en} NOT SUPPORTED
+ENDIF
 endfunc
 
 * ---------------------------------------
@@ -1928,7 +2065,7 @@ lcPattern = ''; && modify command awOOPmenu > awMenu_cPatterns() && 2016-09-14 t
 + CRLF + '(^\bon\b\s+\bexit\b\s+\bpopu(p)?\b)	ON EXIT POPUP	V	P';
 + '';
 
-aLinesCols(@m.laPattern, Alltrim(m.lcPattern, CR, LF))
+aLinesCols(@m.laPattern, Alltrim(m.lcPattern, CR, LF), TABUL)
 tcCmdFunc = Alltrim(cInLineCommentStripped(m.tcCmdFunc), ' ', TABUL, CR, LF)
 
 WITH abRegExp() AS abRegExp OF abTxt.prg
@@ -2547,7 +2684,7 @@ procedure ControlSource_Assign(tcCS)
 
 * {fr} Ajouter l'alias du .ControlSource de la grille si non précisé
 this.ControlSource = Iif(NOT (Empty(m.tcCS) OR '.' $ m.tcCS OR Empty(m.this.Parent.RecordSource)) AND Used(m.this.Parent.RecordSource);
-	, m.this.Parent.RecordSource + '.' + m.tcCS;
+	, m.this.Parent.RecordSource + '.' + Alltrim(m.tcCS);
 	, m.tcCS;
 	)
 endproc
@@ -3013,9 +3150,10 @@ endproc
 *--------------------------------------------
 procedure Refresh_
 lparameters void_parameter_reminder_call_dodefault_after_your_code
-if GetPem(this, 'Caption') == GetPem(this.Class, 'Caption') and !Empty(this.Parent.ControlSource)
-	this.Caption = JustField(this.Parent.ControlSource)
+if !Empty(this.Parent.ControlSource) and (Empty(this.Class) or GetPem(this, 'Caption') == GetPem(this.Class, 'Caption'))
+	this.Caption = Chrtran(JustField(this.Parent.ControlSource), '_', ' ')
 endif
+endproc
 
 *--------------------------------------------
 *-- {en} [Internal, do not overload] PROTECTED or HIDDEN property getter {fr} [Interne, ne pas surcharger] Valeur d'une propriété PROTECTED ou HIDDEN

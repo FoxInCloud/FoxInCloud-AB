@@ -424,7 +424,7 @@ if m.llResult
 					copy file (m.tcFileSrce) to (m.lcFileDest) && {en} changes name to lower case
 					llResult = .t.
 
-*!*							llResult = Empty(CopyFile(m.tcFileSrce, m.tcFileDest, 0)) && {fr} preserves case but ... does not work!
+*!*							llResult = Empty(CopyFile(m.tcFileSrce, m.tcFileDest, 0)) && {en} preserves case but ... does not work!
 				endif
 
 			else

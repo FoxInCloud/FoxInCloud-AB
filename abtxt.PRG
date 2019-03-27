@@ -836,8 +836,9 @@ lparameters ;
 
 local lcResult as string;
 , llTronc as Boolean;
-, aa[1] as string;
-, s as string;
+, aa[1];
+, s as string, s_ as string;
+, cEOL as string;
 , lnData as integer;
 , lnData_ as integer;
 , lcLine as string;
@@ -850,11 +851,15 @@ tnTronc = iif(m.llTronc and between(m.tnTronc, 1, 255); && {fr} Maximum length o
 	, 255;
 	)
 
-if alines(m.aa, m.tcData) > 0
-
+if ALines(m.aa, m.tcData, 16) > 0 && 2019-01-29 thn -- {en} ', 16' added 
 	lnData_ = 0
+
 	for each s in m.aa
 
+		s_ = Trim(m.s, CR, LF)
+		cEOL = Strtran(m.s, m.s_)
+		s = m.s_
+		
 		s = iif(m.tlRTrim, rtrim(m.s), m.s)
 		s = iif(m.tlXML, cEscaped_XML(m.s), m.s)
 
@@ -862,9 +867,10 @@ if alines(m.aa, m.tcData) > 0
 		lnData_ = m.lnData_ + m.lnData
 
 		do case
+		case Empty(m.lnData)
+			lcLine = ''
 		case m.llTronc
 			lcLine = cLitteral_C_(iif(m.lnData > m.tnTronc, cTronc(m.s, m.tnTronc), m.s))
-
 		case m.lnData > 255 && {fr} limite d'un littéral caractère
 			lcLine = ''
 			do while m.lnData > 0
@@ -873,12 +879,11 @@ if alines(m.aa, m.tcData) > 0
 				lnData = m.lnData - 255
 			enddo
 			lcLine = substrc(m.lcLine, 2)
-
 		otherwise
 			lcLine = cLitteral_C_(m.s)
 		endcase
 
-		lcResult = c2Words(m.lcResult, '+Chr(13)+Chr(10)+', m.lcLine)
+		lcResult = c2Words(m.lcResult, '+', m.lcLine) + Strtran(Strtran(m.cEOL, CR, '+Chr(13)'), LF, '+Chr(10)')
 
 		if m.llTronc and m.lnData_ > m.tnTronc
 			exit
@@ -886,7 +891,7 @@ if alines(m.aa, m.tcData) > 0
 	endfor
 endif
 
-return m.lcResult
+return Evl(Ltrim(m.lcResult, '+'), '""')
 endfunc
 
 * -----------------------------------------------------------------
@@ -1078,8 +1083,13 @@ loTest = newobject('abUnitTest', 'abDev.prg')
 loTest.Test([" foo"], ' foo') && {fr} C
 loTest.Test(['" foo"'], '" foo"') && {fr} C
 loTest.Test('[' + ["foo"'] + ']+"' + "[bar]'" + '"', '"foo"' + "'[bar]'") && {fr} C
-loTest.Test('"' + replicate('a', 255) + '"+[a' + ["foo"'] + ']+"' + "[bar]'" + '"';
-	, replicate('a', 256) + '"foo"' + "'[bar]'") && {fr} C
+loTest.Test(; && {fr} C
+  '"' + replicate('a', 255) + '"+[a' + ["foo"'] + ']+"' + "[bar]'" + '"';
+, replicate('a', 256) + '"foo"' + "'[bar]'";
+)
+loTest.Test(["foo"+Chr(13)], 'foo' + CR) && {fr} C
+loTest.Test(["foo"+Chr(10)], 'foo' + LF) && {fr} C
+loTest.Test(["foo"+Chr(13)+Chr(10)], 'foo' + CR + LF) && {fr} C
 
 loTest.Test('2.5487', 2.5487) && {fr} N
 
@@ -3202,9 +3212,35 @@ lparameters tcChain && {fr} Chaîne
 return cCRto(m.tcChain, '')
 
 * ===================================================================
-function cCRSpace && {fr} chaîne oû les sauts de ligne sont remplacés par un Space(1)
+function cCRspace && {fr} chaîne oû les sauts de ligne sont remplacés par un espace
 lparameters tcChain && {fr} Chaîne
 return cCRto(m.tcChain, space(1))
+endfunc
+
+* ===================================================================
+function cSpaceFix && {fr} chaîne oû tous les mots sont séparés par un espace
+lparameters tcChain && {fr} Chaîne
+&& 2019-03-26 thn -- {FiC V 2.28.1-beta.4} {en} created
+local result as String, iWord as Integer
+result = ''
+for iWord = 1 to GetWordCount(Iif(ga_Type_IsChar(m.tcChain, .T.), m.tcChain, ''))
+	result = m.result + ' ' + GetWordNum(m.tcChain, m.iWord)
+endfor
+return Ltrim(m.result)
+endfunc
+
+* -----------------------------------------------------------------
+procedure cSpaceFix_Test
+
+local loTest as abUnitTest of abDev.prg
+loTest = newobject('abUnitTest', 'abDev.prg')
+
+loTest.test('define bar', 'define   bar')
+loTest.test('define bar', 'define ' + TABUL + '  bar')
+loTest.test('define()', TABUL + 'define()  ')
+
+return m.loTest.result()
+endproc
 
 * ===================================================================
 function cOuiNon(tl) && {fr} oui ou non selon une condition logique
@@ -4389,4 +4425,43 @@ for each lcChar in m.laChars
 endfor
 
 return Nvl(m.liResult, 0)
+endfunc
+
+* -------------------------------
+FUNCTION cFullName && {fr} Nom complet {en} Full Name
+LPARAMETERS ;
+  tcCivil;
+, tcFirst;
+, tcLast ;
+, tnPadR; && [none] {en} padded length
+
+local result as String;
+
+result = cWords(' ';
+  , Iif(ga_Type_IsChar(m.tcCivil), Alltrim(m.tcCivil), '');
+  , Iif(ga_Type_IsChar(m.tcFirst), Alltrim(m.tcFirst), '');
+  , Iif(ga_Type_IsChar(m.tcLast), Alltrim(m.tcLast), '');
+  )
+
+return Iif(ga_Type_IsPositiveInteger(m.tnPadR), Padr(m.result, m.tnPadR), m.result)
+endfunc
+
+* -------------------------------
+FUNCTION cRecipient && {fr} Destinataire d'un email {en} Recipient of an email
+LPARAMETERS ;
+  tcFirst;
+, tcLast ;
+, tcEmail;
+, tnPadR; && [none] {en} padded length
+
+local result as String;
+, lResult as Boolean
+
+result = cFullName('', m.tcFirst, m.tcLast)
+lResult = !Empty(m.result)
+result = Iif(lEmailAddrOK(m.tcEmail);
+	, m.result + Iif(m.lResult, ' <', '') + Alltrim(m.tcEmail) + Iif(m.lResult, '>', '');
+	, '';
+	)
+return Iif(ga_Type_IsPositiveInteger(m.tnPadR), Padr(m.result, m.tnPadR), m.result)
 endfunc

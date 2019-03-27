@@ -1168,8 +1168,8 @@ for liStack = 1 to m.lnStack
 		  , m.aa[m.liStack, Iif(m.tcInfo == 'N', 3, 2)];
 		  , cModuleInfo(Sys(16, m.liStack), m.tcInfo);
 		  );
-		+ Iif(m.tlLineNum;
-		  , ' (' + Transform(Evl(m.aa[m.liStack, 5], 'N/A')) + ')';
+		+ Iif(m.tlLineNum and !Empty(m.aa[m.liStack, 5]);
+		  , ' (' + cast(m.aa[m.liStack, 5] as M) + ')';
 		  , '';
 		  );
 		+ ''
@@ -3892,8 +3892,7 @@ local luResult;
 , llResult;
 , lcTypeSrce;
 , lcTypeDest;
-
-luResult = .null.
+, lcPoint, lcSeparator, lcChars;
 
 #if .f. && {fr} Vartype() VFP9
 	C && {fr} Character, Memo, Varchar, Varchar (Binary)
@@ -3910,10 +3909,10 @@ luResult = .null.
 	I && {fr} Integer && {fr} support additionnel
 #endif
 
-llResult = vartype(m.tcTypeDest) == 'C'
-if m.llResult
+luResult = .null.
+if Vartype(m.tcTypeDest) == 'C'
 	lcTypeDest = upper(alltrim(m.tcTypeDest))
-	llResult = len(m.lcTypeDest) = 1 and m.lcTypeDest $ 'CDGLNOQTUXYI'
+	llResult = Lenc(m.lcTypeDest) = 1 and m.lcTypeDest $ 'CDGLNOQTUXYI'
 endif
 assert m.llResult message cAssertMsg(textmerge("Spécification de type non supportée : <<cLitteral(m.tcTypeDest)>>"))
 if m.llResult
@@ -3934,7 +3933,6 @@ if m.llResult
 				if m.lcTypeDest $ 'YNI'
 
 					* {fr} Normaliser le point décimal éventuel, supprimer les séparateurs de milliers
-					local lcPoint, lcSeparator, lcChars
 					lcPoint = set("Point")
 					lcSeparator = set("Separator")
 					lcChars = m.lcSeparator + space(1) + set("Currency", 1) + '$'
@@ -3997,14 +3995,13 @@ if m.llResult
 			case m.lcTypeSrce == 'X'
 				luResult = uEmpty(m.lcTypeDest)
 
-			otherwise
-				luResult = .null.
 			endcase
 		endif
 	endif
 endif
 
 return m.luResult
+endfunc
 
 * ------------------------------------
 function uValue_TD && {fr} date[-heure] d'après une valeur quelconque
@@ -4050,11 +4047,13 @@ case varSet(@m.lCentury, 4 = len(getwordnum(m.tuValue, m.liYear, m.cMark))) and 
 	liMonth = getwordnum(m.cDate, m.liMonth, m.cMark)
 	liMonth = Min(Max(evl(Cast(Iif(Lenc(m.liMonth) > 2, rtrim(m.liMonth, '0'), m.liMonth) as I), month(date())), 1), 12) && {en} month
 	liDay = getwordnum(m.cDate, m.liDay, m.cMark)
-	liDay = Min(Max(evl(Cast(Iif(Lenc(m.liDay) > 2, rtrim(m.liDay, '0'), m.liDay) as I), day(date())), 1), ICase(; && {en} day
-		m.liMonth = 2, 28,;
-		InList(m.liMonth, 1, 3, 5, 7, 8, 10, 12), 31,;
-		30;
-		))
+	liDay = Min(Max(Evl(Cast(Iif(Lenc(m.liDay) > 2, Rtrim(m.liDay, '0'), m.liDay) as I), day(date())), 1), ICase(; && {en} day
+		m.liMonth = 2,; && https://support.west-wind.com/Thread5EH0IIR79.wwt#5EH0IIR7A
+			 Iif(Day(Date(m.liYear, 02, 28) + 1) = 29, 29, 28),; && leap year?
+		InList(m.liMonth, 1, 3, 5, 7, 8, 10, 12),;
+			31,;
+			30;
+			))
 
 	cTime = getwordnum(m.tuValue, 2)
 	
@@ -5947,7 +5946,8 @@ if .t.;
 		  )
 
 endif
-return .f. && {fr} impératif
+
+return .F. && {fr} impératif
 endfunc
 
 * ===================================================================
