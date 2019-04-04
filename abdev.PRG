@@ -2301,7 +2301,7 @@ local success as Boolean;
 lnSetting = vartype(m.tnSetting) == 'N'
 
 * {fr} If parameters are valid
-success = ga_Type_IsChar(m.tcSetting, .t.)
+success = Vartype(m.tcSetting) == 'C' and !Empty(m.tcSetting)
 assert m.success message cAssertMsg(textmerge([Invalid setting <<cLitteral(m.tcSetting)>>]))
 if m.success
 
@@ -2339,7 +2339,7 @@ if m.success
 				* {fr} If setting must be changed
 				if .f.;
 				 or m.llToggle;
-				 or lTrue(m.tlChangeAlways);
+				 or Vartype(m.tlChangeAlways) == 'L' and m.tlChangeAlways;
 				 or !luEqual(m.lvValueCur, m.tvValueNew,, .t.)
 
 					this.lOnOff = m.lcTypeCur == 'C' and (m.lvValueCur == 'ON' or m.lvValueCur == 'OFF')
@@ -3899,10 +3899,10 @@ local luResult;
 	D && {fr} Date
 	G && {fr} General
 	L && {fr} Logical
-	n && {fr} Numeric, Float, Double, or Integer
+	N && {fr} Numeric, Float, Double, or Integer
 	O && {fr} Object
 	Q && {fr} Blob, Varbinary
-	t && {fr} DateTime
+	T && {fr} DateTime
 	U && {fr} Unknown or variable does not exist
 	X && .NULL.
 	Y && {fr} Currency

@@ -772,7 +772,7 @@ llArray = type('tuTypes', 1) == 'A'
 
 return icase(;
 			not m.llResult, 0,;
-			M.llArray, min(acopy(tuTypes, taResult), 0) + alen(taResult),;
+			m.llArray, min(acopy(tuTypes, taResult), 0) + alen(taResult),;
 			vartype(m.tuTypes) == 'C', iif(;
 				',' $ m.tuTypes or ';' $ m.tuTypes or TABUL $ m.tuTypes or '|' $ m.tuTypes;
 									, alines(taResult, upper(m.tuTypes), 1+4, ',', ';', TABUL, '|'),;
@@ -1734,7 +1734,7 @@ if m.llResult
 
 		for liCol = 1 to min(m.lnCol, m.lnType)
 			for liRow = 1 to m.lnResult
-				taRow[m.liRow, m.liCol] = uValue(taRow[m.liRow, m.liCol], laType[m.liCol])
+				taRow[m.liRow, m.liCol] = Iif(Upper(laType[m.liCol]) == 'C', taRow[m.liRow, m.liCol], uValue(taRow[m.liRow, m.liCol], laType[m.liCol]))
 			endfor
 		endfor
 	endif

@@ -2158,17 +2158,20 @@ return CreateObject('awSets', @m.result)
 DEFINE CLASS awSets AS abSets of abDev.prg && {en} Sets FoxInCloud Application Serveur (FAS) Application Environment {fr} Règle l'environnement de l'application dans le Serveur d'Application FoxInCloud (FAS)
 
 protected ;
-  wlWeb;
-, wlLAN;
+  wlWeb, lWeb;
+, wlLAN, lLAN;
+, wlAutomation, lAutomation;
 , lDevMode;
-, lAutomation;
 , oConfigApp;
 , oAppConfig;
 
 wlWeb = .null. && {en} application runs in Web mode {fr} l'application fonctionne en mode Web
+lWeb  = .null. && {en} application runs in Web mode {fr} l'application fonctionne en mode Web
 wlLAN = .null. && {en} application runs in LAN (desktop) mode {fr} l'application fonctionne en mode LAN (desktop)
+lLAN  = .null. && {en} application runs in LAN (desktop) mode {fr} l'application fonctionne en mode LAN (desktop)
+wlAutomation = .null. && {en} App works in COM mode (this.wlWeb only) {fr} L'application fonctionne en mode COM (si this.wlWeb)
+lAutomation  = .null. && {en} App works in COM mode (this.wlWeb only) {fr} L'application fonctionne en mode COM (si this.wlWeb)
 lDevMode = .null. && {en} application runs in the IDE {fr} l'application fonctionne dans l'IDE de VFP
-lAutomation = .null. && {en} App works in COM mode (this.wlWeb only) {fr} L'application fonctionne en mode COM (si this.wlWeb)
 oConfigApp = .null. && {en} App configuration object - see xxxServer.prg!xxxAppConfig {fr} Objet de configuration de l'application - voir xxxServer.prg!xxxAppConfig
 oAppConfig = .null. && {en} App configuration object - see xxxServer.prg!xxxAppConfig {fr} Objet de configuration de l'application - voir xxxServer.prg!xxxAppConfig
 
@@ -2200,12 +2203,12 @@ lparameters;
 
 on error
 
-this.wlWeb = wlWeb()
-this.wlLAN = not m.this.wlWeb
-this.lDevMode = lDevMode()
-this.lAutomation = wlAutomation()
+store wlWeb() to this.wlWeb, this.lWeb
+store not m.this.wlWeb to this.wlLAN, this.lLAN
+store wlAutomation() to this.lAutomation, this.wlAutomation
+store lDevMode() to this.lDevMode
 
-* {fr} this.cProc = Strtran(m.this.cProc, cModuleInfo(Sys(16, Program(-1)-1), 'Address'))
+* this.cProc = Strtran(m.this.cProc, cModuleInfo(Sys(16, Program(-1)-1), 'Address'))
 && {fr} NewObject() l'ajoute automatiquement à Set("Procedure")
 && {fr} il faut le garder pour les définitions des classes de colonne et d'en-tête de colonne
 if !this.lAutomation
@@ -2221,7 +2224,7 @@ this.oSets = Iif(this.lDevMode or lCallingModule('awAdapter');
 	)
 
 if Vartype(this.oSets) # 'O'
-	assert .F. && 2016-08-19 thn -- {FiC V 2.22.0-beta.3} {en} should no longer execute && 2018-03-16 thn -- {FiC V 2.26.2-beta.3} {en} executes when starting server after FAA
+*	assert .F. && 2016-08-19 thn -- {FiC V 2.22.0-beta.3} {en} should no longer execute && 2018-03-16 thn -- {FiC V 2.26.2-beta.3} {en} executes when starting server after FAA
 	this.cDefa = Addbs(Sys(5)) + Curdir()
 	this.cPath = Set("Path")
 	this.cProc = Set("Procedure")
@@ -2247,25 +2250,26 @@ endif
 
 if m.this.lDevMode
 
-	#IF .F. && 2017-09-21 thn -- {FiC V 2.25.0-beta.9} {en} WIP
+	* save native _Screen.properties && 2017-09-21 thn -- {FiC V 2.25.0-beta.9} {en} added
+	#IF .T. && 2017-09-21 thn -- {FiC V 2.25.0-beta.9} {en} WIP
 	local aa[1], ab[1], ac[1], cProp, uProp && 2017-09-21 thn -- {FiC V 2.25.0-beta.9} {en} added 
 	AMembers(aa, _screen, 0, 'G+N') && native public
 	AMembers(ab, _screen, 0, 'G+R') && read-only
-	aLitteral(@m.ac, Upper(["forms", "formCount", "name", "tabindex", "macdesktop"])) && weird
+	aLitteral(@m.ac, Upper(["forms", "formCount", "name", "tabindex", "macdesktop"])) && unrestorable
 	this.oScreen = CreateObject('Empty')
 	if aFilter(@m.aa, @m.ab,,, .T.) > 0 and aFilter(@m.aa, @m.ac,,, .T.) > 0
 		for each cProp in m.aa
-			uProp = Evaluate('_Screen.' + m.cProp)
+			uProp = GetPem(_Screen, m.cProp)
 			if !Vartype(m.uProp) == 'O'
-				AddProperty(this.oScreen, m.cProp, m.uProp)
+				AddProperty(this.oScreen, m.cProp, Iif(PemStatus(_Screen, m.cProp, 0), m.uProp, .null.)) && .null. if set to class value
 			endif
 		endfor
 	endif
-	#ENDIF
-
+	#ELSE
 	this.cIcon = _Screen.Icon
 	this.cCaption = _Screen.Caption
 	this.iWindowState = _Screen.WindowState
+	#ENDIF
 
 	this.Set('ASSERTS', 'ON')
 	this.Set('CONSOLE', 'OFF')
@@ -2318,25 +2322,27 @@ IF m.this.lDevMode
 	pop menu _mSysMenu && set sysmenu to default
 	pop key
 
+	* restore native _Screen.properties && 2017-09-21 thn -- {FiC V 2.25.0-beta.9} {en} added
+	#IF .T.
+	local aa[1], cProp, uProp && 2017-09-21 thn -- {FiC V 2.25.0-beta.9} {en} added 
+	if Vartype(this.oScreen) == 'O' and AMembers(m.aa, this.oScreen) > 0
+		for each cProp in m.aa
+			do case
+			case !PemStatus(_Screen, m.cProp, 0) && not changed
+			case varSet(@m.uProp, GetPem(this.oScreen, m.cProp)) and IsNull(m.uProp)
+				_Screen.ResetToDefault(m.cProp)
+			case !luEqual(m.uProp, GetPem(_Screen, m.cProp))
+				AddProperty(_Screen, m.cProp, m.uProp)
+			endcase
+		endfor
+	endif
+	#ELSE
 	_Screen.Icon = m.this.cIcon
 	_Screen.Caption = m.this.cCaption
 	_Screen.WindowState = m.this.iWindowState
-
-	#IF .F. && 2017-09-21 thn -- {FiC V 2.25.0-beta.9} {en} WIP
-	local aa[1], cProp, uProp && 2017-09-21 thn -- {FiC V 2.25.0-beta.9} {en} added 
-	if AMembers(m.aa, this.oScreen) > 0
-		for each cProp in m.aa
-			uProp = Evaluate('this.oScreen.' + m.cProp)
-			if !luEqual(m.uProp, Evaluate('_Screen.' + m.cProp))
-				store m.uProp to ('_Screen.' + m.cProp)
-			endif
-		endfor
-	endif
 	#ENDIF && 2017-09-21 thn -- {FiC V 2.25.0-beta.9} {en} WIP
 
-	this.oISX = .null.
-
-	&& 2017-02-23 thn -- {FiC V 2.24.0-beta.10} {fr} added remove custom _screen properties added since .Init()
+	* remove custom _screen properties added since .Init() && 2017-02-23 thn -- {FiC V 2.24.0-beta.10} {fr} added
 	local aScreenProp[1], iScreenProp, cScreenProp
 	for iScreenProp = 1 to AMembers(m.aScreenProp, _Screen, 0, 'U')
 		cScreenProp = m.aScreenProp[m.iScreenProp]
@@ -2345,7 +2351,9 @@ IF m.this.lDevMode
 		endif
 	endfor
 
-	wait clear
+	this.oISX = .null.
+
+	WAIT CLEAR
 endif
 
 return DoDefault()

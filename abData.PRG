@@ -3199,13 +3199,15 @@ if m.llResult
 					m.tuLen,;
 					str(m.tuLen);
 				))
+
 			lcDec = ''
 			if m.tcType $ VFP9_FIELD_TYPES_WITH_DEC and Vartype(m.tuDec) $ 'CN'
 				lcDec = alltrim(iif(vartype(m.tuDec) = 'C', m.tuDec, str(m.tuDec)))
 				lcDec = iif(val(m.lcDec) = 0 and !m.tcType == 'B', '', m.lcDec)
 			endif
-
-			lcResult = m.lcResult + m.lcLen + Iif(Empty(m.lcLen) or Empty(m.lcDec), '', ',') + m.lcDec
+			
+			lcLen = m.lcLen + Iif(Empty(m.lcLen) or Empty(m.lcDec), '', ',') + m.lcDec
+			lcResult = m.lcResult + Iif(Empty(m.lcLen), '', '(' + m.lcLen + ')')
 		endif
 
 		lcResult = lcResult + textmerge([];
@@ -3226,6 +3228,7 @@ if m.llResult
 endif
 
 return m.lcResult
+endfunc
 
 * -----------------------------------------------------------------
 procedure cFieldExp_Test

@@ -1990,36 +1990,13 @@ return m.loTest.result()
 function lEmailAddrOK && {fr} Adresse courriel valide
 lparameters tcEmailAddr && {fr} Adresse courriel à valider
 
-local lceMailAddr, lnCar, llResult
+local abRegExp as abRegExp of abTxt.prg
 
-&& {fr} réécrire avec RegExp : "^([0-9a-zA-Z]+([-.=_+&])*[0-9a-zA-Z]+)*@([-0-9a-zA-Z]+[.])+[a-zA-Z]{2,6}$"
+return ga_Type_IsChar(m.tcEmailAddr, .T.);
+ and varSet(@m.abRegExp, abRegExp("^([0-9a-zA-Z]+([-.=_+&])*[0-9a-zA-Z]+)*@([-0-9a-zA-Z]+[.])+[a-zA-Z]{2,6}$"));
+ and abRegExp.test(m.tcEmailAddr)
 
-* {fr} Si l'adresse est non vide
-llResult = not empty(m.tcEmailAddr)
-if m.llResult
-	lceMailAddr = upper(alltrim(m.tcEmailAddr))
-
-	* {fr} Si l'adresse ne comporte que des caractères autorisés
-	for m.lnCar = 1 to lenc(m.lceMailAddr)
-		llResult = substr(m.lceMailAddr, m.lnCar, 1) $ "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ@.-_"
-		if not m.llResult
-			exit
-		endif
-	endfor
-	if m.llResult
-
-		* {fr} Si l'adresse comporter un "@" un un seul
-		llResult = occurs("@", m.lceMailAddr) = 1
-		if m.llResult
-
-			* {fr} Si l'adresse comporte au moins un point à droite de "@" (pour le nom de domaine)
-			lnCar = atc("@", m.lceMailAddr)
-			llResult = occurs('.', substr(m.lceMailAddr, m.lnCar + 1)) > 0
-		endif
-	endif
-endif
-
-return m.llResult
+endfunc
 
 * ===================================================================
 function cVFPNameSubstr && {fr} Nom VFP commençant à partir d'une position dans une chaîne
@@ -2799,16 +2776,16 @@ local loException as exception, llResult
 
 try
 
-	this.lDebug = lTrue(m.tlDebug)
+	this.lDebug = Vartype(m.tlDebug) == 'L' and m.tlDebug
 
 	* {fr} Si l'objet RegExp peut être créé
 	this.oRegExp = createobject("VBscript.RegExp")
-	llResult = vartype(m.this.oRegExp) == 'O'
-	if m.llResult
+	if vartype(m.this.oRegExp) == 'O'
 
 		this.IgnoreCase = m.this.IgnoreCase && {fr} cf. this.IgnoreCase_assign()
 		this.global = m.this.global && {fr} cf. this.Global_assign()
 		this.Multiline = m.this.Multiline && {fr} cf. this.Multiline_assign()
+		llResult = .T.
 	endif
 catch to loException
 	tcResult = cException(m.loException)

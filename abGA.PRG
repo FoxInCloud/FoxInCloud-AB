@@ -13,7 +13,7 @@
 * {en} This permission notice shall be entirely included in all copies or substantial portions of the Software
 * =====================================================
 * (c) Gregory Adam 
-* Last build: 04/10/2018 14:36:03 by Thierry Nivelet
+* Last build: 03/28/2019 13:38:36 by ThierryNivelet
 
 && ga_Collection
 * Gregory Adam 2010
@@ -3781,7 +3781,7 @@ endfunc
 function ga_Type_IsChar(s, needFilled)
 
 	return 	inlist(vartype(m.s), T_CHARACTER, T_MEMO) ;
-		and not(ga_Type_IsLogical(m.needFilled) and m.needFilled and empty(len(m.s)))
+		and not(vartype(m.needFilled) == T_LOGICAL and m.needFilled and empty(len(m.s)))
 	
 endfunc
 *_______________________________________________________________________________
