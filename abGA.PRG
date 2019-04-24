@@ -13,7 +13,7 @@
 * {en} This permission notice shall be entirely included in all copies or substantial portions of the Software
 * =====================================================
 * (c) Gregory Adam 
-* Last build: 03/28/2019 13:38:36 by ThierryNivelet
+* Last build: 04/18/2019 16:47:16 by ThierryNivelet
 
 && ga_Collection
 * Gregory Adam 2010
@@ -115,20 +115,11 @@ endfunc
 
 *_______________________________________________________________________________
 protected function Init()
-
-	local success
-	success = true
 	
-	do case
-	case !m.success
-	
-	case !DoDefault()
+	if !DoDefault()
 		assert false
-		success = false
-		
-	endcase
-
-	return m.success
+		return false
+	endif
 
 endfunc
 
@@ -2847,36 +2838,20 @@ function ga_String_SplitToArray(aa, naa, s, separator, nflags)
 
 	external array aa
 	
-	local success
-	success = true
-	
-	do case
-	case !m.success
-	
-	case pcount() < 5
-		assert false
-		success = false
+	local success, i, x, trimAll, stripEmpty, lowerCase
 
-	case !ga_Type_IsArray(@m.aa)
-		assert false
-		success = false
-	
-	case !ga_Type_IsChar(@m.s, false)
-		assert false
-		success = false
-	
-	case !ga_Type_IsChar(@m.separator, true)
-		assert false
-		success = false
-	
-	case !ga_Type_IsInteger(m.nflags)
-		assert false
-		success = false
-	
-	case empty(len(m.s))
+	if false;
+	 or pcount() < 5;
+	 or !ga_Type_IsArray(@m.aa);
+	 or !ga_Type_IsChar(@m.s, false);
+	 or !ga_Type_IsChar(@m.separator, true);
+	 or !ga_Type_IsInteger(@m.nflags);
+	 or empty(len(m.s));
+	 or false
 		naa = 0
+		assert false
 		
-	otherwise
+	else
 		naa = alines( ;
 					aa, ;
 					m.s, ;
@@ -2891,83 +2866,47 @@ function ga_String_SplitToArray(aa, naa, s, separator, nflags)
 						), ;
 					m.separator ;
 				)
-	endcase
+		success = true
+	endif
 	
-	local i, x
-	
-	do case
-	case !m.success
-	
-	** alines() only trims space chars()
-	case empty(bitand(m.nflags, GA_STRING_SPLIT_FLAG_ALLTRIM))
-	
-	case empty(bitand(m.nflags, GA_STRING_SPLIT_FLAG_STRIPEMPYELEMENTS))
+	trimAll = !empty(bitand(m.nflags, GA_STRING_SPLIT_FLAG_ALLTRIM)) && alines() only trims space chars()
+	stripEmpty = !empty(bitand(m.nflags, GA_STRING_SPLIT_FLAG_STRIPEMPYELEMENTS))
+	lowerCase = !empty(bitand(m.nflags, ga_STRING_SPLIT_FLAG_TOLOWERCASE))
+	if m.success and (m.trimAll or m.lowerCase)
 		for i = m.naa to 1 step -1
-			store ga_String_ALLTRIM_WhiteSpace(m.aa[m.i]) to aa[m.i]
-		endfor
-
-	otherwise
-	
-		for i = m.naa to 1 step -1
-			
-			store ga_String_ALLTRIM_WhiteSpace(m.aa[m.i]) to aa[m.i]
-			
-			if( empty(len(m.aa[m.i])) )
+			store ICase(;
+				m.trimAll and m.lowerCase,;
+					Lower(ga_String_ALLTRIM_WhiteSpace(m.aa[m.i])),;
+				m.trimAll,;
+					ga_String_ALLTRIM_WhiteSpace(m.aa[m.i]),;
+					lower(m.aa[m.i]);
+				) to aa[m.i]
+			if m.stripEmpty and empty(len(m.aa[m.i]))
 				=adel(aa, m.i)
 				naa = m.naa - 1
 			endif
 		endfor
-	endcase
-			
-	do case
-	case !m.success
+	endif
 	
-	case empty(bitand(m.nflags, ga_STRING_SPLIT_FLAG_TOLOWERCASE))
-	
-	otherwise
-	
+	if m.success and !empty(bitand(m.nflags, GA_STRING_SPLIT_FLAG_EVALELEMENTS))
 		for i = 1 to m.naa
-			store lower(m.aa[m.i]) to aa[m.i]
-		endfor
-	endcase
-	
-	do case
-	case !m.success
-	
-	case empty(bitand(m.nflags, GA_STRING_SPLIT_FLAG_EVALELEMENTS))
-	
-	otherwise
-		
-		for i = 1 to m.naa
-			
 			do case
 			case !m.success
 				exit
-			
 			case !ga_String_TryEval(@m.x, m.aa[m.i])
 				assert false
 				success = false
-			
 			otherwise
 				store m.x to aa[m.i]
-			
 			endcase
-			
 		endfor
-	endcase
+	endif
 	
-	do case
-	case !m.success
-	
-	case m.naa == alen(aa)
-	
-	otherwise
-		dime aa[ max(1, m.naa) ]
-	
-	endcase
+	if m.success and not m.naa == alen(aa)
+		dimension aa[max(1, m.naa)]
+	endif
 			
 	return m.success
-	
 endfunc
 
 *_______________________________________________________________________________

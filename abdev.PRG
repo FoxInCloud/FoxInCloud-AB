@@ -2178,7 +2178,7 @@ function aInLineCommentsStripped && {fr} Lignes de code sans commentaires de lig
 lparameters taCodeLines && @ {fr} Lignes de code
 external array taCodeLines
 
-local lnCodeLine, llResult, lnResult
+local lnResult, liResult, llResult
 lnResult = 0
 
 llResult = type('m.taCodeLines[1]') == 'C' and alen(m.taCodeLines, 2) = 0
@@ -2186,8 +2186,8 @@ assert m.llResult message program() + ' - Code Lines expected: ' + cLitteral(m.t
 if m.llResult
 
 	lnResult = alen(taCodeLines)
-	for m.lnCodeLine = 1 to m.lnResult
-		taCodeLines[m.lnCodeLine] = cInLineCommentStripped(taCodeLines[m.lnCodeLine])
+	for m.liResult = 1 to m.lnResult
+		taCodeLines[m.liResult] = cInLineCommentStripped(taCodeLines[m.liResult])
 	endfor
 endif
 
@@ -2492,47 +2492,10 @@ tcSetting = upper(alltrim(m.tcSetting))
 lcParm2 = alltrim(m.lcParm2, ' ', ',')
 
 local llResult as Boolean;
+, laResult[1], lnResult, liResult;
+, loResult as exception;
 , lcUnsupported;
 , lcUntested;
-, laResult[1];
-, lnResult;
-, liResult;
-, loResult as exception
-
-&& {fr} Reprocess && {fr} strange options
-
-lcUnsupported = ''; && 2015-11-04 thn TEXT ... ENDTEXT removed (should have been done much earlier)
-+ [Century, , 3] + CRLF;
-+ [Clock, , 1] + CRLF; && {fr} does not restore properly
-+ [Color] + CRLF; && {fr} Included for backward compatibility
-+ [Date, , 1] + CRLF;
-+ [Echo] + CRLF; && {fr} Included for backward compatibility
-+ [Fields, , 1] + CRLF;
-+ [Order] + CRLF; && {fr} unable to restore
-+ [Printer, , 2] + CRLF;
-+ [Printer, , 3] + CRLF;
-+ [Skip] + CRLF;
-+ [Status Bar] + CRLF; && {fr} Problem with space between 'Status' and 'Bar' ...
-+ [Topic, .T., 1] + CRLF; && {fr} unable to restore
-+ [View] + CRLF; && {fr} unable to restore
-
-
-lcUntested  = ''; && {fr} Untested sets && 2015-11-04 thn TEXT ... ENDTEXT removed (should have been done much earlier)
-+ [Help, , 1] + CRLF;
-+ [Help, , 2] + CRLF;
-+ [Help, , 3] + CRLF;
-+ [Key, , 1] + CRLF;
-+ [Key, , 2] + CRLF;
-+ [Textmerge, , 4] + CRLF;
-+ [Topic, , 1] + CRLF;
-+ [Step] + CRLF;
-+ [Display] + CRLF; && {fr} Included for backward compatibility
-+ [Filter] + CRLF;
-+ [Helpfilter] + CRLF;
-+ [Pdsetup] + CRLF;
-+ [Relation] + CRLF;
-
-&&	textmerge, , 1 && {fr} unable to restore - set textmerge delimiters to ...
 
 try && {fr} aLinesCols() may not be in scope
 
@@ -2541,9 +2504,43 @@ try && {fr} aLinesCols() may not be in scope
 		dimension laResult[m.lnResult, Alen(_screen.abSet_aSupported, 2)]
 		acopy(_screen.abSet_aSupported, laResult)
 	else
+
+		lcUnsupported = ''; && 2015-11-04 thn TEXT ... ENDTEXT removed (should have been done much earlier)
+		+ [Century, , 3] + CRLF;
+		+ [Clock, , 1] + CRLF; && {fr} does not restore properly
+		+ [Color] + CRLF; && {fr} Included for backward compatibility
+		+ [Date, , 1] + CRLF;
+		+ [Echo] + CRLF; && {fr} Included for backward compatibility
+		+ [Fields, , 1] + CRLF;
+		+ [Order] + CRLF; && {fr} unable to restore
+		+ [Printer, , 2] + CRLF;
+		+ [Printer, , 3] + CRLF;
+		+ [Skip] + CRLF;
+		+ [Status Bar] + CRLF; && {fr} Problem with space between 'Status' and 'Bar' ...
+		+ [Topic, .T., 1] + CRLF; && {fr} unable to restore
+		+ [View] + CRLF; && {fr} unable to restore
+
+		&& Reprocess && {en} strange options
+
+		lcUntested = ''; && {fr} Untested sets && 2015-11-04 thn TEXT ... ENDTEXT removed (should have been done much earlier)
+		+ [Help, , 1] + CRLF;
+		+ [Help, , 2] + CRLF;
+		+ [Help, , 3] + CRLF;
+		+ [Key, , 1] + CRLF;
+		+ [Key, , 2] + CRLF;
+		+ [Textmerge, , 4] + CRLF;
+		+ [Topic, , 1] + CRLF;
+		+ [Step] + CRLF;
+		+ [Display] + CRLF; && {fr} Included for backward compatibility
+		+ [Filter] + CRLF;
+		+ [Helpfilter] + CRLF;
+		+ [Pdsetup] + CRLF;
+		+ [Relation] + CRLF;
+
+		&&	textmerge, , 1 && {fr} unable to restore - set textmerge delimiters to ...
 		lnResult = aLinesCols(; && {fr} very long ! - to be optimized
 			  @m.laResult;
-			, upper(chrtran(cInLineCommentStripped(m.lcUnsupported + CRLF + m.lcUntested), space(1), ''));
+			, upper(chrtran(m.lcUnsupported + CRLF + m.lcUntested, space(1), ''));
 			, ',';
 			, 'CLC';
 			)
@@ -2552,10 +2549,11 @@ try && {fr} aLinesCols() may not be in scope
 		dimension _screen.abSet_aSupported[m.lnResult, Alen(laResult, 2)]
 		acopy(laResult, _screen.abSet_aSupported)
 	endif
-	for liResult = 1 to m.lnResult
 
-		llResult = not (m.tcSetting == m.laResult[m.liResult, 1] and m.lcParm2 == m.laResult[m.liResult, 3])
-		if not m.llResult
+	llResult = .T.
+	for liResult = 1 to m.lnResult
+		if m.tcSetting == m.laResult[m.liResult, 1] and m.lcParm2 == m.laResult[m.liResult, 3]
+			llResult = .F.
 			exit
 		endif
 	endfor
@@ -2566,6 +2564,7 @@ catch to loResult
 endtry
 
 return m.llResult
+endfunc
 
 * ------------------------------------
 hidden function destroy && {en} Restores setting to its original value
@@ -4115,28 +4114,27 @@ lparameters ;
 , tu2; && {fr} Valeur 2, par référence si Array
 , tlStrict; && [.F.] {fr} comparaison de chaînes stricte
 , tlCaseIgnore && [.F.] {fr} ignorer la casse
-tlStrict = lTrue(m.tlStrict)
-tlCaseIgnore = lTrue(m.tlCaseIgnore)
+
+tlCaseIgnore = Vartype(m.tlCaseIgnore) == 'L' and m.tlCaseIgnore
 
 local lcType1, lcType2
 
-lcType1 = type('tu1', 1)
-lcType1 = iif(m.lcType1 == 'A', m.lcType1, vartype(m.tu1))
+lcType1 = iif(type('tu1', 1) == 'A', 'A', vartype(m.tu1))
 tu1 = iif(m.lcType1 == 'C' and m.tlCaseIgnore, lower(m.tu1), m.tu1)
 
-lcType2 = type('tu2', 1)
-lcType2 = iif(m.lcType2 == 'A', m.lcType2, vartype(m.tu2))
+lcType2 = iif(type('tu2', 1) == 'A', 'A', vartype(m.tu2))
 tu2 = iif(m.lcType2 == 'C' and m.tlCaseIgnore, lower(m.tu2), m.tu2)
 
 return m.lcType1 == m.lcType2;
 	and	(m.lcType1 == 'X';
-			or icase(;
+			or ICase(;
 				m.lcType1 == 'O', luEqual_Object(m.tu1, m.tu2),;
 				m.lcType1 == 'A', laEqual(@m.tu1, @m.tu2),;
-				m.lcType1 == 'C' and not m.tlStrict, trim(m.tu1) == trim(m.tu2),;
+				m.lcType1 == 'C' and not (Vartype(m.tlStrict) == 'L' and m.tlStrict), trim(m.tu1) == trim(m.tu2),;
 			 	m.tu1 == m.tu2;
 			 	);
 		 	)
+endfunc
 
 * --------------------
 function luEqual_Object	&& {fr} Deux objets sont identiques
@@ -6146,24 +6144,24 @@ store m.value to ('m.obj.' + m.prop)
 endproc
 
 * ========================================
-procedure varStore(out, in) as Boolean && {fr} assigne une variable - alias de varSet()
-store m.in to out
+procedure varStore(tuVarOut, tuVarIn) as Boolean && {fr} assigne une variable - alias de varSet()
+store m.tuVarIn to tuVarOut
 endproc
 
 * =============================================
-procedure varSet(out, in) as Boolean && {fr} assigne une variable - alias de varStore()
-store m.in to out && {fr} http://blogs.msdn.com/b/calvin_hsia/archive/2004/12/14/301282.aspx - Calvin: the STORE command doesn't do as much as the "x=y" command. More in a future blog.
+procedure varSet(tuVarOut, tuVarIn) as Boolean && {fr} assigne une variable - alias de varStore()
+store m.tuVarIn to tuVarOut && {fr} http://blogs.msdn.com/b/calvin_hsia/archive/2004/12/14/301282.aspx - Calvin: the STORE command doesn't do as much as the "x=y" command. More in a future blog.
 endproc
 
 * =============================================
-procedure varSetC(out, in) as String && {fr} assigne une variable et retourne une chaine vide
-store m.in to out
+procedure varSetC(tuVarOut, tuVarIn) as String && {fr} assigne une variable et retourne une chaine vide
+store m.tuVarIn to tuVarOut
 return ''
 endproc
 
 * =============================================
-procedure varSetF(out, in) as Boolean && {fr} assigne une variable et retourne .F.
-store m.in to out
+procedure varSetF(tuVarOut, tuVarIn) as Boolean && {fr} assigne une variable et retourne .F.
+store m.tuVarIn to tuVarOut
 return .F.
 endproc
 
@@ -6212,11 +6210,14 @@ if .t.;
 
 	lAdditive = lTrue(m.lAdditive)
 
-	local lcFile as string
+	local lcFile as string, lcName as string
+	
+	lcName = Lower(cModuleInfo(sys(16, program(-1)-1), 'Name'))
+	lcName = Iif(m.lcName == Lower('abCoverage'), Lower(cModuleInfo(sys(16, program(-1)-2), 'Name')), m.lcName)
 
 	lcFile = '';
 		+ lower(cModuleInfo(sys(16,1), 'Address')); && {fr} main program
-		+ '_' + lower(cModuleInfo(sys(16, program(-1)-1), 'Name'));
+		+ '_' + m.lcName;
 		+ iif(m.lAdditive;
 			, '';
 			, '_' + TtocSep(, '-');

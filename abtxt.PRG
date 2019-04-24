@@ -1300,7 +1300,7 @@ case m.lcVarType == 'O' && {fr} Objet
 case m.lcVarType == 'A' && {fr} Array
 	if !laEmpty(@m.tuValue)
 		local luElt, liRow, lcRow, liCol
-		if Alen(m.tuValue, 2) > 0
+		if Alen(m.tuValue, 2) > 1
 			for liRow = 1 to Alen(m.tuValue, 1)
 				lcResult = m.lcResult + ', ['
 				lcRow = ''
@@ -2653,7 +2653,7 @@ lparameters ;
 local abRegExp as abRegExp of abTxt.prg
 
 abRegExp = createobject('abRegExp') && # 5 ms
-if vartype(m.abRegExp) == 'O' and ga_Type_IsChar(m.tcPattern, .t.)
+if vartype(m.abRegExp) == 'O'
 	m.abRegExp.setup(m.tcPattern, evl(m.tcFlags, ''))
 endif
 
@@ -2772,7 +2772,7 @@ lparameters ;
   tlDebug; && [.F.] {fr} Afficher le résultat de .execute() à l'écran et dans la fenêtre Debug
 , tcResult && @ [''] {fr} Résultat de l'instanciation
 
-local loException as exception, llResult
+local llResult, loException as exception
 
 try
 
@@ -2782,9 +2782,9 @@ try
 	this.oRegExp = createobject("VBscript.RegExp")
 	if vartype(m.this.oRegExp) == 'O'
 
-		this.IgnoreCase = m.this.IgnoreCase && {fr} cf. this.IgnoreCase_assign()
-		this.global = m.this.global && {fr} cf. this.Global_assign()
-		this.Multiline = m.this.Multiline && {fr} cf. this.Multiline_assign()
+		this.oRegExp.IgnoreCase = m.this.IgnoreCase
+		this.oRegExp.Global = m.this.Global
+		this.oRegExp.Multiline = m.this.Multiline
 		llResult = .T.
 	endif
 catch to loException
@@ -2811,7 +2811,7 @@ local lcResult;
 
 lcResult = ''
 
-if alines(laParm, m.tcParms) > 0 && {fr} cInLineCommentStripped(m.tcParms)
+if alines(laParm, m.tcParms) > 0
 
 	tcFunction = alltrim(m.tcFunction)
 	for each lcParm in laParm
@@ -2831,7 +2831,7 @@ tcPattern = iif(vartype(m.tcPattern) == 'C', m.tcPattern, '')
 this.lPatterns = CR $ m.tcPattern
 
 if m.this.lPatterns
-	alines(m.this.aPattern, m.tcPattern) && {fr} cInLineCommentStripped(m.tcPattern)
+	alines(m.this.aPattern, m.tcPattern) && cInLineCommentStripped(m.tcPattern)
 else
 	store m.tcPattern to this.pattern, this.oRegExp.pattern
 endif
@@ -2885,7 +2885,7 @@ lparameters ;
 local lnParms
 lnParms = Pcount()
 
-if Empty(m.lnParms) or !ga_Type_IsChar(m.tcPattern)
+if Empty(m.lnParms) or !ga_Type_IsChar(m.tcPattern, .T.)
 	return .f.
 else
 	this.pattern = m.tcPattern
@@ -2942,7 +2942,7 @@ lparameters ;
 , tlDebug; && [.F.] {fr} Débuguer
 , tlInstContKeep; && [.F.] {fr} Garder les matches qui sont des suites d'instructions {en} Keep matches that are on multi-line instruction
 
-tlDebug = lTrue(m.tlDebug)
+tlDebug = Vartype(m.tlDebug) == 'L' and m.tlDebug
 
 local lnResult
 
@@ -3006,7 +3006,7 @@ lparameters ;
 , tlDebug as Boolean; && [.F.] {fr} Débuguer
 , tlInstContKeep; && [.F.] {fr} Garder les matches qui sont des suites d'instructions {en} Keep matches that are on multi-line instruction
 
-tlDebug = lTrue(m.tlDebug) or m.this.lDebug
+tlDebug = Vartype(m.tlDebug) == 'L' and m.tlDebug or m.this.lDebug
 
 .nSeconds = seconds()
 .nMatches = 0 && {fr} Nombre de Résultats
@@ -3014,7 +3014,7 @@ tlDebug = lTrue(m.tlDebug) or m.this.lDebug
 if not empty(.pattern)
 
 	local loResults, loResult;
-	, llSubMatches, loSubMatches as collection;
+	, loSubMatches as collection;
 	, lcSubMatch;
 	, lcHead
 
@@ -3025,9 +3025,7 @@ if not empty(.pattern)
 		for each loResult in m.loResults && {fr} GA ne met pas la clause 'foxobject'
 
 			* {fr} Objectifier les sub-matches en base 1 (VFP)
-			llSubMatches = ga_Collection_Object(@m.loSubMatches)
-			assert m.llSubMatches
-			if m.llSubMatches
+			if ga_Collection_Object(@m.loSubMatches)
 				for each lcSubMatch in loResult.SubMatches
 					loSubMatches.add(m.lcSubMatch)
 				endfor
