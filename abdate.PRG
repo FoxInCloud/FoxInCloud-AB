@@ -1458,7 +1458,6 @@ local lcTZ, lnDayLightSavings
 lcTZ = Space(256)
 lnDayLightSavings = GetTimeZoneInformation(@m.lcTZ)
 
-RETURN nOfcDWord(Substr(m.lcTZ, 1, 4), .T.); && modify command abDev
+return nOfcDWord(Substr(m.lcTZ, 1, 4), .T.); && modify command abDev
 	- Iif(m.lnDaylightSavings = 2, 60, 0)
-
 endfunc

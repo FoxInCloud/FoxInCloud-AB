@@ -1731,6 +1731,7 @@ if m.llResult
 endif
 
 return m.llResult
+endproc
 
 * ------------------------------------
 procedure ProjectFilesRemove && {fr} Ôte des fichiers du projet courant
@@ -1791,7 +1792,7 @@ if m.llResult
 endif
 
 return m.llResult
-
+endproc
 
 *========================================
 function cVFPname	&& {fr} Nom valide pour VFP, avec longueur limitée si nécessaire
@@ -3079,10 +3080,12 @@ case m.lcSet == 'LIBRARY'
 	endfor
 
 otherwise
-	set &lcSet to (m.luSet)
+	try
+		set &lcSet to (m.luSet)
+	catch
+	endtry
 
 endcase
-
 endproc
 
 *---------------------------------------------------------------------------
@@ -3909,95 +3912,90 @@ local luResult;
 #endif
 
 luResult = .null.
-if Vartype(m.tcTypeDest) == 'C'
-	lcTypeDest = upper(alltrim(m.tcTypeDest))
-	llResult = Lenc(m.lcTypeDest) = 1 and m.lcTypeDest $ 'CDGLNOQTUXYI'
-endif
-assert m.llResult message cAssertMsg(textmerge("Spécification de type non supportée : <<cLitteral(m.tcTypeDest)>>"))
-if m.llResult
 
-	lcTypeSrce = vartype(m.tuValue)
-	llResult = m.lcTypeSrce $ 'CNYLDTX'
-	assert m.llResult message cAssertMsg(textmerge("Type de valeur non supportée : <<cLitteral(m.lcTypeSrce)>>"))
-	if m.llResult
+do case
+case !(.T.;
+ and Vartype(m.tcTypeDest) == 'C';
+ and varSet(@m.lcTypeDest, Upper(Alltrim(m.tcTypeDest)));
+ and Lenc(m.lcTypeDest) = 1;
+ and m.lcTypeDest $ 'CDGLNOQTUXYI';
+ )
+	assert .F. message cAssertMsg(textmerge("Spécification de type non supportée : <<cLitteral(m.tcTypeDest)>>"))
+ 
+case varSet(@m.lcTypeSrce, Vartype(m.tuValue)) and !m.lcTypeSrce $ 'CNYLDTX'
+	assert .F. message cAssertMsg(textmerge("Type de valeur non supportée : <<cLitteral(m.lcTypeSrce)>>"))
 
-		if m.lcTypeDest == m.lcTypeSrce
-			luResult = m.tuValue
-		else
+case m.lcTypeDest == m.lcTypeSrce
+	luResult = m.tuValue
 
-			do case
+case m.lcTypeSrce == 'C'
+	tuValue = upper(alltrim(m.tuValue))
+	if m.lcTypeDest $ 'YNI'
 
-			case m.lcTypeSrce == 'C'
-				tuValue = upper(alltrim(m.tuValue))
-				if m.lcTypeDest $ 'YNI'
-
-					* {fr} Normaliser le point décimal éventuel, supprimer les séparateurs de milliers
-					lcPoint = set("Point")
-					lcSeparator = set("Separator")
-					lcChars = m.lcSeparator + space(1) + set("Currency", 1) + '$'
-					tuValue = iif(m.lcSeparator == '.';
-						, chrtran(m.tuValue, m.lcChars, '');
-						, chrtran(m.tuValue, '.' + m.lcChars, m.lcPoint);
-						)
-					assert occurs(m.lcPoint, m.tuValue) <= 1 message cAssertMsg(textmerge([Plus d'un séparateur décimal dans le nombre <<m.tuValue>>]))
-				endif
-				luResult = icase(;
-					m.lcTypeDest == 'N', val(m.tuValue),;
-					m.lcTypeDest == 'Y', ntom(val(m.tuValue)),;
-					m.lcTypeDest == 'I', int(val(m.tuValue)),;
-					m.lcTypeDest == 'L', icase(;
-						inlist(m.tuValue, 'T', '.T.', 'VRAI', 'TRUE'),;
-							.t.,;
-						empty(m.tuValue) or inlist(m.tuValue, 'F', '.F.', 'FAUX', 'FALSE'),;
-							.f.,;
-							evaluate(m.tuValue);
-							),;
-					m.lcTypeDest $ 'DT', iif(left(m.tuValue, 1) = '{', evaluate(m.tuValue), uValue_TD(m.tuValue, m.lcTypeDest)),;
-					.null.)
-				if m.lcTypeDest $ 'DT' && {fr} Ctod() et Ctot() peuvent produire un résultat invalide
-					try
-						dtoc(m.luResult)
-					catch
-						luResult = iif(m.lcTypeDest == 'D', {}, {/:})
-					endtry
-				endif
-
-			case m.lcTypeSrce == 'N'
-				luResult = icase(;
-					m.lcTypeDest == 'C', transform(m.tuValue),;
-					m.lcTypeDest == 'I', int(m.tuValue),;
-					m.lcTypeDest == 'Y', ntom(m.tuValue),;
-					m.lcTypeDest == 'L', m.tuValue != 0,;
-					.null.)
-
-			case m.lcTypeSrce $ 'DT'
-				luResult = icase(;
-					m.lcTypeDest == 'C', cLitteral(m.tuValue),; && {fr} mieux que Cast()
-					m.lcTypeDest == 'D', ttod(m.tuValue),;
-					m.lcTypeDest == 'T', dtot(m.tuValue),;
-					.null.)
-
-			case m.lcTypeSrce == 'L'
-				luResult = icase(;
-					m.lcTypeDest == 'C', cLitteral(m.tuValue),;
-					m.lcTypeDest $ 'NI', iif(m.tuValue, 1, 0),;
-					.null.)
-
-			case m.lcTypeSrce == 'Y'
-				luResult = icase(;
-					m.lcTypeDest == 'C', transform(m.tuValue),;
-					m.lcTypeDest == 'N', mton(m.tuValue),;
-					m.lcTypeDest == 'I', int(mton(m.tuValue)),;
-					m.lcTypeDest == 'L', not m.tuValue = ntom(0),;
-					.null.)
-
-			case m.lcTypeSrce == 'X'
-				luResult = uEmpty(m.lcTypeDest)
-
-			endcase
-		endif
+		* {fr} Normaliser le point décimal éventuel, supprimer les séparateurs de milliers
+		lcPoint = set("Point")
+		lcSeparator = set("Separator")
+		lcChars = m.lcSeparator + space(1) + set("Currency", 1) + '$'
+		tuValue = iif(m.lcSeparator == '.';
+			, chrtran(m.tuValue, m.lcChars, '');
+			, chrtran(m.tuValue, '.' + m.lcChars, m.lcPoint);
+			)
+		assert occurs(m.lcPoint, m.tuValue) <= 1 message cAssertMsg(textmerge([Plus d'un séparateur décimal dans le nombre <<m.tuValue>>]))
 	endif
-endif
+	luResult = icase(;
+		m.lcTypeDest == 'N', val(m.tuValue),;
+		m.lcTypeDest == 'Y', ntom(val(m.tuValue)),;
+		m.lcTypeDest == 'I', int(val(m.tuValue)),;
+		m.lcTypeDest == 'L', icase(;
+			inlist(m.tuValue, 'T', '.T.', 'VRAI', 'TRUE'),;
+				.t.,;
+			empty(m.tuValue) or inlist(m.tuValue, 'F', '.F.', 'FAUX', 'FALSE'),;
+				.f.,;
+				evaluate(m.tuValue);
+				),;
+		m.lcTypeDest $ 'DT', iif(left(m.tuValue, 1) = '{', evaluate(m.tuValue), uValue_TD(m.tuValue, m.lcTypeDest)),;
+		.null.)
+	if m.lcTypeDest $ 'DT' && {fr} Ctod() et Ctot() peuvent produire un résultat invalide
+		try
+			dtoc(m.luResult)
+		catch
+			luResult = iif(m.lcTypeDest == 'D', {}, {/:})
+		endtry
+	endif
+
+case m.lcTypeSrce == 'N'
+	luResult = icase(;
+		m.lcTypeDest == 'C', transform(m.tuValue),;
+		m.lcTypeDest == 'I', int(m.tuValue),;
+		m.lcTypeDest == 'Y', ntom(m.tuValue),;
+		m.lcTypeDest == 'L', m.tuValue != 0,;
+		.null.)
+
+case m.lcTypeSrce $ 'DT'
+	luResult = icase(;
+		m.lcTypeDest == 'C', cLitteral(m.tuValue),; && {fr} mieux que Cast()
+		m.lcTypeDest == 'D', ttod(m.tuValue),;
+		m.lcTypeDest == 'T', dtot(m.tuValue),;
+		.null.)
+
+case m.lcTypeSrce == 'L'
+	luResult = icase(;
+		m.lcTypeDest == 'C', cLitteral(m.tuValue),;
+		m.lcTypeDest $ 'NI', iif(m.tuValue, 1, 0),;
+		.null.)
+
+case m.lcTypeSrce == 'Y'
+	luResult = icase(;
+		m.lcTypeDest == 'C', transform(m.tuValue),;
+		m.lcTypeDest == 'N', mton(m.tuValue),;
+		m.lcTypeDest == 'I', int(mton(m.tuValue)),;
+		m.lcTypeDest == 'L', not m.tuValue = ntom(0),;
+		.null.)
+
+case m.lcTypeSrce == 'X'
+	luResult = uEmpty(m.lcTypeDest)
+
+endcase
 
 return m.luResult
 endfunc
@@ -4039,12 +4037,21 @@ case 2 # Occurs(m.cMark, m.tuValue)
 case !iDayMonthYear(@m.liDay, @m.liMonth, @m.liYear) && modify command abDate
 
 case varSet(@m.lCentury, 4 = len(getwordnum(m.tuValue, m.liYear, m.cMark))) and m.lCentury
-
 	cDate = getwordnum(m.tuValue, 1)
-	liYear = getwordnum(m.cDate, m.liYear, m.cMark)
-	liYear = evl(Cast(Iif(Lenc(m.liYear) > 4, rtrim(m.liYear, '0'), m.liYear) as I), year(date())) && {en} year
+
+	liYear = GetWordNum(m.cDate, m.liYear, m.cMark)
+	liYear = Evl(Cast(Iif(Lenc(m.liYear) > 4, rtrim(m.liYear, '0'), m.liYear) as I), year(date())) && {en} year
+	liYear = ICase(; && 2019-06-17 thn -- {FiC V 2.30.0-beta.1} {en} nYear can be a value from 100 to 9999
+		m.liYear > 100,;
+			m.liYear,;
+		m.liYear > Set("Century", 2),;
+			(Set("Century", 1)) * 100 + m.liYear,;
+			(Set("Century", 1) + 1) * 100 + m.liYear;
+			)
+
 	liMonth = getwordnum(m.cDate, m.liMonth, m.cMark)
 	liMonth = Min(Max(evl(Cast(Iif(Lenc(m.liMonth) > 2, rtrim(m.liMonth, '0'), m.liMonth) as I), month(date())), 1), 12) && {en} month
+
 	liDay = getwordnum(m.cDate, m.liDay, m.cMark)
 	liDay = Min(Max(Evl(Cast(Iif(Lenc(m.liDay) > 2, Rtrim(m.liDay, '0'), m.liDay) as I), day(date())), 1), ICase(; && {en} day
 		m.liMonth = 2,; && https://support.west-wind.com/Thread5EH0IIR79.wwt#5EH0IIR7A
@@ -4057,13 +4064,13 @@ case varSet(@m.lCentury, 4 = len(getwordnum(m.tuValue, m.liYear, m.cMark))) and 
 	cTime = getwordnum(m.tuValue, 2)
 	
 	return Iif(m.lDate;
-		, date(m.liYear, m.liMonth, m.liDay);
-		, datetime(m.liYear, m.liMonth, m.liDay;
+	, date(m.liYear, m.liMonth, m.liDay);
+	, dateTime(m.liYear, m.liMonth, m.liDay;
 		  , Cast(getwordnum(m.cTime, 1, ':') as I); && {en} hour
 		  , Cast(getwordnum(m.cTime, 2, ':') as I); && {fr} minute
 		  , Cast(getwordnum(m.cTime, 3, ':') as I); && {en} second
 		  );
-		)
+	)
 
 otherwise
 	return Iif(m.lDate, Ctod(m.tuValue), Ctot(m.tuValue))

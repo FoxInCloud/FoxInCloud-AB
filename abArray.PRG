@@ -843,20 +843,19 @@ if m.llResult
 	for m.liCol = 1 to m.lnResult
 
 		llColBeg = m.liCol <= m.tnColBef
-
 		lnColIns = m.liCol - m.tnColBef
 		llColIns = between(m.lnColIns, 1, m.tnColsIns)
 		llColInsTyped = m.llColIns and m.lnColIns <= m.lnType
-
-		for m.liRow = 1 to m.lnRow
+		for liRow = 1 to m.lnRow
 
 			laTemp[m.liRow, m.liCol] = icase(;
-				M.llColBeg, taResult[m.liRow, m.liCol],; && {fr} avant la(es) nouvelle(s) Colonne(s) {en} before new Column(s)
-				m.llColIns; && {fr} nouvelle(s) Colonne(s) {en} new Column(s)
-							, iif(m.llColInsTyped;
-									, uEmpty(laType[m.lnColIns]);
-									, m.tuVal;
-							),;
+				m.llColBeg,; && {fr} avant la(es) nouvelle(s) Colonne(s) {en} before new Column(s)
+					taResult[m.liRow, m.liCol],;
+				m.llColIns,; && {fr} nouvelle(s) Colonne(s) {en} new Column(s)
+					iif(m.llColInsTyped;
+						, uEmpty(laType[m.lnColIns]);
+						, m.tuVal;
+						),;
 				taResult[m.liRow, m.liCol - m.tnColsIns]; && {fr} après la(es) nouvelle(s) Colonne(s) {en} after new Column(s)
 				)
 		endfor
@@ -868,6 +867,7 @@ if m.llResult
 endif
 
 return m.lnResult
+endfunc
 
 * --------------------------------------
 procedure aColsIns_Test && {fr} Teste aColsIns()

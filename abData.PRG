@@ -3307,6 +3307,7 @@ lparameters ;
 , tlParenth; && [.F.] {fr} Ajouter les parenthèses autour de l'expression
 , tcSep; && [','] {fr} Séparateur entre champs
 , tlNullIgnore; && [.F.] {fr} Ignorer le réglage SET NULL du champ
+, tlSort; && [.F.] {fr} Trier les champs par ordre alphabétique
 
 local result as string;
 , cAlias as string;
@@ -3315,7 +3316,7 @@ local result as string;
 
 cAlias = cAlias(m.tuTable, @m.lAlias)
 
-result = Iif(Used(m.cAlias) and AFields(laField, m.cAlias) > 0;
+result = Iif(Used(m.cAlias) and AFields(laField, m.cAlias) > 0 and (!lTrue(m.tlSort) or Asort(m.laField, 1) > 0);
 	, cFieldsExp(@m.laField, m.tlParenth, m.tcSep, m.tlNullIgnore);
 	, '';
 	)

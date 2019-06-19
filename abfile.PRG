@@ -474,8 +474,8 @@ endfunc
 * ========================================
 procedure FileMove && {fr} Déplace un ou plusieurs fichier(s) en créant le(s) dossier(s) si nécessaire
 lparameters ;
-  tcFileSrce ; && {fr} Adresse actuelle (can contain wildcard characters)
-, tcFileDest; && {fr} Nouvelle adresse (can contain wildcard characters)
+  tcFileSrce; && {en} current address (can contain wildcard characters) {fr} Adresse actuelle (peut contenir des caractères joker)
+, tcFileDest; && {en} target  address (can contain wildcard characters) {fr} Nouvelle adresse (peut contenir des caractères joker)
 , tlCopyForce; && [.F.] {fr} Toujours copier (pas de RENAME, donc potentiellement plus lent)
 , tcResult; && @ {fr} Résultat
 

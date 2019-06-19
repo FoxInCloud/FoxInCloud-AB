@@ -638,7 +638,6 @@ endfunc
 
 * ------------------------------------------------------------
 procedure wcPropSaveInit && {fr} liste les propriétés à sauvegarder dans .wcPropSave
-&& 2014-06-19 thn {fr} protected pour pouvoir être étendue en sous-classe
 && 2018-10-18 thn -- {FiC V 2.28.0-beta.9} {en} grid.members.wcPropSave* support: created
 && 2019-01-30 thn -- {FiC V 2.28.1-beta.1} {en} code moved from awAJAX.PropsSave_Init_Memb_Init_wcPropSave()
 LPARAMETERS ;
@@ -1101,12 +1100,12 @@ endfunc
 function wcSCXfile && {fr} Name of a form file from a FoxInCloud name {fr} Nom d'un fichier écran d'après son nom FoxInCloud
 lparameters tcForm
 tcForm = Lower(Alltrim(Evl(m.tcForm, '')))
-return Iif(Rightc(m.tcForm, 4) == '_scx';
+tcForm = Iif(Rightc(m.tcForm, 4) == '_scx';
 	, Leftc(m.tcForm, Lenc(m.tcForm)-4) + '.scx';
 	, m.tcForm;
 	)
+return Iif(! '.' $ m.tcForm or JustExt(m.tcForm) == 'scx', m.tcForm, .null.)
 endfunc
-
 
 * =============================================================
 procedure wReport && {en} REPORT FORM in Web and LAN modes
