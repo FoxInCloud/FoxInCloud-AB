@@ -3493,6 +3493,7 @@ if vartype(m.tcUA) == 'C' and !empty(m.tcUA)
 	or 'compspybot' $ m.tcUA;
 	or 'meanpathbot' $ m.tcUA;
 	or 'lipperhey' $ m.tcUA;
+	or 'knowledge' $ m.tcUA; && 2019-06-19 thn -- {en} added
 	or .f. && {fr} pour placer facilement les plus fréquents en tête
 
 endif
@@ -3533,20 +3534,7 @@ if pcount() > 1
 	endfor
 	result = substr(m.result, 3)
 endif
-
-*----------------------------------------------------
-function cCRLF2fix && {fr} Chaîne où toutes les lignes se terminent par CRLF simple
-lparameters tcChain
-
-tcChain = cCRLFfix(m.tcChain)
-do while CRLF2 $ m.tcChain
-	tcChain = strtran(m.tcChain, CRLF2, CRLF)
-enddo
-do while CR2 $ m.tcChain
-	tcChain = strtran(m.tcChain, CR2, CR)
-enddo
-
-return m.tcChain
+endfunc
 
 *----------------------------------------------------
 function cCRLFfix && {fr} Chaîne oû toutes les lignes se terminent par CRLF
@@ -3588,6 +3576,34 @@ do while m.tcNewLine $ m.tcChain
 		)
 enddo
 
+return m.tcChain
+endfunc
+
+*----------------------------------------------------
+function cCRLF2fix && {fr} Chaîne où toutes les lignes se terminent par CRLF simple
+lparameters tcChain
+
+tcChain = cCRLFfix(m.tcChain)
+do while CRLF2 $ m.tcChain
+	tcChain = strtran(m.tcChain, CRLF2, CRLF)
+enddo
+do while CR2 $ m.tcChain
+	tcChain = strtran(m.tcChain, CR2, CR)
+enddo
+return m.tcChain
+endfunc
+
+*----------------------------------------------------
+function cCRLF3fix && {fr} Chaîne où toutes les lignes se terminent par au plus 2 CRLF
+lparameters tcChain
+
+tcChain = cCRLFfix(m.tcChain)
+do while CRLF3 $ m.tcChain
+	tcChain = strtran(m.tcChain, CRLF3, CRLF2)
+enddo
+do while CR3 $ m.tcChain
+	tcChain = strtran(m.tcChain, CR3, CR2)
+enddo
 return m.tcChain
 endfunc
 

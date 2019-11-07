@@ -1077,8 +1077,8 @@ lcResult = icase(;
 	m.lcDate == 'MDY', 'mm/dd/' + m.lcYear,;
 	m.lcDate == 'DMY', 'dd/mm/' + m.lcYear,;
 	m.lcDate == 'YMD', m.lcYear + '/mm/dd',;
-	m.lcDate == 'SHORT', 'dd/mm/yy',; && {fr} Short date format determined by the Windows Control Panel short date setting /!\ à approfondir
-	m.lcDate == 'LONG', 'dd/mm/yyyy',; && {fr} Long date format determined by the Windows Control Panel long date setting /!\ à approfondir
+	m.lcDate == 'SHORT', 'dd/mm/yy',; && {en} Short date format determined by the Windows Control Panel short date setting /!\ {fr} à approfondir
+	m.lcDate == 'LONG', 'dd/mm/yyyy',; && {en} Long date format determined by the Windows Control Panel long date setting /!\ {fr} à approfondir
 	'dd/mm/yyyy';
 	)
 

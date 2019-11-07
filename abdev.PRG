@@ -162,11 +162,11 @@ use in select(this.acDBFlogAlias)
 show window all
 show window all && {fr} parfois il reste des fenêtres invisibles
 
-* {en} Restore screen font
-_screen.fontname = this.acScreenFont
-_screen.fontsize = this.anScreenFontSize
-
 if m.this.alConsole
+
+	* {en} Restore screen font
+	_screen.fontname = this.acScreenFont
+	_screen.fontsize = this.anScreenFontSize
 
 	* {fr} Si l'utilisateur souhaite voir les avertissements
 	local lcS, lcBe
