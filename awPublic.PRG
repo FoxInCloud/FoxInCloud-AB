@@ -596,8 +596,8 @@ return m.llResult
 procedure wRemoveObject && {fr} Supprime un objet d'un conteneur s'il existe
 && 3 Feb. 14 - {en} deprecated in favor of aw.vcx!aw*.RemoveObject()
 lparameters ;
-  toCont AS awCnt OF aw.vcx,; && {fr} Conteneur d'où il faut retirer l'objet
-	tcObject && {fr} Nom de l'objet à supprimer
+  toCont AS awCnt OF aw.vcx; && {fr} Conteneur d'où il faut retirer l'objet
+, tcObject && {fr} Nom de l'objet à supprimer
 
 LOCAL llResult, loAJAX as awAJAX of awServer.prg
 
@@ -606,21 +606,18 @@ llResult = loCont(m.toCont)
 ASSERT m.llResult MESSAGE cAssertMsg(Textmerge(ICase(;
 		cLangUser() = 'fr',	[Le premier paramètre (<<cLitteral(m.toCont)>>) doit être une référence à un objet conteneur],; && copy-paste this line to add another language support
 												[First parameter (<<cLitteral(m.toCont)>>) should be a container object reference]))) && Default: English
-IF m.llResult
+IF m.llResult;
+ and locObject(m.toCont, m.tcObject) && {fr} L'objet existe toujours dans le parent
 
-	* {fr} Si l'objet existe toujours dans le parent
-	IF locObject(m.toCont, m.tcObject)
-
-		* {fr} Si le conteneur est dynamique, indiquer que son contenu a changé && {fr} FoxInCloud régénère tout le HTML à chaque changement
-		IF lProperty(m.toCont, 'wlContentDynamic') AND m.toCont.wlContentDynamic
-			toCont.wlContentChanged = .T.
-		ELSE
-			= wlAJAX(@m.loAJAX) AND m.loAJAX.wRemoveObject(m.toCont, Evaluate('m.toCont.' + m.tcObject)) && {fr} AJAX: envoit l'ordre de retirer l'objet de la page HTML
-		ENDIF
-
-		* {fr} Ôter l'objet
-		llResult = toCont.RemoveObject(m.tcObject)
+	* {fr} Si le conteneur est dynamique, indiquer que son contenu a changé && {fr} FoxInCloud régénère tout le HTML à chaque changement
+	IF lProperty(m.toCont, 'wlContentDynamic') AND m.toCont.wlContentDynamic
+		toCont.wlContentChanged = .T.
+	ELSE
+		= wlAJAX(@m.loAJAX) AND m.loAJAX.wRemoveObject(m.toCont, Evaluate('m.toCont.' + m.tcObject)) && {fr} AJAX: envoit l'ordre de retirer l'objet de la page HTML
 	ENDIF
+
+	* {fr} Ôter l'objet
+	llResult = toCont.RemoveObject(m.tcObject)
 ENDIF
 
 return m.llResult
@@ -945,14 +942,18 @@ local lnMajor, lnMinor, llWorkStation
 
 = wcOSversion(@m.lnMajor, @m.lnMinor, @m.llWorkStation)
 
-&& {fr} http://www.foxite.com/archives/0000420530.htm
-&& {fr} https://msdn.microsoft.com/en-us/library/windows/desktop/ms724832%28v=vs.85%29.aspx
-&& {fr} http://fox.wikis.com/wc.dll?Wiki~CurrentVersion
-&& {fr} http://fox.wikis.com/wc.dll?Wiki~VFPFunctionOS
+&& http://www.foxite.com/archives/0000420530.htm
+&& https://msdn.microsoft.com/en-us/library/windows/desktop/ms724832%28v=vs.85%29.aspx
+&& http://fox.wikis.com/wc.dll?Wiki~CurrentVersion
+&& http://fox.wikis.com/wc.dll?Wiki~VFPFunctionOS
+&& https://en.wikipedia.org/wiki/List_of_Microsoft_Windows_versions
 
 return Iif(lTrue(m.tlWindowsNo), '', 'Windows ') + ICase(;
 	m.lnMajor = 10 AND m.lnMinor = 0,;
-			'10',;
+		Iif(m.llWorkStation;
+		, '10';
+		, 'Server 2016/2019';
+		),;
 	m.lnMajor = 6 AND m.lnMinor = 3,;
 		Iif(m.llWorkStation;
 		, '8.1';
@@ -1683,17 +1684,16 @@ function wGetColor && {fr} GetColor() _SANS RETOUR MODAL_ en mode LAN ou Web
 && {en} - standalone procedure or function: NOT SUPPORTED
 lparameters nDefaultColorNumber
 
-LOCAL lnParm
-lnParm = Pcount()
+local llParm
+llParm = Vartype(m.nDefaultColorNumber) == 'N'
 
-IF wlLAN()
-	return ICase(;
-		m.lnParm = 0, 	GetColor(),;
-										GetColor(m.nDefaultColorNumber);
-	)
-ELSE
-	return .null. && {en} NOT SUPPORTED
-ENDIF
+return ICase(;
+	wlWeb(),;
+		.null.,; && {en} NOT SUPPORTED YET
+	m.llParm,;
+		GetColor(m.nDefaultColorNumber),;
+		GetColor();
+)
 endfunc
 
 * ---------------------------------------

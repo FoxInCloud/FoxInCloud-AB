@@ -933,7 +933,8 @@ lparameters taUsed && @ out: used() *.DBF
 
 external array taUsed
 
-local lnDS_, liDS, laDS[1], lnDS, laResult[1], liResult, lcResult, lnResult
+local lnResult, liResult, lcResult, laResult[1];
+, lnDS_, liDS, laDS[1], lnDS
 
 lnResult = 0
 if aClear(@m.taUsed)
@@ -952,7 +953,7 @@ if aClear(@m.taUsed)
 				set datasession to m.lnDS && {fr} pour dbf()
 				aColDel(@m.laResult, 2)
 				dimension laResult[m.lnResult]
-				for liResult = 1 to m.lnResult
+				for liResult = m.lnResult to 1 step -1
 
 					lcResult = cFileCased(dbf(laResult[m.liResult]), .t.)
 					if empty(m.lcResult)

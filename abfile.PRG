@@ -189,15 +189,15 @@ declare Integer CloseHandle IN kernel32;
 
 declare Integer GetLastError IN Win32API 
 
-lcBuff = Repli(Chr(0), 250)
+lcBuff = Replicate(Chr(0), 250)
 cFile = Iif(lFullPath(m.cFile), m.cFile, FullPath(m.cFile))
 hFile = OpenFile(;
-	  m.cFile;
+	  c83Address(m.cFile);  && 2019-12-10 thn -- {FiC V 2.30.0-beta.5} {en} https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-openfile : you cannot use the OpenFile function to open a file with a path length that exceeds 128 characters
 	, @m.lcBuff; && A pointer to the OFSTRUCT structure (https://msdn.microsoft.com/en-us/library/windows/desktop/aa365282(v=vs.85).aspx) that receives information about a file when it is first opened. The structure can be used in subsequent calls to the OpenFile function to see an open file.
 	, 0x00000001; && Opens a file for write access only
 	)
 IF hFile = -1 && failed to open
-  return cResultAdd(@m.result, textmerge([kernel32 OpenFile() ] + ICase(;
+  RETURN cResultAdd(@m.result, textmerge([kernel32 OpenFile() ] + ICase(;
 		cLangUser() = 'fr',	[n'a pas pu accéder à '<<m.cFile>>' ; code d'erreur :],; && copy-paste this line to add another language support
 												[could not access '<<m.cFile>>'; error code:]; && default: English
 	  ) + [ <<GetLastError()>>]))
@@ -1230,9 +1230,9 @@ lparameters ;
 tcLangUser = cLangUser(m.tcLangUser)
 
 return '';
-	+ ltrim(transform(m.tnSize/2^20, '999.99'));
+	+ Ltrim(Transform(m.tnSize/2^20, '999,999.99'));
 	+ Chr(160); && Iif(lTrue(m.tlHTML), '&nbsp;', ' ')
-	+ icase(;
+	+ ICase(;
 		m.tcLangUser = 'fr', 	'MO',; && copy-paste this line to add another language support
 													'MB'; && default: English
 		)
@@ -2297,7 +2297,7 @@ if vartype(m.tcPath) == 'C'
 		lnResult = GetShortPathName(@m.tcPath, @m.lcShortName, m.lnLength)
 
 		lcResult = iif(m.lnResult > 0;
-			, left (m.lcShortName, m.lnResult); && {fr} la conversion a réussi
+			, Left(m.lcShortName, m.lnResult); && {fr} la conversion a réussi
 			, m.tcPath; && {fr} la conversion a échoué : l'adresse spécifiée est 8.3
 			)
 	endif

@@ -885,7 +885,7 @@ return iif(aoClassCont(@m.laObject, m.toCont, m.tcClasses, m.tlRecurse, m.tnCont
 * ====================
 function aoClassCont && {fr} Objets VFP [d'une classe] dans un conteneur /!\ récursion descendante
 lparameters ;
-  taObjects; && @ {fr} Objets trouvés
+  taObjects; && @ {en} [object, tabindex] sorted on tabIndex {fr} [objet, tabindex] triés sur tabIndex
 , toCont; && {fr} Conteneur
 , tcClasses; && [toutes] {fr} Classe(s) filtrante(s)
 , tlRecurse; && [.T.] {fr} Récurser dans les conteneurs contenus
@@ -982,7 +982,7 @@ define class aoClassContTest as abUnitTest of abDev.prg
 * ====================
 function aoAppend && {fr} Ajoute un objet à un tableau d'objets
 lparameters ;
-  taObjects; && @ {fr} Objets
+  taObjects; && @ {en} [object, tabindex]
 , toObject; && {fr} Objet
 , tlTabIndex; && [.F.] {fr} tabuler seulement les objets ayant la propriété TabIndex et TabStop
 , tlEnabled && [.F.] {fr} tabuler seulement les objets ayant la propriété TabIndex et Enabled
@@ -1023,7 +1023,7 @@ if m.llResult
 				oParent = iif(type('m.oParent.Parent') == 'O', m.oParent.parent, .null.)
 				iParent = m.iParent + 1
 			enddo
-			dimension taObjects[m.lnResult, 2]
+			dimension taObjects[m.lnResult, 2] && [object, tabindex]
 			taObjects[m.lnResult, 1] = m.toObject
 			taObjects[m.lnResult, 2] = m.iTabIndex && Iif(m.lPage, 0, m.toObject.Tabindex)
 		else
