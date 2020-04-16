@@ -644,13 +644,14 @@ LPARAMETERS ;
 , tcBaseClass as String; && [m.toMember.baseClass] {fr} classe de base du membre
 , tlControl as Boolean; && [.F.] {fr} le membre est un contrôle
 
-#if .F. && 2018-10-18 thn -- {FiC V 2.28.0-beta.9} {en} grid.members.wcPropSave* support: to be refined
+#if .F.
 properties in .wcPropSave:
 - native: save if listed here or in parent class
-- custom: save implicitely
+- custom: saved implicitely, no need to mention
 properties in .wcPropSaveNot:
-- native: don't save even if in some parent Class .wcPropSave
-- custom: don't save if defined in the
+- native: don't save even if in some parent class's .wcPropSave
+- custom: don't save
+ && 2018-10-18 thn -- {FiC V 2.28.0-beta.9} {en} grid.members.wcPropSave* support: to be refined
 #endif
 
 LOCAL llResult as Boolean;
@@ -739,7 +740,7 @@ llResult = .T.;
 	  , ', Left, Top, Width, Height' + Iif(m.tlControl or Evl(m.tcBaseClass, m.toMember.BaseClass) == 'Container', ', BorderColor, BackColor', '');
 	  , '';
 	  );
-	, .T.; && {fr} Remove
+	, .T.; && {en} Remove
 	);
  and .T.
 
@@ -788,7 +789,7 @@ lparameters ;
 , tuProps; && {fr} Propriété(s) à ajouter ou ôter de la liste
 , tlRemove; && [.F.] {fr} .F. : ajouter à la liste, .T. : ôter de  la liste {en} .F.: add to list, .T.: remove from list
 , tlCheck; && [.F.] {fr} Vérifier que l'objet détient bien les propriétés à sauvegarder
-, tcPropSave; && {fr} Propriété de l'objet à modifier ('wcPropSave' ou 'wcPropSaveNot')
+, tcPropSave; && {fr} Propriété de l'objet à modifier: 'wcPropSave' ou 'wcPropSaveNot'
 
 tlRemove = lTrue(m.tlRemove)
 tlCheck  = lTrue(m.tlCheck)

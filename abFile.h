@@ -4,8 +4,8 @@
 #DEFINE	EXT_LOG		 		'LOG'
 #DEFINE	EXT_LOG_WARN	 	'LWR'
 
-* {fr} Caractères interdits dans le système de fichiers
-#DEFINE	CAR_INT_DS_ADR_FICH		"*?<>|"
+* {fr} CaractÃ¨res interdits dans le systÃ¨me de fichiers && https://gist.github.com/doctaphred/d01d05291546186941e1b7ddc02034d3
+#DEFINE	CAR_INT_DS_ADR_FICH		'*?<>|"'
 #DEFINE	CAR_INT_DS_NOM_FICH		CAR_INT_DS_ADR_FICH + ":/\"
 
 * {en} Special Folder Constants
@@ -29,4 +29,3 @@
 #DEFINE CSIDL_INTERNET_CACHE			32 && {fr} Temp. Internet Files
 #DEFINE CSIDL_COOKIES					33 && {fr} Cookies
 #DEFINE CSIDL_HISTORY					34 && {fr} History
-

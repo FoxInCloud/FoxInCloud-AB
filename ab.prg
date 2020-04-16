@@ -406,9 +406,9 @@ endproc
 * ========================================
 PROCEDURE PathAddSubFolders && {fr} Ajoute un dossier et ses sous-dossiers au Set('Path')
 LPARAMETERS ;
-  tcFolder; && {fr} Dossier @: Addbs(FullPath(m.tcFolder)) si existant
-, tnLevel; && [1] {fr} Profondeur des sous-dossiers
-, tcFoldersExcl; && [''] {fr} sous-dossiers à exclure ou masque des fichiers attendus dans les dossiers à inclure
+  tcFolder; && @: Addbs(FullPath(m.tcFolder)) si existant {fr} Dossier parent {en} Parent folder
+, tnLevel; && [1] {fr} Profondeur des sous-dossiers {en} sub-folders depth
+, tcFoldersExcl; && [''] {fr} sous-dossiers à exclure ou masque des fichiers attendus dans les dossiers à inclure {en} sub-folders to exclude
 , tlRemove; && [.F.] {fr} Supprimer du path
 , tlRelative && [.F.] {fr} Ajouter en relatif au dossier par défaut
 tnLevel = Evl(m.tnLevel, 1)
@@ -506,9 +506,9 @@ DEFINE CLASS abPathAddSubFolders AS abPathesAdd OF ab.prg
 * ---------------------------------
 PROCEDURE Init
 LPARAMETERS ;
-  tcFolder; && {fr} Dossier @: Addbs(FullPath(m.tcFolder)) si existant
-, tnLevel; && [1] {fr} Profondeur des sous-dossiers
-, tcFoldersExcl; && [''] {fr} sous-dossiers à exclure ou masque des fichiers attendus dans les dossiers à inclure ou masque des fichiers attendus dans les dossiers à inclure
+  tcFolder; && @ Addbs(FullPath(m.tcFolder)) si existant {fr} Dossier {en} Folder
+, tnLevel; && [1] {fr} Profondeur des sous-dossiers {en} sub-folder depth
+, tcFoldersExcl; && [''] {fr} sous-dossiers à exclure ou masque des fichiers attendus dans les dossiers à inclure
 , tlRemove; && [.F.] {fr} Supprimer du path
 , tlRelative && [.F.] {fr} Ajouter en relatif au dossier par défaut
 

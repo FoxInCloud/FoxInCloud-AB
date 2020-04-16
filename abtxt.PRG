@@ -3388,11 +3388,13 @@ loCurrency2 = abSet('Currency', icase(;
 return transform(cast(m.ty as y))
 
 * -------------------------------
-function lBotSpider && {fr} Une requête émane d'une araignée d'un moteur de recherche
+function lBotSpider && {en} Request from a search engine bot spider {fr} Une requête émane d'une araignée d'un moteur de recherche
 lparameters tcUA && [m.Request.getBrowser()] {fr} User Agent de la requête HTTP
 
-tcUA = iif(empty(m.tcUA) and vartype(m.Request) == 'O';
-	, m.Request.getBrowser();
+local oRequest
+
+tcUA = iif(Empty(m.tcUA) and wlRequest(@m.oRequest);
+	, m.oRequest.getBrowser();
 	, m.tcUA;
 	)
 if vartype(m.tcUA) == 'C' and !empty(m.tcUA)

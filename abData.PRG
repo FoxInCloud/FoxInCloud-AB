@@ -1,4 +1,4 @@
-* {fr} abData.prg
+* abData.prg
 * =====================================================
 * (c) Abaque SARL, 66 rue Michel Ange - 75016 Paris - France
 * contact@FoxInCloud.com - http://foxincloud.com/ - +33 9 53 41 90 90
@@ -294,8 +294,9 @@ local lcResult as string; && {fr} Alias sous lequel la table est ouverte
 lcResult = ''
 
 lcType = vartype(m.tuTable)
-tuTable = iif(m.lcType == 'C', upper(alltrim(m.tuTable)), m.tuTable)
+tuTable = iif(m.lcType == 'C', Upper(Alltrim(m.tuTable)), m.tuTable)
 llAlias = ga_Type_IsChar(m.tcAlias, .t.)
+tcAlias = Iif(m.llAlias, Upper(Alltrim(m.tcAlias)), m.tcAlias)
 
 do case
 
@@ -1161,7 +1162,7 @@ if Used(m.lcAlias)
 		if Empty(m.tnMS) or Used(m.lcResult)
 			exit
 		endif
-		Sleep(Max(m.tnMS / 10, 50)) && modify command ab
+		Sleep(Max(m.tnMS / 10, 50)) && modify command ab.prg
 	enddo
 endif
 
