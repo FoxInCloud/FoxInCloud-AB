@@ -1610,143 +1610,146 @@ local lcResult as string;
 , loRange as Excel.range;
 
 * {fr} Ouvrir la feuille Excel en automation
-loXL = oXL()
-loWB = loXL.Workbooks.open(m.tcXLWBaddr, .f., .t.)
-loWS = loWB.Worksheets(iif(vartype(m.tcSheet) == 'C' and not empty(m.tcSheet), m.tcSheet, 1))
-loWF = m.loXL.WorksheetFunction
 lcResult = ''
-if !m.loXL.Calculation = -4105  && {fr} xlCalculationAutomatic
-	m.loWS.calculate
-endif
-with m.loWS.UsedRange as Excel.range
+loXL = oXL()
+if Vartype(m.loXL) == 'O' and Type('m.loXL.Workbooks') == 'O'
+	
+	loWB = loXL.Workbooks.open(m.tcXLWBaddr, .f., .t.)
+	loWS = loWB.Worksheets(iif(vartype(m.tcSheet) == 'C' and not empty(m.tcSheet), m.tcSheet, 1))
+	loWF = m.loXL.WorksheetFunction
+	if !m.loXL.Calculation = -4105  && {fr} xlCalculationAutomatic
+		m.loWS.calculate
+	endif
+	with m.loWS.UsedRange as Excel.range
 
-	* {fr} Pour chaque colonne
-	local lnCols, lnCol, lcCol, lnField, lcField, lnSuffix, lnRow, laCols[.Columns.Count, 6], luValue, lcType, lnLen
-	lnCols = min(.columns.count, 254)
-	lnField = iif(m.tlCursor, 128, 10)
-	for lnCol = 1 to m.lnCols
+		* {fr} Pour chaque colonne
+		local lnCols, lnCol, lcCol, lnField, lcField, lnSuffix, lnRow, laCols[.Columns.Count, 6], luValue, lcType, lnLen
+		lnCols = min(.columns.count, 254)
+		lnField = iif(m.tlCursor, 128, 10)
+		for lnCol = 1 to m.lnCols
 
-		lcType = 'U'
-		store 0 to laCols[m.lnCol, 3], laCols[m.lnCol, 4]
-		for lnRow = 1 to .rows.count
-			if m.lnRow = 1
+			lcType = 'U'
+			store 0 to laCols[m.lnCol, 3], laCols[m.lnCol, 4]
+			for lnRow = 1 to .rows.count
+				if m.lnRow = 1
 
-				* {fr} Première ligne : lire le nom du champ
-				lcCol = cVFPName(.Cells(1, m.lnCol).value, m.lnField)
-				lcCol = evl(m.lcCol, [Col] + transform(m.lnCol))
+					* {fr} Première ligne : lire le nom du champ
+					lcCol = cVFPName(.Cells(1, m.lnCol).value, m.lnField)
+					lcCol = evl(m.lcCol, [Col] + transform(m.lnCol))
 
-				* {fr} Dédoublonner le cas échéant
-				lcField = m.lcCol
-				lnSuffix = 0
-				do while ascan(laCols, m.lcField, 1, -1, 1, 1+2+4) > 0
-					lnSuffix = m.lnSuffix + 1
-					lcField = left(m.lcCol, m.lnField-2) + '_' + transform(m.lnSuffix)
-				enddo
-				laCols[m.lnCol, 1] = m.lcField
-			else
-
-				* {fr} Autres lignes: déterminer le type du champ d'après le contenu
-				loRange = .Cells(m.lnRow, m.lnCol)
-				luValue = iif(m.loRange.HasFormula() and m.loWF.IsError(m.loRange); && {fr} plantage si la cellule contient une erreur de formule http://stackoverflow.com/questions/2424718/how-to-know-if-a-cell-has-an-error-in-the-formula-in-c-sharp
-					, .null.;
-					, m.loRange.value;
-					)
-				if isnull(m.luValue)
-					if m.tlNULL
-						laCols[m.lnCol, 5] = .t.
-					endif
-					loop
-
+					* {fr} Dédoublonner le cas échéant
+					lcField = m.lcCol
+					lnSuffix = 0
+					do while ascan(laCols, m.lcField, 1, -1, 1, 1+2+4) > 0
+						lnSuffix = m.lnSuffix + 1
+						lcField = left(m.lcCol, m.lnField-2) + '_' + transform(m.lnSuffix)
+					enddo
+					laCols[m.lnCol, 1] = m.lcField
 				else
 
-					lcType = iif(m.lcType $ 'CMDT';
-						, m.lcType;
-						, vartype(m.luValue);
+					* {fr} Autres lignes: déterminer le type du champ d'après le contenu
+					loRange = .Cells(m.lnRow, m.lnCol)
+					luValue = iif(m.loRange.HasFormula() and m.loWF.IsError(m.loRange); && {fr} plantage si la cellule contient une erreur de formule http://stackoverflow.com/questions/2424718/how-to-know-if-a-cell-has-an-error-in-the-formula-in-c-sharp
+						, .null.;
+						, m.loRange.value;
 						)
-
-					do case
-					case m.lcType == 'C'
-						luValue = transform(m.luValue)
-						lnLen = evl(len(trim(m.luValue)), 1)
-						if m.lnLen > 254 or CRLF $ m.luValue
-							lcType = 'M'
-							loop
-						else
-							laCols[m.lnCol, 3] = max(laCols[m.lnCol, 3] , m.lnLen)
+					if isnull(m.luValue)
+						if m.tlNULL
+							laCols[m.lnCol, 5] = .t.
 						endif
-					case m.lcType == 'N'
-						laCols[m.lnCol, 3] = max(laCols[m.lnCol, 3] , len(transform(m.luValue))) && {fr} à modifier pour point décimal
-					endcase
+						loop
+
+					else
+
+						lcType = iif(m.lcType $ 'CMDT';
+							, m.lcType;
+							, vartype(m.luValue);
+							)
+
+						do case
+						case m.lcType == 'C'
+							luValue = transform(m.luValue)
+							lnLen = evl(len(trim(m.luValue)), 1)
+							if m.lnLen > 254 or CRLF $ m.luValue
+								lcType = 'M'
+								loop
+							else
+								laCols[m.lnCol, 3] = max(laCols[m.lnCol, 3] , m.lnLen)
+							endif
+						case m.lcType == 'N'
+							laCols[m.lnCol, 3] = max(laCols[m.lnCol, 3] , len(transform(m.luValue))) && {fr} à modifier pour point décimal
+						endcase
+					endif
 				endif
-			endif
+			endfor
+			lcType = iif(m.lcType == 'U', 'M', m.lcType)
+			laCols[m.lnCol, 2] = m.lcType
+			laCols[m.lnCol, 3] = icase(m.lcType $ 'DT', 8, m.lcType $ 'BIM', 4, m.lcType == 'L', 1, laCols[m.lnCol, 3])
 		endfor
-		lcType = iif(m.lcType == 'U', 'M', m.lcType)
-		laCols[m.lnCol, 2] = m.lcType
-		laCols[m.lnCol, 3] = icase(m.lcType $ 'DT', 8, m.lcType $ 'BIM', 4, m.lcType == 'L', 1, laCols[m.lnCol, 3])
-	endfor
 
-	* {fr} Créer la table ou le curseur
-	local laFields[1], lnFields
-	lnFields = 0
-	for lnCol = 1 to m.lnCols
-		if not empty(laCols[m.lnCol, 1])
-			lnFields = m.lnFields + 1
-			dimension laFields[m.lnFields, 5]
-			laFields[m.lnFields, 1] = laCols[m.lnCol, 1]
-			laFields[m.lnFields, 2] = laCols[m.lnCol, 2]
-			laFields[m.lnFields, 3] = laCols[m.lnCol, 3]
-			laFields[m.lnFields, 4] = laCols[m.lnCol, 4]
-			laFields[m.lnFields, 5] = laCols[m.lnCol, 5]
-			laCols[m.lnCol, 6] = m.lnFields && {fr} pour correspondance lors du remplissage
-		endif
-	endfor
-
-	if not laEmpty(@taFieldAdd)
-		aColsDel(@taFieldAdd, 6)
-		aAppend(@laFields, @taFieldAdd)
-	endif
-
-	lcResult = iif(m.tlCursor, juststem(m.tcTable), m.tcTable)
-	if m.tlCursor
-		create cursor (m.lcResult) from array laFields
-	else
-		create table (m.lcResult) free from array laFields
-	endif
-
-	* {fr} Importer les données
-	local loTalk, luValue
-	loTalk = abSet('TALK', 'OFF')
-	for lnRow = 2 to .rows.count
-		append blank
-		for lnCol = 1 to .columns.count
+		* {fr} Créer la table ou le curseur
+		local laFields[1], lnFields
+		lnFields = 0
+		for lnCol = 1 to m.lnCols
 			if not empty(laCols[m.lnCol, 1])
-				luValue = .Cells(m.lnRow, m.lnCol)
-				luValue = iif(m.luValue.HasFormula() and m.loWF.IsError(m.luValue);
-					, .null.;
-					, m.luValue.value;
-					)
-				luValue = iif(laCols[m.lnCol, 2] $ 'CM';
-					, transform(nvl(m.luValue, ''));
-					, uValue(m.luValue, laCols[m.lnCol, 2]);
-					)
-				if not m.tlNULL and isnull(m.luValue)
-					lcType = laFields[m.lnCol, 2]
-					lcType = iif(m.lcType $ 'M', 'C', m.lcType)
-					luValue = uEmpty(m.lcType)
-				endif
-				replace (field(laCols[m.lnCol, 6])) with m.luValue
+				lnFields = m.lnFields + 1
+				dimension laFields[m.lnFields, 5]
+				laFields[m.lnFields, 1] = laCols[m.lnCol, 1]
+				laFields[m.lnFields, 2] = laCols[m.lnCol, 2]
+				laFields[m.lnFields, 3] = laCols[m.lnCol, 3]
+				laFields[m.lnFields, 4] = laCols[m.lnCol, 4]
+				laFields[m.lnFields, 5] = laCols[m.lnCol, 5]
+				laCols[m.lnCol, 6] = m.lnFields && {fr} pour correspondance lors du remplissage
 			endif
 		endfor
-	endfor
-endwith
 
-loWB.close
-loXL.quit
+		if not laEmpty(@taFieldAdd)
+			aColsDel(@taFieldAdd, 6)
+			aAppend(@laFields, @taFieldAdd)
+		endif
 
-FreeTableSlim(alias(), 20) && 20% de marge
+		lcResult = iif(m.tlCursor, juststem(m.tcTable), m.tcTable)
+		if m.tlCursor
+			create cursor (m.lcResult) from array laFields
+		else
+			create table (m.lcResult) free from array laFields
+		endif
 
-if not m.tlCursor
-	use
+		* {fr} Importer les données
+		local loTalk, luValue
+		loTalk = abSet('TALK', 'OFF')
+		for lnRow = 2 to .rows.count
+			append blank
+			for lnCol = 1 to .columns.count
+				if not empty(laCols[m.lnCol, 1])
+					luValue = .Cells(m.lnRow, m.lnCol)
+					luValue = iif(m.luValue.HasFormula() and m.loWF.IsError(m.luValue);
+						, .null.;
+						, m.luValue.value;
+						)
+					luValue = iif(laCols[m.lnCol, 2] $ 'CM';
+						, transform(nvl(m.luValue, ''));
+						, uValue(m.luValue, laCols[m.lnCol, 2]);
+						)
+					if not m.tlNULL and isnull(m.luValue)
+						lcType = laFields[m.lnCol, 2]
+						lcType = iif(m.lcType $ 'M', 'C', m.lcType)
+						luValue = uEmpty(m.lcType)
+					endif
+					replace (field(laCols[m.lnCol, 6])) with m.luValue
+				endif
+			endfor
+		endfor
+	endwith
+
+	loWB.close
+	loXL.quit
+
+	FreeTableSlim(alias(), 20) && 20% de marge
+
+	if not m.tlCursor
+		use
+	endif
 endif
 
 return m.lcResult

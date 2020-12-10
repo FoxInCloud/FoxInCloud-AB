@@ -1140,6 +1140,7 @@ lparameters ;
   tlCurrent; && [.F.] {en} Include current module's name {fr} Inclure le nom du module courant
 , tcInfo; && [Name] {en} 'Name', 'Address', 'Path', 'Object' or 'Line up'
 , tlLineNum; && [.F.] {en} Add Line number in the object source file
+, tlASCII; && [.F.] {en} Force ASCII separator
 
 tcInfo = Upper(Left(Ltrim(Evl(m.tcInfo, 'Name')), 1))
 tlLineNum = lTrue(m.tlLineNum)
@@ -1148,7 +1149,7 @@ local lcResult;
 , aa[1]; && [1- Call Stack Level, 2- Current program filename, 3- Module or Object name, 4- Module or Object Source filename, 5- Line number in the object source file, 6- Source line contents]
 , liStack, lnStack;
 , lnDigit;
-, llWeb;
+, lcSep;
 
 lcResult = ''
 
@@ -1157,13 +1158,13 @@ lnStack = Iif(m.tlLineNum;
   , program(-1);
   ) - iif(lTrue(m.tlCurrent), 1, 2)
 lnDigit = ICase(m.lnStack < 10, 1, m.lnStack < 100, 2, 3)
-llWeb = wlWeb()
+lcSep = Iif(wlWeb() and !lTrue(m.tlASCII), '&#160;', Chr(160))
 
 for liStack = 1 to m.lnStack
 	lcResult = m.lcResult;
 		+ ' > ';
 		+ padl(m.liStack, m.lnDigit, '0');
-		+ Iif(llWeb, '&#160;', Chr(160));
+		+ m.lcSep;
 		+ Iif(m.tlLineNum;
 		  , m.aa[m.liStack, Iif(m.tcInfo == 'N', 3, 2)];
 		  , cModuleInfo(Sys(16, m.liStack), m.tcInfo);
@@ -2999,7 +3000,7 @@ endproc
 define class abSetsMaintain as GA_LIGHTWEIGHT_CLASS of abGA.prg && {fr} Sauve les sets critiques et les restore s'ils ont changé
 * ===========================================
 
-hidden aSet[1], nSets
+hidden aSet[1], nSets, cAlias
 
 *---------------------------------------------------------------------------
 protected procedure init
@@ -6182,6 +6183,8 @@ endproc
 procedure setStepOn(condition as Boolean) as Boolean && {en} execute SET STEP ON within a Boolean expression
 if (cast(Nvl(m.condition, .F.) as L) or empty(pcount())) && and lDevMode() useless
 	set step on
+else
+	return .F.
 endif
 endproc
 

@@ -684,8 +684,10 @@ tcClassLib = iif(lower(justext(m.tcClassLib)) == 'prg', forceext(m.tcClassLib, '
 tiResult = 0
 
 local llResult as Boolean;
+, abSets as abSetsMaintain of abDev.prg;
 , abOnError as abOn of abDev.prg;
-, loSets as abSetsMaintain of abDev.prg;
+, abSelect as abSelect of abData.prg;
+, lcAlias as String;
 , loException as exception;
 , loForm as form;
 
@@ -694,15 +696,17 @@ if m.llResult
 
 *assert !Lower(m.tcClass) == 'baseform' && 4 Feb 2014
 
-	tcClass = alltrim(m.tcClass)
-	loSets = NewObject('abSetsMaintain', 'abDev.prg';
+	abSets = NewObject('abSetsMaintain', 'abDev.prg';
 		, .null.; && && [.null.] {en} type of SETs - .null.: all, .T.: scoped to the dataSession, .F.: global (not scoped to the dataSession)
 		, !wlAutomation(); && tlProcClass [.F.] {en} also save Set("Procedure") & Set("Classlib")
 		)
 	abOnError = NewObject('abOn', 'abDev.prg', '', 'error', '') && 2017-02-15 thn -- {FiC V 2.24.0-beta.6} {fr} 
+*	abSelect = Iif(Empty(Alias()), .null., abSelect())
+	lcAlias = Alias() && 2020-11-18 thn -- {FiC V 2.31.0-beta.6} {en} added for https://support.west-wind.com/Thread5WR03GJIA.wwt
 
 	try
 		try
+			tcClass = alltrim(m.tcClass)
 			toClass = iif(file(m.tcClassLib); && /!\ assez long pour les grilles avec classMember (plusieurs secondes)
 				, newobject(m.tcClass, m.tcClassLib, 0);
 				, createobject(m.tcClass);
@@ -737,6 +741,10 @@ if m.llResult
 
 	tiResult = icase(m.llResult, 0, m.loException.errorno = 2071, m.loException.uservalue.errorno, m.loException.errorno)
 	tcResult = iif(m.llResult, '', cException(iif(m.loException.errorno = 2071, m.loException.uservalue, m.loException)))
+	store .null. to abOnError, abSets
+	if Used(m.lcAlias)
+		select (m.lcAlias)
+	endif
 
 else
 	tcResult = textmerge(icase(;

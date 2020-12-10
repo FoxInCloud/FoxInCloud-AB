@@ -754,7 +754,7 @@ lparameters ;
   toObj; && {fr} Objet dont la propriété .wcPropSaveNot est à éditer
 , tuProps; && {fr} Propriété(s) à ajouter ou ôter de la liste
 , tlRemove; && [.F.] {fr} .F. : ajouter à la liste, .T. : ôter de  la liste {en} .F.: add to list, .T.: remove from list
-, tlCheck; && [.F.] {fr} Vérifier que l'objet détient bien les propriétés à sauvegarder
+, tlCheck; && [.F.] {fr} Vérifier que l'objet détient bien chaque propriété {en} Check object holds each property
 
 return wcPropSaveEdit_(;
 	  m.toObj;
@@ -1101,12 +1101,12 @@ endfunc
 * =============================================================
 function wcSCXfile && {fr} Name of a form file from a FoxInCloud name {fr} Nom d'un fichier écran d'après son nom FoxInCloud
 lparameters tcForm
-tcForm = Lower(Alltrim(Evl(m.tcForm, '')))
+tcForm = Iif(ga_Type_IsChar(m.tcForm, .T.), Lower(Alltrim(m.tcForm)), '')
 tcForm = Iif(Rightc(m.tcForm, 4) == '_scx';
 	, Leftc(m.tcForm, Lenc(m.tcForm)-4) + '.scx';
 	, m.tcForm;
 	)
-return Iif(! '.' $ m.tcForm or JustExt(m.tcForm) == 'scx', m.tcForm, .null.)
+return Iif(!Empty(m.tcForm) and (!'.' $ m.tcForm or JustExt(m.tcForm) == 'scx'), m.tcForm, .null.)
 endfunc
 
 * =============================================================
@@ -1539,10 +1539,10 @@ case wlLAN()
 									MessageBox(m.eMessageText, m.nDialogBoxType, m.cTitleBarText, m.nTimeout);
 		)
 
-case wlAJAX(@m.loAJAX) and wlAppHost(@m.loAppHost) && {fr} requête en cours
+case wlAppHost(@m.loAppHost) and wlAJAX(@m.loAJAX) && {fr} requête en cours
 
 	loForm = ICase(;
-		m.lnParm = 1,	m.loAppHost.oForm(m.loAppHost.cFrmMBclass, .T., .T., m.eMessageText),;
+		m.lnParm = 1,	m.loAppHost.oForm(m.loAppHost.cFrmMBclass, .T., .T., m.eMessageText),; && tuForm, tuSubForm, tlModal, t01, t02,...
 		m.lnParm = 2,	m.loAppHost.oForm(m.loAppHost.cFrmMBclass, .T., .T., m.eMessageText, m.nDialogBoxType),;
 		m.lnParm = 3,	m.loAppHost.oForm(m.loAppHost.cFrmMBclass, .T., .T., m.eMessageText, m.nDialogBoxType, m.cTitleBarText),;
 									m.loAppHost.oForm(m.loAppHost.cFrmMBclass, .T., .T., m.eMessageText, m.nDialogBoxType, m.cTitleBarText, m.nTimeout);
@@ -3556,7 +3556,7 @@ lparameters reqData, lError
 
 && 2016-06-16 thn -- {FiC V 2.21.1-beta.6} {en} created
 
-local result, piece, iSep
+local result, piece, pieces[1], lArray, iSep
 result = ''
 
 if ga_Type_IsChar(m.reqData, .T.) and .T. && !m.lError
@@ -3586,10 +3586,18 @@ if ga_Type_IsChar(m.reqData, .T.) and .T. && !m.lError
 
 	piece = Strtran(URLdecode(cawUserAction_strExtract(m.reqData, '&ValueType=', '&', 1, 3), .T.), '') && 'undefined'
 	piece = Trim(Leftc(m.piece, Evl(Atcc(CR, m.piece), Lenc(m.piece))), CR, LF)
-	piece = Iif(Empty(m.piece), '', cL(uValueJS(;
-		  URLdecode(cawUserAction_strExtract(m.reqData, '&Value=', '&', 1, 3), .T.);
-		, m.piece;
-		)))
+	lArray = m.piece == 'array'
+	piece = Iif(Empty(m.piece);
+	, '';
+	, uValueJS(;
+	    URLdecode(cawUserAction_strExtract(m.reqData, '&Value=', '&', 1, 3), .T.);
+	  , m.piece;
+	  ,@m.pieces;
+	))
+	piece = Iif(Vartype(m.piece) == 'C' and Empty(m.piece);
+	, ''; && '' m.piece
+	, Iif(m.lArray, cL(@m.pieces), cL(m.piece));
+	)
 	result = c2Words(m.result, '(', nEvl(m.piece, m.piece + ')'))
 endif
 

@@ -1181,7 +1181,7 @@ lparameters ;
   tuValue; && @ {fr} Valeur à convertir en littéral ; types supportés : cf. cLitteralJS_lSupport()
 , tlTrim; && [.F.] {fr} si type C, ôter les espaces à droite
 
-return strtran(cLitteralJS(m.tuValue, m.tlTrim), '"', '&#34;') && {fr} échappe les guillements '"' par '&#34;' pour le HTML
+return cLitteralJS(strtran(m.tuValue, '"', '&#34;'), m.tlTrim) && {fr} échappe les guillements '"' par '&#34;' pour le HTML
 endfunc
 
 * -----------------------------------------------
@@ -1194,7 +1194,7 @@ local loTest as abUnitTest of abDev.prg;
 loTest = abUnitTest()
 loAsserts = abSet('ASSERTS', 'OFF') && 'ON'
 
-loTest.Test(['&#34;Order id&#34;\nTrier : clic gauche\nFiltrer/chercher : clic droit\n(insensible à la casse)'];
+loTest.Test(["&#34;Order id&#34;\nTrier : clic gauche\nFiltrer/chercher : clic droit\n(insensible à la casse)"];
 	, '"Order id"' + CRLF + 'Trier : clic gauche' + CRLF + 'Filtrer/chercher : clic droit' + CRLF + '(insensible à la casse)';
 	)
 
@@ -1213,7 +1213,12 @@ external array tuValue
 
 tlJSON = lTrue(m.tlJSON)
 
-local lcVarType, llResult, lcResult
+local lcResult, llResult;
+, lcVarType, lcBaseClass;
+, laProp[1], lcProp;
+, laValue[1], lcValue;
+, llKeyed, ii;
+, luElt, liRow, lcRow, liCol;
 
 lcResult = ''
 
@@ -1223,11 +1228,9 @@ do case
 
 case m.lcVarType == 'C'
 
-* {fr} Supprimer les caractères non imprimables
-&& /!\ 2/8/07	conserver les sauts de ligne		lcResult = cPrintable(m.lcResult)
-
+	&& /!\ 2/8/07	conserver les sauts de ligne		lcResult = cPrintable(m.lcResult)
 	* {fr} Encadrer la chaîne de délimiteur, échapper si nécessaire
-	* {fr} return ["] + Strtran(Strtran(Iif(lTrue(m.tlTrim), Trim(m.tuValue), m.tuValue), '\', '\\'), ["], [\"]) + ["]
+	&& {en} see GA_STRINGPARSE_CLASS.MaskStrings(), parameter JSstring
 	return icase(;
 		lTrue(m.tlQuotesNo),;
 		[];
@@ -1237,26 +1240,29 @@ case m.lcVarType == 'C'
 				, CR, '\n');
 				, LF, '\n');
 			+ [],;
-		M.tlJSON,;
+		.T. or m.tlJSON,; && https://www.json.org/json-en.html && 2020-11-13 thn -- {FiC V 2.31.0-beta.6} {en} always use '"' as delimiter
 		[];
 			+ ["];
-			+ strtran(strtran(strtran(strtran(strtran(iif(lTrue(m.tlTrim), trim(m.tuValue), m.tuValue);
+			+ strtran(strtran(strtran(strtran(strtran(strtran(iif(lTrue(m.tlTrim), trim(m.tuValue), m.tuValue);
 				, '\', '\\');
 				, ["], [\"]);
 				, CRLF, '\n');
 				, CR, '\n');
 				, LF, '\n');
+				, TABUL, '\t');
 			+ ["],;
 		[];
 			+ ['];
 			+ strtran(strtran(strtran(strtran(strtran(iif(lTrue(m.tlTrim), trim(m.tuValue), m.tuValue);
 				, '\', '\\');
-				, ['], [\']); && {fr} see GA_STRINGPARSE_CLASS.MaskStrings(), parameter JSstring
+				, ['], [\']);
 				, CRLF, '\n');
 				, CR, '\n');
 				, LF, '\n');
 			+ ['];
 		)
+
+&&			chrTran(, [’], [']); && 2020-07-17 thn -- {en} https://support.west-wind.com/Thread5TD05C1YE.wwt
 
 case m.lcVarType $ 'DT'
 	return iif(m.tlJSON;
@@ -1278,28 +1284,52 @@ case m.lcVarType == 'Y'
 
 case m.lcVarType == 'O' && {fr} Objet
 && {V 1.25}
-	llResult = cLitteralJS_lSupport(m.tuValue, @m.lcResult)
-	assert m.llResult message cAssertMsg(m.lcResult)
-	if m.llResult
-&& {V 1.25}
+	llResult = cLitteralJS_lSupport(m.tuValue, @m.lcResult, @m.lcBaseClass)
+	do case
+	case !m.llResult
+		assert m.llResult message cAssertMsg(m.lcResult)
+		lcResult = ''
 
-		local laProp[1], lcProp
+	case !m.lcBaseClass == 'Collection'
 		if amembers(laProp, m.tuValue, 0, 'U') > 0 && 'U' : user-defined
 			asort(laProp)
 			for each lcProp in laProp
 				if not pemstatus(m.tuValue, m.lcProp, 2) && {fr} protected
-					lcResult = m.lcResult + ',"' + lower(m.lcProp) + '":' + cLitteralJS(getpem(m.tuValue, m.lcProp),, .t.) && {fr} JSON compatible
+					if Type('m.tuValue.' + m.lcProp, 1) == 'A'
+						if Alen(m.tuValue.&lcProp, 2) > 0
+							dimension laValue[Alen(m.tuValue.&lcProp, 1), Alen(m.tuValue.&lcProp, 2)]
+						else
+							dimension laValue[Alen(m.tuValue.&lcProp)]
+						endif
+						Acopy(m.tuValue.&lcProp, laValue)
+						lcValue = cLitteralJS(@m.laValue	,, .t.) && {fr} JSON compatible
+					else
+						lcValue = cLitteralJS(GetPem(m.tuValue, m.lcProp),, .t.) && {fr} JSON compatible
+					endif
+					lcResult = m.lcResult + ',"' + lower(m.lcProp) + '":' + m.lcValue
 				endif
-			next
+			endfor
 		endif
-		lcResult = '{' + substr(m.lcResult, 2) + '}'
-	else
-		lcResult = ''
-	endif
+		lcResult = '{' + substr(m.lcResult, 2) + '}'		
+
+	case Empty(m.tuValue.Count)
+		lcResult = '[]'
+
+	otherwise
+		llKeyed = !Empty(m.tuValue.getKey(1))
+		lcResult = Iif(m.llKeyed, '{', '[')
+		for ii = 1 to m.tuValue.Count
+			lcResult = m.lcResult;
+				+ Iif(m.ii = 1, '', ',');
+				+ Iif(m.llKeyed, '"' + m.tuValue.getKey(m.ii) + '":', '');
+				+ cLitteralJS(m.tuValue.Item(m.ii))
+		endfor
+		lcResult = m.lcResult + Iif(m.llKeyed, '}', ']')
+
+	endcase
 
 case m.lcVarType == 'A' && {fr} Array
 	if !laEmpty(@m.tuValue)
-		local luElt, liRow, lcRow, liCol
 		if Alen(m.tuValue, 2) > 1
 			for liRow = 1 to Alen(m.tuValue, 1)
 				lcResult = m.lcResult + ', ['
@@ -1338,12 +1368,14 @@ endfunc
 function cLitteralJS_lSupport && [Private to cLitteralJS()] {fr} Une données est supportée pour conversion en littéral Javascript
 lparameters ;
   tuValue; && {fr} Donnée à analyser
-, tcResult && @ {fr} Résultat localisé si pas supporté
+, tcResult; && @ {fr} Résultat localisé si pas supporté
+, tcBaseClass && @ {fr} Classe de base si objet
 
-local lcVarType, llResult
+local llResult, lcVarType, llBaseClass
 
 lcVarType = type('tuValue', 1)
 lcVarType = iif(m.lcVarType == 'A', m.lcVarType, vartype(m.tuValue))
+tcBaseClass = .NULL.
 
 do case
 
@@ -1351,6 +1383,8 @@ case m.lcVarType $ 'ACDTXLYN'
 	llResult = .t.
 
 case m.lcVarType == 'O'
+	llBaseClass = type('m.tuValue.baseClass') == 'C'
+	tcBaseClass = Iif(m.llBaseClass, m.tuValue.baseClass, '')
 	do case
 
 	case type('m.tuValue.Application.Name') == 'C' and not 'foxpro' $ lower(m.tuValue.application.name)
@@ -1359,10 +1393,10 @@ case m.lcVarType == 'O'
 													[non-FoxPro objects (<<m.tuValue.Application.Name>>) are not supported]; && Default: English
 		))
 
-	case type('m.tuValue.Class') == 'U' && {fr} Empty class
+	case !m.llBaseClass && {fr} Empty class
 		llResult = .t.
 
-	case type('m.tuValue.BaseClass') == 'C' and inlist(m.tuValue.baseclass, 'Collection', 'Control', 'Olecontrol') && {fr} unsupported foxpro class
+	case InList(m.tuValue.baseClass, 'Control', 'Olecontrol') && {fr} unsupported foxpro class
 		tcResult = textmerge(icase(;
 			cLangUser() = 'fr',	[la classe de base '<<m.tuValue.BaseClass>>' n'est pas supportée],;
 													[base class '<<m.tuValue.BaseClass>>' is not supported]; && Default: English
@@ -1393,15 +1427,15 @@ loAsserts = abSet('ASSERTS', 'OFF') && 'ON'
 
 loTest.Test('4', 4)
 
-loTest.Test('', createobject('Collection'))
+* loTest.Test('', createobject('Collection'))
 
 loTest.Test('', createobject('Excel.Application'))
 
 luData = createobject('Custom')
-m.luData.addproperty('car', 'a')
-m.luData.addproperty('num', 2)
-m.luData.addproperty('date', date(2012,06,20))
-loTest.Test('{"car":"a","date":"2012-06-20T00:00:00Z","num":2}', m.luData)
+luData.addproperty('car', 'a')
+luData.addproperty('num', 2)
+luData.addproperty('date', date(2012,06,20))
+loTest.Test('{"car":"a","date":"2012-06-20T00:00:00Z","num":2}', m.luData) && properties in alpha. order
 
 return m.loTest.Result()
 
@@ -3324,18 +3358,18 @@ function cUnescaped && {fr} Inverse de cEscaped()
 lparameters tcChain
 
 return iif(vartype(m.tcChain) == 'C';
-	, strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(cUnescaped_Base(m.tcChain);
+	, strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(strtran(cUnescaped_Base(m.tcChain);
 	  , '&#34;', ["]);
 	  , '&#39;', [']);
 	  , '&thinsp;', ' ');
 	  , '&#8211;', chr(150));
-	  , '&mdash;', chr(151));
-	  , '&#8212;', chr(151)); && &mdash; &&
+	  , '&mdash;', chr(151)), '&#8212;', chr(151));
 	  , '&#160;',  chr(160));
 	  , '&#8364;', chr(128));
 	  , '&#8482;', chr(153));
 	  , '&#339;',  chr(156));
 	  , '&#8209;', '-'); && non-breaking hyphen -- not supported by ASCII
+		, '&#8217;', Chr(146)); && [’] apostrophe
 	, m.tcChain;
 	)
 
@@ -3404,7 +3438,7 @@ if vartype(m.tcUA) == 'C' and !empty(m.tcUA)
 	return .f.; && {fr} pour placer facilement les plus fréquents en tête && {fr} http://www.botsVSbrowsers.com/
 	or 'googlebot' $ m.tcUA;
 	or 'west wind' $ m.tcUA; && {fr} West Wind Internet Protocols x,xx
-	or '/slurp' $ m.tcUA; && "Mozilla/5.0 (compatible; Yahoo! Slurp; http://help.yahoo.com/help/us/ysearch/slurp)" - https://help.yahoo.com/kb/search/SLN22600.html?impressions=true
+	or '/slurp' $ m.tcUA; && "Mozilla/5.0 (compatible; Yahoo! Slurp…)" - https://help.yahoo.com/kb/search/SLN22600.html
 	or '/bot' $ m.tcUA;
 	or 'bot/' $ m.tcUA;
 	or ' bot ' $ m.tcUA;
@@ -3415,12 +3449,14 @@ if vartype(m.tcUA) == 'C' and !empty(m.tcUA)
 	or 'spider' $ m.tcUA;
 	or 'robot' $ m.tcUA;
 	or 'yahoo!+slurp' $ m.tcUA;
-	or 'msnbot' $ m.tcUA;
+	or 'petalbot' $ m.tcUA;
 	or 'bingbot' $ m.tcUA;
 	or 'exabot' $ m.tcUA;
 	or 'voilabot' $ m.tcUA;
 	or 'alexa.com' $ m.tcUA;
-	or 'ccbot' $ m.tcUA;
+	or 'webhook' $ m.tcUA; && 2020-10-20 thn -- {FiC V 2.31.0-beta.6} {en} added for https://support.west-wind.com/Thread5VZ04J6ZA.wwt?rl=1#5W20DDDLO
+ 	or 'ccbot' $ m.tcUA;
+	or 'msnbot' $ m.tcUA;
 	or 'catchbot' $ m.tcUA;
 	or 'proximic' $ m.tcUA;
 	or 'jooblebot' $ m.tcUA;

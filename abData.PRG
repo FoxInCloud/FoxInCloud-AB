@@ -584,7 +584,7 @@ return createobject('abAlias', m.tcAlias, @m.tcResult)
 endfunc
 
 * ========================================
-define class abAlias as relation && {en} Alias settings {fr} Caractéristiques d'un alias
+define class abAlias as relation && {en} Saves/restore Alias settings {fr} Sauve/restaure les réglages d'un alias
 * ========================================
 && as GA_LIGHTWEIGHT_CLASS (GA_LIGHTWEIGHT_CLASS protects this.cResult)
 
@@ -7920,7 +7920,7 @@ text TO lcResultItem NOSHOW FLAGS 1 PRETEXT 1+2 && {fr} Field | default value | 
 	nRecsSrce | 0 | I | Source Recs | Enr. source
 	nRecsAdded | 0 | I | Added | Ajoutés
 	nRecsReplaced | 0 | I | Replaced | Remplacés
-	nRecsDeleted | 0 | I | Deleted | Supprimés
+	nRecsDeleted | 0 | I | Deleted or recalled | Supprimés ou rappelés
 	nFiles | 0 | I | # Files | Nb Fichiers
 	cFiles | '' | M | Files | Fichiers
 	nRecsSrceError | 0 | I | Errors | Erreurs
@@ -8632,18 +8632,16 @@ if m.this.lResult
 						if m.llReplace
 
 							* {fr} Aligner le statut de suppression
-							llDeleted = .f.
-							if deleted(m.tcAliasSrce)
-								if !deleted(m.tcAliasDest)
-									delete in (m.tcAliasDest)
-									this.oResult.nRecsDeleted = this.oResult.nRecsDeleted + 1
-									llDeleted = .t.
-								endif
-							else && {fr} NOT Deleted(m.tcAliasSrce)
-								if deleted(m.tcAliasDest)
-									recall in (m.tcAliasDest)
-								endif
-							endif
+							llDeleted = .t.
+							do case
+							case deleted(m.tcAliasSrce) and !deleted(m.tcAliasDest)
+								delete in (m.tcAliasDest)
+							case !deleted(m.tcAliasSrce) and deleted(m.tcAliasDest)
+								recall in (m.tcAliasDest)
+							otherwise
+								llDeleted = .f.
+							endcase
+							this.oResult.nRecsDeleted = this.oResult.nRecsDeleted + Iif(m.llDeleted, 1, 0)
 
 							* {fr} Si vérification des modifications, vérifier la nécessité du remplacement
 							if m.this.lModCheck
@@ -8748,20 +8746,21 @@ if m.this.lResult
 		endif
 
 		* {fr} Restituer le résultat final
-		local lnIgnored, lcResult
+		local lnIgnored
 		lnIgnored = this.oResult.nRecsSrce - m.this.oResult.nRecsAdded - m.this.oResult.nRecsReplaced - this.oResult.nRecsDeleted - m.this.oResult.nRecsSrceError
-		lcResult = iif(m.this.oResult.lPCtag;
-			, textmerge(icase(;
-							m.this.cLangUser = 'fr',	[, <<m.this.oResult.nRecsReplaced>> remplacés, <<m.this.oResult.nRecsSrceError>> avec erreur],; && copy-paste this line to add another language support
-																				[, <<m.this.oResult.nRecsReplaced>> replaced, <<m.this.oResult.nRecsSrceError>> with error]; && Default: English
-							));
-			, '';
-			)
-		lcResult = textmerge(icase(;
-			m.this.cLangUser = 'fr',	[Table source : '<<Dbf(m.tcAliasSrce)>>' - <<this.oResult.nRecsSrce>> enregistrements, <<m.lnIgnored>> ignorés, <<m.this.oResult.nRecsAdded>> ajoutés<<m.lcResult>>],; && copy-paste this line to add another language support
-																[Source table: '<<Dbf(m.tcAliasSrce)>>' - <<this.oResult.nRecsSrce>> records, <<m.lnIgnored>> ignored, <<m.this.oResult.nRecsAdded>> added<<m.lcResult>>]; && Default: English
-			))
-		this.cResult =  iif(m.this.lResult, m.this.cResult + CRLF, '') + m.lcResult
+		this.cResult = iif(m.this.lResult, m.this.cResult + CRLF, '')+ textmerge('';
+		  + icase(;
+				m.this.cLangUser = 'fr',	[Table source : '<<Dbf(m.tcAliasSrce)>>' - <<this.oResult.nRecsSrce>> enregistrements, <<m.lnIgnored>> ignorés, <<m.this.oResult.nRecsAdded>> ajoutés],; && copy-paste this line to add another language support
+																	[Source table: '<<Dbf(m.tcAliasSrce)>>' - <<this.oResult.nRecsSrce>> records, <<m.lnIgnored>> ignored, <<m.this.oResult.nRecsAdded>> added]; && Default: English
+			);
+			+ iif(m.this.oResult.lPCtag;
+			  , icase(;
+					m.this.cLangUser = 'fr',	[, <<m.this.oResult.nRecsDeleted>> supprimés ou rappelés, <<m.this.oResult.nRecsReplaced>> remplacés, <<m.this.oResult.nRecsSrceError>> avec erreur],; && copy-paste this line to add another language support
+																		[, <<m.this.oResult.nRecsDeleted>> deleted or recalled, <<m.this.oResult.nRecsReplaced>> replaced, <<m.this.oResult.nRecsSrceError>> with error]; && Default: English
+				  );
+			  , '';
+			  );
+			 )
 	else
 		this.cResult = textmerge(icase(;
 			m.this.cLangUser = 'fr',	[Impossible d'ouvrir la table destination <<cLitteral(Dbf(m.tcAliasDest))>> en exclusif pour la vider.],; && copy-paste this line to add another language support
@@ -8771,6 +8770,7 @@ if m.this.lResult
 endif
 
 return m.this.lResult
+endproc
 
 *---------------------------------------
 protected procedure TableSync_Rec && {fr} Exécuté à chaque enregistrement
@@ -8789,10 +8789,11 @@ enddefine && class abDataSyncVFP
 
 * -------------------------------
 procedure tModUpdate && {en} updates record's last modification date-time {fr} Met à jour la date&heure de dernière modification de l'enregistrement
-&& {en} required by the a*DataSyncVFP system
+&& {en} required by the a?DataSyncVFP system
 && {en} append to the record rule of each table as illustrated below ...
-&& {en} /!\ The Delete command does not trigger the table validation rule. However, the DELETE TRIGGER is called. The RECALL commmand does trigger the table validation rule. -- Ben Creighton
-&& {fr} nécessaire au système a*DataSyncVFP
+&& {en} /!\ The Delete command does not trigger the table validation rule. However, the DELETE TRIGGER is called.
+&& {en} The RECALL commmand does trigger the table validation rule. -- Ben Creighton
+&& {fr} nécessaire au système a?DataSyncVFP
 && {fr} ajouter à la fin de la règle d'enregistrement de chaque table comme indiqué ci-dessous ...
 && {fr} /!\ la règle d'enregistrement ne se déclenche pas lorsque l'enregistrement est supprimé
 && ... [set |,] check xxx() and yyy() and tModUpdate()

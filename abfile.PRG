@@ -2697,7 +2697,8 @@ endif
 return m.lcResult
 
 * ========================================
-function lFileWritable && {en} Wait for a given delay until a file can be accessed (about 2 ms)
+function lFileWritable && {en} Wait for a given delay until a file can be accessed
+&& executes in about 2 ms
 lparameters ;
 	cFile; && {en} file to be accessed exclusively
 , nMS; && @ [50 ms] {en} wait delay to gain write access to file -- Between(m.nMS, 50 ms, 5000 ms); @: nMS elapsed
@@ -2725,7 +2726,7 @@ if ga_Type_IsChar(m.cFile, .T.) and file(m.cFile) and !Used(cAliasUsed(m.cFile))
 	lFileCDX = File(m.cFileCDX)
 
 	do while nMS(m.nSeconds) < m.nMS
-		hFile = fopen(m.cFile, 2)
+		hFile = Fopen(m.cFile, 2)
 		hFileFPT = Iif(m.lFileFPT, fopen(m.cFileFPT, 2), -1)
 		hFileCDX = Iif(m.lFileCDX, fopen(m.cFileCDX, 2), -1)
 		success = .T.;
