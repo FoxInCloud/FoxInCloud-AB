@@ -8321,7 +8321,7 @@ if m.this.lResult
 		 or lTrue(m.tuFieldsIgnore) ;
 		 or this.lFieldsMatch(m.lcAliasDest, m.lcAliasSrce, uDefault(m.tuFieldsIgnore, 'WARNING'))
 		if m.this.lResult
-
+* setStepOn(m.lcAliasDest == "AWCONTACT")
 			try
 
 				* {fr} Réaliser la sychronisation
