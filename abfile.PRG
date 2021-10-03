@@ -1872,6 +1872,7 @@ if m.llResult
 			pnFileSkel = 0
 			if m.pnFoldersExcl > 0
 
+				Asort(paFoldersExcl)
 				for lnFolder = m.pnFoldersExcl to 1 step -1
 					lcFolder = paFoldersExcl[m.lnFolder]
 
@@ -2772,13 +2773,13 @@ lparameters ;
 lSeconds = lTrue(m.lSeconds)
 local lnLen
 lnLen = 12 + Iif(m.lSeconds, 2, 0)
-return ForceExt('';
-	  + JustStem(m.cFileAddr);
-	  + '_';
-	  + Transform(Iif(lTrue(m.lSkeleton), Replicate('?', m.lnLen), Left(Ttoc(Datetime(), 1), m.lnLen));
-	  	, '@R 9999-99-99_99-99' + Iif(m.lSeconds, '-99', ''));
-	, Lower(JustExt(m.cFileAddr));
-	)
+return '';
+  + JustStem(m.cFileAddr);
+  + '_';
+  + Transform(Iif(lTrue(m.lSkeleton), Replicate('?', m.lnLen), Left(Ttoc(Datetime(), 1), m.lnLen));
+  	, '@R 9999-99-99_99-99' + Iif(m.lSeconds, '-99', ''));
+	+ '.' + Lower(JustExt(m.cFileAddr));
+	+ ''
 endfunc
 
 * ========================================

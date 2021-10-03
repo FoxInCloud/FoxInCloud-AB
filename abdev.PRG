@@ -6180,11 +6180,9 @@ return m.int
 endproc
 
 * =============================================
-procedure setStepOn(condition as Boolean) as Boolean && {en} execute SET STEP ON within a Boolean expression
-if (cast(Nvl(m.condition, .F.) as L) or empty(pcount())) && and lDevMode() useless
+procedure setStepOn(condition as Boolean) as Boolean && {en} execute SET STEP ON if condition is met; can be used within a Boolean expression
+if (cast(Nvl(m.condition, .F.) as L) or empty(pcount()))
 	set step on
-else
-	return .F.
 endif
 endproc
 
@@ -7585,7 +7583,7 @@ endfunc
 *!*  MessageBox(SHA1("ceci est un test")="71438dc237b45f04759c41e1b2d34f42a46318f3")
 
 * ---------------------------------------------
-FUNCTION SHA1 && {en} RSA-SHA1 digital signature
+FUNCTION SHA1 && {en} RSA SHA1 digital signature
 LPARAMETERS cMessage
 
 PRIVATE HO, H1, H2, H3, H4

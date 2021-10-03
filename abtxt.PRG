@@ -3451,6 +3451,7 @@ if vartype(m.tcUA) == 'C' and !empty(m.tcUA)
 	or 'yahoo!+slurp' $ m.tcUA;
 	or 'petalbot' $ m.tcUA;
 	or 'bingbot' $ m.tcUA;
+	or 'zoominfobot' $ m.tcUA;
 	or 'exabot' $ m.tcUA;
 	or 'voilabot' $ m.tcUA;
 	or 'alexa.com' $ m.tcUA;

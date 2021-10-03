@@ -47,8 +47,18 @@
 #define DOS_USER_APPDATA_AW			DOS_USER_APPDATA_AB + 'AW\'
 
 * {fr} Dossiers à exclure des traitements batch
-#define FOLDERS_EXCLUDE	'save,_save,old,_old,bak,backup,back,_back,tmp,_tmp,temp,_temp,ancien,_ancien,anciens,_anciens,sauve,_sauve';
-	 + ',src,source,_source,script,scripts,image,images,screenshots,doc,docs,test,_gsData_,.git,test,tests'
+#define FOLDERS_EXCLUDE	'';
+	 + 'save,_save,sauve,_sauve';
+	 + ',old,_old,ancien,_ancien,anciens,_anciens';
+	 + ',bak,_bak,back,_back,backup';
+	 + ',tmp,_tmp,temp,_temp';
+	 + ',src,_src,source,_source';
+	 + ',script,scripts';
+	 + ',image,images,screenshots';
+	 + ',doc,docs';
+	 + ',test,_test,tests,_tests';
+	 + ',_gsData_,.git, .github';
+	 + ''
 
 *!*	declare integer ShellExecute IN Shell32.dll; && {fr} If the function succeeds, it returns a value greater than 32
 *!*		  integer nWinHandle; && {fr} A handle to the parent window used for displaying a UI or error messages. This value can be NULL if the operation is not associated with a window.
