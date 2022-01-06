@@ -3884,18 +3884,19 @@ enddefine && {fr} CLASS abISX
 * =================================================
 
 * ------------------------------------
-function uValue && {fr} Valeur convertie selon le varType spécifié (AKA coercition de type)
+function uValue && {en} Value converted to a specified varType (AKA type coersion) {fr} Valeur convertie selon un varType spécifié (coercition de type)
 lparameters ;
-  tuValue; && {fr} Valeur source
-, tcTypeDest && {fr} Type de valeur attendu selon codification de la fonction VFP varType()
+  tuValue; && {en} Source Value {fr} Valeur source
+, tcTypeDest; && {en} Expected Value Type according to VarType() codes {fr} Type de valeur attendu selon codification de la fonction VFP VarType()
+, tlNlitt; && [.F.] {en} Numeric literal string {fr} Littéral si chaîne numérique && 2021-10-30 thn -- {FiC V 3.0.0-beta.5} {en} added
 
-&& /!\ pourrait être simplifiée et optimisée avec Cast()
+&& {fr} /!\ pourrait être simplifiée et optimisée avec Cast()
 
 local luResult;
 , llResult;
 , lcTypeSrce;
 , lcTypeDest;
-, lcPoint, lcSeparator, lcChars;
+, lcPoint, lcSepar, lcChars;
 
 #if .f. && {fr} Vartype() VFP9
 	C && {fr} Character, Memo, Varchar, Varchar (Binary)
@@ -3935,14 +3936,18 @@ case m.lcTypeSrce == 'C'
 
 		* {fr} Normaliser le point décimal éventuel, supprimer les séparateurs de milliers
 		lcPoint = set("Point")
-		lcSeparator = set("Separator")
-		lcChars = m.lcSeparator + space(1) + set("Currency", 1) + '$'
-		tuValue = iif(m.lcSeparator == '.';
-			, chrtran(m.tuValue, m.lcChars, '');
-			, chrtran(m.tuValue, '.' + m.lcChars, m.lcPoint);
+		lcSepar = set("Separator")
+		lcChars = m.lcSepar + space(1) + Ltrim(set("Currency", 1)) + '$'
+		tuValue = ICase(;
+			lTrue(m.tlNlitt) and !Empty(cEuroANSI('s')),;
+			  Chrtran(strtran(m.tuValue, '.', m.lcPoint), Chrtran(m.european, '+-$0123456789'+m.lcPoint, ''), '') + cEuroANSI(.T.),; && 2021-10-30 thn -- {FiC V 3.0.0-beta.5} {en} added for https://support.west-wind.com/Thread66D0H3XML.wwt && 2021-12-16 thn -- {FiC V 3.0.0-beta.7} {en} changed for https://support.west-wind.com/Thread67T048NY1.wwt
+			m.lcSepar == '.',;
+			  chrtran(m.tuValue, m.lcChars, ''),;
+			  chrtran(m.tuValue, '.' + m.lcChars, m.lcPoint);
 			)
 		assert occurs(m.lcPoint, m.tuValue) <= 1 message cAssertMsg(textmerge([Plus d'un séparateur décimal dans le nombre <<m.tuValue>>]))
 	endif
+
 	luResult = icase(;
 		m.lcTypeDest == 'N', val(m.tuValue),;
 		m.lcTypeDest == 'Y', ntom(val(m.tuValue)),;

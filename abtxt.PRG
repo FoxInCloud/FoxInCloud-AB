@@ -1618,7 +1618,7 @@ do case
 case m.lcVarType == 'C' and not empty(m.tuEuropean)
 
  	* {fr} Si les chaines de traduction ne sont pas en mémoire, les lire
- 	if not vartype(m.EuroAnsi) == 'C'
+ 	if !vartype(m.EuroAnsi) == 'C'
 		public European, EuroAnsi && {fr} pour accélérer les appels répétés
 		external file European.mem
 		restore from (home() + 'european.mem') additive

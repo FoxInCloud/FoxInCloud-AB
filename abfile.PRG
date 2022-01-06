@@ -476,8 +476,9 @@ procedure FileMove && {fr} Déplace un ou plusieurs fichier(s) en créant le(s) do
 lparameters ;
   tcFileSrce; && {en} current address (can contain wildcard characters) {fr} Adresse actuelle (peut contenir des caractères joker)
 , tcFileDest; && {en} target  address (can contain wildcard characters) {fr} Nouvelle adresse (peut contenir des caractères joker)
-, tlCopyForce; && [.F.] {fr} Toujours copier (pas de RENAME, donc potentiellement plus lent)
+, tlCopyForce; && [.F.] {en} Always COPY the file (instead of RENAME, slower for large files) {fr} Toujours copier (pas de RENAME, plus lent pour des fichiers lourds)
 , tcResult; && @ {fr} Résultat
+, tlSrceFolderEmptyRemove; && {en} remove source folder if empty {fr} Supprimer le dossier source s'il est vide && 2021-10-15 thn -- {FiC V 3.0.0-beta.4} {en} added
 
 tcResult = ''
 
@@ -485,6 +486,8 @@ local llResult as Boolean;
 , loException as exception;
 , lcExt as String;
 , llWild as Boolean;
+, lcDir as String;
+, aa[1];
 
 llResult = lFiles(m.tcFileSrce)
 assert m.llResult message cAssertMsg(textmerge([Le fichier '<<m.tcFileSrce>>' n'existe pas]))
@@ -520,6 +523,10 @@ if m.llResult
 			 	else
 				 	llResult = !Empty(MoveFile(cFileCased(m.tcFileSrce), m.tcFileDest))
 			 	endif
+			endif
+			
+			if lTrue(tlSrceFolderEmptyRemove) and varSet(@m.lcDir, JustPath(m.tcFileSrce)) and lDirEmpty(m.lcDir)
+				rd (m.lcDir)
 			endif
 
 		catch to loException
@@ -568,26 +575,28 @@ else
 endif
 
 * ========================================
-function lDir && {fr} Un dossier existe
+function lDir && {en} A folder exists {fr} Un dossier existe
 lparameters tcDir, tlStrict && {fr} Adresse du dossier ; supporte wildcard
-local array laTemp[1]
+local array aa[1]
 return .T.;
  and vartype(m.tcDir) == 'C';
  and not empty(m.tcDir);
  and Iif(lTrue(m.tlStrict);
-	 , adir(laTemp, addbs(m.tcDir), 'DHS') >= 1; && {fr} Directory, Hidden, System
+	 , adir(aa, addbs(m.tcDir), 'DHS') >= 1; && {fr} Directory, Hidden, System
 	 , directory(m.tcDir);
 	 )
+endfunc
 
 * ========================================
-function lDirEmpty && {fr} Un dossier existe et est vide
+function lDirEmpty && {en} A folder exists and is empty {fr} Un dossier existe et est vide
 lparameters tcDir && {fr} Adresse du dossier ; supporte wildcard
-local laTemp[1]
+local aa[1]
 
 return lDir(m.tcDir, .T.);
- and adir(laTemp, forcepath('*.*', m.tcDir), [DHS]) = 2;
- and laTemp[1,1] == '.';
- and laTemp[2,1] == '..'
+ and adir(aa, forcepath('*.*', m.tcDir), [DHS]) = 2;
+ and aa[1,1] == '.';
+ and aa[2,1] == '..'
+endfunc
 
 * ========================================
 function lFile && {fr} Un fichier existe (plus rapide et précis que File() car ne cherche pas dans le PATH)

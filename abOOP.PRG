@@ -2493,6 +2493,7 @@ for each lcProp in laProp
 	lcType = strextract(m.lcProp, '<#t#>', '</#t#>')
 	luValue = strextract(m.lcProp, '<#v#>', '</#v#>')
 	lcProp = strextract(m.lcProp, '<#n#>', '</#n#>') && {fr} en dernier car m.lcProp est recyclée ...
+* setStepOn(m.lcProp=='refresh')
 	llProp = .f.;
 	 or not lProperty(m.toResult, m.lcProp);
 	 or not (.f.;
