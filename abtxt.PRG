@@ -2912,7 +2912,7 @@ this.PatternMatched = ''
 procedure setup && {fr} Règle les options de recherche
 lparameters ;
   tcPattern; && [''] {fr} Expression régulière de recherche
-, tuIgnoreCase; && [.null.] {fr} Ignorer la casse dans les comparaisons
+, tuIgnoreCase; && [.null.] {fr} Ignorer la casse dans les comparaisons || initiales de 3 réglages
 , tlGlobal; && [.null.] {fr} Trouver toutes les occurrences ou la première seulement
 , tlMultiline; && [.null.] {fr} Le texte comporte plusieurs lignes
 
@@ -3410,7 +3410,7 @@ local loCurrency1 as abSet of abDev.prg;
 , loCurrency2 as abSet of abDev.prg
 
 loCurrency1 = abSet('Currency', icase(;
-	M.tcCurrency == 'EUR', ' Â€',; && Copy-paste this line to add another currency support
+	M.tcCurrency == 'EUR', ' €',; && Copy-paste this line to add another currency support
 		'$';
 	),,,.t.)
 
@@ -3420,6 +3420,7 @@ loCurrency2 = abSet('Currency', icase(;
 	),,,.t.)
 
 return transform(cast(m.ty as y))
+endfunc
 
 * -------------------------------
 function lBotSpider && {en} Request from a search engine bot spider {fr} Une requête émane d'une araignée d'un moteur de recherche
@@ -4489,6 +4490,7 @@ local result as String;
 
 result = cFullName('', m.tcFirst, m.tcLast)
 lResult = !Empty(m.result)
+tcEmail = Trim(Evl(m.tcEmail, ''))
 result = Iif(lEmailAddrOK(m.tcEmail);
 	, m.result + Iif(m.lResult, ' <', '') + Alltrim(m.tcEmail) + Iif(m.lResult, '>', '');
 	, '';

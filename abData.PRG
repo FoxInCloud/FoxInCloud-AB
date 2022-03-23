@@ -3079,7 +3079,7 @@ endfunc
 function aFieldsShort && {fr} noms de champs courts
 lparameters ;
   result; && @ {fr} résultat (cumulatif)
-, taField; && @ {en} result Fields [long field name, 10-chars field name]
+, taField; && @ {en} result Fields [long field name, short field name (10-chars)]
 , tcTable; && {fr} table
 
 && 2018-05-09 thn -- {FiC V 2.27.0-beta.1} {en} to do: remplacer par aFieldLong10()
@@ -3090,7 +3090,7 @@ local nField
 
 nField = aFieldLong10(;
 	 @m.result; && @ {fr} résultat (cumulatif)
-	,@m.taField; && @ {en} Fields [long field name, 10-chars field name]
+	,@m.taField; && @ {en} Fields [long field name, short field name (10-chars)]
 	,@m.tcTable; && [Alias()] {en} Table : Alias | Work area | Address | [DB!]Table
 	, .T.; && [.F.] {en} Keep fields that are originally short
 	)
@@ -3098,62 +3098,6 @@ nField = aFieldLong10(;
  = m.nField > 0 and aColDel(@m.taField, 1) > 0
 
 return m.nField
-
-*!*	2018-05-16 thn -- {FiC V 2.27.0-beta.2} {en} code prone to "not enough memory" errors when fileToStr(big tables)
-*!*	local lnResult as integer;
-*!*	, llResult;
-*!*	, lcResult;
-*!*	, lcAlias, llAlias;
-*!*	, lcFields, lnFields;
-*!*	, lcField, liField;
-*!*	, lcFile
-
-*!*	lnResult = 0
-
-*!*	lcAlias = cAlias(m.tcTable, @m.llAlias,, @m.result)
-*!*	llResult = used(m.lcAlias)
-*!*	if m.llResult
-
-*!*	  lnResult = fcount(m.lcAlias)
-*!*	  dimension taField[m.lnResult]
-*!*	  for liField = 1 to m.lnResult
-*!*	    taField[m.liField] = field(m.liField, m.lcAlias)
-*!*	  endfor
-*!*	  && to do: refermer la table temporairement pour lire son en-tête
-*!*	  for liField = 1 to m.lnResult
-*!*	  	lcField = taField[m.liField]
-*!*	  	if lenc(m.lcField) > 10
-*!*			  do case
-*!*			  case !Empty(m.lcFields)
-*!*			  case .F.;
-*!*			   or IsExclusive(m.lcAlias) and varSet(@m.lcResult, [it's used Exclusive]);
-*!*			   or !varSet(@m.lcFile, ForcePath(m.tcTable, Sys(2023)));
-*!*			   or !FileCopy(m.tcTable, m.lcFile, @m.lcResult) and varSet(@m.lcResult, [can't copy to "] + m.lcFile + '"' + ': ' + m.lcResult);
-*!*			   or varSet(@m.lnFields, Fopen(m.lcFile)) and m.lnFields = -1 and varSet(@m.lcResult, [can't open file "] + m.lcFile + '" low level')
-*!*		  		lcResult = textmerge([Can't get the short field name of '<<m.lcField>>' in '<<m.tcTable>>' because ] + m.lcResult)
-*!*		  		llResult = cResultAdd(@m.result, m.lcResult)
-*!*		  		lnResult = 0
-*!*		  		exit
-*!*			  otherwise
-*!*					Fseek(m.lnFields, 33)
-*!*					lcFields = Fread(m.lnFields, 32 * m.lnResult)
-*!*			  	Fclose(m.lnFields)
-*!*			  	erase (m.lcFile)
-*!*			  endcase
-*!*		    taField[m.liField] = trim(substr(m.lcFields, 32 * m.liField - 31, 10), chr(0))
-*!*	  	endif
-*!*	  endfor
-*!*	  if m.llAlias
-*!*	  	use in (m.lcAlias)
-*!*	  endif
-*!*	else
-*!*		lcResult = [Can't find table ] + cL(m.tcTable)
-*!*		llResult = cResultAdd(@m.result, m.lcResult)
-*!*	endif
-
-*!*	assert m.llResult message cAssertMsg(m.lcResult)
-
-*!*	return m.lnResult
 endfunc
 
 * ========================================
@@ -7795,7 +7739,7 @@ endif
 return m.llResult
 
 * ========================================
-define class abDataSyncVFP as custom && {fr} Synchronise deux tables ou deux bases de données VFP && {fr} as custom pour .addObject()
+define class abDataSyncVFP as session && custom && {fr} Synchronise deux tables ou deux bases de données VFP && {fr} as custom pour .addObject()
 * ========================================
 
 && {en} Each table must have:
@@ -7869,7 +7813,10 @@ if m.llResult
 	for lnResultItem = 1 to Alen(this.aResultItems, 1)
 		lcResultItems = c2Words(m.lcResultItems, ',', textmerge("<<this.aResultItems[m.lnResultItem, 1]>> <<this.aResultItems[m.lnResultItem, 3]>>"))
 	endfor
+
 	addproperty(m.this, 'abSelect', abSelect())
+	AddProperty(m.this, 'oDeleted', abSet('DELETED', iif(lTrue(m.this.lSyncDeleted), 'OFF', 'ON')))
+
 	create cursor (m.this.cResultCursor) (&lcResultItems)
 
 	this.cDBCsrce = m.this.cDBCsrce && {fr} see this.cDBCsrce_Assign()
@@ -8412,7 +8359,30 @@ return m.this.lResult
 endfunc
 
 *---------------------------------------
-protected procedure TableSync_ && {fr} Réalise la synchronisation des tables
+hidden function TableSync_cExp_FieldLong10 && {fr} Intervertit les noms de champ long et courts dans une expression
+lparameters ;
+  tcExp;
+, taFieldLong10; && @ [long field name, short field name (10-chars)]
+, tlFieldLong; && [.F.] map to long field names
+
+external array taFieldLong10
+local abRegExp as abRegExp of abTxt.prg, lnRow, liRow, liColSrch, liColRepl;
+
+if Alen(taFieldLong10, 2) > 0
+	abRegExp = abRegExp()
+	liColSrch = Iif(m.tlFieldLong, 2, 1)
+	liColRepl = Iif(m.tlFieldLong, 1, 2)
+	for liRow = 1 to Alen(taFieldLong10, 1)
+		abRegExp.setup('\b' + m.taFieldLong10[m.liRow, m.liColSrch] + '\b', 'gi')
+		tcExp = abRegExp.replace(m.tcExp, m.taFieldLong10[m.liRow, m.liColRepl])
+	endfor
+endif
+
+return m.tcExp
+endfunc
+
+*---------------------------------------
+protected procedure TableSync_ && {fr} Exécute la synchronisation des tables
 lparameters ;
   tcAliasDest; && {fr} Alias de la table destination
 , tcAliasSrce; && {fr} Alias de la table source
@@ -8426,43 +8396,57 @@ tlCKmatch = lTrue(m.tlCKmatch)
 tlPKreplace = lTrue(m.tlPKreplace)
 tnRecs = iif(vartype(m.tnRecs) == 'N' and m.tnRecs > 0, int(m.tnRecs), 0)
 
-* {fr} Si la table destination a une clé unique (primaire ou candidate)
-local llCtag, lcPCtag, lcPCexp, lcPCexpMem;
-, llPtag, lcPtag, lcPexp, lcPexpMem, lcPexpDest, lcPCmsg
+* {fr} si une seule des tables est dans une base de données, tabuler les correspondances entre champs longs et courts (10 caractères)
+local llFieldLong10, llFieldLongSrce, llFieldLongDest, lnFieldLong10, laFieldLong10[1], cResult
+llFieldLongSrce = CursorGetProp("SourceType", m.tcAliasSrce)%100 # 3 or !Empty(CursorGetProp("Database", m.tcAliasSrce))
+llFieldLongDest = CursorGetProp("SourceType", m.tcAliasDest)%100 # 3 or !Empty(CursorGetProp("Database", m.tcAliasDest))
+llFieldLong10 = m.llFieldLongSrce # m.llFieldLongDest
+lnFieldLong10 = Iif(m.llFieldLong10, aFieldLong10(;
+	  @m.cResult;
+	, @m.laFieldLong10; && [long field name, short field name (10-chars)]
+	, Iif(m.llFieldLongSrce, m.tcAliasSrce, m.tcAliasDest);
+	), 0)
 
+local llCtag; && candidate
+, lcPCtag, lcPCexp, lcPCexpMem, lcPCmsg; && primary or candidate
+, llPtag, lcPtag, lcPexp, lcPexpMem, lcPexpDest && primary
+
+&& 2022-02-02 thn -- {FiC V 3.0.0-beta.8} {en} to do : handle long/short field names
+
+* {fr} Si les tables source et destination partagent une clé unique (primaire ou candidate)
 llCtag = m.tlCKmatch
 lcPCtag = cTagPC(m.tcAliasDest, @m.lcPCexp, @m.llCtag)
-this.oResult.lPCtag = not empty(m.lcPCtag) and lTableExpr(m.lcPCexp, m.tcAliasSrce)
+llPtag = !m.llCtag
+this.oResult.lPCtag = !empty(m.lcPCtag) and lTableExpr(Iif(m.llFieldLong10, this.TableSync_cExp_FieldLong10(m.lcPCexp, @m.laFieldLong10, m.llFieldLongSrce), m.lcPCexp), m.tcAliasSrce)
 if this.oResult.lPCtag
 
-	* {fr} Calculer l'expression mémoire de la clé
-	lcPCexpMem = cExprFieldsPrefixed(m.lcPCexp, m.tcAliasDest, 'm') && {fr} expression de recherche de l'enr. à mettre à jour (en mémoire)
+	* {fr} Calculer l'expression mémoire de la clé (à mettre à jour en mémoire)
+	lcPCexpMem = cExprFieldsPrefixed(m.lcPCexp, m.tcAliasDest, 'm')
 
-	* {fr} Si la clé est candidate et la table destination a une clé primaire valable sur la table source
-	llPtag = not m.llCtag
-	if m.llPtag
-		lcPtag = m.lcPCtag
-		lcPexp = m.lcPCexp
-		lcPexpMem = m.lcPCexpMem
-	else
+	* {fr} Si la clé est candidate, voir si la table destination a aussi une clé primaire valable sur la table source
+	if m.llCtag
 		lcPtag = cTagP(m.tcAliasDest, @m.lcPexp)
-		llPtag = not empty(m.lcPtag) and lTableExpr(m.lcPexp, m.tcAliasSrce)
+		llPtag = !empty(m.lcPtag) and lTableExpr(Iif(m.llFieldLong10, this.TableSync_cExp_FieldLong10(m.lcPexp, @m.laFieldLong10, m.llFieldLongSrce), m.lcPexp), m.tcAliasSrce)
 		if m.llPtag
 			lcPexpMem = cExprFieldsPrefixed(m.lcPexp, m.tcAliasDest, 'm')
 			lcPexpDest = cExprFieldsPrefixed(m.lcPexp, m.tcAliasDest, m.tcAliasDest)
 		endif
+	else && m.llPtag
+		lcPtag = m.lcPCtag
+		lcPexp = m.lcPCexp
+		lcPexpMem = m.lcPCexpMem
 	endif
 
 	* {fr} Définir si les enr. sont comparés sur leur clé candidate
-	this.oResult.lcTag = !m.llPtag or m.tlCKmatch && {fr} les enregistrements sont comparés selon un index candidat
-	this.oResult.cPCtag = iif(m.this.oResult.lcTag, m.lcPCtag, m.lcPtag) && {fr} nom de l'index primaire ou candidat de la table destination
-	this.oResult.cPCexp = iif(m.this.oResult.lcTag, m.lcPCexp, m.lcPexp) && {fr} expression de l'index primaire ou candidat de la table destination
+	this.oResult.lCtag = !m.llPtag or m.tlCKmatch && {fr} les enregistrements sont comparés selon un index candidat
+	this.oResult.cPCtag = iif(m.this.oResult.lCtag, m.lcPCtag, m.lcPtag) && {fr} nom de l'index primaire ou candidat de la table destination
+	this.oResult.cPCexp = iif(m.this.oResult.lCtag, m.lcPCexp, m.lcPexp) && {fr} expression de l'index primaire ou candidat de la table destination
 	lcPCmsg = textmerge([];
 		+ icase(;
 			m.this.cLangUser = 'fr',	[ajout ou remplacement d'enregistrement(s) selon la clé <<Iif(this.oResult.lCtag, 'candidate', 'primaire')>> '<<m.this.oResult.cPCtag>>' (<<m.this.oResult.cPCexp>>)],; && copy-paste this line to add another language support
 																[adding or replacing records based on <<Iif(this.oResult.lCtag, 'candidate', 'primary')>> key '<<m.this.oResult.cPCtag>>' (<<m.this.oResult.cPCexp>>)]; && Default: English
 			);
-		+ iif(m.this.oResult.lcTag and m.llPtag;
+		+ iif(m.this.oResult.lCtag and m.llPtag;
 			, ' ' + icase(;
 				m.this.cLangUser = 'fr',	Iif(m.tlPKreplace, 'en remplaçant', 'et') + [ la clé primaire '<<m.lcPtag>>' (<<m.lcPexp>>)] + Iif(m.tlPKreplace, ' si différente', ''),; && copy-paste this line to add another language support
 																	Iif(m.tlPKreplace, 'while replacing the', 'and') + [ primary key '<<m.lcPtag>>' (<<m.lcPexp>>)] + Iif(m.tlPKreplace, ' if different', ''); && Default: English
@@ -8471,8 +8455,7 @@ if this.oResult.lPCtag
 			);
 		)
 
-
-* {fr} Sinon (la table destination n'a pas de clé unique)
+* {fr} Sinon (les tables source et destination ne partagent aucune clé unique)
 else
 	if m.tlCKmatch
 		this.lResult = .f.
@@ -8505,18 +8488,9 @@ if m.this.lResult
 	endif
 	if m.this.lResult
 
-		* {fr} si une seule des tables est dans une base de données, tabuler les correspondances entre champs longs et courts (10 caractères)
-		local llFieldLongSrce, llFieldLongDest, lnFieldLong10, laFieldLong10[1], cResult
-		llFieldLongSrce = CursorGetProp("SourceType", m.tcAliasSrce)%100 # 3 or !Empty(CursorGetProp("Database", m.tcAliasSrce))
-		llFieldLongDest = CursorGetProp("SourceType", m.tcAliasDest)%100 # 3 or !Empty(CursorGetProp("Database", m.tcAliasDest))
-		lnFieldLong10 = Iif(m.llFieldLongSrce # m.llFieldLongDest;
-			, aFieldLong10(@m.cResult, @m.laFieldLong10, Iif(m.llFieldLongSrce, m.tcAliasSrce, m.tcAliasDest));
-			, 0;
-			)
-
 		* {fr} Créer une variable par champ de la table source
 		local lcFields, laField[1], lnField, liField, lcField
-		lcFields = c2Words(cFields(m.tcAliasSrce), ',', iif(Empty(m.lnFieldLong10), '', cListOfArray(@m.laFieldLong10,, Iif(m.llFieldLongSrce, 2, 1))))
+		lcFields = c2Words(cFields(m.tcAliasSrce), ',', iif(m.llFieldLong10, cListOfArray(@m.laFieldLong10,, Iif(m.llFieldLongSrce, 2, 1)), ''))
 		local &lcFields
 
 		* {fr} Si forçage des types ou vérification des modifications
@@ -8551,10 +8525,8 @@ if m.this.lResult
 		 and .T.
 		plPKgen = m.tlReplace or not m.llPtag && {fr} Générer la PK
 
-		local llDeletedOff, loDeleted, loExact, loException as exception, clSyncField, llSyncField
+		local loDeleted, loExact, loException as exception, clSyncField, llSyncField
 
-		llDeletedOff = m.this.lSyncDeleted
-		loDeleted = abSet('DELETED', iif(m.llDeletedOff, 'OFF', 'ON'))
 		loExact = abSet('EXACT', 'ON')
 		clSyncField = this.clSyncField_get(m.tcAliasDest)
 		llSyncField = .t.;
@@ -8614,7 +8586,7 @@ if m.this.lResult
 				try
 
 					* {fr} Si clé primaire non automatique, chercher l'enregistrement correspondant dans la table destination
-					llReplace = this.oResult.lPCtag and iif(this.oResult.lcTag;
+					llReplace = this.oResult.lPCtag and iif(this.oResult.lCtag;
 							, seek(evaluate(m.lcPCexpMem), m.tcAliasDest, m.lcPCtag);
 							, seek(evaluate(m.lcPexpMem ), m.tcAliasDest, m.lcPtag);
 							)
@@ -8625,7 +8597,7 @@ if m.this.lResult
 
 						* {fr} Si comparaison sur clé candidate sans conflit de clé primaire
 						llReplace = .F.;
-							or !(this.oResult.lcTag and m.llPtag);
+							or !(this.oResult.lCtag and m.llPtag);
 							or m.tlPKreplace; && 2016-12-13 thn -- {FiC V 2.23.0-beta.8} {en} added for ipMigrator
 							or luEqual(evaluate(m.lcPexpMem), evaluate(m.lcPexpDest));
 							or .F.
@@ -8680,13 +8652,7 @@ if m.this.lResult
 
 					else
 
-*!*								if m.llDeletedOff && 2016-08-12 thn -- {FiC V 2.22.0-beta.3} {en} added -- don't know if useful!
-*!*									set deleted on
-*!*								endif
 						insert into (m.tcAliasDest) from memvar
-*!*								if m.llDeletedOff && 2016-08-12 thn -- {FiC V 2.22.0-beta.3} {en} added
-*!*									set deleted off
-*!*								endif
 						this.oResult.nRecsAdded = m.this.oResult.nRecsAdded + 1
 					endif
 
@@ -8791,11 +8757,12 @@ enddefine && class abDataSyncVFP
 procedure tModUpdate && {en} updates record's last modification date-time {fr} Met à jour la date&heure de dernière modification de l'enregistrement
 && {en} required by the a?DataSyncVFP system
 && {en} append to the record rule of each table as illustrated below ...
-&& {en} /!\ The Delete command does not trigger the table validation rule. However, the DELETE TRIGGER is called.
-&& {en} The RECALL commmand does trigger the table validation rule. -- Ben Creighton
+&& {en} /!\ The DELETE command does not trigger the table validation rule. However, the DELETE TRIGGER is called.
+&& {en} The RECALL commmand does trigger the table validation rule. -- https://fox.wikis.com/wc.dll?Wiki~Delete
 && {fr} nécessaire au système a?DataSyncVFP
 && {fr} ajouter à la fin de la règle d'enregistrement de chaque table comme indiqué ci-dessous ...
-&& {fr} /!\ la règle d'enregistrement ne se déclenche pas lorsque l'enregistrement est supprimé
+&& {fr} /!\ la règle d'enregistrement ne se déclenche pas lorsque l'enregistrement est supprimé (DELETE)
+&& {fr} elle se déclenche au rappel de l'enregistrement (RECALL) -- https://fox.wikis.com/wc.dll?Wiki~Delete
 && ... [set |,] check xxx() and yyy() and tModUpdate()
 
 lparameters tModField, lSyncField
@@ -8941,7 +8908,7 @@ endfunc
 function aFieldLong10 && {en} Long field as renamed in a free copy of a table or cursor && {fr} noms de champs de plus de 10 caractères dans une copie libre d'une table ou curseur
 lparameters ;
   result; && @ {fr} résultat (cumulatif)
-, laField; && @ {en} Fields [long field name, 10-chars field name]
+, laField; && @ {en} Fields [long field name, short field name (10-chars)]
 , lcTable; && [Alias()] {en} Table : Alias | Work area | Address | [DB!]Table
 , llAllFields; && [.F.] {en} Keep fields that are originally short
 
@@ -9047,7 +9014,7 @@ loTest.assert(@m.aa, @m.bb)
 * ---------------------------------------------
 function aFieldLong10_cField && {fr} nom d'un champ de plus de 10 caractères dans une table libre ou libérée
 lparameters ;
-  laField; && @ {en} result [long field name, 10-chars field name]
+  laField; && @ {en} result [long field name, short field name (10-chars)]
 , lcField; && {en} Field to add
 
 && {fr} utilisé par awHTML
