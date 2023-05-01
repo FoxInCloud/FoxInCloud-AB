@@ -773,8 +773,9 @@ define class oAlias as abAlias of abData.prg && {en} Alias settings {fr} Caracté
 * ---------------------------------------------------
 procedure swap as Boolean && {fr} Ouvre une autre table sous le même alias et lui applique les mêmes attributs {en} USE another table under the same Alias with the same attributes
 lparameters ;
-  tcDBF; && Table
-, tcResult; && @ {fr} Résultat {en} Result
+  tcResult; && @ {fr} Résultat {en} Result
+, tcDBF; && Table
+, nWA; && [0] {fr} Zone de travail {en} Work area
 
 local success as Boolean;
 , result as String;
@@ -799,12 +800,18 @@ with m.this as oAlias of abData.prg
 																[Buffered data of <<.cAlias>> were discarded, <<m.liValue>> record(s)]; && Default: English
 						))
 				endif
-				use in select(.cAlias)
+
+				if Used(.cAlias)
+					nWA = Evl(m.nWA, select(.cAlias))
+					use in (.cAlias)
+				else
+					nWA = Evl(m.nWA, 0)
+				endif
 
 				* {fr} Ouvrir la nouvelle table sous le même alias
 				lcValue1 = iif(.lExclusive, ' EXCLUSIVE', ' SHARED')
 				lcValue2 = iif(.lReadonly, ' NOUPDATE', '')
-				use (m.tcDBF) in 0 alias (.cAlias) &lcValue1 &lcValue2
+				use (m.tcDBF) in (m.nWA) alias (.cAlias) &lcValue1 &lcValue2
 
 				success = .reset(@m.tcResult)
 

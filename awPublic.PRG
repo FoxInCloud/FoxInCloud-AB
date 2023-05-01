@@ -1386,14 +1386,15 @@ otherwise
 endcase
 
 * =============================================================
-function wNavigate(URL, newWindow)
+function wNavigate(URL, newWindow, t01,t02,t03,t04,t05,t06,t07,t08,t09,t10,t11,t12,t13,t14,t15,t15,t16,t17,t18,t19,t20) && @ {en} parameters to be passed to Form.Init() {fr} paramètres à passer à Form.Init()
 
-local oAJAX as awAJAX of awServer.prg
+local oAJAX as awAJAX of awServer.prg, lcParms
 
 if wlAJAX(@m.oAJAX)
 
 	m.oAJAX.lURLnextNewWindow = m.oAJAX.lURLnextNewWindow or lTrue(m.newWindow)
-	return m.oAJAX.Navigate(m.URL)
+	lcParms = wcParms(Pcount() - 2)
+	return m.oAJAX.Navigate(m.URL &lcParms)
 
 else
 	return ShellExecute(; && {en} If the function succeeds, it returns a value greater than 32

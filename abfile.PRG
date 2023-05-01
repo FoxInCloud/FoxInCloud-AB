@@ -317,7 +317,7 @@ otherwise
 			lcPath = m.lcPath + '\' + getwordnum(m.tcPath, m.liPath, '\')
 
 			* {fr} Si le dossier n'existe pas, créer
-			if !lDir(m.lcPath, .T.) && {V1.11} Directory(m.lcPath) ne marche pas pour <user>\appdata\
+			if !(lDir(m.lcPath, .T.) or Directory(m.lcPath, 1)) && {V1.11} Directory(m.lcPath) ne marche pas pour <user>\appdata\
 				md (m.lcPath) && case sensitive
 			endif
 		endfor
