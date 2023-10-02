@@ -138,11 +138,11 @@ endproc
 * =================================================
 function abSelect as abSelect of abData.prg && {fr} Change la zone de travail Select() et rétablit à destruction {en} Changes Select() and restores when destroyed
 lparameters ;
-  tuSelect; && [0] {fr} Zone de travail ou alias à sélectionner, ou table à ouvrir et sélectionner {en} Work Area or Alias to select(), or table to USE and Select()
+  tuSelect; && [0] {fr} Zone de travail ou Alias à sélectionner, ou table à ouvrir et sélectionner {en} Work Area or Alias to select(), or table to USE and Select()
 , tlKeepOpened; && [.F.] {fr} Si la table est ouverte, laisser ouverte en sortie {en} If table was USEd, keep USEd upon exit
 , tcError; && @ [''] {fr} Erreur éventuelle {en} out: error if any
 
-return createobject('abSelect', m.tuSelect, m.tlKeepOpened, @m.tcError)
+return createobject('abSelect', @m.tuSelect, m.tlKeepOpened, @m.tcError)
 endfunc
 
 * =================================================
@@ -164,7 +164,7 @@ lKeepOpened = .f.
 * ---------------------------------------------------
 protected procedure init && {fr} Change la zone de travail
 lparameters ;
-  tuSelect; && [0] {fr} Zone de travail ou alias à sélectionner, ou table à ouvrir et sélectionner {en} Work Area or Alias to select(), or table to USE and Select()
+  tuSelect; && [0] {fr} Zone de travail ou alias à sélectionner, ou table à ouvrir et sélectionner @ alias {en} Work Area or Alias to select(), or table to USE and Select @ alias selected
 , tlKeepOpened; && [.F.] {fr} Si la table est ouverte, laisser ouverte en sortie {en} If table was USEd, keep USEd upon exit
 , tcError; && @ [''] {fr} Erreur éventuelle {en} out: error if any
 
@@ -6146,7 +6146,7 @@ return m.loTest.Result()
 * ------------------------------
 define class aDBCJoins_Test as abUnitTest of abDev.prg
 
-	procedure dataopen
+	procedure dataOpen
 		lparameters tcDBC && {fr} Adresse de la base de données
 		local llResult
 

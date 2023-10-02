@@ -1783,6 +1783,7 @@ lparameters ;
 , tcTxt; && {fr} TExte multiligne tabulé {en} TAbulated multiline text
 , tcSep; && [,;<CHr(9)>|] {fr} Séparateur de colonnes (plus rapide en le précisant) {en} Column separator (faster when specified)
 , tuTypes && {fr} Types des colonnes (Array ou liste) in 'CDGLNOQTUXYI' - les colonnes non précisées restent en caractères {en} Columns type (Array or list) in 'CDGLNOQTUXYI' - when not indicated stay in character
+
 external Array taResult, tuTypes
 
 local llResult, lnResult && {fr} lignes {en} lines

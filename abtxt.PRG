@@ -2524,6 +2524,7 @@ lparameters ;
 , tcWord; && {fr} Mot à chercher
 , tlCaseIgnore; && [.F.] {fr} Ignorer la casse
 , tlAnyWord && [.F.] {fr} Traiter le mot même s'il comporte des caractère de séparation
+
 external array ta
 
 local lnAtc, lnResult && {fr} nombre de positions trouvées
@@ -2547,7 +2548,7 @@ endif
 return m.lnResult
 
 * -----------------------------------------------------------------
-procedure anWordIn_Test
+procedure anWordIn_Test && test unitaire de anWordIn()
 
 local loTest as abUnitTest of abDev.prg, laTest[1]
 loTest = newobject('abUnitTest', 'abDev.prg')
